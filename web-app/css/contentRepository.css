@@ -1,0 +1,75 @@
+table.details, div.details {
+  border: 1px solid #CCCCCC;
+  margin-bottom: 5px;
+}
+
+table.details th {
+  font-weight: bold;
+  text-align: center;
+  white-space: nowrap;
+}
+
+table.details td {
+  vertical-align: top;
+}
+
+table.details td.header {
+  border-bottom: 1px solid #CCCCCC;
+  font-weight: bold;
+  padding-bottom: 5px;
+  text-align: center;
+}
+
+table.details td.footer {
+  border-top: 1px solid #CCCCCC;
+  padding-top: 5px;
+  text-align: center;
+}
+
+.defaultLeaf {
+  background: url( ../images/weceem/file_unknown_16.gif ) no-repeat;
+}
+
+.blockLeaf {
+  background: url( ../images/weceem/file_blocks_16.gif ) no-repeat;
+}
+
+.blogLeaf {
+  background: url( ../images/weceem/file_blog_16.gif ) no-repeat;
+}
+
+.forumLeaf {
+  background: url( ../images/weceem/file_forumentry_16.gif ) no-repeat;
+}
+
+.htmlLeaf {
+  background: url( ../images/weceem/file_html_16.gif ) no-repeat;
+}
+
+.stylesheetLeaf {
+  background: url( ../images/weceem/file_stylesheet_16.gif ) no-repeat;
+}
+
+.wikiLeaf {
+  background: url( ../images/weceem/file_wiki_16.gif ) no-repeat;
+}
+
+.templateLeaf {
+  background: url( ../images/weceem/file_template_16.gif ) no-repeat;
+}
+
+span.loadingMessage {
+  background: url("../images/weceem/ajax_load.gif") left center no-repeat;
+  padding: 2px 0 2px 20px;
+}
+
+.contentRepositoryError {
+  background: url("../images/weceem/error_16.gif") left top no-repeat;
+  color: red;
+  padding: 2px 0 2px 20px;
+}
+
+.contentRepositoryError a, .contentRepositoryError a:visited {
+  color: red;
+  text-decoration: underline;
+}

@@ -1,0 +1,372 @@
+/*
+  layout.css - defines general layout of application, i.e
+  toolbar, menu, header, footer locations.
+*/
+
+/* body */
+body {
+  font-family : Verdana, Arial;
+  font-size : 11px;
+  font-weight: normal;
+  color : black;
+  background-color : #FFFFFF;
+  margin : 0px;
+  padding: 0px;
+}
+
+div#body {
+  min-width: 950px;
+  /*width:expression(document.body.clientWidth < 950 ? "950px": "auto" );*/
+}
+
+table {
+  font-family : Verdana, Arial;
+  font-size : 11px;
+  font-weight: normal;
+  color : black;
+}
+
+img {
+  border: none;
+}
+
+/** Header behaviour */
+div#header {
+  top: 0px;
+  height: 70px;
+  border: none;
+  text-align: center;
+  background-color: #e0e0e0;
+}
+
+div#supplierLogo {
+  background: url(../images/layout/weceem-logo.png) no-repeat center;
+  border: none;
+}
+
+div#title {
+  height: 42px;
+  margin: 0px 0px 0px 205px;
+  padding: 0px 6px 0px 0px;
+  text-align: right;
+  font-family: Tahoma,Verdana,Arial;
+}
+
+div#footerMessageBuildVersion {
+  display: none;
+}
+
+span#userName {
+  font-weight: bold;
+  font-size: 11px;
+  padding-top: 2px;
+  padding-right: 17px;
+  display: block;
+  color: white;
+  text-align: right; 
+}
+
+span#appName {
+  padding-top: 2px;
+  padding-right: 17px;
+  display: block;
+  color: white;
+  text-align: right; 
+}
+
+#appName a {
+  font-size: 16px;
+  color: #FFFFFF;
+  vertical-align: middle;
+  text-decoration: none;
+  font-weight: bold;
+  text-align: right;
+}
+
+#moduleName {
+  color: #FFFFFF;
+  font-weight: bold;
+  vertical-align: middle;
+  text-decoration: none;
+  text-shadow: black;
+}
+
+div#adminLogo {
+  background: url(../images/layout/weceem-logo.png) no-repeat top left;
+  border: none;
+  height: 100px;
+}
+
+div#marketLogo {
+  background: url(../images/layout/weceem-logo.png) no-repeat top;
+  border: none;
+}
+
+/* Toolbar behaviour */
+div#toolbar {
+  margin: 0px;
+  padding: 3px 0px 0px 0px;
+  background: url(../images/layout/toolbar.gif) repeat-y;
+  border-bottom: 1px solid rgb(217,224,243);
+}
+
+ul#navlist {
+  list-style-type: none;
+  margin: 0px 0px 0px 201px;
+  padding: 2px 0px 5px 0px;
+  white-space: nowrap;
+  background-color: rgb(11,50,141);
+  border-bottom: none;
+  border-left: none;
+}
+
+#navlist li {
+  display: inline;
+  margin-right: 1px;
+  padding: 3px 2px 5px 3px;
+  background: url(../images/layout/tabRegular.gif) repeat-x;
+  border-top: 1px solid rgb(156,150,205);
+  border-left: 1px solid rgb(156,140,200);
+  border-right: 1px solid rgb(53,81,146);
+}
+
+#navlist li.selected {
+  border-top: 1px solid rgb(217,224,243);
+  border-right: 1px solid rgb(110,127,170);
+  border-left: 1px solid rgb(217,224,243);
+  border-bottom: 1px solid rgb(151, 166, 199);
+  background: url(../images/layout/tabActive.gif) repeat-x;
+  background-color: rgb(151, 166, 199);
+}
+
+#navlist a {
+  padding: 1px 4px 0px 12px;
+  background: url(../images/layout/tabCorner.gif) no-repeat top left;
+  color: white;
+  font: 11px Tahoma, Verdana, Arial;
+  text-decoration: none;
+}
+
+#navlist li.selected a {
+  color: white;
+  font-weight: bold;
+}
+
+div#iconbar {
+  height: 16px;
+  display: block;
+  float: right;
+  right: 5px;
+  top: 46px;
+}
+
+#iconbar a {
+  margin-right: 0px;    
+}
+
+div#stripe {
+  margin: 0px;
+  padding: 0px;
+  height: 6px;
+  overflow: hidden;
+  background-color: rgb(151, 166, 199);
+  border-bottom: 1px solid rgb(76, 98, 155);
+}
+
+td#stripe {
+  margin: 0px;
+  padding: 0px;
+  height: 6px;
+  overflow: hidden;
+  background-color: rgb(151, 166, 199);
+  border-top:  1px solid rgb(217,224,243);
+  border-bottom: 1px solid rgb(76, 98, 155);
+}
+
+/** Menu behaviour */
+td#menu {
+  vertical-align: top;
+  margin: 0px;
+  padding: 15px 0px 15px 15px;
+}
+
+dl#menuList {
+  margin: 0px;
+  padding: 0px;
+  width: 170px;
+  list-style-type: none;
+  border: #99A6C8 1px solid;
+  border-top: none;
+}
+
+#menuList dt {
+  padding: 5px;
+  font: bold 11px Tahoma, Verdana, Arial;
+  text-decoration : none;
+  color: #002276;
+  background: url(../images/layout/arrow.gif) no-repeat right;
+  background-color : #E9F0FA;
+  border-top: #99A6C8 1px solid;
+}
+
+#menuList dd {
+  margin: 0px;
+  padding: 0px;
+}
+
+#menuList ul {
+  margin: 0px;
+  padding: 0px;
+  list-style-type: none;
+}
+
+#menuList li {
+  margin: 0px;
+  padding: 4px 0px 4px 15px;
+  list-style-type: none;
+  border-top: #99A6C8 1px solid;
+  overflow: hidden;
+  font-size: 11px;
+}
+
+#menuList a:link{
+  text-decoration:none;
+  color:#000000;
+}
+
+#menuList a:hover{
+  text-decoration:none;
+  color:#000000;
+}
+
+#menuList a:visited{
+  text-decoration:none;
+  color:#000000;
+}
+
+/* Hint behaviour */
+td#hint {
+  margin-left: 202px;
+  padding: 5px 8px 5px 8px;
+}
+
+#hint p {
+  margin-top: 0px;
+  margin-bottom: 0px;
+}
+
+/** Content behaviour */
+td#content {
+  margin-left: 202px;
+  padding: 5px 8px 5px 8px;
+  vertical-align: top;
+}
+
+td#fullContent {
+  padding: 15px 15px 15px 15px;
+}
+
+/** Portal behaviour */
+table.portal {
+  margin: 0;
+  padding: 0px;
+  width: 100%;
+}
+
+table.portal caption {
+  font-family: Tahoma;
+  font-weight: bold;
+  font-size: 13px;
+  text-align: left;
+  padding: 2px 0px 2px 10px;
+  color: #002276;
+  background-color : #E9F0FA;
+  border: #99A6C8 1px solid;
+}
+
+table.portal img {
+  float: left;
+  margin-right: 8px;
+}
+
+table.portal td {
+  vertical-align: top;
+  padding-bottom: 15px;
+  padding-left: 20px;
+  width: 50%;
+}
+
+table.portal p.title {
+  font-family: Tahoma,Verdana,Arial;
+  font-size: 12px;
+  font-weight: bold;
+  color: #002276;
+  display: inline;
+}
+
+table.portal p.description, table.portal div.description {
+  clear: left;
+  margin-left: 39px;
+  margin-top: 0px;
+  font-family: Verdana,Tahoma,Arial;
+  font-size: 11px;
+}
+
+table.portal a {
+  font-family: Tahoma,Verdana,Arial;
+  font-size: 12px;
+  color: #002276;
+  text-decoration: underline;
+}
+
+/** Footer behaviour */
+div#footer {
+  clear: both;
+  text-align: right;
+  padding-right: 15px;
+  color: gray;
+  font-size: 10px;
+  border:none;
+}
+
+
+/* Some default heading  */
+h1.headline{
+  font-family: Tahoma;
+  font-weight: bold;
+  font-size: 15px;
+  text-align: left;
+  padding: 0px 0px 0px 59px;
+  color: #002276;
+  margin: 0px 0px 0px 0px;
+  margin-bottom: 0px;
+  /*border-bottom: #C0C0C0 1px solid;*/
+}
+
+h2.headline {
+  font-family: Tahoma;
+  font-weight: bold;
+  font-size: 13px;
+  text-align: left;
+  padding: 2px 0px 2px 10px;
+  color: #002276;
+  border-bottom: #C0C0C0 1px solid;
+  margin: 6px 0px 6px 0px;
+}
+
+h3.headline {
+  font-family: Tahoma;
+  font-weight: bold;
+  font-size: 13px;
+  text-align: left;
+  padding: 2px 0px 2px 10px;
+  color: #002276;
+  border-bottom: #C0C0C0 1px solid;
+  margin: 6px 0px 6px 0px;
+}
+hr.headline {
+  margin-left: 50px;
+  height: 0;
+  border: 0;
+  border-top: 1px solid #C0C0C0;
+}

@@ -1,0 +1,84 @@
+.listGreyItem {
+  background: url(../images/weceem/bn.gif);
+  border: #C0C0C0 1px solid;
+  margin-bottom: 10px;
+  padding: 10px;
+}
+
+ul.adsList {
+  list-style-image: url(../images/weceem/absBullet.png)
+}
+
+ul.adsList li{
+  margin-bottom: 5px;
+}
+
+ul.adsList li a {
+  color:#6699CC;
+  text-decoration:none;
+}
+
+span.sbox_l  {
+	background: white url(../images/weceem/srch_l.gif)
+		no-repeat top left;
+	float: left;
+	width: 19px; height: 19px;
+	margin-left: 5px;
+}
+
+span.sbox_r  {
+	background: white url(../images/weceem/srch_r.gif)
+		no-repeat top left;
+	float: left;
+	width: 19px; height: 19px;
+	margin-right: 5px;
+}
+
+span.sbox input {
+	background: white url(../images/weceem/srch_bg.gif)
+		repeat-x top left;
+	float: left;
+	border: 0;
+	height: 19px; width: 142px;
+	padding: 3px;
+	font: 11px/13px arial;
+	color: #000;
+}
+span.button_l  {
+	background: white url(../images/weceem/btn_l.gif)
+		no-repeat top left;
+	float: left;
+	width: 8px; height: 19px;
+	margin-left: 5px;
+}
+
+span.button_r  {
+	background: white url(../images/weceem/btn_r.gif)
+		no-repeat top left;
+	float: left;
+	width: 8px; height: 19px;
+	margin-right: 5px;
+}
+
+span.button input  {
+	background: white url(../images/weceem/srch_bg.gif)
+		repeat-x top left;
+	float: left;
+	border: 0;
+	height: 19px; /*width: 142px;*/
+	padding: 3px;
+	font: 11px/13px arial;
+	color: #000;
+}
+
+span.lnk a {
+	background: white url(../images/weceem/srch_bg.gif)
+		repeat-x top left;
+	float: left;
+	border: 0;
+	height: 19px; /*width: 142px;*/
+	padding: 3px;
+	font: 11px/13px arial;
+	color: #000;
+	text-decoration: none;
+}

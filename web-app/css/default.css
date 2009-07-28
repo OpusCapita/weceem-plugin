@@ -1,0 +1,439 @@
+/*
+  default.css - defines styles for common elements for all
+  pages of application (tables, links, etc)
+*/
+
+/* Default tables behaviour */
+table {
+  color: black;
+  border: 0px;
+  margin: 0px;
+  padding: 0px;
+}
+
+table.inner {
+  margin: 0px;
+  padding: 0px;
+}
+
+table.inner tbody tr td {
+  padding: 0px;
+  border: 0px;
+}
+
+/* Default forms behaviour */
+form {
+  margin: 0px;
+  width: 99,9%;
+}
+
+select {
+  font-family : Verdana, Arial;
+  font-weight : normal;
+  font-size : 11px;
+}
+
+input {
+  font-family : Verdana, Arial;
+  font-weight : normal;
+  font-size : 11px;
+}
+
+input.button {
+  border : 0px;
+  font-weight : bold;
+  color : #FFFFFF;
+  text-align : center;
+  height : 18px;
+  background: url(../images/general/button.gif) repeat-x center;
+  margin:0;
+  padding: 0px 5px 0px 5px;
+  width:0; /* IE table-cell margin fix */
+  overflow:visible;
+}
+
+input.button[class] {  /* IE ignores [class] */
+    width: auto;  /* cancel margin fix for other browsers */
+}
+
+
+input.image {
+  border: none;
+}
+
+.readonly {
+  color: #555555;
+  background-color: #E9F0FA
+}
+
+/* Default image behaviour */
+img {
+  border: 0px;
+}
+
+legend {
+  color: #002276;
+  font-weight : bold;
+}
+
+fieldset {
+  border: #99A6C8 1px solid;
+  margin: 0px;
+  padding-left: 8px;
+  padding-right: 8px;
+  padding-bottom: 8px;
+}
+
+/* Default <a> behaviour */
+a {
+  text-decoration: none;
+  color: rgb(5,38,121);
+}
+
+/* Standard "search" button behaviour */
+a.search {
+  margin-left: 5px;
+  margin-right: 5px;
+  padding-top: 3px;
+  vertical-align: middle;
+}
+
+/* back link */
+a.backLink {
+  display: inline;
+  margin-bottom: 5px;
+  margin-left: 2px;
+  font-weight: bold;
+}
+
+/* action link */
+a.action {
+  margin-left: 5px;
+  margin-right: 5px;
+  padding-top: 3px;
+  vertical-align: middle;
+}
+
+/* Standard table that should be used to display any tabular data */
+table.standard {
+}
+
+table.standard caption {
+  background-color: #BFC0CE;
+  color: black;
+  font-weight : bold;
+  text-align: left;
+  padding: 5px;
+}
+
+table.standard thead {
+  color : #5B5B5B;
+  font-weight : bold;
+}
+
+table.standard th {
+  padding: 5px 8px 6px 8px;
+  background: url(../images/general/thBottom.gif) repeat-x bottom;
+  background-color: rgb(230,234,245);
+  repeat-x: top;
+  color: rgb(5,38,121);
+  border-right: 1px solid white;
+  border-left: 0px solid white;
+  border-top: 1px solid rgb(120,136,180);
+  border-bottom: 1px solid rgb(120,136,180);
+}
+
+table.standard th a {
+  color: rgb(5,38,121);
+  text-decoration: none;
+}
+
+table.standard td {
+  padding: 5px 5px 5px 5px;
+}
+
+/* for verticale table header */
+table.standard td.header {
+  padding: 5px 5px 5px 5px;
+  font-weight : bold;
+}
+
+table.standard tr.even {
+  background-color:  rgb(235,238,247);
+}
+
+table.standard tr.odd {
+  background-color: white;
+}
+
+/*
+  Some common usefull classes
+*/
+.title {
+  font-size: 140%;
+  font-weight: bold;
+  color: #002276;
+}
+
+.required {
+  color: #002276;
+  background: url(../images/general/required.gif) top right no-repeat;
+  padding-right: 5px;
+}
+
+.label {
+  color: #002276;
+  padding-right: 5px;
+}
+
+.hint {
+  color: rgb(97,130,207);
+  font-size: smaller;
+  font-style: italic;
+}
+
+.messages ul {
+  margin: 0px 0px 10px 0px;
+  padding: 0px;
+  list-style-type: none;
+}
+
+.error {
+  color: red;
+}
+
+.success {
+  color: green;
+}
+
+.noEntries {
+  color: #002276;
+  font-weight: bold;
+  margin-left: 10px;
+}
+
+.section {
+  font-weight: bold;
+  font-size: small;
+  margin-left: 10px;
+}
+
+.toggle {
+  font-weight : bold;
+  cursor: pointer; 5px;
+  text-decoration: underline;
+  color: #003366;
+  float: right;
+  margin-right: 5px;
+}
+
+/* Some default heading  */
+b.header{
+  font-family: Tahoma;
+  font-weight: bold;
+  font-size: 15px;
+  text-align: left;
+  padding: 0px 0px 0px 0px;
+  color: #002276;
+  margin: 4px 0px 6px 0px;
+  margin-bottom: 0px;
+}
+
+h1.headline{
+  font-family: Tahoma;
+  font-weight: bold;
+  font-size: 15px;
+  text-align: left;
+  padding: 0px 0px 0px 50px;
+  color: #002276;
+  margin: 4px 0px 6px 0px;
+  margin-bottom: 0px;
+  /*border-bottom: #C0C0C0 1px solid;*/
+}
+
+h1.headlineNoImage{
+  font-family: Tahoma;
+  font-weight: bold;
+  font-size: 15px;
+  text-align: left;
+  padding: 0px 0px 0px 0px;
+  color: #002276;
+  margin: 4px 0px 6px 0px;
+  margin-bottom: 0px;
+  border-bottom: #C0C0C0 1px solid;
+}
+
+h2.headline {
+  font-family: Tahoma;
+  font-weight: bold;
+  font-size: 13px;
+  text-align: left;
+  padding: 2px 0px 2px 10px;
+  color: #002276;
+  border-bottom: #C0C0C0 1px solid;
+  margin: 6px 0px 6px 0px;
+}
+
+h3.headline {
+  font-family: Tahoma;
+  font-weight: bold;
+  font-size: 13px;
+  text-align: left;
+  padding: 2px 0px 2px 10px;
+  color: #002276;
+  border-bottom: #C0C0C0 1px solid;
+  margin: 6px 0px 6px 0px;
+}
+
+/*** Standard form ***/
+
+form.standard h3 {
+  margin-top: 5px;
+}
+
+form.standard .required {
+  color: #002276;
+  padding-right: 7px;
+}
+
+form.standard .label {
+  color: #002276;
+  padding-right: 5px;
+  width: 150px;
+  vertical-align: top;
+}
+
+form.standard .img {
+  padding: 0px;
+  width: 20px;
+  vertical-align: middle;
+}
+
+form.standard .column  table{
+  border-collapse: collapse;
+}
+
+form.standard .innerLabel {
+  color: #002276;
+  padding-left: 5px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+form.standard .contractInnerLabel {
+  color: #002276;
+  vertical-align: top;
+}
+
+form.standard .middleNowrapLabel {
+  color: #002276;
+  padding-right: 5px;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+/*
+  * Label in in audit information table.
+*/
+form.standard .auditLabel {
+  color: #002276;
+  padding-left: 0px;
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+/*
+* Value in in audit information table.
+*/
+form.standard .auditValue {
+  padding-right: 5px;
+  vertical-align: top;
+}
+
+form.standard .hint {
+  color: rgb(0,0,0);
+  font-size: 11px;
+  font-style: italic;
+  text-align: justify;
+  display: block;
+  color: gray;
+}
+
+form.standard .info {
+  font-weight: bold;
+}
+
+form.standard .nowrap {
+  white-space: nowrap;
+}
+
+form.standard table.buttonPanel {
+  margin-top: 10px;
+  margin-left: -4px;
+}
+
+form.standard .formfields {
+  vertical-align: top;
+  border: none;
+  width: 99%;
+}
+
+form.standard ul.hint {
+ padding-left: 17px;
+}
+
+*html form.standard ul.hint {
+ margin-left: 0px;
+}
+
+form.standard .calendar {
+  margin-right: 10px;
+}
+
+form.standard .supLabel {
+  color: #002276;
+  padding-right: 5px;
+  width: 100px;
+  vertical-align: top;
+}
+
+td.labelColumn {
+  width: 30%;
+  color: #002276;
+  padding-right: 5px;
+}
+
+.actionButton {
+  display: ;
+}
+
+.actionLabel {
+  vertical-align: top;
+  text-align: center;
+  display: screen;
+  font-size: 8pt;
+}
+
+/* Styles for <g:sortableColumn> */
+th.sortable a{
+  color: #002276;
+  background: url(../images/default/table/sortNone.gif) center right no-repeat;
+  padding-right: 12px;
+  padding-bottom: 0px;
+}
+
+th.asc a{
+  background: url(../images/default/table/sortAsc.gif) center right no-repeat;
+}
+
+th.desc a{
+  background: url(../images/default/table/sortDesc.gif) center right no-repeat;
+}
+
+.errors {
+    color: red;
+}
+
+.message {
+    color: green;
+}

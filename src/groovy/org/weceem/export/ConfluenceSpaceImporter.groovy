@@ -1,0 +1,51 @@
+package org.weceem.export
+
+import javax.xml.parsers.SAXParserFactory
+import org.apache.commons.logging.LogFactory
+import org.apache.commons.logging.Log
+
+import org.weceem.content.*
+import org.weceem.wiki.* // Nasty
+
+/**
+ * ConfluenceSpaceImporter.
+ *
+ * @author Sergei Shushkevich
+ */
+class ConfluenceSpaceImporter implements SpaceImporter {
+
+    Log log = LogFactory.getLog(DefaultSpaceImporter)
+
+    public void execute(Space space, File file) {
+        def defStatus = Status.findByPublicContent(true)
+        def parser = SAXParserFactory.newInstance().newSAXParser()
+        def handler = new SAXConfluenceParser()
+        try {
+            parser.parse(new FileInputStream(file), handler)
+        } catch (Exception e) {
+            log.error( "Unable to import Confluence file ${file}", e)
+            throw new ImportException("Uploaded file can't be parsed. Check it and try again.")
+        }
+        // merge pages and bodies
+        handler.pages.eachWithIndex {page, i ->
+            page.body = handler.bodies[i]
+        }
+        // group pages by title
+        def pageGroups = handler.pages.groupBy { it.title }
+        pageGroups.each {k, v ->
+            def wi = new WikiItem(title: k, space: space, status: defStatus)
+            wi.createAliasURI()
+            def latestItem = v.max { Long.valueOf(it.version) }
+            wi.content = latestItem.body
+
+            def wikiItem = WikiItem.findWhere(aliasURI: wi.aliasURI, space: space)
+            if (wikiItem) wikiItem.properties = wi.properties
+            else wikiItem = wi
+            wikiItem.save(flush: true)
+        }
+    }
+
+    public String getName() {
+        'Confluence (XML)'
+    }
+}
