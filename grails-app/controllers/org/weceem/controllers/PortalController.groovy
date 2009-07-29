@@ -18,4 +18,12 @@ class PortalController {
     def administration = {
         render(view: 'administration', plugin:'weceem')
     }
+    
+    def comingsoon = {
+        render(view: 'comingsoon', plugin:'weceem')
+    }
+    
+    def licenses = {
+        render(view: 'licenses', plugin:'weceem')
+    }
 }
