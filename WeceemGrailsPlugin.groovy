@@ -27,9 +27,9 @@ class WeceemGrailsPlugin {
     // TODO Fill in these fields
     def author = "JCatalog AB"
     def authorEmail = "info@weceem.org"
-    def title = "A CMS that you can install into your own applications, as used by the Weceem CMS application"
+    def title = "Weceem CMS"
     def description = '''\\
-CMS functionality with a clean content model.
+A CMS that you can install into your own applications, as used by the Weceem CMS application
 '''
 
     // URL to the plugin's documentation
