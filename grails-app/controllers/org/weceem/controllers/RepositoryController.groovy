@@ -116,7 +116,7 @@ class RepositoryController {
                 haveChildren.put(domainClass.name, dcInst.canHaveChildren())
             }
             return [content:nodes, contentTypes:contentRepositoryService.listContentClassNames(), 
-            'haveChildren':haveChildren, space: params.space, spaces: Space.listOrderByName() ]
+                'haveChildren':haveChildren, space: params.space, spaces: Space.listOrderByName() ]
         } else {
             flash.message = 'message.there.are.no.spaces'
             redirect(controller:'space')

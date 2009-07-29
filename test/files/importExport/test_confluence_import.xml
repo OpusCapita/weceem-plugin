@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<hibernate-generic datetime="2008-12-07 21:42:29">
+<object class="ConfluenceBandanaRecord" package="com.atlassian.confluence.setup.bandana">
+<id name="id">458757</id>
+<property name="context"><![CDATA[test]]></property>
+<property name="key"><![CDATA[atlassian.confluence.space.settings]]></property>
+<property name="value"><![CDATA[<com.atlassian.confluence.setup.settings.SpaceSettings>
+  <spaceKey>test</spaceKey>
+  <disableLogo>false</disableLogo>
+  <colourSchemesSettings>
+    <colourSchemeType>global</colourSchemeType>
+  </colourSchemesSettings>
+</com.atlassian.confluence.setup.settings.SpaceSettings>]]></property>
+</object>
+<object class="ConfluenceBandanaRecord" package="com.atlassian.confluence.setup.bandana">
+<id name="id">458755</id>
+<property name="context"><![CDATA[test]]></property>
+<property name="key"><![CDATA[atlassian.confluence.theme.settings]]></property>
+<property name="value"><![CDATA[<map>
+  <entry>
+    <string>theme.key</string>
+    <string></string>
+  </entry>
+</map>]]></property>
+</object>
+<object class="Page" package="com.atlassian.confluence.pages">
+<id name="id">393220</id>
+<property name="position"/><property name="space" class="Space" package="com.atlassian.confluence.spaces"><id name="id">524289</id>
+</property>
+<property name="title"><![CDATA[Home]]></property>
+<collection name="bodyContents"><element class="BodyContent" package="com.atlassian.confluence.core"><id name="id">557058</id>
+</element>
+</collection>
+<property name="version">1</property>
+<property name="creatorName"><![CDATA[admin]]></property>
+<property name="creationDate">2008-12-07 21:41:55.593</property>
+<property name="lastModifierName"><![CDATA[admin]]></property>
+<property name="lastModificationDate">2008-12-07 21:41:55.593</property>
+<property name="versionComment"><![CDATA[]]></property>
+<property name="contentStatus"><![CDATA[current]]></property>
+</object>
+<object class="Space" package="com.atlassian.confluence.spaces">
+<id name="id">524289</id>
+<property name="name"><![CDATA[test]]></property>
+<property name="key"><![CDATA[test]]></property>
+<property name="description" class="SpaceDescription" package="com.atlassian.confluence.spaces"><id name="id">393219</id>
+</property>
+<property name="homePage" class="Page" package="com.atlassian.confluence.pages"><id name="id">393220</id>
+</property>
+<collection name="permissions"><element class="SpacePermission" package="com.atlassian.confluence.security"><id name="id">327741</id>
+</element>
+<element class="SpacePermission" package="com.atlassian.confluence.security"><id name="id">327742</id>
+</element>
+<element class="SpacePermission" package="com.atlassian.confluence.security"><id name="id">327743</id>
+</element>
+<element class="SpacePermission" package="com.atlassian.confluence.security"><id name="id">327744</id>
+</element>
+<element class="SpacePermission" package="com.atlassian.confluence.security"><id name="id">327745</id>
+</element>
+<element class="SpacePermission" package="com.atlassian.confluence.security"><id name="id">327746</id>
+</element>
+<element class="SpacePermission" package="com.atlassian.confluence.security"><id name="id">327747</id>
+</element>
+<element class="SpacePermission" package="com.atlassian.confluence.security"><id name="id">327748</id>
+</element>
+<element class="SpacePermission" package="com.atlassian.confluence.security"><id name="id">327749</id>
+</element>
+<element class="SpacePermission" package="com.atlassian.confluence.security"><id name="id">327750</id>
+</element>
+<element class="SpacePermission" package="com.atlassian.confluence.security"><id name="id">327751</id>
+</element>
+<element class="SpacePermission" package="com.atlassian.confluence.security"><id name="id">327752</id>
+</element>
+<element class="SpacePermission" package="com.atlassian.confluence.security"><id name="id">327753</id>
+</element>
+<element class="SpacePermission" package="com.atlassian.confluence.security"><id name="id">327754</id>
+</element>
+<element class="SpacePermission" package="com.atlassian.confluence.security"><id name="id">327755</id>
+</element>
+<element class="SpacePermission" package="com.atlassian.confluence.security"><id name="id">327756</id>
+</element>
+<element class="SpacePermission" package="com.atlassian.confluence.security"><id name="id">327757</id>
+</element>
+<element class="SpacePermission" package="com.atlassian.confluence.security"><id name="id">327758</id>
+</element>
+<element class="SpacePermission" package="com.atlassian.confluence.security"><id name="id">327759</id>
+</element>
+<element class="SpacePermission" package="com.atlassian.confluence.security"><id name="id">327760</id>
+</element>
+<element class="SpacePermission" package="com.atlassian.confluence.security"><id name="id">327761</id>
+</element>
+</collection>
+<property name="creatorName"><![CDATA[admin]]></property>
+<property name="creationDate">2008-12-07 21:41:55.593</property>
+<property name="lastModifierName"><![CDATA[admin]]></property>
+<property name="lastModificationDate">2008-12-07 21:41:55.593</property>
+<property name="spaceType">global</property>
+</object>
+<object class="ConfluenceBandanaRecord" package="com.atlassian.confluence.setup.bandana">
+<id name="id">458756</id>
+<property name="context"><![CDATA[test]]></property>
+<property name="key"><![CDATA[atlassian.confluence.css.resource.counter]]></property>
+<property name="value"><![CDATA[<int>3</int>]]></property>
+</object>
+<object class="SpacePermission" package="com.atlassian.confluence.security">
+<id name="id">327759</id>
+<property name="space" class="Space" package="com.atlassian.confluence.spaces"><id name="id">524289</id>
+</property>
+<property name="type"><![CDATA[EDITBLOG]]></property>
+<property name="group"><![CDATA[confluence-users]]></property>
+<property name="userName"/><property name="creatorName"><![CDATA[admin]]></property>
+<property name="creationDate">2008-12-07 21:41:55.000</property>
+<property name="lastModifierName"><![CDATA[admin]]></property>
+<property name="lastModificationDate">2008-12-07 21:41:55.000</property>
+</object>
+<object class="SpacePermission" package="com.atlassian.confluence.security">
+<id name="id">327756</id>
+<property name="space" class="Space" package="com.atlassian.confluence.spaces"><id name="id">524289</id>
+</property>
+<property name="type"><![CDATA[COMMENT]]></property>
+<property name="group"><![CDATA[confluence-users]]></property>
+<property name="userName"/><property name="creatorName"><![CDATA[admin]]></property>
+<property name="creationDate">2008-12-07 21:41:55.000</property>
+<property name="lastModifierName"><![CDATA[admin]]></property>
+<property name="lastModificationDate">2008-12-07 21:41:55.000</property>
+</object>
+<object class="BodyContent" package="com.atlassian.confluence.core">
+<id name="id">557058</id>
+<property name="body"><![CDATA[This is the home page for the test space.]]></property>
+<property name="content" class="Page" package="com.atlassian.confluence.pages"><id name="id">393220</id>
+</property>
+</object>
+<object class="SpacePermission" package="com.atlassian.confluence.security">
+<id name="id">327741</id>
+<property name="space" class="Space" package="com.atlassian.confluence.spaces"><id name="id">524289</id>
+</property>
+<property name="type"><![CDATA[VIEWSPACE]]></property>
+<property name="group"/><property name="userName"><![CDATA[admin]]></property>
+<property name="creatorName"><![CDATA[admin]]></property>
+<property name="creationDate">2008-12-07 21:41:55.000</property>
+<property name="lastModifierName"><![CDATA[admin]]></property>
+<property name="lastModificationDate">2008-12-07 21:41:55.000</property>
+</object>
+<object class="SpacePermission" package="com.atlassian.confluence.security">
+<id name="id">327746</id>
+<property name="space" class="Space" package="com.atlassian.confluence.spaces"><id name="id">524289</id>
+</property>
+<property name="type"><![CDATA[REMOVECOMMENT]]></property>
+<property name="group"/><property name="userName"><![CDATA[admin]]></property>
+<property name="creatorName"><![CDATA[admin]]></property>
+<property name="creationDate">2008-12-07 21:41:55.000</property>
+<property name="lastModifierName"><![CDATA[admin]]></property>
+<property name="lastModificationDate">2008-12-07 21:41:55.000</property>
+</object>
+<object class="SpacePermission" package="com.atlassian.confluence.security">
+<id name="id">327749</id>
+<property name="space" class="Space" package="com.atlassian.confluence.spaces"><id name="id">524289</id>
+</property>
+<property name="type"><![CDATA[REMOVEATTACHMENT]]></property>
+<property name="group"/><property name="userName"><![CDATA[admin]]></property>
+<property name="creatorName"><![CDATA[admin]]></property>
+<property name="creationDate">2008-12-07 21:41:55.000</property>
+<property name="lastModifierName"><![CDATA[admin]]></property>
+<property name="lastModificationDate">2008-12-07 21:41:55.000</property>
+</object>
+<object class="SpacePermission" package="com.atlassian.confluence.security">
+<id name="id">327753</id>
+<property name="space" class="Space" package="com.atlassian.confluence.spaces"><id name="id">524289</id>
+</property>
+<property name="type"><![CDATA[REMOVEMAIL]]></property>
+<property name="group"/><property name="userName"><![CDATA[admin]]></property>
+<property name="creatorName"><![CDATA[admin]]></property>
+<property name="creationDate">2008-12-07 21:41:55.000</property>
+<property name="lastModifierName"><![CDATA[admin]]></property>
+<property name="lastModificationDate">2008-12-07 21:41:55.000</property>
+</object>
+<object class="SpacePermission" package="com.atlassian.confluence.security">
+<id name="id">327748</id>
+<property name="space" class="Space" package="com.atlassian.confluence.spaces"><id name="id">524289</id>
+</property>
+<property name="type"><![CDATA[CREATEATTACHMENT]]></property>
+<property name="group"/><property name="userName"><![CDATA[admin]]></property>
+<property name="creatorName"><![CDATA[admin]]></property>
+<property name="creationDate">2008-12-07 21:41:55.000</property>
+<property name="lastModifierName"><![CDATA[admin]]></property>
+<property name="lastModificationDate">2008-12-07 21:41:55.000</property>
+</object>
+<object class="SpacePermission" package="com.atlassian.confluence.security">
+<id name="id">327754</id>
+<property name="space" class="Space" package="com.atlassian.confluence.spaces"><id name="id">524289</id>
+</property>
+<property name="type"><![CDATA[SETPAGEPERMISSIONS]]></property>
+<property name="group"/><property name="userName"><![CDATA[admin]]></property>
+<property name="creatorName"><![CDATA[admin]]></property>
+<property name="creationDate">2008-12-07 21:41:55.000</property>
+<property name="lastModifierName"><![CDATA[admin]]></property>
+<property name="lastModificationDate">2008-12-07 21:41:55.000</property>
+</object>
+<object class="SpacePermission" package="com.atlassian.confluence.security">
+<id name="id">327747</id>
+<property name="space" class="Space" package="com.atlassian.confluence.spaces"><id name="id">524289</id>
+</property>
+<property name="type"><![CDATA[REMOVEBLOG]]></property>
+<property name="group"/><property name="userName"><![CDATA[admin]]></property>
+<property name="creatorName"><![CDATA[admin]]></property>
+<property name="creationDate">2008-12-07 21:41:55.000</property>
+<property name="lastModifierName"><![CDATA[admin]]></property>
+<property name="lastModificationDate">2008-12-07 21:41:55.000</property>
+</object>
+<object class="SpacePermission" package="com.atlassian.confluence.security">
+<id name="id">327760</id>
+<property name="space" class="Space" package="com.atlassian.confluence.spaces"><id name="id">524289</id>
+</property>
+<property name="type"><![CDATA[EXPORTPAGE]]></property>
+<property name="group"><![CDATA[confluence-users]]></property>
+<property name="userName"/><property name="creatorName"><![CDATA[admin]]></property>
+<property name="creationDate">2008-12-07 21:41:55.000</property>
+<property name="lastModifierName"><![CDATA[admin]]></property>
+<property name="lastModificationDate">2008-12-07 21:41:55.000</property>
+</object>
+<object class="SpacePermission" package="com.atlassian.confluence.security">
+<id name="id">327755</id>
+<property name="space" class="Space" package="com.atlassian.confluence.spaces"><id name="id">524289</id>
+</property>
+<property name="type"><![CDATA[VIEWSPACE]]></property>
+<property name="group"><![CDATA[confluence-users]]></property>
+<property name="userName"/><property name="creatorName"><![CDATA[admin]]></property>
+<property name="creationDate">2008-12-07 21:41:55.000</property>
+<property name="lastModifierName"><![CDATA[admin]]></property>
+<property name="lastModificationDate">2008-12-07 21:41:55.000</property>
+</object>
+<object class="SpacePermission" package="com.atlassian.confluence.security">
+<id name="id">327752</id>
+<property name="space" class="Space" package="com.atlassian.confluence.spaces"><id name="id">524289</id>
+</property>
+<property name="type"><![CDATA[EXPORTSPACE]]></property>
+<property name="group"/><property name="userName"><![CDATA[admin]]></property>
+<property name="creatorName"><![CDATA[admin]]></property>
+<property name="creationDate">2008-12-07 21:41:55.000</property>
+<property name="lastModifierName"><![CDATA[admin]]></property>
+<property name="lastModificationDate">2008-12-07 21:41:55.000</property>
+</object>
+<object class="SpacePermission" package="com.atlassian.confluence.security">
+<id name="id">327742</id>
+<property name="space" class="Space" package="com.atlassian.confluence.spaces"><id name="id">524289</id>
+</property>
+<property name="type"><![CDATA[COMMENT]]></property>
+<property name="group"/><property name="userName"><![CDATA[admin]]></property>
+<property name="creatorName"><![CDATA[admin]]></property>
+<property name="creationDate">2008-12-07 21:41:55.000</property>
+<property name="lastModifierName"><![CDATA[admin]]></property>
+<property name="lastModificationDate">2008-12-07 21:41:55.000</property>
+</object>
+<object class="SpacePermission" package="com.atlassian.confluence.security">
+<id name="id">327757</id>
+<property name="space" class="Space" package="com.atlassian.confluence.spaces"><id name="id">524289</id>
+</property>
+<property name="type"><![CDATA[EDITSPACE]]></property>
+<property name="group"><![CDATA[confluence-users]]></property>
+<property name="userName"/><property name="creatorName"><![CDATA[admin]]></property>
+<property name="creationDate">2008-12-07 21:41:55.000</property>
+<property name="lastModifierName"><![CDATA[admin]]></property>
+<property name="lastModificationDate">2008-12-07 21:41:55.000</property>
+</object>
+<object class="SpacePermission" package="com.atlassian.confluence.security">
+<id name="id">327745</id>
+<property name="space" class="Space" package="com.atlassian.confluence.spaces"><id name="id">524289</id>
+</property>
+<property name="type"><![CDATA[REMOVEPAGE]]></property>
+<property name="group"/><property name="userName"><![CDATA[admin]]></property>
+<property name="creatorName"><![CDATA[admin]]></property>
+<property name="creationDate">2008-12-07 21:41:55.000</property>
+<property name="lastModifierName"><![CDATA[admin]]></property>
+<property name="lastModificationDate">2008-12-07 21:41:55.000</property>
+</object>
+<object class="SpaceDescription" package="com.atlassian.confluence.spaces">
+<id name="id">393219</id>
+<property name="space" class="Space" package="com.atlassian.confluence.spaces"><id name="id">524289</id>
+</property>
+<property name="title"/><collection name="bodyContents"><element class="BodyContent" package="com.atlassian.confluence.core"><id name="id">557057</id>
+</element>
+</collection>
+<property name="version">1</property>
+<property name="creatorName"><![CDATA[admin]]></property>
+<property name="creationDate">2008-12-07 21:41:55.562</property>
+<property name="lastModifierName"><![CDATA[admin]]></property>
+<property name="lastModificationDate">2008-12-07 21:41:55.562</property>
+<property name="versionComment"><![CDATA[]]></property>
+<property name="contentStatus"><![CDATA[current]]></property>
+</object>
+<object class="SpacePermission" package="com.atlassian.confluence.security">
+<id name="id">327750</id>
+<property name="space" class="Space" package="com.atlassian.confluence.spaces"><id name="id">524289</id>
+</property>
+<property name="type"><![CDATA[EDITBLOG]]></property>
+<property name="group"/><property name="userName"><![CDATA[admin]]></property>
+<property name="creatorName"><![CDATA[admin]]></property>
+<property name="creationDate">2008-12-07 21:41:55.000</property>
+<property name="lastModifierName"><![CDATA[admin]]></property>
+<property name="lastModificationDate">2008-12-07 21:41:55.000</property>
+</object>
+<object class="SpacePermission" package="com.atlassian.confluence.security">
+<id name="id">327761</id>
+<property name="space" class="Space" package="com.atlassian.confluence.spaces"><id name="id">524289</id>
+</property>
+<property name="type"><![CDATA[EXPORTSPACE]]></property>
+<property name="group"><![CDATA[confluence-users]]></property>
+<property name="userName"/><property name="creatorName"><![CDATA[admin]]></property>
+<property name="creationDate">2008-12-07 21:41:55.000</property>
+<property name="lastModifierName"><![CDATA[admin]]></property>
+<property name="lastModificationDate">2008-12-07 21:41:55.000</property>
+</object>
+<object class="SpacePermission" package="com.atlassian.confluence.security">
+<id name="id">327758</id>
+<property name="space" class="Space" package="com.atlassian.confluence.spaces"><id name="id">524289</id>
+</property>
+<property name="type"><![CDATA[CREATEATTACHMENT]]></property>
+<property name="group"><![CDATA[confluence-users]]></property>
+<property name="userName"/><property name="creatorName"><![CDATA[admin]]></property>
+<property name="creationDate">2008-12-07 21:41:55.000</property>
+<property name="lastModifierName"><![CDATA[admin]]></property>
+<property name="lastModificationDate">2008-12-07 21:41:55.000</property>
+</object>
+<object class="SpacePermission" package="com.atlassian.confluence.security">
+<id name="id">327744</id>
+<property name="space" class="Space" package="com.atlassian.confluence.spaces"><id name="id">524289</id>
+</property>
+<property name="type"><![CDATA[SETSPACEPERMISSIONS]]></property>
+<property name="group"/><property name="userName"><![CDATA[admin]]></property>
+<property name="creatorName"><![CDATA[admin]]></property>
+<property name="creationDate">2008-12-07 21:41:55.000</property>
+<property name="lastModifierName"><![CDATA[admin]]></property>
+<property name="lastModificationDate">2008-12-07 21:41:55.000</property>
+</object>
+<object class="SpacePermission" package="com.atlassian.confluence.security">
+<id name="id">327751</id>
+<property name="space" class="Space" package="com.atlassian.confluence.spaces"><id name="id">524289</id>
+</property>
+<property name="type"><![CDATA[EXPORTPAGE]]></property>
+<property name="group"/><property name="userName"><![CDATA[admin]]></property>
+<property name="creatorName"><![CDATA[admin]]></property>
+<property name="creationDate">2008-12-07 21:41:55.000</property>
+<property name="lastModifierName"><![CDATA[admin]]></property>
+<property name="lastModificationDate">2008-12-07 21:41:55.000</property>
+</object>
+<object class="SpacePermission" package="com.atlassian.confluence.security">
+<id name="id">327743</id>
+<property name="space" class="Space" package="com.atlassian.confluence.spaces"><id name="id">524289</id>
+</property>
+<property name="type"><![CDATA[EDITSPACE]]></property>
+<property name="group"/><property name="userName"><![CDATA[admin]]></property>
+<property name="creatorName"><![CDATA[admin]]></property>
+<property name="creationDate">2008-12-07 21:41:55.000</property>
+<property name="lastModifierName"><![CDATA[admin]]></property>
+<property name="lastModificationDate">2008-12-07 21:41:55.000</property>
+</object>
+<object class="BodyContent" package="com.atlassian.confluence.core">
+<id name="id">557057</id>
+<property name="body"><![CDATA[]]></property>
+<property name="content" class="SpaceDescription" package="com.atlassian.confluence.spaces"><id name="id">393219</id>
+</property>
+</object>
+</hibernate-generic>

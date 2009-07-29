@@ -330,7 +330,8 @@ class ContentRepositoryService {
         def parent = sourceContent.parent
         if (parent) {
             parent.children.remove(sourceContent)
-            parent.save(flush: true)
+            sourceContent.parent = null
+            assert parent.save()
         }
         if (Content.findAll("from Content c where c.orderIndex=? and c.parent=? ", [orderIndex, targetContent]) == null){
             sourceContent.orderIndex = orderIndex
@@ -338,13 +339,12 @@ class ContentRepositoryService {
             Content.executeUpdate("update Content c set c.orderIndex=c.orderIndex+1 where c.orderIndex>? and c.parent=?", [orderIndex, targetContent])
             sourceContent.orderIndex = orderIndex + 1
         }
-        sourceContent.parent = targetContent
-        sourceContent.save(flush: true)
         if (targetContent) {
             if (!targetContent.children) targetContent.children = new TreeSet()
-            targetContent.children << sourceContent
-            targetContent.save(flush: true)
+            targetContent.addToChildren(sourceContent)
+            assert targetContent.save()
         }
+        assert sourceContent.save()
         return true
         if (sourceContent.metaClass.respondsTo(sourceContent, 'move', Content, Content)) {
             return sourceContent.move(sourceParentContent, targetContent)

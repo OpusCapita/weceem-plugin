@@ -1,9 +1,9 @@
-<plugin name='weceem' version='0.2-RC1' grailsVersion='1.1.1 &gt; *'>
+<plugin name='weceem' version='0.2' grailsVersion='1.1.1 &gt; *'>
   <author>JCatalog AB</author>
   <authorEmail>info@weceem.org</authorEmail>
-  <title>A CMS that you can install into your own applications, as used by the Weceem CMS application</title>
+  <title>Weceem CMS</title>
   <description>\
-CMS functionality with a clean content model.
+A CMS that you can install into your own applications, as used by the Weceem CMS application
 </description>
   <documentation>http://grails.org/plugin/weceem</documentation>
   <resources>
@@ -12,7 +12,6 @@ CMS functionality with a clean content model.
     <resource>DataSource</resource>
     <resource>QuartzConfig</resource>
     <resource>Searchable</resource>
-    <resource>spring.resources</resource>
     <resource>WeceemPluginUrlMappings</resource>
     <resource>org.weceem.controllers.ContentController</resource>
     <resource>org.weceem.controllers.EditorController</resource>

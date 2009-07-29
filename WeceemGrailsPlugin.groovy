@@ -4,7 +4,7 @@ import org.weceem.content.*
 
 class WeceemGrailsPlugin {
     // the plugin version
-    def version = "0.2-RC1"
+    def version = "0.2"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.1.1 > *"
     // the other plugins this plugin depends on
@@ -20,16 +20,16 @@ class WeceemGrailsPlugin {
 
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
-            "grails-app/views/error.gsp",
-            "web-app/WeceemFiles/**/*"
+        "grails-app/views/error.gsp",
+        "web-app/WeceemFiles/**/*"
     ]
 
     // TODO Fill in these fields
     def author = "JCatalog AB"
     def authorEmail = "info@weceem.org"
-    def title = "A CMS that you can install into your own applications, as used by the Weceem CMS application"
+    def title = "Weceem CMS"
     def description = '''\\
-CMS functionality with a clean content model.
+A CMS that you can install into your own applications, as used by the Weceem CMS application
 '''
 
     // URL to the plugin's documentation
@@ -50,10 +50,10 @@ CMS functionality with a clean content model.
             [controller:'portal', action:'administration', title:'administration', path:'admin',order:2])
         [
             [controller:'space', action:'list', title:'spaces', path:'admin/spaces', order: 0],
-            [controller:'repository', action:'index', title:'synchronize', path:'admin/files/synchronize', order: 1],
-            [controller:'repository', action:'index', title:'plugins', path:'admin/plugins', order: 2],
-            [controller:'repository', action:'index', title:'licenses', path:'admin/licenses', order: 3],
-            [controller:'repository', action:'index', title:'linkcheck', path:'admin/linkchecker', order: 4] ].each { item ->
+            [controller:'portal', action:'comingsoon', title:'synchronize', path:'admin/files/synchronize', order: 1],
+            [controller:'portal', action:'comingsoon', title:'plugins', path:'admin/plugins', order: 2],
+            [controller:'portal', action:'licenses', title:'licenses', path:'admin/licenses', order: 3],
+            [controller:'portal', action:'comingsoon', title:'linkcheck', path:'admin/linkchecker', order: 4] ].each { item ->
                 applicationContext.navigationService.registerItem( 'weceem.plugin.admin', item)
         }
     }
