@@ -25,7 +25,7 @@ class WeceemGrailsPlugin {
     ]
 
     // TODO Fill in these fields
-    def author = "JCatalog AB"
+    def author = "jCatalog AG"
     def authorEmail = "info@weceem.org"
     def title = "Weceem CMS"
     def description = '''\\
