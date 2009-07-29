@@ -37,7 +37,6 @@
 	</td>
 </tr>
 
-
 <g:if test="${c.children.size()}">
 	<g:each in="${c.children}" var="child">
 		<g:render  plugin="weceem" template="newtreeTableNode" model="[c:child]"/>
