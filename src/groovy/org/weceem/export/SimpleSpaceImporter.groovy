@@ -89,9 +89,6 @@ class SimpleSpaceImporter implements SpaceImporter {
     */
     def parse(def element, def document, def space){
         def grailsApp = ApplicationHolder.application
-//        println "------------------------ ${element.name()} ${element.id.text()}---------------------"
-//        println element
-//        println "------------------------end---------------------------------------------------------"
         if (element.name() == "*") return
         def id = element.id.text().toLong()
         def props = grailsApp.getDomainClass(element.name()).getPersistantProperties()
