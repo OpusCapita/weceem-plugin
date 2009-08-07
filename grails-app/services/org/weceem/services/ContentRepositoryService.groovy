@@ -222,9 +222,10 @@ class ContentRepositoryService {
      * @param parentContent
      */
     Boolean createNode(Content content, Content parentContent = null) {
-        
         log.debug "Creating node: ${content.dump()}"
-        
+        if (!content.validate()){
+            return false
+        }
         if (parentContent == null) parentContent = content.parent
 
         // Update date orderIndex to last order index + 1 in the parent's child list
@@ -232,7 +233,7 @@ class ContentRepositoryService {
             def orderIndex = parentContent.children ?
                              parentContent.children?.last()?.orderIndex + 1 : 0
             content.orderIndex = orderIndex
-            parentContent.addToChildren(content) // @todo this is probably fixed in Grails 1.1.1
+            parentContent.addToChildren(content)
         } else content.orderIndex = 0
 
         def result 
@@ -248,6 +249,7 @@ class ContentRepositoryService {
             if (!content.aliasURI) {
                 content.createAliasURI()
             }
+            
             result = content.validate()
         }
         
@@ -344,14 +346,8 @@ class ContentRepositoryService {
             targetContent.addToChildren(sourceContent)
             assert targetContent.save()
         }
-        assert sourceContent.save()
-        return true
-        if (sourceContent.metaClass.respondsTo(sourceContent, 'move', Content, Content)) {
-            return sourceContent.move(sourceParentContent, targetContent)
-        } else {
-            return true
-        }
-    }
+        return sourceContent.save(flush: true)
+     }
 
     /**
      * Use introspection to find all references to the specified content. Requires finding all
@@ -421,7 +417,8 @@ class ContentRepositoryService {
 */
             // if there is a parent  - we delete node from its association
             if (parent) {
-                parent.children.remove(sourceContent)
+                parent.children = parent.children.findAll{it-> it.id != sourceContent.id}
+                assert parent.save()
             }
 
             // we need to delete all virtual contents that reference sourceContent
