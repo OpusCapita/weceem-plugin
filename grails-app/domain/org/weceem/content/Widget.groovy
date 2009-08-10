@@ -36,7 +36,10 @@ class Widget extends Content {
 
     // 64Kb Unicode text with HTML/Wiki Markup
     String content
-
+    
+    public String getVersioningContent() { content }
+    
+    
     static mapping = {
         cache usage: 'nonstrict-read-write' 
     }
