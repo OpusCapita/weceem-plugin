@@ -68,7 +68,12 @@ class RepositoryController {
         if (!(actionName in ACTIONS_NEEDING_SPACE)) return true
 
         if (!params.space) {
-            // Find the default space and redirect so url has space in
+            // Find the default space(if there is any) and redirect so url has space in
+            if (Space.count() == 0){
+                flash.message = message(code: 'message.there.are.no.spaces')
+                redirect(controller:'space')
+                return false
+            }
             def space = contentRepositoryService.findDefaultSpace()
             if (log.debugEnabled) {
                 log.debug "Using default space: ${space.name}"
@@ -107,7 +112,7 @@ class RepositoryController {
     }
 
     def treeTable = {
-        if (params.space) {
+        if (params.space && (Space.count() != 0)) {
             def nodes = contentRepositoryService.findAllRootContent( params.space, null, 
                 [sort:'aliasURI', fetch:[children:'eager']])
             def haveChildren = [:]

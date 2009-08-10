@@ -77,10 +77,10 @@ class SpaceController {
             }
             // delete all copies for contents in space
             copiesList*.delete()
-            // delete all templates from space
-            templateList*.delete()
             // delete other contents
             (contents - copiesList - templateList)*.delete()
+            // delete all templates from space
+            templateList*.delete()
             // delete space
             space.delete(flush: true)
             
