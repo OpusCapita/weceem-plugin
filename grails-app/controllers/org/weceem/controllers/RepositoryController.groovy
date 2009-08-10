@@ -469,7 +469,7 @@ class RepositoryController {
         }else{
             def indexes = [:]
             contentRepositoryService.findChildren(targetContent)?.collect{indexes.put(it.id, it.orderIndex)}
-            render ([result: 'success', id: vcont.id, indexes: indexes] as JSON)
+            render ([result: 'success', id: vcont.id, indexes: indexes, ctype: vcont.toName()] as JSON)
         }
     }
 

@@ -367,6 +367,7 @@ function initTreeTable() {
                                         break;
         	                    }
         	                    $('#' + srcCopy.attr('id') + ' > td > a > h2.title').draggable(draggableConf);
+        	                    $('#' + srcCopy.attr('id') + ' > td > a > h2.title').attr('type', response['ctype']);
         	                    srcCopy.droppable(droppableConf);
         	                    $('#' + srcCopy.attr('id') + ' > td > a > span.type').html(' (Virtual Content)');
         	                    inserterAfter.insertAfter("#" + srcCopy.attr('id'));
