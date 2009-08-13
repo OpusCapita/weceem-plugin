@@ -135,6 +135,7 @@ class SimpleSpaceImporter implements SpaceImporter {
         }
         params.remove "id"
         content.properties = params
+        content.createAliasURI(null)
         backrefMap += [(id): content]
         return content
     }

@@ -38,11 +38,7 @@ class ContentFile extends Content {
         syncStatus(hidden: true)
     }
 
-    public void createAliasURI(parent) {
-        def path = ''
-        if (parent && (parent instanceof ContentDirectory)) {
-            path = getPath(parent)
-        }
+    public void createAliasURI(parent = null) {
         aliasURI = title.replaceAll(INVALID_ALIAS_URI_CHARS_PATTERN, '-')
     }
 
@@ -145,5 +141,9 @@ class ContentFile extends Content {
         def path = dirs.reverse().join('/')
 
         return path ? "/${path}" : path
+    }
+    
+    public String toRelativePath(){
+        return getPath(this)
     }
 }

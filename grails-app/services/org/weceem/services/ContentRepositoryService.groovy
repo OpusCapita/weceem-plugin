@@ -582,7 +582,7 @@ class ContentRepositoryService {
         }
         if (!type) type = CONTENT_CLASS
         getContentClassForType(type)?.find("""from ${type} c \
-            where c.aliasURI = ? and c.space = ? and c.parent = NULL""",
+            where c.aliasURI = ? and c.space = ? and c.parent is null""",
             [aliasURI, space])        
     }
     
@@ -615,10 +615,9 @@ class ContentRepositoryService {
         // todo: optimize query
         def content = findRootContentByURI(tokens[0], space, type)
         log.debug "findContentForPath $uriPath - root content node is $content"
-        
         def lineage = []
-        if (content && tokens.size() > 1) {
-            for (n in 1..tokens.size()-1) { 
+        if (content && (tokens.size() > 1)) {
+            for (n in 1..tokens.size()-1) {
                 def child = Content.find("""from Content c \
                         where c.parent = ? and c.aliasURI = ?""",
                         [content, tokens[n]])
@@ -646,5 +645,6 @@ class ContentRepositoryService {
     def getAncestors(uri, sourceNode) {
         // Can't impl this yet
     }
+    
 }
 
