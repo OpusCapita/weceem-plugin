@@ -128,6 +128,7 @@ class ContentFile extends Content {
 
         def file = new File(ServletContextHolder.servletContext.getRealPath(
                 "/${DEFAULT_UPLOAD_DIR}/${space.name}${path}/${title}"))
+        if (!file.exists()) return true
         return FileUtils.deleteQuietly(file)
     }
 
