@@ -50,7 +50,7 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
             [controller:'portal', action:'administration', title:'administration', path:'admin',order:2])
         [
             [controller:'space', action:'list', title:'spaces', path:'admin/spaces', order: 0],
-            [controller:'portal', action:'comingsoon', title:'synchronize', path:'admin/files/synchronize', order: 1],
+            [controller:'synchronization', action:'synchronizationList', title:'synchronize', path:'admin/files/synchronize', order: 1],
             [controller:'portal', action:'comingsoon', title:'plugins', path:'admin/plugins', order: 2],
             [controller:'portal', action:'licenses', title:'licenses', path:'admin/licenses', order: 3],
             [controller:'portal', action:'comingsoon', title:'linkcheck', path:'admin/linkchecker', order: 4] ].each { item ->
