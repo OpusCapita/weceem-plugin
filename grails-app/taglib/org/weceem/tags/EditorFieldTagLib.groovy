@@ -75,6 +75,12 @@ class EditorFieldTagLib {
         out << g.render(template:'/editors/richeditor', plugin:'weceem', 
             model:[name:attrs.property, value:pageScope.content[attrs.property]])
     }
+    
+    def editorFieldWikiCode = { attrs ->
+        // Workaround for Grails 1.1.x bug invoking tags with body as method - have to use a template instead
+        out << g.render(template:'/editors/wikieditor', plugin:'weceem', 
+            model:[name:attrs.property, value:pageScope.content[attrs.property]])
+    }
 
     def editorFieldHtmlCode = { attrs ->
         // Workaround for Grails 1.1.x bug invoking tags with body as method - have to use a template instead

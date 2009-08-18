@@ -58,7 +58,7 @@ class WikiItem extends Content {
     
     static editors = {
         template(group:'extra')
-        content(editor:'RichHTML')
+        content(editor:'WikiCode')
         keywords()
     }
 

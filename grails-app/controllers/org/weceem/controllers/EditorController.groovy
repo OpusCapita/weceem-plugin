@@ -1,6 +1,11 @@
 package org.weceem.controllers
 
-
+import javax.xml.transform.TransformerFactory
+import javax.xml.transform.stream.StreamSource
+import javax.xml.transform.stream.StreamResult
+import net.java.textilej.parser.builder.HtmlDocumentBuilder
+import net.java.textilej.parser.MarkupParser
+import com.jcatalog.wiki.WeceemDialect
 import grails.converters.JSON
 import org.weceem.content.*
 
@@ -102,5 +107,44 @@ class EditorController {
             data << template
         }
         render data as JSON
+    }
+    
+    def convertToWiki = {
+        render ([result: toWiki(params.text)] as JSON)
+    }
+    
+    def convertToHtml = {
+        render ([result: toHtml(params.text)] as JSON)
+    }
+    
+    private String toWiki(String text) {
+        if (!text) {
+            return ''
+        }
+        text = text.replaceAll('&nbsp;', '&#160;')
+        def tFactory = TransformerFactory.newInstance()
+        def stream = grailsApplication.parentContext.getResource(
+                'WEB-INF/xslt/xhtml2confluence.xsl').inputStream
+        def transformer = tFactory.newTransformer(new StreamSource(stream))
+        def out = new StringWriter()
+        if (!text.startsWith('<body>') && !text.endsWith('</body>')) {
+            text = "<body>${text}</body>"
+        }
+        transformer.transform(
+                new StreamSource(new StringReader(text)),
+                new StreamResult(out))
+        return out.toString()
+    }
+    
+    private String toHtml(String text) {
+        if (!text) {
+            return ''
+        }
+        def out = new StringWriter(text.size() * 2)
+        def builder = new HtmlDocumentBuilder(out)
+        builder.emitAsDocument = false
+        def parser = new MarkupParser(new WeceemDialect(), builder)
+        parser.parse(text)
+        return out.toString()
     }
 }
