@@ -43,6 +43,7 @@ span.sbox input {
 	padding: 3px;
 	font: 11px/13px arial;
 	color: #000;
+    margin: 0;
 }
 span.button_l  {
 	background: white url(../images/weceem/btn_l.gif)

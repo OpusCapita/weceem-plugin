@@ -762,4 +762,16 @@ class RepositoryController {
         println "Content abs uri is ${content.absoluteURI}"
         redirect(controller: 'content', action: 'show', params:[uri:content.space.aliasURI+'/'+content.absoluteURI])
     }
+    
+    def searchRequest = {
+        def searchStr = params.data
+        def space = null
+        if (params.space) space = params.space
+        def searchResult = Content.searchEvery("+title:*$searchStr* +name:$space".toString(), [reload: true])
+        def result = searchResult.collect{["id": it.id, "title": it.title, "aliasURI": it.aliasURI, 
+        "status": it.status?.description, "createdBy": it.createdBy.toString(), 
+        "changedOn": it.changedOn.toString(), "parent": (it.parent == null ? "": it.parent.aliasURI), 
+        "type": message(code: "content.item.name.${it.toName()}")]} 
+        render ([result: result] as JSON)
+    }
 }

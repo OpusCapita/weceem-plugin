@@ -23,6 +23,7 @@
 	<g:javascript src="jquery-ui-1.7.1/js/jquery-1.3.2.min.js"/>
     <g:javascript src="jquery-ui-1.7.1/js/jquery-ui-1.7.1.custom.min.js"/>
 	<link href="${resource(dir:wcm.pluginCtxPath() +'/js/fg-menu', file:'fg.menu.css')}" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" href="${resource(dir: wcm.pluginCtxPath() +'/css',file:'weceem.css')}"/>
 	<g:javascript src="fg-menu/fg.menu.js"/>
 
 	<!-- Blueprint CSS -->
