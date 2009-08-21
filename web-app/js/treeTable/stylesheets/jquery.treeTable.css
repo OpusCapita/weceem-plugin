@@ -6,14 +6,28 @@
 
 /* jquery.treeTable.collapsible
  * ------------------------------------------------------------------------- */
+
+.table { 
+  border:1px solid #ccc;
+  margin-bottom:1.4em;
+}
+
+.treeTable { 
+  border-collapse: collapse; 
+  position:relative;
+  margin:0; 
+} 
+ 
 .treeTable tr td .expander {
-  display: inline-block;
   background-position: left center;
   background-repeat: no-repeat;
   cursor: pointer;
-  padding-top: 15px; 
-  padding-left: 15px;
-  zoom: 1; /* IE7 Hack */
+  width:18px;
+  height:18px;
+  float:left;
+  display:inline;
+  padding-top:15px;
+  position:relative;
 }
 
 .treeTable tr.collapsed td .expander {
@@ -26,13 +40,8 @@
 
 /* jquery.treeTable.sortable
  * ------------------------------------------------------------------------- */
-.treeTable tr.selected, .treeTable tr.accept {
-  background-color: #3875d7;
-  color: #fff;
-}
-
 .treeTable tr.collapsed.selected td .expander, .treeTable tr.collapsed.accept td .expander {
-  background-image: url(../images/toggle-expand-light.png);
+  background-image: url(../images/toggle-expand-dark.png);
 }
 
 .treeTable tr.expanded.selected td .expander, .treeTable tr.expanded.accept td .expander {
@@ -42,4 +51,56 @@
 .treeTable .ui-draggable-dragging {
   color: #000;
   z-index: 1;
+}
+
+.treeTable thead tr,
+.treeTable thead tr:hover { border:none; }
+
+.treeTable tr td { 
+  border-top: 1px solid #f1f1f1;
+  border-bottom: 1px solid #f1f1f1;
+}
+.treeTable tr:hover td { 
+  background-color: #f1f1f1;
+  border-top:1px solid #ccc;
+  border-bottom:1px solid #ccc;
+}
+.treeTable tr.selected td {
+  background-color: #fbf5d3;
+  border-top:1px solid #f9dd34;
+  border-bottom:1px solid #f9dd34;
+}
+
+.treeTable h2 { 
+  margin-bottom:0;
+  font-size:1.1em;
+  font-weight:bold;
+  min-height:25px;
+  padding-top:0.5em;
+}
+
+.treeTable h2 span { font-size:1em; color:#999999; font-weight:normal; }
+
+.treeTable a, 
+.treeTable a:hover, 
+.treeTable a:visited { text-decoration:none; }
+.treeTable a:hover h2 { color:#006699;}
+
+.treeTable .item { 
+  padding-left:35px;
+  position:relative;
+}
+
+.treeTable .ui-icon {
+  position:absolute;
+  left:5px;
+  right:5px;
+}
+
+.treeTable .inserter-before td,
+.treeTable .inserter-after td  { padding-left:0 !important; }
+
+.treeTable .inserter-before .title,
+.treeTable .inserter-after .title { 
+  border-top:1px dashed #999999;
 }

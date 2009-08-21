@@ -768,9 +768,12 @@ class RepositoryController {
         def space = null
         if (params.space) space = params.space
         def searchResult = Content.searchEvery("+title:*$searchStr* +name:$space".toString(), [reload: true])
-        def result = searchResult.collect{["id": it.id, "title": it.title, "aliasURI": it.aliasURI, 
-        "status": it.status?.description, "createdBy": it.createdBy.toString(), 
-        "changedOn": it.changedOn.toString(), "parent": (it.parent == null ? "": it.parent.aliasURI), 
+        def result = searchResult.collect{["id": it.id, "title": it.title, 
+        "aliasURI": it.aliasURI, "status": it.status?.description, 
+        "createdBy": it.createdBy.toString(), 
+        "changedOn": wcm.humanDate(date: it.changedOn), 
+        "href": createLink(controller: "editor", action: "edit", id: it.id),
+        "parent": (it.parent == null ? "": it.parent.aliasURI), 
         "type": message(code: "content.item.name.${it.toName()}")]} 
         render ([result: result] as JSON)
     }

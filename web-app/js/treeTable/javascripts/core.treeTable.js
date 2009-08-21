@@ -1,9 +1,9 @@
 function updateExpanders(){
-    $('tr[id*=content-node-] > td > span[class=expander]').css({'display': 'none', 'margin-left': '-19px'});
+    $('tr[id*=content-node-] > td > span[class=expander]').css({'display': 'none'});
     var reg = new RegExp("child-of-content-node-\\d+");
     jQuery.each($('tr[class*=child-of-content-node-][id!=]'), function(index, value){
       var id = /\d+/.exec(value.className.match(reg)[0]);
-      $("#content-node-" + id + " > td > span[class=expander]").css({'display': ''});
+      $("#content-node-" + id + " > td > span[class=expander]").css({'display':''});
     });
 }
 
@@ -176,7 +176,7 @@ function initTreeTable() {
             }
         }
     });
-  	$("#treeTable").treeTable({indent: 15});
+  	$("#treeTable").treeTable({indent: 25});
   	$("span.expander").click(function (){resetInserters()});
     resetInserters();
     updateExpanders();
@@ -222,10 +222,6 @@ function initTreeTable() {
 	})
 	$('.ui-icon-circle-minus').click( function() { 
         deleteSelected()
-	})
-	$('#adv').click( function() {
-		$('#advSearch').toggle('slow');
-		return false;
 	})
 	
 	$('#createNewDialog').dialog({

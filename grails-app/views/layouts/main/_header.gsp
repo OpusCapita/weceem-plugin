@@ -1,6 +1,6 @@
-<div class="container span-24 last"> 
-    <div id="adminLogo" class="span-12"></div>
-    <div id="iconbar" class="prepend-6 span-6 last">
+<div class="container"> 
+    <div id="adminLogo" ></div>
+    <div id="iconbar" >
         <span title="Current User">
           Current User: <wcm:loggedInUserName/>
         </span>
