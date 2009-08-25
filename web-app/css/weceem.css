@@ -83,3 +83,11 @@ span.lnk a {
 	color: #000;
 	text-decoration: none;
 }
+
+th.asc a{
+  background: url(../images/skin/sorted_asc.gif) center right no-repeat;
+}
+
+th.desc a{
+  background: url(../images/skin/sorted_desc.gif) center right no-repeat;
+}

@@ -24,6 +24,7 @@ import com.lowagie.text.Section
 import com.lowagie.text.html.HtmlParser
 import com.lowagie.text.pdf.PdfWriter
 import java.text.SimpleDateFormat
+import org.compass.core.*
 
 import org.weceem.content.*
 // Design smell
@@ -767,7 +768,32 @@ class RepositoryController {
         def searchStr = params.data
         def space = null
         if (params.space) space = params.space
-        def searchResult = Content.searchEvery("+title:*$searchStr* +name:$space".toString(), [reload: true])
+        def filterClass = Content
+        if (params.classFilter != "none") 
+            filterClass = Class.forName("${params.classFilter}", true, this.class.classLoader)
+        def searchResult = filterClass.searchEvery("+title:*$searchStr* +name:$space".toString(), [reload: true])
+        def fromDateFilter = null
+        def toDateFilter = null
+        if (params.fromDateFilter != "") fromDateFilter = new Date(params.fromDateFilter)
+        if (params.toDateFilter != "") toDateFilter = new Date(params.toDateFilter)
+        def sortField = params.sortField
+        def ascOrder = Boolean.valueOf(params.isAsc)
+        searchResult.sort({a,b -> 
+            if (ascOrder) 
+                return a."$sortField".compareTo(b."$sortField")
+            else
+                return -a."$sortField".compareTo(b."$sortField")
+        })
+        searchResult = searchResult.findAll{
+            def flag = true
+            if (fromDateFilter){
+                flag = flag && (it."${params.fieldFilter}" > fromDateFilter)
+            }
+            if (toDateFilter){
+                flag = flag && (it."${params.fieldFilter}" < toDateFilter)
+            }
+            flag
+        }
         def result = searchResult.collect{["id": it.id, "title": it.title, 
         "aliasURI": it.aliasURI, "status": it.status?.description, 
         "createdBy": it.createdBy.toString(), 
