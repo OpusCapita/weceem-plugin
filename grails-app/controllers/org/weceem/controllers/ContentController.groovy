@@ -137,14 +137,5 @@ class ContentController {
         response.sendError(404, msg)
     }
     
-    private def getTemplateForContent(def contentNode) {
-        // get template for content
-        // this might later be extended for more complex cases
-        if (!contentNode) {
-            return null
-        }
-        // todo: StyleSheet, ForumEntry & BlogEntry haven't templates.. think how to render
-        return contentNode.metaClass.hasProperty(contentNode, 'template') ? contentNode.template : null
-    }
     
 }

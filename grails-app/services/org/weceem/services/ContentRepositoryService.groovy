@@ -646,5 +646,14 @@ class ContentRepositoryService {
         // Can't impl this yet
     }
     
+    def getTemplateForContent(def content){
+        def template = content.template
+        if ((template == null) && (content.parent != null)){
+            return getTemplateForContent(content.parent)
+        }else{
+            return template
+        }
+    }
+    
 }
 
