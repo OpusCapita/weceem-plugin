@@ -765,6 +765,7 @@ class RepositoryController {
     }
     
     def searchRequest = {
+        // define search parameters
         def searchStr = params.data
         def space = null
         if (params.space) space = params.space
@@ -778,6 +779,8 @@ class RepositoryController {
         if (params.toDateFilter != "") toDateFilter = new Date(params.toDateFilter)
         def sortField = params.sortField
         def ascOrder = Boolean.valueOf(params.isAsc)
+        def statusFilter = Integer.valueOf(params.statusFilter)
+        //performing search
         searchResult.sort({a,b -> 
             if (ascOrder) 
                 return a."$sortField".compareTo(b."$sortField")
@@ -792,7 +795,7 @@ class RepositoryController {
             if (toDateFilter){
                 flag = flag && (it."${params.fieldFilter}" < toDateFilter)
             }
-            flag
+            flag && ((it.status.code == statusFilter) || (statusFilter == 0))
         }
         def result = searchResult.collect{["id": it.id, "title": it.title, 
         "aliasURI": it.aliasURI, "status": it.status?.description, 

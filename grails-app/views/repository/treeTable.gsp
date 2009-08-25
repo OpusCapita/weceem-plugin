@@ -72,11 +72,7 @@ function sendSearchRequest(searchParams){
     $("#searchDiv").css("display", "");
     $("#searchDiv > div > table > tbody").html("");
     $.post("${createLink(action: 'searchRequest', controller: 'repository')}",
-        {data: searchParams["data"], space: searchParams["space"],
-        classFilter: searchParams["classFilter"],
-        fieldFilter: searchParams["fieldFilter"], fromDateFilter: searchParams["fromDateFilter"],
-        toDateFilter: searchParams["toDateFilter"], sortField: searchParams["sortField"],
-        isAsc: searchParams["isAsc"]},
+        searchParams,
         function(data){
             var response = eval('(' + data + ')');
             var tr = $("<tr>");
@@ -120,6 +116,7 @@ $(function(){
         cacheParams["fieldFilter"] = $("#fieldFilter")[0].value;
         cacheParams["fromDateFilter"] = $("#fromDate")[0].value;
         cacheParams["toDateFilter"] = $("#toDate")[0].value;
+        cacheParams["statusFilter"] = $("#statusFilter")[0].value;
         sendSearchRequest(cacheParams);
     });
     $("#clear_btn").click(function(){
@@ -155,7 +152,8 @@ $(function(){
     		</table>
             <form controller="repository">
             	<div id="advSearch" style="display:none" class="span-24 last">
-            			You can filter results by type: <g:select id="classFilter" from="${grailsApplication.domainClasses.findAll({org.weceem.content.Content.isAssignableFrom(it.clazz)}).sort({a,b->a.name.compareTo(b.name)})}" optionKey="fullName" optionValue="name"/>
+            			You can filter results by type: <g:select id="classFilter" from="${grailsApplication.domainClasses.findAll({org.weceem.content.Content.isAssignableFrom(it.clazz)}).sort({a,b->a.name.compareTo(b.name)})}" optionKey="fullName" optionValue="name"/>,
+            			status: <g:select id="statusFilter" from="${[['description': 'all', 'code': 0]] + org.weceem.content.Status.list()}" optionKey="code" optionValue="description" />
             			and date <g:select id="fieldFilter" from="[[id:'createdOn', value:'created'], [id:'changedOn', value:'changed']]"  optionKey="id" optionValue="value"/> from <input id="fromDate" type="text"/> to <input id="toDate" type="text"/>
             	</div>
             </form>
