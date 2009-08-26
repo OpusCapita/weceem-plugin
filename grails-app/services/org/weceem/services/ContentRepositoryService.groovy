@@ -57,7 +57,7 @@ class ContentRepositoryService {
         def spaceName
         def space
         
-        def n = uri.indexOf('/')
+        def n = uri?.indexOf('/')
         if (n >= 0) {
             spaceName = uri[0..n-1]
             uri = uri[n+1..-1]
