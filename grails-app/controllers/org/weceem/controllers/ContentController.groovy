@@ -85,7 +85,7 @@ class ContentController {
                     
                     log.debug "Content is: $contentText"
                     
-                    def template = getTemplateForContent(content)
+                    def template = contentRepositoryService.getTemplateForContent(content)
                     log.debug "Content's template is: $template"
 
                     if (!template) {

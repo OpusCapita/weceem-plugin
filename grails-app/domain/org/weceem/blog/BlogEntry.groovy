@@ -29,6 +29,8 @@ class BlogEntry extends Content {
     String summary
 
     String content
+
+    Template template
     
     static mapping = {
         cache usage: 'nonstrict-read-write'
@@ -49,4 +51,15 @@ class BlogEntry extends Content {
     }
 
     static transients = Content.transients + ['summary']
+
+    String getVersioningContent() { content }
+
+    Map getVersioningProperties() { 
+       def r = super.getVersioningProperties() + [ 
+           keywords:keywords,
+           summary:summary,
+           template:template?.ident() // Is this right?
+       ] 
+       return r
+    }
 }
