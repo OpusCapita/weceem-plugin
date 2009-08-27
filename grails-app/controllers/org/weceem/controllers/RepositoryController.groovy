@@ -69,19 +69,24 @@ class RepositoryController {
         if (!(actionName in ACTIONS_NEEDING_SPACE)) return true
 
         if (!params.space) {
-            // Find the default space(if there is any) and redirect so url has space in
-            if (Space.count() == 0){
-                flash.message = message(code: 'message.there.are.no.spaces')
-                redirect(controller:'space')
+            if (session.currentAdminSpace) {
+                params.space = Space.get(session.currentAdminSpace)
+                return true
+            } else {
+                // Find the default space(if there is any) and redirect so url has space in
+                if (Space.count() == 0){
+                    flash.message = message(code: 'message.there.are.no.spaces')
+                    redirect(controller:'space')
+                    return false
+                }
+                def space = contentRepositoryService.findDefaultSpace()
+                if (log.debugEnabled) {
+                    log.debug "Using default space: ${space.name}"
+                }
+                // Redirect to ourselves with the correct link for default dspace
+                redirect(controller:controllerName, action:actionName, params:[space:space.name])
                 return false
             }
-            def space = contentRepositoryService.findDefaultSpace()
-            if (log.debugEnabled) {
-                log.debug "Using default space: ${space.name}"
-            }
-            // Redirect to ourselves with the correct link for default dspace
-            redirect(controller:controllerName, action:actionName, params:[space:space.name])
-            return false
         } else {
             if (log.debugEnabled) {
                 log.debug "Loading space from parameter: ${params.space}"
@@ -92,6 +97,10 @@ class RepositoryController {
                 params.space = contentRepositoryService.findDefaultSpace()
             }
         }
+        if (params.space) {
+            session.currentAdminSpace = params.space.id
+        }
+        return true
     }
     
     static defaultAction = 'treeTable'
