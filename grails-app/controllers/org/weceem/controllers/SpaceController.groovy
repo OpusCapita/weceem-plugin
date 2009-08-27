@@ -9,6 +9,7 @@ import org.weceem.export.*
 class SpaceController {
 
     def importExportService
+    def contentRepositoryService
 
     static allowedMethods = [delete: ['GET', 'POST'], save: 'POST', update: 'POST']
 
@@ -37,9 +38,9 @@ class SpaceController {
     }
 
     def save = {
-        def space = new Space(params)
-        if (!space.hasErrors() && space.save()) {
-            flash.message = "Space ${space.id} created"
+        def space = contentRepositoryService.createSpace(params)
+        if (!space.hasErrors()) {
+            flash.message = "Space '${space.name}' created"
             redirect(action: list, id: space.id)
         } else {
             render(view: 'create', model: [space: space])
@@ -51,7 +52,7 @@ class SpaceController {
         if (space) {
             space.properties = params
             if (!space.hasErrors() && space.save()) {
-                flash.message = "Space ${params.id} updated"
+                flash.message = "Space '${space.name}' updated"
                 redirect(action: list, id: space.id)
             } else {
                 render(view: 'edit', model: [space: space])
@@ -65,29 +66,12 @@ class SpaceController {
     def delete = {
         def space = Space.get(params.id)
         if (space) {
-            def contents = Content.findAllWhere(space: space)
-            def templateList = []
-            def copiesList = []
-            contents.each() {
-                if (it instanceof Template) {
-                    templateList << it
-                } else if (it instanceof VirtualContent) {
-                    copiesList << it
-                }
-            }
-            // delete all copies for contents in space
-            copiesList*.delete()
-            // delete other contents
-            (contents - copiesList - templateList)*.delete()
-            // delete all templates from space
-            templateList*.delete()
-            // delete space
-            space.delete(flush: true)
-            
-            flash.message = "Space ${params.id} deleted"
+            contentRepositoryService.deleteSpace(space)
+
+            flash.message = "Space '${space.name}' deleted"
             redirect(action: list)
         } else {
-            flash.message = "Space not found with id ${params.id}"
+            flash.message = "No space found with id ${params.id}"
             redirect(action: list)
         }
     }
