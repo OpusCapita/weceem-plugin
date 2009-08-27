@@ -197,26 +197,7 @@ class Content implements Comparable {
         
         // Ask the content instance what we should serialize in a version
         def verProps = getVersioningProperties()
-        def writer = new StringWriter()
-        def bld = new MarkupBuilder(writer)
-        /*
-        t = this
-        println "In saveRevision before builder, this is ${t} and it is a ${t.class}"
         
-        bld.revision() {
-            println "In saveRevision inside builder, this is ${t} and it is a ${t.class}"
-            def hack = this
-            println "In saveRevision inside builder, hack is ${hack} and it is a ${hack.class}"
-            verProps.each { vp ->
-                def propName = vp.key
-                def propValue = vp.value
-                println "Trying to build XML for $propName = $propValue"
-                "${propName}"(propValue)
-            }
-            content(getVersioningContent())
-        }
-        def xml = writer.toString()
-        */
         def output = new StringBuilder()
         output << "<revision>"
         verProps.each { vp ->
