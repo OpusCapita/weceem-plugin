@@ -1,6 +1,7 @@
 package org.weceem.services
 
 import org.codehaus.groovy.grails.commons.ApplicationHolder
+import org.codehaus.groovy.grails.web.context.ServletContextHolder
 
 import org.weceem.content.*
 
@@ -24,6 +25,7 @@ class ContentRepositoryService {
     static transactional = true
 
     def grailsApplication
+    def importExportService
     
     static DEFAULT_STATUSES = [
         [code:100, description:'draft', publicContent:false],
@@ -103,6 +105,59 @@ class ContentRepositoryService {
         [space:space, uri:uri]
     }
     
+    Space createSpace(params) {
+        def s = new Space(params)
+        if (s.save()) {
+            importSpaceTemplate('default', s)
+        }
+        return s // If this fails we still return the original space so we can see errors
+    }
+    
+    /**
+     * Import a named space template (import zip) into the specified space
+     */
+    void importSpaceTemplate(String templateName, Space space) {
+        // For now we only load files, in future we may get them as blobs from DB
+        def f = File.createTempFile("default-space-import", null)
+        def res = ServletContextHolder.servletContext.getResourceAsStream('/WEB-INF/$templateName-space-template.zip')
+        if (!res) {
+            log.error "Unable to import space template [${templateName}] into space [${space.name}], space template not found"
+            return
+        }
+        f.withOutputStream { os ->
+            os << res
+        }
+        try {
+            importExportService.importSpace(space, params.importer, f)
+        } catch (Throwable t) {
+            log.error "Unable to import space template [${templateName}] into space [${space.name}]", t
+            throw t // rethrow, this is sort of fatal
+        }
+    }
+    
+    void deleteSpace(Space space) {
+        def contents = Content.findAllWhere(space: space)
+        def templateList = []
+        def copiesList = []
+        contents.each() {
+            // @todo This is bad, we should not rely on specific types of relationships
+            // Needs smarter code like the new import/export
+            if (it instanceof Template) {
+                templateList << it
+            } else if (it instanceof VirtualContent) {
+                copiesList << it
+            }
+        }
+        // delete all copies for contents in space
+        copiesList*.delete()
+        // delete other contents
+        (contents - copiesList - templateList)*.delete()
+        // delete all templates from space
+        templateList*.delete()
+        // delete space
+        space.delete(flush: true)
+    }
+
     // @todo cache the list of known type ans mappings that are assignable to a Content variable
     // so that we can skip the isAssignableFrom which will affect performance a lot, as this function may be
     // called a lot
