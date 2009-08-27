@@ -28,6 +28,7 @@
   display:inline;
   padding-top:15px;
   position:relative;
+  left: 25px;
 }
 
 .treeTable tr.collapsed td .expander {
@@ -89,6 +90,7 @@
 .treeTable .item { 
   padding-left:35px;
   position:relative;
+  left: 25px;
 }
 
 .treeTable .ui-icon {
