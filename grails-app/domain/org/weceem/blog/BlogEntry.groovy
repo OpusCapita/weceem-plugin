@@ -30,8 +30,6 @@ class BlogEntry extends Content {
 
     String content
 
-    Template template
-    
     static mapping = {
         cache usage: 'nonstrict-read-write'
         columns {
@@ -57,8 +55,7 @@ class BlogEntry extends Content {
     Map getVersioningProperties() { 
        def r = super.getVersioningProperties() + [ 
            keywords:keywords,
-           summary:summary,
-           template:template?.ident() // Is this right?
+           summary:summary
        ] 
        return r
     }

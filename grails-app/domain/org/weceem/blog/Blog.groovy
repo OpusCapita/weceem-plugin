@@ -9,10 +9,12 @@ class Blog extends Content {
 
     Template template
     Integer maxEntriesToDisplay
+    String commentMarkup = ""
     
     static constraints = {
         template(nullable: true)
         maxEntriesToDisplay(inList:[3, 5, 10, 20])
+        commentMarkup(inList:["", "html", "wiki"])
     }
     
     static transients = Content.transients

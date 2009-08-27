@@ -27,15 +27,17 @@ class BlogComment extends Content {
     String ipAddress
     String websiteUrl
     String content
-    String markup = ""
     
     static constraints = {
         author(maxSize:80, blank: false, nullable: false)
         email(email:true, maxSize:80, blank: false, nullable: false)
         content(maxSize:4000, blank: false, nullable: false)
         status(nullable: false)
-        markup(inList:["", "html", "wiki"])
         websiteUrl(url:true, maxSize:100, nullable: true, blank: false)
         ipAddress(maxSize:50, nullable: false, blank: false)
     }
+    
+    static transients = Content.transients
+
+    String getVersioningContent() { content }
 }
