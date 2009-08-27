@@ -120,9 +120,10 @@ class ContentRepositoryService {
         log.info "Importing space template [${templateName}] into space [${space.name}]"
         // For now we only load files, in future we may get them as blobs from DB
         def f = File.createTempFile("default-space-import", null)
-        def res = ServletContextHolder.servletContext.getResourceAsStream("/WEB-INF/${templateName}-space-template.zip")
+        def resourceName = "classpath:/org/weceem/resources/${templateName}-space-template.zip"
+        def res = ApplicationHolder.application.parentContext.getResource(resourceName).inputStream
         if (!res) {
-            log.error "Unable to import space template [${templateName}] into space [${space.name}], space template not found"
+            log.error "Unable to import space template [${templateName}] into space [${space.name}], space template not found at resource ${resourceName}"
             return
         }
         f.withOutputStream { os ->

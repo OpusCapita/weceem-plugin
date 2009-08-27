@@ -1,4 +1,4 @@
-<plugin name='weceem' version='0.2' grailsVersion='1.1.1 &gt; *'>
+<plugin name='weceem' version='0.3-SNAPSHOT' grailsVersion='1.1.1 &gt; *'>
   <author>jCatalog AG</author>
   <authorEmail>info@weceem.org</authorEmail>
   <title>Weceem CMS</title>
@@ -22,6 +22,7 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     <resource>org.weceem.controllers.VersionController</resource>
     <resource>org.weceem.controllers.WikiItemRenderController</resource>
     <resource>org.weceem.blog.Blog</resource>
+    <resource>org.weceem.blog.BlogComment</resource>
     <resource>org.weceem.blog.BlogEntry</resource>
     <resource>org.weceem.content.Content</resource>
     <resource>org.weceem.content.ContentVersion</resource>
@@ -40,9 +41,9 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     <resource>org.weceem.services.ContentRepositoryService</resource>
     <resource>org.weceem.services.ContentVersionService</resource>
     <resource>org.weceem.services.EditorService</resource>
+    <resource>org.weceem.services.EventService</resource>
     <resource>org.weceem.services.ImportExportService</resource>
     <resource>org.weceem.services.WeceemSecurityService</resource>
-    <resource>BeanTagLib</resource>
     <resource>org.weceem.tags.AdminTagLib</resource>
     <resource>org.weceem.tags.EditorFieldTagLib</resource>
     <resource>org.weceem.tags.WeceemTagLib</resource>
@@ -55,4 +56,5 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     <plugin name='navigation' version='1.1 &gt; *' />
     <plugin name='fckeditor' version='0.9.2 &gt; *' />
   </dependencies>
+  <behavior />
 </plugin>
