@@ -117,9 +117,10 @@ class ContentRepositoryService {
      * Import a named space template (import zip) into the specified space
      */
     void importSpaceTemplate(String templateName, Space space) {
+        log.info "Importing space template [${templateName}] into space [${space.name}]"
         // For now we only load files, in future we may get them as blobs from DB
         def f = File.createTempFile("default-space-import", null)
-        def res = ServletContextHolder.servletContext.getResourceAsStream('/WEB-INF/$templateName-space-template.zip')
+        def res = ServletContextHolder.servletContext.getResourceAsStream("/WEB-INF/${templateName}-space-template.zip")
         if (!res) {
             log.error "Unable to import space template [${templateName}] into space [${space.name}], space template not found"
             return
@@ -128,11 +129,12 @@ class ContentRepositoryService {
             os << res
         }
         try {
-            importExportService.importSpace(space, params.importer, f)
+            importExportService.importSpace(space, 'simpleSpaceImporter', f)
         } catch (Throwable t) {
             log.error "Unable to import space template [${templateName}] into space [${space.name}]", t
             throw t // rethrow, this is sort of fatal
         }
+        log.info "Successfully imported space template [${templateName}] into space [${space.name}]"
     }
     
     void deleteSpace(Space space) {

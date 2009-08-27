@@ -36,7 +36,6 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     def documentation = "http://grails.org/plugin/weceem"
 
     def doWithSpring = {
-        // TODO Implement runtime spring config (optional)
         simpleSpaceExporter(org.weceem.export.SimpleSpaceExporter)
         simpleSpaceImporter(org.weceem.export.SimpleSpaceImporter)
         defaultSpaceImporter(org.weceem.export.DefaultSpaceImporter)
