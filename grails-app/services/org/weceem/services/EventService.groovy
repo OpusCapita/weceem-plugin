@@ -9,13 +9,9 @@ import org.weceem.event.Events
 
 class EventService {
 
-    
-
     boolean transactional = false
 
-    def grailsApplication
     private listeners = [:]
-
 
     /* get listeners for an event */
     private getListeners(Events event) {
@@ -29,6 +25,9 @@ class EventService {
       listeners[event] = getListeners(event) << listener
     }
 
+    /*
+    * Unregister a listener
+     */
     void unregisterListener(Events event, listener) {
       getListeners(event).remove(listener)
     }
@@ -45,8 +44,3 @@ class EventService {
       getListeners(Events.CONTENT_ADDED)*.onWeceemContentAdded(content, params)
     }
 }
-
-
-
-
-
