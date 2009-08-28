@@ -195,13 +195,18 @@ class WeceemTagLib {
             return
         }
 
+        // @todo This is quite crappy, we should be getting these urls from a cache
         StringBuffer path = new StringBuffer()
+        if (path) {
+            path << space.aliasURI
+            path << '/'
+        }
         if(contentInfo.parentURI) {
             path << contentInfo.parentURI
             path <<  '/'
         }
         path << contentInfo.content.aliasURI
-        attrs.params = [uri:path.toString(), space: space.name]
+        attrs.params = [uri:+'/'+path.toString()]
         attrs.controller = 'content'
         attrs.action = 'show'
         out << g.createLink(attrs)

@@ -52,12 +52,6 @@ class WeceemPluginUrlMappings {
         "/" {
             controller = "content"
             action = "show"
-            constraints {
-                // @todo this is very ugly, clean up
-                uri(validator: { v ->
-                    !WeceemPluginUrlMappings.INTERNAL_URI_PREFIXES.find { pref -> return v?.startsWith(pref) }
-                })
-            }
         }
         
         "/search/$space" {
