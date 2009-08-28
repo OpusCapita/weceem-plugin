@@ -796,9 +796,9 @@ class RepositoryController {
         //performing search
         searchResult.sort({a,b -> 
             if (ascOrder) 
-                return a."$sortField".compareTo(b."$sortField")
+                return a?."$sortField"?.compareTo(b?."$sortField")
             else
-                return -a."$sortField".compareTo(b."$sortField")
+                return -a?."$sortField"?.compareTo(b?."$sortField")
         })
         searchResult = searchResult.findAll{
             def flag = true
