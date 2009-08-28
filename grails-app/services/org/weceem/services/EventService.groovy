@@ -1,6 +1,7 @@
 package org.weceem.services
 
 import org.weceem.content.Content
+import org.weceem.event.Events
 
 /*
  * A service to send events to hooks used by plugins/internally
@@ -8,38 +9,44 @@ import org.weceem.content.Content
 
 class EventService {
 
-    static final String CONTENT_ADDED = 'onWeceemContentAdded'
+    
 
     boolean transactional = false
 
     def grailsApplication
-    def listenerCache = [:]
+    private listeners = [:]
+
+
+    /* get listeners for an event */
+    private getListeners(Events event) {
+      listeners[event] ?: []
+    }
+
+    /*
+    * Register a listener with a callback method
+     */
+    void registerListener(Events event, listener) {
+      listeners[event] = getListeners(event) << listener
+    }
+
+    void unregisterListener(Events event, listener) {
+      getListeners(event).remove(listener)
+    }
+
+
+  /************************************
+   **** Place events here
+   **********************************/
 
     /*
      * Called when new content is added
     */
     void contentAdded(Content content, params) {
-        findListeners(CONTENT_ADDED)*.onWeceemContentAdded(content, params)
+      getListeners(Events.CONTENT_ADDED)*.onWeceemContentAdded(content, params)
     }
-
-    /*
-    * Clear the listener cache
-    */
-    void emptyCache() {
-        listenerCache = [:]
-    }
-
-    /*
-     * Find places where a hook is used and cache the results
-    */
-    private List findListeners(String event) {
-        if (!listenerCache[event]) {
-            listenerCache[event] = grailsApplication.allArtefacts.findAll {it.metaClass.respondsTo(it, event)}
-        }
-        return listenerCache[event]
-    }
-
 }
+
+
 
 
 
