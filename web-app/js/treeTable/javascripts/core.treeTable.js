@@ -1,10 +1,31 @@
 function updateExpanders(){
-    $('tr[id*=content-node-] > td > span[class=expander]').css({'display': 'none'});
-    var reg = new RegExp("child-of-content-node-\\d+");
-    jQuery.each($('tr[class*=child-of-content-node-][id!=]'), function(index, value){
-      var id = /\d+/.exec(value.className.match(reg)[0]);
-      $("#content-node-" + id + " > td > span[class=expander]").css({'display':''});
+    var parents = $("#treeTable>tbody>tr.parent"); //get all parents
+    var leaves = $("#treeTable>tbody>tr:not(.parent,.inserter-before,.inserter-after)"); //get all leaves
+    parents.each(function (id, it){
+        if ($("#"+it.id+">td>span.expander").size() == 0){
+            var expander ;
+            if ($("span.expander").size() > 0){
+                expander = $($("span.expander")[0]).clone();
+            }else{
+                expander = $("<span class='expander' style='margin-left: -25px; padding-left: 25px; />'");
+            }
+            expander.click(function (){
+                $("#"+it.id).toggleBranch();
+                resetInserters();
+            })
+            $("#"+it.id+">td:first").prepend(expander);
+        }
+        var id = /\d+/.exec(it.id);
+        if ($(".child-of-content-node-"+id).size() == 0){
+            $("#"+it.id).removeClass("parent");
+            $("#"+it.id+">td:first>span.expander").remove();
+        }
     });
+    leaves.each(function (id, it){
+        if ($("#"+it.id+">td>span.expander").size() > 0){
+            $("#"+it.id+">td>span.expander").remove();
+        }
+    })
 }
 
 function loadPage(url) {
@@ -111,7 +132,7 @@ var droppableConf = {
                 var el = $("#" + this.id);
                 if (el.is(".inserter-before") || el.is(".inserter-after")){
                     var movable = $($(ui.draggable).parents("tr")[0]);
-                    var newindex = $("#content-node-" + /\d+/.exec(el.attr('id')) + " > td:first > a > h2.title").attr("orderindex");
+                    var newindex = $("#content-node-" + /\d+/.exec(el.attr('id')) + ">td:first>div>a>h2.title").attr("orderindex");
                     if (el.is(".inserter-before")){
                         newindex = (newindex == 0) ? newindex : newindex - 1;
                     }
@@ -122,7 +143,7 @@ var droppableConf = {
                     $('#confirmDialog').dialog('option', 'target', el);
                     $('#confirmDialog').dialog('open');
                 }else{
-                    var type = $("#" + this.id + " > td > a > h2.title").attr("type");
+                    var type = $("#" + this.id + ">td>div>a>h2.title").attr("type");
                     if (resources["haveChildren"][type]){
                         var children = $(".child-of-content-node-" + /\d+/.exec(this.id) + "[id*=content-node-] > td > a > h2.title")
                         var newindex = 0;
@@ -298,6 +319,7 @@ function initTreeTable() {
     	                    switch(swc){
     	                        case 'in':
         	                        $(src).appendBranchTo(trg);
+        	                        $(trg).addClass("parent");
         	                        break;
         	                    case 'before':
         	                        toggleStyle(src, $(trg));
@@ -314,7 +336,7 @@ function initTreeTable() {
                             inserterBefore.insertBefore("#" + $(src).attr('id'));
                             var indexes = response['indexes'];
                             jQuery.each(indexes, function(key, val){
-                               $("#content-node-" + key + " > td:first > a >h2.title").attr('orderindex', val);
+                               $("#content-node-" + key + ">div>td:first>a>h2.title").attr('orderindex', val);
                             });
                             updateExpanders();
                             resetInserters();
@@ -352,6 +374,7 @@ function initTreeTable() {
         	                    switch (swc){
         	                        case 'in':
         	                            $(srcCopy).appendBranchTo(trg);
+        	                            $(trg).addClass("parent");
                                         break;
                                     case 'before':
                                         srcCopy.insertBefore("#" + trg.attr('id'));
@@ -362,17 +385,17 @@ function initTreeTable() {
                                         toggleStyle($(srcCopy), trg);
                                         break;
         	                    }
-        	                    $('#' + srcCopy.attr('id') + ' > td > a > h2.title').draggable(draggableConf);
-        	                    $('#' + srcCopy.attr('id') + ' > td > a > h2.title').attr('type', response['ctype']);
+        	                    $('#' + srcCopy.attr('id') + '>td>div>a>h2.title').draggable(draggableConf);
+        	                    $('#' + srcCopy.attr('id') + '>td>div>a>h2.title').attr('type', response['ctype']);
         	                    srcCopy.droppable(droppableConf);
-        	                    $('#' + srcCopy.attr('id') + ' > td > a > span.type').html(' (Virtual Content)');
+        	                    $('#' + srcCopy.attr('id') + '>td>div>a>span.type').html(' (Virtual Content)');
         	                    inserterAfter.insertAfter("#" + srcCopy.attr('id'));
         	                    inserterBefore.insertBefore("#" + srcCopy.attr('id'));
                                 toggleStyle($(inserterBefore), $(srcCopy));
                                 toggleStyle($(inserterAfter), $(srcCopy));
                                 var indexes = response['indexes'];
                                 jQuery.each(indexes, function(key, val){
-                                   $("#content-node-" + key + " > td:first > a >h2.title").attr('orderindex', val);
+                                   $("#content-node-" + key + ">td:first>div>a>h2.title").attr('orderindex', val);
                                 });
         	                    resetInserters();
         	                    updateExpanders();
