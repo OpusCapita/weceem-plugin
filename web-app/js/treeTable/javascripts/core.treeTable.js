@@ -132,7 +132,7 @@ var droppableConf = {
                 var el = $("#" + this.id);
                 if (el.is(".inserter-before") || el.is(".inserter-after")){
                     var movable = $($(ui.draggable).parents("tr")[0]);
-                    var newindex = $("#content-node-" + /\d+/.exec(el.attr('id')) + ">td:first>div>a>h2.title").attr("orderindex");
+                    var newindex = $("#content-node-" + /\d+/.exec(el.attr('id')) + ">td:first>div>h2.title").attr("orderindex");
                     if (el.is(".inserter-before")){
                         newindex = (newindex == 0) ? newindex : newindex - 1;
                     }
@@ -143,9 +143,9 @@ var droppableConf = {
                     $('#confirmDialog').dialog('option', 'target', el);
                     $('#confirmDialog').dialog('open');
                 }else{
-                    var type = $("#" + this.id + ">td>div>a>h2.title").attr("type");
+                    var type = $("#" + this.id + ">td>div>h2.title").attr("type");
                     if (resources["haveChildren"][type]){
-                        var children = $(".child-of-content-node-" + /\d+/.exec(this.id) + "[id*=content-node-] > td > a > h2.title")
+                        var children = $(".child-of-content-node-" + /\d+/.exec(this.id) + "[id*=content-node-]>td>div>h2.title")
                         var newindex = 0;
                         jQuery.each(children, function(index, value){
                             if ($(value).attr('orderindex') > newindex){
@@ -385,17 +385,17 @@ function initTreeTable() {
                                         toggleStyle($(srcCopy), trg);
                                         break;
         	                    }
-        	                    $('#' + srcCopy.attr('id') + '>td>div>a>h2.title').draggable(draggableConf);
-        	                    $('#' + srcCopy.attr('id') + '>td>div>a>h2.title').attr('type', response['ctype']);
+        	                    $('#' + srcCopy.attr('id') + '>td>div>h2.title').draggable(draggableConf);
+        	                    $('#' + srcCopy.attr('id') + '>td>div>h2.title').attr('type', response['ctype']);
         	                    srcCopy.droppable(droppableConf);
-        	                    $('#' + srcCopy.attr('id') + '>td>div>a>span.type').html(' (Virtual Content)');
+        	                    $('#' + srcCopy.attr('id') + '>td>div>span.type').html(' (Virtual Content)');
         	                    inserterAfter.insertAfter("#" + srcCopy.attr('id'));
         	                    inserterBefore.insertBefore("#" + srcCopy.attr('id'));
                                 toggleStyle($(inserterBefore), $(srcCopy));
                                 toggleStyle($(inserterAfter), $(srcCopy));
                                 var indexes = response['indexes'];
                                 jQuery.each(indexes, function(key, val){
-                                   $("#content-node-" + key + ">td:first>div>a>h2.title").attr('orderindex', val);
+                                   $("#content-node-" + key + ">td:first>div>h2.title").attr('orderindex', val);
                                 });
         	                    resetInserters();
         	                    updateExpanders();

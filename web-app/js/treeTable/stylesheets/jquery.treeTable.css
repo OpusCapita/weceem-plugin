@@ -80,12 +80,15 @@
   padding-top:0.5em;
 }
 
-.treeTable h2 span { font-size:1em; color:#999999; font-weight:normal; }
+h2 a{
+    color: #111111;
+}
+.treeTable h2 a span { font-size:1em; color:#999999; font-weight:normal; }
 
 .treeTable a, 
 .treeTable a:hover, 
 .treeTable a:visited { text-decoration:none; }
-.treeTable a:hover h2 { color:#006699;}
+.treeTable h2 a:hover  { color:#006699;}
 
 .treeTable .item { 
   padding-left:35px;

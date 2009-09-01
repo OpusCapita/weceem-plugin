@@ -16,10 +16,11 @@
 			}
 			%>
 			<div class="ui-icon ui-icon-${icontype}"></div>
-			<g:link controller="editor" action="edit" id="${c.id}">
-			 <h2 orderindex="${c.orderIndex == null ? 0 : c.orderIndex}" type="${c.toName()}" class="title">${c.title.encodeAsHTML()}        <span class="type">( /${c.aliasURI.encodeAsHTML()} - <g:message code="content.item.name.${c.toName()}"/>)</span>
-			 </h2>
-			</g:link>
+			<h2 orderindex="${c.orderIndex == null ? 0 : c.orderIndex}" type="${c.toName()}" class="title">
+			    <g:link controller="editor" action="edit" id="${c.id}">
+			     ${c.title.encodeAsHTML()}        <span class="type">( /${c.aliasURI.encodeAsHTML()} - <g:message code="content.item.name.${c.toName()}"/>)</span>
+			    </g:link>
+			</h2>
 		</div>		
 	</td>
 	<td>
