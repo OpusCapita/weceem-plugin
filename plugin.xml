@@ -55,6 +55,7 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     <plugin name='quartz' version='0.4.1-SNAPSHOT &gt; *' />
     <plugin name='navigation' version='1.1 &gt; *' />
     <plugin name='fckeditor' version='0.9.2 &gt; *' />
+    <plugin name='beanFields' version='0.1 &gt; *' />
   </dependencies>
   <behavior />
 </plugin>
