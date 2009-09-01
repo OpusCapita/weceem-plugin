@@ -104,7 +104,7 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
         HTMLContent.list()*.template = null
         WikiItem.list()*.template = null
         VirtualContent.list()*.target = null
-        Content.list()*.delete(flush:true)
+        //Content.list()*.delete(flush:true)
     }
 
     void testDeleteNodeA() {
