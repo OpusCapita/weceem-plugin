@@ -7,7 +7,7 @@ function updateExpanders(){
             if ($("span.expander").size() > 0){
                 expander = $($("span.expander")[0]).clone();
             }else{
-                expander = $("<span class='expander' style='margin-left: -25px; padding-left: 25px; />'");
+                expander = $('<span class="expander" style="margin-left: -25px; padding-left: 25px;" />');
             }
             expander.click(function (){
                 $("#"+it.id).toggleBranch();
