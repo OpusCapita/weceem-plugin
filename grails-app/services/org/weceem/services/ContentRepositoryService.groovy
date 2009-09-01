@@ -281,9 +281,6 @@ class ContentRepositoryService {
      */
     Boolean createNode(Content content, Content parentContent = null) {
         log.debug "Creating node: ${content.dump()}"
-        if (!content.validate()){
-            return false
-        }
         if (parentContent == null) parentContent = content.parent
 
         // Update date orderIndex to last order index + 1 in the parent's child list
@@ -301,7 +298,6 @@ class ContentRepositoryService {
         } else {
             result = true
         }
-
         if (result) {
             // We complete the AliasURI, AFTER handling the create() event which may need to affect title/aliasURI
             if (!content.aliasURI) {
