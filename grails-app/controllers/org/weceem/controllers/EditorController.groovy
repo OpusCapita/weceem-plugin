@@ -91,6 +91,7 @@ class EditorController {
         def content = contentRepositoryService.getContentClassForType(params.type).get(params.id)
         if (content) {
             content.delete(flush: true)
+            eventService.afterContentRemoved(content)
             flash.message = "Content ${params.id} deleted"
             redirect(action: list)
         } else {

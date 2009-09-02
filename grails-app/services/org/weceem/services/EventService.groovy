@@ -5,6 +5,7 @@ import org.weceem.event.Events
 
 /*
  * A service to send events to hooks used by plugins/internally
+ * @author Scott Burch
 */
 
 class EventService {
@@ -49,5 +50,9 @@ class EventService {
      */
     void afterContentUpdated(Content content, params) {
       getListeners(Events.AFTER_CONTENT_UPDATED)*.afterWeceemContentUpdated(content, params)
+    }
+
+    void afterContentRemoved(Content content) {
+      getListeners(Events.AFTER_CONTENT_REMOVED)*.afterWeceemContentRemoved(content)
     }
 }

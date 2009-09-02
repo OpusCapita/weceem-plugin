@@ -53,7 +53,21 @@ class EventServiceTests extends grails.test.GrailsUnitTestCase {
     assertFalse listenerCalled
   }
 
+  void testAfterContentRemovedEvent() {
+    // first test without a listener
+    eventService.afterContentRemoved(new Content())
 
+    // then test with a listener
+    eventService.registerListener(Events.AFTER_CONTENT_REMOVED, this)
+    eventService.afterContentRemoved(new Content())
+    assertTrue listenerCalled
+
+    // remove listener and test again
+    eventService.unregisterListener(Events.AFTER_CONTENT_REMOVED, this)
+    listenerCalled = false
+    eventService.afterContentRemoved(new Content())
+    assertFalse listenerCalled
+  }
 
   void afterWeceemContentUpdated(Content content, params) {
     listenerCalled = content instanceof Content && params.size == 0
@@ -61,6 +75,10 @@ class EventServiceTests extends grails.test.GrailsUnitTestCase {
 
   void afterWeceemContentAdded(Content content, params) {
     listenerCalled = content instanceof Content && params.size == 0
+  }
+
+  void afterWeceemContentRemoved(Content content) {
+    listenerCalled = content instanceof Content 
   }
 }
 
