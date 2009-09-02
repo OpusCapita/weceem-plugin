@@ -357,7 +357,6 @@ class RepositoryController {
                     contentType: params.contentType, parentPath: params.parentPath,
                     editor: editorToUse ])
         } else {
-            eventService.afterContentAdded(insertedContent, params)
             redirect(action: treeTable)
         }
     }

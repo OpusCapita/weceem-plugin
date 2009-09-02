@@ -8,10 +8,12 @@ import net.java.textilej.parser.MarkupParser
 import com.jcatalog.wiki.WeceemDialect
 import grails.converters.JSON
 import org.weceem.content.*
+import org.weceem.services.EventService
 
 class EditorController {
     def contentRepositoryService
     def editorService
+    EventService eventService
 
     // the delete, save and update actions only accept POST requests
     static allowedMethods = [create:['GET'], delete: ['POST'], save: 'POST', update: 'POST']
@@ -54,6 +56,7 @@ class EditorController {
         def content = contentRepositoryService.createNode(params.type, params)
 
         if (!content.hasErrors() && content.save()) {
+            eventService.afterContentAdded(content, params)
             flash.message = message(code:'message.content.saved', args:[content.title, message(code:'content.item.name.'+content.class.name)])
             log.debug "Saved content: ${content}"
             redirect(controller:'repository', params:[space:content.space.name])
@@ -77,6 +80,7 @@ class EditorController {
         } else if (result?.notFound) {
             response.sendError(404, "Cannot update node, no node found with id ${params.id}")
         } else {
+            eventService.afterContentUpdated(result.content, params)
             flash.message = message(code:'message.content.updated', args:[
                 result.content.title, message(code:'content.item.name.'+result.content.class.name)])
             redirect(controller:'repository', action:'treeTable', params:[space:result.content.space.name])
