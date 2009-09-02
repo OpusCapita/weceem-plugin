@@ -38,9 +38,16 @@ class EventService {
    **********************************/
 
     /*
-     * Called when new content is added
+     * Called after new content is added
     */
-    void contentAdded(Content content, params) {
-      getListeners(Events.CONTENT_ADDED)*.onWeceemContentAdded(content, params)
+    void afterContentAdded(Content content, params) {
+      getListeners(Events.AFTER_CONTENT_ADDED)*.afterWeceemContentAdded(content, params)
+    }
+
+    /*
+     * Called after conent is updated
+     */
+    void afterContentUpdated(Content content, params) {
+      getListeners(Events.AFTER_CONTENT_UPDATED)*.afterWeceemContentUpdated(content, params)
     }
 }

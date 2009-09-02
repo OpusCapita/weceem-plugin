@@ -8,6 +8,7 @@ package org.weceem.event
  */
 
 public enum Events {
-     CONTENT_ADDED
+     AFTER_CONTENT_ADDED,
+     AFTER_CONTENT_UPDATED
 
 }
