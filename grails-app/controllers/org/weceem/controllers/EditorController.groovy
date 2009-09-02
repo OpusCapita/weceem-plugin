@@ -31,7 +31,7 @@ class EditorController {
         def content = Content.get(params.id)
         if (!content) {
             flash.message = "Content not found with id ${params.id}"
-            redirect(controller:'repository', params:[space:params.space?.name])
+            redirect(controller:'repository')
         } else {
             return [content: content, editableProperties: editorService.getEditorInfo(content.class)]
         }
@@ -47,6 +47,11 @@ class EditorController {
         }
     }
 
+    def saveContinue = {
+        params.continue = 'y'
+        save()
+    }
+
     def save = {
         assert params.type
         workaroundBlankAssociationBug()
@@ -59,7 +64,11 @@ class EditorController {
             eventService.afterContentAdded(content, params)
             flash.message = message(code:'message.content.saved', args:[content.title, message(code:'content.item.name.'+content.class.name)])
             log.debug "Saved content: ${content}"
-            redirect(controller:'repository', params:[space:content.space.name])
+            if (!params.continue) {
+                redirect(controller:'repository')
+            } else {
+                redirect(action:edit, params:[id:content.id])
+            }
         } else {
             flash.message = message(code:'message.content.save.failed')
             log.error "Unable to save content: ${content.errors}"
@@ -69,6 +78,11 @@ class EditorController {
     
     def cancel = {
         redirect(controller:'repository')
+    }
+
+    def updateContinue = {
+        params.continue = 'y'
+        update()
     }
 
     def update = {
@@ -83,10 +97,13 @@ class EditorController {
             eventService.afterContentUpdated(result.content, params)
             flash.message = message(code:'message.content.updated', args:[
                 result.content.title, message(code:'content.item.name.'+result.content.class.name)])
-            redirect(controller:'repository', action:'treeTable', params:[space:result.content.space.name])
+            if (!params.continue) {
+                redirect(controller:'repository', action:'treeTable')
+            } else {
+                redirect(action:edit, params:[id:result.content.id])
+            }
         }        
     }
-
     def delete = {
         def content = contentRepositoryService.getContentClassForType(params.type).get(params.id)
         if (content) {
