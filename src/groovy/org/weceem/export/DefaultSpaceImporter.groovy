@@ -118,7 +118,7 @@ class DefaultSpaceImporter implements SpaceImporter {
             }
         }
 
-        def filesDir = new File(ServletContextHolder.servletContext.getRealPath(
+        def filesDir = new File(ApplicationHolder.application.mainContext.servletContext.getRealPath(
                 "/${ContentFile.DEFAULT_UPLOAD_DIR}"))
         ant.copy(todir: "${filesDir.absolutePath}/${space.name}", failonerror: false) {
             fileset(dir: "${tmpDir.absolutePath}/files")

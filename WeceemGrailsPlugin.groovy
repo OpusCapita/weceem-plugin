@@ -1,4 +1,5 @@
 import org.codehaus.groovy.grails.commons.GrailsDomainClass
+import grails.util.Environment
 
 import org.weceem.content.*
 
@@ -66,6 +67,7 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         ctx.editorService.cacheEditorInfo()
         ctx.contentRepositoryService.createDefaultStatuses()
         ctx.editorService.configureFCKEditor()
+        ctx.contentRepositoryService.createDefaultSpace()
     }
 
     def onChange = { event ->

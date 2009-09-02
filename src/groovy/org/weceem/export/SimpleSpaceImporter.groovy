@@ -1,7 +1,6 @@
 package org.weceem.export
 
 import com.thoughtworks.xstream.XStream
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.apache.commons.logging.LogFactory
 import org.apache.commons.logging.Log
@@ -77,7 +76,7 @@ class SimpleSpaceImporter implements SpaceImporter {
                 }
             }
         }
-        def filesDir = new File(ServletContextHolder.servletContext.getRealPath(
+        def filesDir = new File(ApplicationHolder.application.mainContext.servletContext.getRealPath(
                 "/${ContentFile.DEFAULT_UPLOAD_DIR}"))
         ant.copy(todir: "${filesDir.absolutePath}/${space.name}", failonerror: false) {
             fileset(dir: "${tmpDir.absolutePath}/files")

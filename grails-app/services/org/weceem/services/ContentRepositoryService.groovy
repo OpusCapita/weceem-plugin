@@ -2,6 +2,7 @@ package org.weceem.services
 
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
+import grails.util.Environment
 
 import org.weceem.content.*
 
@@ -33,6 +34,14 @@ class ContentRepositoryService {
         [code:300, description:'approved', publicContent:false],
         [code:400, description:'published', publicContent:true]
     ]
+    
+    void createDefaultSpace() {
+        if (Environment.current != Environment.TEST) {
+            if (Space.count() == 0) {
+                createSpace([name:'Default'])
+            }
+        }
+    }
     
     void createDefaultStatuses() {
         if (Status.count() == 0) {

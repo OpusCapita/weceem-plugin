@@ -13,6 +13,8 @@ import org.weceem.export.*
  */
 class ImportExportService {
 
+    def grailsApplication
+    
     def importSpace(Space space, String importerName, File file) throws ImportException {
         // Let's brute-force this
         // @todo remove/rework this for 0.2
@@ -30,16 +32,12 @@ class ImportExportService {
     }
 
     def getImporters() {
-        ServletContextHolder.servletContext
-                .getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT)
-                .getBeansOfType(SpaceImporter.class)
+        grailsApplication.mainContext.getBeansOfType(SpaceImporter.class)
     }
     
     //for now only SimpleSpaceExporter(DefaultSpaceExporter is not supported)
     def getExporters() {
-        ServletContextHolder.servletContext
-                .getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT)
-                .getBeansOfType(SimpleSpaceExporter.class)
+        grailsApplication.mainContext.getBeansOfType(SimpleSpaceExporter.class)
     }
 
     def getExportMimeType(String exporterName) {

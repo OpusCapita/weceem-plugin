@@ -33,6 +33,7 @@ class HTMLContent extends Content {
 
     // 64Kb Unicode text with HTML/Wiki Markup
     String content
+    String caption
 
     String getVersioningContent() { content }
 
@@ -49,6 +50,7 @@ class HTMLContent extends Content {
     static constraints = {
         content(nullable: false, maxSize: 65536)
         keywords(nullable: true, blank: true, maxSize: 200)
+        caption(nullable: true, blank: true, maxSize: 40)
         template(nullable: true)
         status(nullable: false) // Workaround for Grails 1.1.1 constraint inheritance bug
     }
@@ -62,6 +64,7 @@ class HTMLContent extends Content {
 
     static editors = {
         template(group:'extra')
+        caption(group:'extra')
         content(editor:'RichHTML')
         keywords()
     }
