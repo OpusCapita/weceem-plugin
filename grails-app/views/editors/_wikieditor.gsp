@@ -1,33 +1,3 @@
-<script type="text/javascript">
-    $(function(){
-        $('#tabs').tabs({
-            select: function(event, ui){
-                var tabid = ui.tab.id;
-                var richEditor = FCKeditorAPI.GetInstance("${name}");
-                switch (tabid){
-                    case "tab-1":
-                        $.post("${createLink(action: 'convertToWiki', controller: 'editor')}",
-                            {text: richEditor.GetXHTML(true)},
-                            function (data){
-        	                    var response = eval('(' + data + ')');
-        	                   $("#wikiEditor")[0].value = response.result;
-        	                });
-                        break;
-                    case "tab-2":
-                        $.post("${createLink(action: 'convertToHtml', controller: 'editor')}",
-                            {text: $("#wikiEditor")[0].value},
-                            function (data){
-        	                    var response = eval('(' + data + ')');
-                                richEditor.SetData(response.result);
-        	                });
-                        break;
-                    default:
-                        break;
-                }
-            }
-        });
-    })
-</script>
 <bean:customField beanName="content" property="${name}" labelKey="${'content.label.'+name}" noLabel="true">
     <div id="tabs">
         <ul>

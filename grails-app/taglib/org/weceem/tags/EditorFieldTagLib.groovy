@@ -131,6 +131,11 @@ class EditorFieldTagLib {
         """
     }
     
+    def editorResourcesWikiCode = { attrs ->
+        out << g.render(template: '/editors/wikicode', plugin:'weceem', 
+            model:[name:attrs.property, value:pageScope.content[attrs.property]])
+    }
+    
     def ifTagExists = { attrs, body ->
         if (gspTagLibraryLookup.lookupTagLibrary(attrs.namespace, attrs.tag)) {
             out << body()
