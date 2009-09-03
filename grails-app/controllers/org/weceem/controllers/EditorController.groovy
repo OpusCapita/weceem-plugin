@@ -71,6 +71,7 @@ class EditorController {
             }
         } else {
             flash.message = message(code:'message.content.save.failed')
+            flash.error = renderErrors(bean: content)
             log.error "Unable to save content: ${content.errors}"
             render(view: 'create', model: [content: content, editableProperties: editorService.getEditorInfo(content.class)])
         }

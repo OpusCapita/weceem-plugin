@@ -292,14 +292,6 @@ class ContentRepositoryService {
         log.debug "Creating node: ${content.dump()}"
         if (parentContent == null) parentContent = content.parent
 
-        // Update date orderIndex to last order index + 1 in the parent's child list
-        if (parentContent) {
-            def orderIndex = parentContent.children ?
-                             parentContent.children?.last()?.orderIndex + 1 : 0
-            content.orderIndex = orderIndex
-            parentContent.addToChildren(content)
-        } else content.orderIndex = 0
-
         def result 
         if (content.metaClass.respondsTo(content, 'create', Content)) {
             // Call the event so that nodes can perform post-creation tasks
@@ -307,6 +299,7 @@ class ContentRepositoryService {
         } else {
             result = true
         }
+        def uniqueURI = true
         if (result) {
             // We complete the AliasURI, AFTER handling the create() event which may need to affect title/aliasURI
             if (!content.aliasURI) {
@@ -314,8 +307,26 @@ class ContentRepositoryService {
             }
             
             result = content.validate()
+            // Check aliasURI uniqueness within content items with null parent
+            if (parentContent){
+                uniqueURI = Content.find("from Content c where c.parent=? and c.aliasURI=?", [parentContent, content.aliasURI]) ? false : true
+            }else{
+                uniqueURI = Content.find("from Content c where c.parent is NULL and c.aliasURI=?", content.aliasURI) ? false : true
+            }
         }
         
+        if (uniqueURI){
+            // Update date orderIndex to last order index + 1 in the parent's child list
+            if (parentContent) {
+                def orderIndex = parentContent.children ?
+                                 parentContent.children?.last()?.orderIndex + 1 : 0
+                content.orderIndex = orderIndex
+                parentContent.addToChildren(content)
+            } else content.orderIndex = 0
+        }else{
+            if (!parentContent)
+                content.errors.rejectValue("aliasURI", "org.weceem.content.Content.aliasURI.unique")
+        }
         return result
     }
 
