@@ -15,12 +15,12 @@
 package org.weceem.content
 
 /**
- * VisitorComment class encapsulates comments on a content node, where the submitting person 
+ * Comment class encapsulates comments on any content node, where the submitting person 
  * may not be a user of the system - eg comments need to be spam checked and IP address tracked
  *
  * @author Marc Palmer
  */
-class VisitorComment extends Content {
+class Comment extends Content {
     String author
     String email
     String ipAddress
