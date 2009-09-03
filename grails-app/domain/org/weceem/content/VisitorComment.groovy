@@ -12,16 +12,15 @@
  * limitations under the License.
  */
 
-package org.weceem.blog
-
-import org.weceem.content.*
+package org.weceem.content
 
 /**
- * BlogComment class encapsulates comments on a blog entry
+ * VisitorComment class encapsulates comments on a content node, where the submitting person 
+ * may not be a user of the system - eg comments need to be spam checked and IP address tracked
  *
  * @author Marc Palmer
  */
-class BlogComment extends Content {
+class VisitorComment extends Content {
     String author
     String email
     String ipAddress
