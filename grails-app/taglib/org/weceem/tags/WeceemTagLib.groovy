@@ -278,4 +278,22 @@ class WeceemTagLib {
     def loggedInUserName = { attrs ->
         out << weceemSecurityService.userName?.encodeAsHTML()
     }
+    
+    def ifContentIs = { attrs, body ->
+        def node = request[ContentController.REQUEST_ATTRIBUTE_NODE]
+        def targetType = attrs[ATTR_TYPE]
+        
+        if (grailsApplication.getClassForName(targetType).isAssignableFrom(node.class)) {
+            out << body()
+        }
+    }
+
+    def ifContentIsNot = { attrs ->
+        def node = request[ContentController.REQUEST_ATTRIBUTE_NODE]
+        def targetType = attrs[ATTR_TYPE]
+        
+        if (!grailsApplication.getClassForName(targetType).isAssignableFrom(node.class)) {
+            out << body()
+        }
+    }
 }

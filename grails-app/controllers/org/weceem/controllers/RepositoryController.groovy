@@ -347,11 +347,9 @@ class RepositoryController {
         contentRepositoryService.createNode(insertedContent, parent)
 
         if (insertedContent.hasErrors() || !insertedContent.save()) {
-            println "insert failed: ${insertedContent.errors}"
             log.debug("Unable to create new content: ${insertedContent.errors}")
             
             def editorToUse = getEditorName(params.contentType)
-            println "EDITOR IS: $editorToUse"
             
             render(view: 'newContent', model: [content: insertedContent,
                     contentType: params.contentType, parentPath: params.parentPath,
@@ -367,8 +365,6 @@ class RepositoryController {
      * @param parentPath
      */
     def createDirectory = {
-        println "params: ${params}"
-        println "space id: "+params['space.id']?.dump()
         def space = Space.get(params['space.id']?.toLong())
         def parent = params.parentPath ? getContent(params.parentPath, space) : null
 
@@ -598,7 +594,7 @@ class RepositoryController {
             */
             document.close()
         } catch(Exception e) {
-            println(e.message)
+            log.error e
         }
 
         response.setContentType("application/pdf")
@@ -772,8 +768,6 @@ class RepositoryController {
     def preview = {
         // todo: 'id' param for WeceemController simply hardcoded
         def content = Content.get(params.id)
-        println "Content is ${content.dump()}"
-        println "Content abs uri is ${content.absoluteURI}"
         redirect(controller: 'content', action: 'show', params:[uri:content.space.aliasURI+'/'+content.absoluteURI])
     }
     

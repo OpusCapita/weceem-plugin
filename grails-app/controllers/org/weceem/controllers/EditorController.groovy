@@ -101,10 +101,11 @@ class EditorController {
             if (!params.continue) {
                 redirect(controller:'repository', action:'treeTable')
             } else {
-                redirect(action:edit, params:[id:result.content.id])
+                redirect(action:'edit', params:[id:result.content.id])
             }
         }        
     }
+    
     def delete = {
         def content = contentRepositoryService.getContentClassForType(params.type).get(params.id)
         if (content) {
@@ -140,6 +141,7 @@ class EditorController {
         render ([result: toHtml(params.text)] as JSON)
     }
     
+    // @todo rework this, it looks hideous. Loading up a new XSL to transform the content?!
     private String toWiki(String text) {
         if (!text) {
             return ''

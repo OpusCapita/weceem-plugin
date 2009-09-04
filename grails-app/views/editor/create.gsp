@@ -10,7 +10,7 @@
   <body>
     <div class="container">
         <div class="span-24 last">
-          <h1>Create new <g:message code="${'content.type.name.'+params.type}" encodeAs="HTML"/> content</h1>
+          <h1>Create new <g:message code="${'content.type.name.'+params.type}" encodeAs="HTML"/></h1>
 
           <g:render template="editor" plugin="weceem"/>
         </div>

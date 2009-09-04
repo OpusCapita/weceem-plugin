@@ -18,6 +18,10 @@ class Blog extends Content {
     }
     
     static transients = Content.transients
+
+    static editors = {
+        template(group:'extra')
+    }
     
     Map getVersioningProperties() { 
        def r = super.getVersioningProperties() + [ 

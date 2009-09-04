@@ -92,7 +92,6 @@ class VersionController {
             }
         }
 
-        println "old "+oldContent.content.text().toString()
         ['content': DiffUtils.diffString(oldContent.content.text().toString(), currentContent.versioningContent),
         'oVersion': contentVersion.revision, 'cVersion': latestRevision + 1,
         'oCreatedBy': contentVersion.createdBy, 'cChangedBy': currentContent.changedBy,

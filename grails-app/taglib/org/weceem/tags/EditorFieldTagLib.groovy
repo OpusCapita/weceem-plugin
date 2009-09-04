@@ -35,14 +35,17 @@ class EditorFieldTagLib {
     }
 
     def editorFieldTemplate = { attrs ->
+        System.out.println "Template field - space is ${pageScope.content.space.dump()}"
+        def templates = Template.findAllBySpace( pageScope.content.space, [sort:'title'])
         out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
             noSelection: ['':'- No template -'],
-            from:{ Template.findAllBySpace( pageScope.content.space, [sort:'title']) }, optionValue:'title', optionKey:'id')
+            from: templates, optionValue:'title', optionKey:'id')
     }
 
     def editorFieldStatus = { attrs ->
+        def statuses = Status.listOrderByCode() 
         out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
-            from:{ Status.listOrderByCode() }, optionValue: { v -> g.message(code:'content.status.'+v.description) }, optionKey:'id')
+            from: statuses, optionValue: { v -> g.message(code:'content.status.'+v.description) }, optionKey:'id')
     }
 
     def editorFieldSpace = { attrs ->
@@ -52,14 +55,14 @@ class EditorFieldTagLib {
     }
 
     def editorFieldContent = { attrs ->
+        def contents =  Content.findAllBySpace( pageScope.content.space, [sort:'title']).findAll( { c -> !c.is(pageScope.content) }) 
         out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
             noSelection: ['':'- No content -'],
-            from:{ Content.findAllBySpace( pageScope.content.space, [sort:'title']).findAll( { c -> !c.is(pageScope.content) }) }, 
-                optionValue:'title', optionKey:'id')
+            from: contents, optionValue:'title', optionKey:'id')
     }
 
     def editorFieldInteger = { attrs ->
-        out << bean.input(beanName:'content', property:attrs.property, noLabel:true)
+        out << bean.field(beanName:'content', property:attrs.property, noLabel:true)
     }
 
     def editorFieldContentFileUpload = { attrs ->
@@ -157,6 +160,7 @@ class EditorFieldTagLib {
             a.text.compareTo(b.text)
         }
         langs.add(0, defaultLanguage)        
-        out << bean.select(beanName:'content', property:attrs.property, noLabel:true, from: langs, optionKey:'id', optionValue:'text')
+        out << bean.select(beanName:'content', property:attrs.property, noLabel:true, 
+            from: langs, optionKey:'id', optionValue:'text')
     }
 }

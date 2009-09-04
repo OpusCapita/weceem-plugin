@@ -184,7 +184,6 @@ class Content implements Comparable {
         def self = this 
         
         def t = this
-        println "In saveRevision, this is ${t} and it is a ${t.class}"
         
         def criteria = ContentVersion.createCriteria()
         log.debug "In saveRevision of ${this}, doing revision query"
@@ -204,7 +203,6 @@ class Content implements Comparable {
             def propName = vp.key
             def propValue = vp.value
             if (propValue) {
-                println "Trying to build XML for $propName = $propValue"
                 output << "<${propName}>${propValue.encodeAsHTML()}</${propName}>"
             }
         }
