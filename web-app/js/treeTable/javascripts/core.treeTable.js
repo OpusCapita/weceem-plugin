@@ -111,8 +111,10 @@ function getParentId(element){
         return null;
     }
 }
-
-
+//variable for mouse Y coordinate
+var mouseTop = null;
+//variable for hovered item
+var hoverItem = null;
 
 var draggableConf = {
         helper: "clone",
@@ -120,7 +122,24 @@ var draggableConf = {
         refreshPositions: true, // Performance?
         revert: "invalid",
         revertDuration: 300,
-        scroll: true
+        scroll: true,
+        containment: "#treeTable",
+        drag: function(e, ui){
+            var hoverItemId = /\d+/.exec(hoverItem.id);
+            var itemTop = hoverItem.offsetTop;
+            var itemButtom = itemTop + hoverItem.clientHeight;
+            if (!$(hoverItem).is(".inserter-before") && !$(hoverItem).is(".inserter-after"))
+            if (mouseTop <= (itemTop + 8) ){
+                resetInserters();
+                $("#inserter-before-" + hoverItemId).css('display', '');
+            }else
+            if (mouseTop >= (itemButtom - 8)){
+                resetInserters();
+                $("#inserter-after-" + hoverItemId).css('display', '');
+            }else{
+                resetInserters();
+            }
+        }
     }
 
 var droppableConf = {
@@ -169,10 +188,8 @@ var droppableConf = {
           if(this.id != ui.draggable.parents("tr")[0].id && !$(this).is(".expanded")) {
             $(this).expand();
           }
-          var itemId = /\d+/.exec(this.id);
-          resetInserters();
-          $("#inserter-before-"+itemId).css({'display': ''});
-          $("#inserter-after-"+itemId).css({'display': ''});
+          hoverItem = $("#" + this.id)[0];
+          
         }
 }
 
@@ -196,6 +213,9 @@ function initTreeTable() {
                 clickedNode.addClass('selected');
             }
         }
+    });
+    $().mousemove(function (e){
+        mouseTop = e.pageY - $("#treeTable")[0].offsetTop;
     });
   	$("#treeTable").treeTable({indent: 25});
   	$("span.expander").click(function (){resetInserters()});

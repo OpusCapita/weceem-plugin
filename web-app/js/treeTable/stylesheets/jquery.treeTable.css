@@ -72,6 +72,12 @@
   border-bottom:1px solid #f9dd34;
 }
 
+.accept{
+  background-color: #f1f1f1;
+  border-top:1px solid #ccc;
+  border-bottom:1px solid #ccc;
+}
+
 .treeTable h2 { 
   margin-bottom:0;
   font-size:1.1em;
