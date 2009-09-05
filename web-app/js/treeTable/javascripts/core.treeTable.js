@@ -139,6 +139,9 @@ var draggableConf = {
             }else{
                 resetInserters();
             }
+        },
+        start: function(e, ui){
+            $(".selected").removeClass('selected');
         }
     }
 
@@ -150,16 +153,25 @@ var droppableConf = {
                 (this.id != "empty-field")) {
                 var el = $("#" + this.id);
                 if (el.is(".inserter-before") || el.is(".inserter-after")){
+                    var mainElId = /\d+/.exec(el.attr('id'));
+                    var mainEl = $("#content-node-" + mainElId);
+                    var target = el;
+                    var swch = el.is('.inserter-before') ? 'before' : 'after'
+                    if (mainEl.is(".parent") && el.is(".inserter-after")){
+                        swch = 'before';
+                        var targetId = /\d+/.exec($(".child-of-content-node-"+mainElId+":first")[0].id);
+                        target = $("#inserter-before-"+targetId)[0];
+                    }
                     var movable = $($(ui.draggable).parents("tr")[0]);
-                    var newindex = $("#content-node-" + /\d+/.exec(el.attr('id')) + ">td:first>div>h2.title").attr("orderindex");
+                    var newindex = $("#content-node-" + mainElId + ">td:first>div>h2.title").attr("orderindex");
                     if (el.is(".inserter-before")){
                         newindex = (newindex == 0) ? newindex : newindex - 1;
                     }
                     // @todo clean this up - slow to keep getting the node!
                     $('#confirmDialog').dialog('option', 'index', newindex);
-                    $('#confirmDialog').dialog('option', 'switch', el.is('.inserter-before') ? 'before' : 'after');
+                    $('#confirmDialog').dialog('option', 'switch', swch);
                     $('#confirmDialog').dialog('option', 'source', movable);
-                    $('#confirmDialog').dialog('option', 'target', el);
+                    $('#confirmDialog').dialog('option', 'target', target);
                     $('#confirmDialog').dialog('open');
                 }else{
                     var type = $("#" + this.id + ">td>div>h2.title").attr("type");

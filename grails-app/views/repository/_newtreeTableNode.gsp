@@ -46,15 +46,12 @@
 	</td>
 </tr>
 
+<tr id="inserter-after-${c.id}" class="inserter-after ${ c.parent ? 'child-of-content-node-'+c.parent.id : ''} delimeter-${c.id}">
+  <td colspan="5" ><div class="title"></div></td>
+</tr>
+
 <g:if test="${c.children.size()}">
 	<g:each in="${c.children}" var="child">
 		<g:render  plugin="weceem" template="newtreeTableNode" model="[c:child]"/>
 	</g:each>
 </g:if>
-<!--<tr id="" class="child-of-content-node-${c.id}">
-  <td colspan="5"></td>
-</tr>-->
-
-<tr id="inserter-after-${c.id}" class="inserter-after ${ c.parent ? 'child-of-content-node-'+c.parent.id : ''} delimeter-${c.id}">
-  <td colspan="5" ><div class="title"></div></td>
-</tr>
