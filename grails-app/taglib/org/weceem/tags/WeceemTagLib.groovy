@@ -282,8 +282,14 @@ class WeceemTagLib {
     def ifContentIs = { attrs, body ->
         def node = request[ContentController.REQUEST_ATTRIBUTE_NODE]
         def targetType = attrs[ATTR_TYPE]
+        if (!targetType)
+            throwTagError("Attribute [${ATTR_TYPE}] is required on tag ifContentIs. It must be a fully qualified class name")
+
+        def targetClass = grailsApplication.getClassForName(targetType)
+        if (!targetClass)
+            throwTagError("Attribute [${ATTR_TYPE}] specified class [${targetType}] but it could not be located")
         
-        if (grailsApplication.getClassForName(targetType).isAssignableFrom(node.class)) {
+        if (targetClass.isAssignableFrom(node.class)) {
             out << body()
         }
     }

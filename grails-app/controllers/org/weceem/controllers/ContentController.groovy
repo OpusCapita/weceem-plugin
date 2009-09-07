@@ -80,19 +80,27 @@ class ContentController {
                     // or better provide a util function for rendering the content inside a template 
                     return renderController.show()
                 } else {
-                    def contentText = content.content
-                    pageInfo.text = contentText
                     
-                    log.debug "Content is: $contentText"
+                    def contentText
+                    if (content.metaClass.hasProperty(content, 'content')) {
+                        contentText = content.content
+                        pageInfo.text = contentText
+                    
+                        log.debug "Content is: $contentText"
+                    }
                     
                     def template = contentRepositoryService.getTemplateForContent(content)
                     log.debug "Content's template is: $template"
 
                     if (!template) {
-                        // todo: what need to be rendered?
-                        log.debug "Rendering content without template: $contentText"
-                        // @todo This needs to handle ContentFile/ContentDirectory requests and pipe them through request dispatcher
-                        render(text:contentText, contentType:content.mimeType)
+                        if (contentText != null) {
+                            // todo: what need to be rendered?
+                            log.debug "Rendering content without template: $contentText"
+                            // @todo This needs to handle ContentFile/ContentDirectory requests and pipe them through request dispatcher
+                            render(text:contentText, contentType:content.mimeType)
+                        } else {
+                            response.sendError(500, "Unable to render content at ${uri}, no content property and no template defined")
+                        }
                         return
                     }
                 

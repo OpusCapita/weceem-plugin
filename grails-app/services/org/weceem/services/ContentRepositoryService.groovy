@@ -474,21 +474,6 @@ class ContentRepositoryService {
         } else {
             def parent = sourceContent.parent
 
-/* @todo Check but I'm pretty sure we don't want to keep children - users can move them first 
-            if (sourceContent.children) {
-                def children = new ArrayList(sourceContent.children)
-                // define for new parent for all children
-                children?.each() {
-                    sourceContent.children.remove(it)
-                    // update orderIndex for new association
-                    def newIndex = parent?.children?.last()?.orderIndex ?
-                                       parent?.children?.last()?.orderIndex + 1 : 0
-                    it.orderIndex = newIndex
-                    it.parent = parent
-                    it.save()
-                }
-            }
-*/
             // if there is a parent  - we delete node from its association
             if (parent) {
                 parent.children = parent.children.findAll{it-> it.id != sourceContent.id}
@@ -514,6 +499,8 @@ class ContentRepositoryService {
 
     /**
      * Deletes content reference 
+     *
+     * @todo Update the naming of this, "link" is not correct terminology. 
      *
      * @param child
      * @param parent
@@ -676,18 +663,17 @@ class ContentRepositoryService {
      * so that you can tell where it is in the hierarchy
      *
      * @param uriPath
-     * @param type
      * @param space
      *
      * @return a map of 'content' (the node), 'lineage' (list of parent Content nodes to reach the node) 
      * and 'parentURI' (the uri to the parent of this instance of the node)
      */
-    def findContentForPath(String uriPath, Space space, String type = null) {
-        log.debug "findContentForPath uri: ${uriPath} type: ${type} space: ${space}"
+    def findContentForPath(String uriPath, Space space) {
+        log.debug "findContentForPath uri: ${uriPath} space: ${space}"
         def tokens = uriPath.split('/')
 
-        // todo: optimize query
-        def content = findRootContentByURI(tokens[0], space, type)
+        // @todo: optimize query 
+        def content = findRootContentByURI(tokens[0], space)
         log.debug "findContentForPath $uriPath - root content node is $content"
         def lineage = []
         if (content && (tokens.size() > 1)) {

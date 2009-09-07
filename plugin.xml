@@ -22,10 +22,11 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     <resource>org.weceem.controllers.VersionController</resource>
     <resource>org.weceem.controllers.WikiItemRenderController</resource>
     <resource>org.weceem.blog.Blog</resource>
-    <resource>org.weceem.blog.BlogComment</resource>
     <resource>org.weceem.blog.BlogEntry</resource>
+    <resource>org.weceem.content.Comment</resource>
     <resource>org.weceem.content.Content</resource>
     <resource>org.weceem.content.ContentVersion</resource>
+    <resource>org.weceem.content.ExternalLink</resource>
     <resource>org.weceem.content.RelatedContent</resource>
     <resource>org.weceem.content.Space</resource>
     <resource>org.weceem.content.Status</resource>

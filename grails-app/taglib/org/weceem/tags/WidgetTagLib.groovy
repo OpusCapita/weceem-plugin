@@ -32,12 +32,28 @@ class WidgetTagLib {
 
     static namespace = "wcm"
     
+    def contentRepositoryService
+    
     def widget = {attrs, body ->
-
         def widget = Widget.findBySpaceAndTitle(pageScope.space, attrs.id)
-        if (!widget) {
-            throwTagError("There is no Widget with title [${attrs.id}] in the space [${pageScope.space.name}]")
+        def path = attrs.path
+        def id = attrs.id
+        if (path) {
+            widget = contentRepositoryService.findContentForPath(path, pageScope.space)?.content
+            if (!widget) {
+                throwTagError("There is no Widget with title [${id}] in the space [${pageScope.space.name}]")
+            }
+        } else if (id) {
+            log.warn("Use of [id] attribute on widget tag is deprecated")
+            widget = Widget.findBySpaceAndTitle(pageScope.space, attrs.id)
+            if (!widget) {
+                throwTagError("There is no Widget at path [${path}] in the space [${pageScope.space.name}]")
+            }
         }
+        if (log.debugEnabled) {
+            log.debug "Widget tag resolved to widget [${widget?.dump()}"
+        }
+        
         if (session.mode == 'edit') {
             out << "<div id=\"${attrs.id}\" onclick=\"window.open('${createLink(controller: 'widget', action: 'edit', id: widget.id, params: ['externalCall': true])}', 'Edit Widget', 'resizable=yes, scrollbars=yes, status=no'\">"
         } else {
@@ -47,10 +63,15 @@ class WidgetTagLib {
 
         def engine = grailsAttributes.getPagesTemplateEngine()
         def groovyTemplate = engine.createTemplate(widget.content, widget.title)
-        if (attrs.model instanceof Map) {
-            groovyTemplate.make(attrs.model).writeTo(out)
-        } else {
-            groovyTemplate.make().writeTo(out)
+        try {
+            if (attrs.model instanceof Map) {
+                groovyTemplate.make(attrs.model).writeTo(out)
+            } else {
+                groovyTemplate.make().writeTo(out)
+            }
+        } catch (Throwable t) {
+            log.error "Error executing widget page", t
+            throwTagError("There is an error in widget at [${path}], please see the logs")
         }
 
         out << "</div>"
