@@ -228,7 +228,8 @@ class WeceemTagLib {
         } else if (title) {
             c = Content.findByTitle(title, params)
         } else throwTagError("One of [id] or [title] must be specified")
-        out << body(c)
+        def var = attrs[ATTR_VAR] ?: null
+        out << body(var ? [(var):c] : c)
     }
     
     def content = { attrs, body ->
