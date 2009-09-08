@@ -15,6 +15,7 @@ package org.weceem.tags
 
 import java.text.SimpleDateFormat
 import org.weceem.controllers.ContentController
+import org.codehaus.groovy.grails.commons.ApplicationHolder as AH
 import org.weceem.content.Content
 
 class WeceemTagLib {
@@ -304,5 +305,19 @@ class WeceemTagLib {
         if (!grailsApplication.getClassForName(targetType).isAssignableFrom(node.class)) {
             out << body()
         }
+    }
+    
+    def renderContentItemIcon = { attrs ->
+        def type = attrs[ATTR_TYPE]
+        def id = attrs[ATTR_ID]
+        def iconconf = type.icon
+        def pluginconf = AH.application.applicationMeta.find{it -> it.key == "plugins.${iconconf.plugin}"}
+        def pluginContextPath
+        if (pluginconf) { 
+           pluginContextPath = "plugins/${iconconf.plugin}-${pluginconf.value}/${iconconf.dir}/"
+        } else { 
+           pluginContextPath = "${iconconf.dir}/"
+        }
+        out << "<div id='${id}' class='ui-content-icon'><img src='${g.resource(dir: pluginContextPath, file: iconconf.file)}'/></div>"
     }
 }
