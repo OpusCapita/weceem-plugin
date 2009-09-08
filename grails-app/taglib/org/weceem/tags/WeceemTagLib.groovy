@@ -15,6 +15,7 @@ package org.weceem.tags
 
 import java.text.SimpleDateFormat
 import org.weceem.controllers.ContentController
+import org.weceem.content.Content
 
 class WeceemTagLib {
     
@@ -33,6 +34,7 @@ class WeceemTagLib {
     static ATTR_FILTER = "filter"
     static ATTR_FORMAT = "format"
     static ATTR_CODEC = "codec"
+    static ATTR_TITLE = "title"
     
     static namespace = "wcm"
     
