@@ -4,6 +4,8 @@ import org.weceem.content.*
 import org.weceem.html.*
 import org.weceem.wiki.*
 import org.weceem.tags.*
+import org.codehaus.groovy.grails.plugins.web.taglib.ApplicationTagLib
+import groovy.mock.interceptor.*
 
 class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
     
@@ -21,7 +23,29 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         
         assertEquals "testing", taglib.out.toString()
     }
+
+
+  void testCreateLink() {
+    mockTagLib(WeceemTagLib)
+    def taglib = new WeceemTagLib()
     
+    def g = new MockFor(ApplicationTagLib)
+    g.demand.createLink {hash ->
+      assertEquals "content", hash.controller
+      assertEquals "show", hash.action
+    }
+
+    taglib.metaClass.g = g.proxyInstance()
+
+    def node = new HTMLContent(aliasURI:'someNode', space: new Space(name:'default', aliasURI:'default'))
+    taglib.contentRepositoryService = [findContentForPath : { path, space -> [content: node]}]
+    taglib.request.setAttribute(ContentController.REQUEST_ATTRIBUTE_SPACE, node.space)
+    taglib.createLink(path: 'someNode', null)
+  }
+
+
+
+
     void testEachChildWithoutFilter() {
         mockTagLib(WeceemTagLib)
         def taglib = new WeceemTagLib()
