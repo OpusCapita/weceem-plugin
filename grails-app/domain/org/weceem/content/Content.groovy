@@ -39,7 +39,8 @@ class Content implements Comparable {
          
          space(component: true)
     }
-
+    
+    public static icon = [plugin: "weceem", dir: "images/weceem", file: "virtual-page.png"]
     // that is also the subject for forums
     String title
 

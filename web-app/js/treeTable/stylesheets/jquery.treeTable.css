@@ -108,6 +108,16 @@ h2 a{
   right:5px;
 }
 
+.treeTable .ui-content-icon {
+  position:absolute;
+  left:5px;
+  right:5px;
+}
+
+.ui-content-item{
+
+}
+
 .treeTable .inserter-before td,
 .treeTable .inserter-after td  { padding-left:0 !important; }
 

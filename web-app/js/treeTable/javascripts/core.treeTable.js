@@ -113,7 +113,7 @@ function getParentId(element){
 }
 
 function getDecId(htmlid){
-    return /\d+/.exec(htmlid);
+    return /\d+/.exec(htmlid)[0];
 }
 //variable for mouse Y coordinate
 var mouseTop = null;
@@ -150,12 +150,12 @@ var draggableConf = {
     }
 
 var droppableConf = {
-        accept: "div.ui-icon",
+        accept: "div.ui-content-icon",
         drop: function(e, ui) { 
             if ((this.id != "") &&
                 (this.id != "empty-field") && 
-                (getDecId(ui.helper.attr('id') != getDecId(this.id))
-            )) {
+                (getDecId(ui.helper.attr('id')) != getDecId(this.id))
+            ) {
                 var el = $("#" + this.id);
                 if (el.is(".inserter-before") || el.is(".inserter-after")){
                     var mainElId = getDecId(el.attr('id'));
@@ -239,7 +239,7 @@ function initTreeTable() {
     resetInserters();
     updateExpanders();
     
-    $('div.ui-icon').draggable(draggableConf)
+    $('div.ui-content-icon').draggable(draggableConf)
     
     $('.title').each(function() {
         $(this).parents("tr").droppable(droppableConf)
