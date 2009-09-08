@@ -15,6 +15,7 @@ class WeceemSecurityService {
     def securityDelegate = [
         getUserName : { -> "unknown" },
         getUserEmail : { -> "unknown@localhost" },
+        getUserPrincipal : { -> [name:'unknown', email:"unknown@localhost"] },
         isUserAllowedContentStatus : { s -> true },
         isUserAllowedToEditContent : { c -> true },
         isUserAdministrator : { -> true }
@@ -49,6 +50,10 @@ class WeceemSecurityService {
      */
     def isUserAdministrator() {
         securityDelegate.isUserAdministrator()
+    }
+    
+    def getUserPrincipal() {
+        securityDelegate.getUserPrincipal()
     }
     
     

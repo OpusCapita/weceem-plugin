@@ -36,7 +36,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         nodeB.title = 'Node B'
 
         def mockCRService = [
-            findChildren : { node, type, params ->
+            findChildren : { node, args ->
                 [nodeA, nodeB]
             }
         ]
@@ -62,8 +62,8 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         nodeA.title = 'Node A'
         
         def mockCRService = [
-            findChildren : { node, type, params ->
-                assertEquals HTMLContent, type
+            findChildren : { node, args ->
+                assertEquals HTMLContent, args.type
                 [nodeA]
             }
         ]
@@ -91,7 +91,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         nodeB.title = 'Wiki B'
 
         def mockCRService = [
-            findChildren : { node, type, params ->
+            findChildren : { node, args ->
                 [nodeA, nodeB]
             }
         ]
@@ -119,8 +119,8 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         nodeA.title = 'Node A'
         
         def mockCRService = [
-            findParents : { node, type, params ->
-                assertEquals HTMLContent, type
+            findParents : { node, args ->
+                assertEquals HTMLContent, args.type
                 [parentB]
             }
         ]
@@ -148,7 +148,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         nodeA.title = 'Node A'
 
         def mockCRService = [
-            findParents : { node, type, params ->
+            findParents : { node, args ->
                 [parent, parentB]
             }
         ]

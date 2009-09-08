@@ -14,6 +14,7 @@
 package org.weceem.tags
 
 import org.weceem.content.*
+import grails.util.GrailsUtil
 
 /**
  * Widget tag library describes the widget tag.
@@ -70,7 +71,7 @@ class WidgetTagLib {
                 groovyTemplate.make().writeTo(out)
             }
         } catch (Throwable t) {
-            log.error "Error executing widget page", t
+            log.error "Error executing widget page", GrailsUtil.deepSanitize(t)
             throwTagError("There is an error in widget at [${path}], please see the logs")
         }
 

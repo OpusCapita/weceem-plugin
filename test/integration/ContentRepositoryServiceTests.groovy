@@ -431,11 +431,11 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
     }
 
     void testFindChildrenWithType() {
-        def children = contentRepositoryService.findChildren(nodeA, WikiItem)
+        def children = contentRepositoryService.findChildren(nodeA, [type:WikiItem])
         assertEquals 1, children.size()
         assertTrue children.contains(nodeWiki)
 
-        children = contentRepositoryService.findChildren(nodeA, HTMLContent)
+        children = contentRepositoryService.findChildren(nodeA, [type:HTMLContent])
         assertEquals 2, children.size()
         assertTrue children.contains(nodeB)
         assertTrue children.contains(nodeC)
@@ -450,11 +450,11 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
     }
 
     void testFindParentsWithType() {
-        def parents = contentRepositoryService.findParents(nodeB, WikiItem)
+        def parents = contentRepositoryService.findParents(nodeB, [type:WikiItem])
         assertEquals 1, parents.size()
         assertTrue parents.contains(nodeWiki)
 
-        parents = contentRepositoryService.findParents(nodeB, HTMLContent)
+        parents = contentRepositoryService.findParents(nodeB, [type:HTMLContent])
         assertEquals 2, parents.size()
         assertTrue parents.contains(nodeA)
         assertTrue parents.contains(nodeC)
@@ -486,7 +486,7 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
     }
 
     void testFindChildrenSorted() {
-        def nodes = contentRepositoryService.findChildren(nodeA, null, [sort:'title', order:'desc'])
+        def nodes = contentRepositoryService.findChildren(nodeA, [params:[sort:'title', order:'desc']])
         
         def expectedNodes = [nodeB, nodeC, nodeWiki]
         assertTrue nodes.every { expectedNodes.contains(it) }

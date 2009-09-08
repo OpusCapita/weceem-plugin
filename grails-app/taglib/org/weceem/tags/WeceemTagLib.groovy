@@ -17,16 +17,19 @@ import java.text.SimpleDateFormat
 import org.weceem.controllers.ContentController
 import org.codehaus.groovy.grails.commons.ApplicationHolder as AH
 import org.weceem.content.Content
+import org.weceem.services.ContentRepositoryService
 
 class WeceemTagLib {
     
     static ATTR_ID = "id"
+    static ATTR_NODE = "node"
     static ATTR_TYPE = "type"
     static ATTR_MAX = "max"
     static ATTR_SORT = "sort"
     static ATTR_ORDER = "order"
     static ATTR_OFFSET = "offset"
     static ATTR_PATH = "path"
+    static ATTR_STATUS = "status"
     static ATTR_VAR = "var"
     static ATTR_CHANGEDSINCE = "changedSince"
     static ATTR_CHANGEDBEFORE = "changedBefore"
@@ -60,7 +63,7 @@ class WeceemTagLib {
      * Tag that reveals user info while hiding the implementation details of the authentication system
      */
     def userInfo = { attrs, body -> 
-        def user = User.findByUsername(username)
+        def user = weceemSecurityService.getUserPrincipal()
         def var = attrs[ATTR_VAR] ?: null
         out << body(var ? [(var):user] : user)
     }
@@ -106,13 +109,13 @@ class WeceemTagLib {
     def eachChild = { attrs, body -> 
         def params = makeFindParams(attrs)
         def baseNode
+        def status = attrs[ATTR_STATUS] ?: ContentRepositoryService.STATUS_ANY_PUBLISHED
         if (attrs[ATTR_PATH]) {
             baseNode = contentRepositoryService.findContentForPath(attrs[ATTR_PATH], request[ContentController.REQUEST_ATTRIBUTE_SPACE]).content 
         } else {
             baseNode = request[ContentController.REQUEST_ATTRIBUTE_NODE]
         }
-        def children = contentRepositoryService.findChildren(baseNode, attrs[ATTR_TYPE], params)
-        println "Children was: ${children}"
+        def children = contentRepositoryService.findChildren(baseNode, [type:attrs[ATTR_TYPE], status:status, params:params])
         if (attrs[ATTR_FILTER]) children = children?.findAll(attrs[ATTR_FILTER])
         def var = attrs[ATTR_VAR] ?: null
         children?.each { child ->
@@ -120,9 +123,24 @@ class WeceemTagLib {
         }
     }
     
+    def countChildren = { attrs ->
+        def baseNode = attrs[ATTR_NODE]
+        if (!baseNode) {
+            if (attrs[ATTR_PATH]) {
+                baseNode = contentRepositoryService.findContentForPath(attrs[ATTR_PATH], request[ContentController.REQUEST_ATTRIBUTE_SPACE]).content 
+            } else {
+                baseNode = request[ContentController.REQUEST_ATTRIBUTE_NODE]
+            }
+        }
+        def status = attrs[ATTR_STATUS] ?: ContentRepositoryService.STATUS_ANY_PUBLISHED
+        out << contentRepositoryService.countChildren(baseNode, [type:attrs[ATTR_TYPE], status:status])
+    }
+    
     def eachParent = { attrs, body -> 
         def params = makeFindParams(attrs)
-        def parents = contentRepositoryService.findParents(request[ContentController.REQUEST_ATTRIBUTE_NODE], attrs[ATTR_TYPE], params)
+        def status = attrs[ATTR_STATUS] ?: ContentRepositoryService.STATUS_ANY_PUBLISHED
+        def parents = contentRepositoryService.findParents(request[ContentController.REQUEST_ATTRIBUTE_NODE], 
+            [type:attrs[ATTR_TYPE], status:status, params:params])
         if (attrs[ATTR_FILTER]) parents = parents?.findAll(attrs[ATTR_FILTER])
         def var = attrs[ATTR_VAR] ?: null
         parents?.each { parent ->
@@ -139,7 +157,7 @@ class WeceemTagLib {
             siblings = contentRepositoryService.findAllRootContent( 
                 request[ContentController.REQUEST_ATTRIBUTE_SPACE],attrs[ATTR_TYPE])
         } else {
-            siblings = contentRepositoryService.findChildren( parentHierarchyNode.parent, attrs[ATTR_TYPE], params)
+            siblings = contentRepositoryService.findChildren( parentHierarchyNode.parent, [type:attrs[ATTR_TYPE], params:params])
         }
         if (attrs[ATTR_FILTER]) siblings = siblings?.findAll(attrs[ATTR_FILTER])
         def var = attrs[ATTR_VAR] ?: null
@@ -281,6 +299,15 @@ class WeceemTagLib {
     
     def loggedInUserName = { attrs ->
         out << weceemSecurityService.userName?.encodeAsHTML()
+    }
+    
+    def ifUserCanEdit = { attrs, body ->
+        def node = attrs[ATTR_NODE]
+        if (!node) node = request[ContentController.REQUEST_ATTRIBUTE_NODE]
+
+        if (weceemSecurityService.isUserAllowedToEditContent(node)) {
+            out << body()
+        }
     }
     
     def ifContentIs = { attrs, body ->

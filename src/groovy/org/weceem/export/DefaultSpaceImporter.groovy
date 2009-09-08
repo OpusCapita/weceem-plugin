@@ -4,6 +4,7 @@ import com.thoughtworks.xstream.XStream
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.apache.commons.logging.LogFactory
 import org.apache.commons.logging.Log
+import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 import org.weceem.content.*
 import org.weceem.files.*

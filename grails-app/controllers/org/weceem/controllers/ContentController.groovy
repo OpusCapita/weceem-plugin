@@ -17,6 +17,7 @@ import org.weceem.content.*
 import org.codehaus.groovy.grails.web.pages.GSPResponseWriter
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
 import org.springframework.web.context.request.RequestContextHolder
+import grails.util.GrailsUtil
 
 class ContentController {
     static String REQUEST_ATTRIBUTE_PAGE = "weceem.page"
@@ -118,7 +119,7 @@ class ContentController {
                            preparedContent.writeTo(out)
                         }
                     } catch (Exception e) {
-                        log.error("Exception in rendering view", e)
+                        log.error("Exception in rendering view", GrailsUtil.deepSanitize(e) )
                     }
 
                     out.flush()

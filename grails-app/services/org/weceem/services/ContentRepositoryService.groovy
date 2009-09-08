@@ -22,7 +22,8 @@ class ContentRepositoryService {
 
     public static final String DEFAULT_UPLOAD_DIR = 'WeceemFiles'
     static final CONTENT_CLASS = Content.class.name
-
+    static final STATUS_ANY_PUBLISHED = 'published'
+    
     static transactional = true
 
     def grailsApplication
@@ -572,26 +573,81 @@ class ContentRepositoryService {
         }
     }
     
+    def countChildren(sourceNode, Map args = null) {
+        if (!sourceNode) return Content.countByParentIsNull()
+
+        // for VirtualContent - the children list is a list of target children
+        if (sourceNode instanceof VirtualContent) {
+            sourceNode = sourceNode.target
+        }
+        
+        def typeRestriction = args.type
+        // @todo replace this with smarter queries on children instead of requiring loading of all child objects
+        if (typeRestriction && (typeRestriction instanceof Class)) {
+            typeRestriction = typeRestriction.name
+        }
+        def clz = typeRestriction ? ApplicationHolder.application.getClassForName(typeRestriction) : Content
+        return clz.countByParent(sourceNode)
+    }
+    
+    /**
+     * Execute a single-argument dynamic finder, also adding filtering by status
+     * where status can be:
+     * - null for 'any' 
+     * - a Status instance eg Status.get(1)
+     * - an integer for a status code eg 500
+     * - a list of status codes eg [100, 200, 500]
+     * - a range of integer status codes eg (1..500)
+     * - a string integer status code eg "500"
+     * 
+     */
+    private def findWithStatus(status, Class cls, finderName, arg0 = null, params = null) {
+        if (status == null) {
+            return cls."${finderName}"(arg0, params)
+        } else if (status == ContentRepositoryService.STATUS_ANY_PUBLISHED) {
+            return cls."${finderName}AndStatusInList"(arg0, Status.findAllByPublicContent(true), params)
+        } else if (status instanceof Collection) {
+            // NOTE: This assumes collection is a collection of codes, not Status objects
+            return cls."${finderName}AndStatusInList"(arg0, Status.findAllByCode(status), params)
+        } else if (status instanceof Status) {
+            return cls."${finderName}AndStatus"(arg0, status, params)
+        } else if (status instanceof Integer) {
+            return cls."${finderName}AndStatus"(arg0, Status.findByCode(status), params)
+        } else if (status instanceof IntRange) {
+            return cls."${finderName}AndStatusBetween"(arg0, status.fromInt, status.toInt, params)
+        } else {
+            def s = status.toString()
+            if (s.isInteger()) {
+                return cls."${finderName}AndStatus"(arg0, Status.findByCode(s.toInteger()), params)
+            } else throw new IllegalArgumentException(
+                "The [status] argument must be null (for 'any'), or '${ContentRepositoryService.STATUS_ANY_PUBLISHED}',  an integer (or integer string), a collection of codes (numbers), a Status instance or an IntRange. You supplied [$status]")
+        }
+    }
+    
     /**
      * Find all the children of the specified node, within the content hierarchy, optionally filtering by a content type class
      * @todo we can probably improve performance by applying the typeRestriction using some HQL
      */ 
-    def findChildren(sourceNode, typeRestriction = null, params = null) {
+    def findChildren(sourceNode, Map args = Collections.EMPTY_MAP) {
         if (!sourceNode) return Content.findAll("from Content c where c.parent is null")
 
         // for VirtualContent - the children list is a list of target children
         if (sourceNode instanceof VirtualContent) {
             sourceNode = sourceNode.target
         }
+        
+        def typeRestriction = args.type
+        
         // @todo replace this with smarter queries on children instead of requiring loading of all child objects
         if (typeRestriction && (typeRestriction instanceof Class)) {
             typeRestriction = typeRestriction.name
         }
         def clz = typeRestriction ? ApplicationHolder.application.getClassForName(typeRestriction) : Content
-        def children = clz.findAllByParent(sourceNode, params)
+        def children = findWithStatus(args.status, clz, 'findAllByParent', sourceNode, args.params)
         
         return children //  sortNodes(children, params?.sort, params?.order)
     }
+
 
     def sortNodes(nodes, sortProperty, sortDirection = "asc") {
         if (sortProperty) {
@@ -614,14 +670,43 @@ class ContentRepositoryService {
     }
     
     /**
+     * Returns true if the node has a status that matches the supplied status
+     * See findWithStatus() for rules and possible values of "status"
+     */
+    boolean contentMatchesStatus(status, Content node) {
+        if (status == null) {
+            return true
+        } else if (status == ContentRepositoryService.STATUS_ANY_PUBLISHED) {
+            return Status.findAllByPublicContent(true).find { it == node.status }
+        } else if (status instanceof Collection) {
+            // NOTE: This assumes collection is a collection of codes, not Status objects
+            return status.find { it == node.status.code }  
+        } else if (status instanceof Status) {
+            return node.status == status
+        } else if (status instanceof Integer) {
+            return node.status.code == status.code
+        } else if (status instanceof IntRange) {
+            return status.containsWithBounds(node.status.code)
+        } else {
+            def s = status.toString()
+            if (s.isInteger()) {
+                return s.toNumber() == node.status.code
+            } else throw new IllegalArgumentException(
+                "The [status] argument must be null (for 'any'), or '${ContentRepositoryService.STATUS_ANY_PUBLISHED}', an integer (or integer string), a collection of codes (numbers), a Status instance or an IntRange. You supplied [$status]")
+        }        
+    }
+    
+    /**
      * Find all the parents of the specified node, within the content hierarchy, optionally filtering by a content type class
      * @todo we can probably improve performance by applying the typeRestriction using some HQL
      */ 
-    def findParents(sourceNode, typeRestriction = null, params = null) {
+    def findParents(sourceNode, Map args = Collections.EMPTY_MAP) {
         // @todo change to criteria/select
-        def references = VirtualContent.findAllWhere(target: sourceNode)*.parent
-        if (sourceNode.parent) references << sourceNode.parent
-
+        def references = findWithStatus(args.status, VirtualContent, 'findAllByTarget', sourceNode, args.params)*.parent
+        if (sourceNode.parent && contentMatchesStatus(args.status, sourceNode.parent)) {
+            references << sourceNode.parent
+        }
+        def typeRestriction = args.type
         if (typeRestriction && (typeRestriction instanceof Class)) {
             typeRestriction = typeRestriction.name
         }
@@ -631,7 +716,7 @@ class ContentRepositoryService {
                 parents << it
             }
         }
-        return sortNodes(parents, params?.sort, params?.order)
+        return sortNodes(parents, args.params?.sort, args.params?.order)
     }
 
     /**
@@ -692,7 +777,7 @@ class ContentRepositoryService {
                 }
             }
         }
-        
+    
         // Get all the URI parts except the last
         def parentURIParts = []
         if (tokens.size() > 1) {
