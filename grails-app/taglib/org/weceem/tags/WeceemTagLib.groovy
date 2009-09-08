@@ -189,7 +189,7 @@ class WeceemTagLib {
     
     def createLink = { attrs, body -> 
         def space = request[ContentController.REQUEST_ATTRIBUTE_SPACE]
-        def contentInfo = contentRepositoryService.findContentForPath(attrs[ATTR_PATH], space, attrs.type)
+        def contentInfo = contentRepositoryService.findContentForPath(attrs[ATTR_PATH], space)
         if (!contentInfo.content) {
             log.error ("Tag [wcm:createLink] cannot create a link to the content at path ${attrs[ATTR_PATH]} as "+
                 "there is no content node at that URI")
