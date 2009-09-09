@@ -112,6 +112,8 @@ h2 a{
   position:absolute;
   left:5px;
   right:5px;
+  width: 25px;
+  height: 31px;
 }
 
 .ui-content-item{

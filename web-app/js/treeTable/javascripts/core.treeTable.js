@@ -52,7 +52,7 @@ function getSelectedNodeIds() {
 }
 
 function resetInserters(){
-    $("tr[class*=inserter]").css({'display': 'none'});
+    $("tr[class*=inserter]:visible").css({'display': 'none'});
 }
 
 function viewSelected() {
