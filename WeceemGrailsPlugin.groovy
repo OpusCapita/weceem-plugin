@@ -57,6 +57,12 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
             [controller:'portal', action:'comingsoon', title:'linkcheck', path:'admin/linkchecker', order: 4] ].each { item ->
                 applicationContext.navigationService.registerItem( 'weceem.plugin.admin', item)
         }
+
+        applicationContext.editorService.cacheEditorInfo()
+        applicationContext.editorService.configureFCKEditor()
+
+        applicationContext.contentRepositoryService.createDefaultStatuses()
+        applicationContext.contentRepositoryService.createDefaultSpace()
     }
 
     def doWithWebDescriptor = { xml ->
@@ -64,10 +70,6 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     }
 
     def doWithDynamicMethods = { ctx ->
-        ctx.editorService.cacheEditorInfo()
-        ctx.contentRepositoryService.createDefaultStatuses()
-        ctx.editorService.configureFCKEditor()
-        ctx.contentRepositoryService.createDefaultSpace()
     }
 
     def onChange = { event ->

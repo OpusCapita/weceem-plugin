@@ -72,7 +72,9 @@ class ContentRepositoryService {
         def n = uri?.indexOf('/')
         if (n >= 0) {
             spaceName = uri[0..n-1]
-            uri = uri[n+1..-1]
+            if (n < uri.size()-1) {
+                uri = uri[n+1..-1]
+            }
         }
         
         // Let's try to find the space, or page in the root space
@@ -146,6 +148,19 @@ class ContentRepositoryService {
             throw t // rethrow, this is sort of fatal
         }
         log.info "Successfully imported space template [${templateName}] into space [${space.name}]"
+    }
+    
+    void deleteSpaceContent(space) {
+        log.info "Deleting content from space [$space]"
+        // Let's brute-force this
+        // @todo remove/rework this for 0.2
+        Content.executeUpdate("update org.weceem.html.HTMLContent con set con.template = null where con.space = ?", [space])
+        Content.executeUpdate("update org.weceem.blog.Blog con set con.template = null where con.space = ?", [space])
+        Content.executeUpdate("update org.weceem.content.VirtualContent con set con.target = null where con.space = ?", [space])
+        Content.executeUpdate("update org.weceem.wiki.WikiItem con set con.template = null where con.space = ?", [space])
+        Content.executeUpdate("update org.weceem.content.Content con set con.parent = null where con.space = ?", [space])
+        Content.executeUpdate("delete from org.weceem.content.Content con where con.parent = null and con.space = ?", [space])
+        log.info "Finished Deleting content from space [$space]"
     }
     
     void deleteSpace(Space space) {
@@ -492,6 +507,14 @@ class ContentRepositoryService {
             }
 
             // delete node
+            
+            // @todo replace this with code that looks at all the properties for relationships
+            if (sourceContent.metaClass.hasProperty(sourceContent, 'template')?.type == Template) {
+                sourceContent.template = null
+            }
+            if (sourceContent.metaClass.hasProperty(sourceContent, 'target')?.type == Content) {
+                sourceContent.target = null
+            }
             sourceContent.delete(flush: true)
 
             return true

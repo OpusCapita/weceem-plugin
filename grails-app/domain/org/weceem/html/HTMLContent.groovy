@@ -56,7 +56,7 @@ class HTMLContent extends Content {
     }
 
     static mapping = {
-        template lazy: false // we never want proxies for this
+        template cascade: 'all', lazy: false // we never want proxies for this
         columns {
             content type:'text'
         }
@@ -70,6 +70,11 @@ class HTMLContent extends Content {
     }
 
     static transients = Content.transients + [ 'summary']
+
+    /**
+     * Overriden to return caption for menu items, if supplied
+     */
+    public String getShortTitle() { caption ?: title }
 
     public String getSummary() {
         def summaryString = ""

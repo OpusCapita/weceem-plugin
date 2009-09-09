@@ -96,7 +96,7 @@ class ContentController {
                     if (!template) {
                         if (contentText != null) {
                             // todo: what need to be rendered?
-                            log.debug "Rendering content without template: $contentText"
+                            log.debug "Rendering content of type [${content.mimeType}] without template: $contentText"
                             // @todo This needs to handle ContentFile/ContentDirectory requests and pipe them through request dispatcher
                             render(text:contentText, contentType:content.mimeType)
                         } else {
@@ -112,14 +112,10 @@ class ContentController {
                     // Only Templates can have GSP tags and expressions, the content is included later as part of the model
                     def groovyTemplate = engine.createTemplate(template.content, template.title)
                 
-                    try {
-                        // Pass in the content so it can be rendered in the template
-                        def preparedContent = groovyTemplate?.make([user: activeUser, node: content, page:pageInfo, space:space])
-                        if (preparedContent)  {
-                           preparedContent.writeTo(out)
-                        }
-                    } catch (Exception e) {
-                        log.error("Exception in rendering view", GrailsUtil.deepSanitize(e) )
+                    // Pass in the content so it can be rendered in the template
+                    def preparedContent = groovyTemplate?.make([user: activeUser, node: content, page:pageInfo, space:space])
+                    if (preparedContent)  {
+                       preparedContent.writeTo(out)
                     }
 
                     out.flush()

@@ -17,6 +17,10 @@ class Blog extends Content {
         commentMarkup(inList:["", "html", "wiki"])
     }
     
+    static mapping = {
+        template cascade: 'all', lazy: false // we never want proxies for this
+    }
+
     static transients = Content.transients
 
     static editors = {

@@ -50,6 +50,7 @@ class WikiItem extends Content {
     }
 
     static mapping = {
+        template cascade: 'all', lazy: false // we never want proxies for this
         cache usage: 'read-write'
         columns {
             content type:'text'

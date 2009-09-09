@@ -185,20 +185,33 @@ class WeceemTagLib {
     }
     
     def breadcrumb = { attrs, body -> 
-        throwTagError("link not implemented yet")
-/*
-        def lineage = contentRepositoryService.getAncestors(page.relativeURI, request.activeNode)
-        def div = attrs.divider ?: ' > '
+        def node = request[ContentController.REQUEST_ATTRIBUTE_NODE]
+        def baseNode = attrs[ATTRS_BASE]
+        def complete = attrs[ATTRS_COMPLETE]
+        def startLevel = attrs[ATTRS_START_LEVEL] ?: 2
+        def lineage = request[ContentController.REQUEST_ATTRIBUTE_PAGE].lineage
+        def div = attrs.divider ?: ' &gt; '
         def first = true
+        def defaultBody = { n -> out << n.shortTitle.encodeAsHTML() } 
+        
         lineage.each { parent ->
             if (!first) {
                 out << div
             }
                 
-            out << parent.title.encodeAsHTML()
+            // @todo this is probably bad, the service is transactional!
+            if (parent != node) {
+                out << link(node:parent) {
+                    defaultBody(parent)
+                }
+            } else {
+                defaultBody(parent)
+            }
             first = false
         }
-*/
+    }
+    
+    def menu = { attrs ->
     }
     
     def link = { attrs, body -> 
@@ -209,25 +222,31 @@ class WeceemTagLib {
     
     def createLink = { attrs, body -> 
         def space = request[ContentController.REQUEST_ATTRIBUTE_SPACE]
-        def contentInfo = contentRepositoryService.findContentForPath(attrs[ATTR_PATH], space)
-        if (!contentInfo.content) {
-            log.error ("Tag [wcm:createLink] cannot create a link to the content at path ${attrs[ATTR_PATH]} as "+
-                "there is no content node at that URI")
-            out << g.createLink(controller:'content', action:'notFound', params:[path:attrs[ATTR_PATH]])
-            return
+        def content = attrs[ATTR_NODE]
+        if (content && !(content instanceof Content)) {
+            throwTagError "Tag invoked with [$ATTR_NODE] attribute but the value is not a Content instance"
         }
-
+        if (!content) {
+            def contentInfo = contentRepositoryService.findContentForPath(attrs[ATTR_PATH], space)
+            if (!contentInfo.content) {
+                log.error ("Tag [wcm:createLink] cannot create a link to the content at path ${attrs[ATTR_PATH]} as "+
+                    "there is no content node at that URI")
+                out << g.createLink(controller:'content', action:'notFound', params:[path:attrs[ATTR_PATH]])
+                return
+            }
+            content = contentInfo.content
+        }
+        
         // @todo This is quite crappy, we should be getting these urls from a cache
         StringBuffer path = new StringBuffer()
         if (space.aliasURI) {
             path << space.aliasURI
             path << '/'
         }
-        if(contentInfo.parentURI) {
-            path << contentInfo.parentURI
+        if(content.absoluteURI) {
+            path << content.absoluteURI
             path <<  '/'
         }
-        path << contentInfo.content.aliasURI
         attrs.params = [uri:path.toString()]
         attrs.controller = 'content'
         attrs.action = 'show'
