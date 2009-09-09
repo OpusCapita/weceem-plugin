@@ -6,6 +6,7 @@ import org.weceem.wiki.*
 import org.weceem.tags.*
 import org.codehaus.groovy.grails.plugins.web.taglib.ApplicationTagLib
 import groovy.mock.interceptor.*
+import org.weceem.services.*
 
 class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
     
@@ -44,6 +45,32 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
   }
 
 
+  void testEachChildWithNode() {
+    mockTagLib(WeceemTagLib)
+    def taglib = new WeceemTagLib()
+
+    def parent = new HTMLContent(title: 'parent')
+
+    def anotherNode = new HTMLContent(title: 'another')
+
+    def mockCRService = new MockFor(ContentRepositoryService)
+    mockCRService.demand.findChildren { node, args ->
+      assertEquals parent, node
+    }
+
+    taglib.contentRepositoryService = mockCRService.proxyInstance()
+
+    taglib.request.setAttribute(ContentController.REQUEST_ATTRIBUTE_NODE, anotherNode)
+
+    try {
+      taglib.eachChild([path:"some/path", node: parent], {})
+      fail "Expected exception with path and node attributes"
+    } catch(e) {
+      assert e.message =~ "can not specify ${WeceemTagLib.ATTR_NODE} and ${WeceemTagLib.ATTR_PATH} attributes"
+    }
+
+    taglib.eachChild([node: parent], {})
+  }
 
 
     void testEachChildWithoutFilter() {

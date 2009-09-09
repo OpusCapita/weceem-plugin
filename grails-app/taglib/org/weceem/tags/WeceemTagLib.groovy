@@ -39,8 +39,7 @@ class WeceemTagLib {
     static ATTR_FORMAT = "format"
     static ATTR_CODEC = "codec"
     static ATTR_TITLE = "title"
-    static ATTR_BASE_NODE = "baseNode"
-    
+
     static namespace = "wcm"
     
     def contentRepositoryService
@@ -109,10 +108,10 @@ class WeceemTagLib {
     
     def eachChild = { attrs, body -> 
         def params = makeFindParams(attrs)
-        if (attrs[ATTR_BASE_NODE] && attrs[ATTR_PATH]) {
-          throwTagError("can not specify ${ATTR_BASE_NODE} and ${ATTR_PATH} attributes")
+        if (attrs[ATTR_NODE] && attrs[ATTR_PATH]) {
+          throwTagError("can not specify ${ATTR_NODE} and ${ATTR_PATH} attributes")
         }
-        def baseNode = attrs.baseNode ?: request[ContentController.REQUEST_ATTRIBUTE_NODE]
+        def baseNode = attrs[ATTR_NODE] ?: request[ContentController.REQUEST_ATTRIBUTE_NODE]
         def status = attrs[ATTR_STATUS] ?: ContentRepositoryService.STATUS_ANY_PUBLISHED
         if (attrs[ATTR_PATH]) {
             baseNode = contentRepositoryService.findContentForPath(attrs[ATTR_PATH], request[ContentController.REQUEST_ATTRIBUTE_SPACE]).content
