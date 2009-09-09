@@ -184,28 +184,23 @@ class WeceemTagLib {
         */
     }
     
-    def breadcrumb = { attrs, body -> 
+    def breadcrumb = { attrs -> 
         def node = request[ContentController.REQUEST_ATTRIBUTE_NODE]
-        def baseNode = attrs[ATTRS_BASE]
-        def complete = attrs[ATTRS_COMPLETE]
-        def startLevel = attrs[ATTRS_START_LEVEL] ?: 2
         def lineage = request[ContentController.REQUEST_ATTRIBUTE_PAGE].lineage
         def div = attrs.divider ?: ' &gt; '
         def first = true
         def defaultBody = { n -> out << n.shortTitle.encodeAsHTML() } 
         
         lineage.each { parent ->
-            if (!first) {
-                out << div
-            }
-                
             // @todo this is probably bad, the service is transactional!
             if (parent != node) {
+                if (!first) {
+                    out << div
+                }
+
                 out << link(node:parent) {
                     defaultBody(parent)
                 }
-            } else {
-                defaultBody(parent)
             }
             first = false
         }

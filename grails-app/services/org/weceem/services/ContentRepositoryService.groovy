@@ -783,7 +783,7 @@ class ContentRepositoryService {
         // @todo: optimize query 
         def content = findRootContentByURI(tokens[0], space)
         log.debug "findContentForPath $uriPath - root content node is $content"
-        def lineage = []
+        def lineage = [content]
         if (content && (tokens.size() > 1)) {
             for (n in 1..tokens.size()-1) {
                 def child = Content.find("""from Content c \
