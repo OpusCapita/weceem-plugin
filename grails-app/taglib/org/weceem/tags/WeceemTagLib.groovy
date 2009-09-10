@@ -133,6 +133,10 @@ class WeceemTagLib {
     }
     
     def countChildren = { attrs ->
+       if (attrs[ATTR_NODE] && attrs[ATTR_PATH]) {
+          throwTagError("can not specify ${ATTR_NODE} and ${ATTR_PATH} attributes")
+       }
+
         def baseNode = attrs[ATTR_NODE]
         if (!baseNode) {
             if (attrs[ATTR_PATH]) {
