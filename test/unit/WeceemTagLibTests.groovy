@@ -44,6 +44,29 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
     taglib.createLink(path: 'someNode', null)
   }
 
+  void testCountChildren() {
+    mockTagLib(WeceemTagLib)
+    def taglib = new WeceemTagLib()
+
+    def parent = new HTMLContent()
+
+    def mockCRService = new MockFor(ContentRepositoryService)
+    mockCRService.demand.countChildren {node, args ->
+      assertEquals parent, node
+    }
+
+    taglib.contentRepositoryService = mockCRService.proxyInstance()
+    taglib.request.setAttribute(ContentController.REQUEST_ATTRIBUTE_NODE, parent)
+
+    try {
+      taglib.countChildren([path:"some/path", node: parent])
+      fail "Expected exception with path and node attributes"
+    } catch(e) {
+      assert e.message =~ "can not specify ${WeceemTagLib.ATTR_NODE} and ${WeceemTagLib.ATTR_PATH} attributes"
+    }
+
+    taglib.countChildren([node: parent])
+  }
 
   void testEachChildWithNode() {
     mockTagLib(WeceemTagLib)
