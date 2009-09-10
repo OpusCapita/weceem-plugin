@@ -31,6 +31,13 @@ class WeceemTagLib {
     static ATTR_PATH = "path"
     static ATTR_STATUS = "status"
     static ATTR_VAR = "var"
+    static ATTR_SIBLINGS = "siblings"
+    static ATTR_LEVELS = "levels"
+    static ATTR_CUSTOM = "custom"
+    static ATTR_ACTIVE_CLASS = "activeClass"
+    static ATTR_FIRST_CLASS = "firstClass"
+    static ATTR_LAST_CLASS = "lastClass"
+    static ATTR_LEVEL_CLASS_PREFIX = "levelClassPrefix"
     static ATTR_CHANGEDSINCE = "changedSince"
     static ATTR_CHANGEDBEFORE = "changedBefore"
     static ATTR_CREATEDSINCE = "changedSince"
@@ -98,7 +105,7 @@ class WeceemTagLib {
         def r = [:]
         r.max = attrs[ATTR_MAX]
         r.offset = attrs[ATTR_OFFSET]
-        r.sort = attrs[ATTR_SORT]
+        r.sort = attrs[ATTR_SORT] ?: 'orderIndex' // Default to orderIndex otherwise things are crazy
         r.order = attrs[ATTR_ORDER] ?: 'asc'
         r.changedSince = attrs[ATTR_CHANGEDSINCE]
         r.changedBefore = attrs[ATTR_CHANGEDBEFORE]
@@ -185,29 +192,101 @@ class WeceemTagLib {
         */
     }
     
-    def breadcrumb = { attrs -> 
+    /**
+     * Renders a breadcrumb trail. Renders up to but not including the current page, from the root of
+     * the space. 
+     * Attributes:
+     *  divider - an optional string that is the HTML used between breadcrumb elements. HTML encode the value in your GSP
+     *  custom - an optional value, which if evaluates to boolean "true" will use the supplied tag body to render each
+     *     item in the trail. Variables "first" and "node" are passed to the body
+     */
+    def breadcrumb = { attrs, body -> 
         def node = request[ContentController.REQUEST_ATTRIBUTE_NODE]
         def lineage = request[ContentController.REQUEST_ATTRIBUTE_PAGE].lineage
-        def div = attrs.divider ?: ' &gt; '
+        def div = attrs.divider?.decodeHTML() ?: ' &gt; '
         def first = true
-        def defaultBody = { n -> out << n.shortTitle.encodeAsHTML() } 
-        
-        lineage.each { parent ->
-            // @todo this is probably bad, the service is transactional!
-            if (parent != node) {
-                if (!first) {
-                    out << div
+        if (!attrs.custom?.toString()?.toBoolean()) {
+            body = { args -> 
+                def o = new StringBuilder()
+                if (!args.first) {
+                    o << div
                 }
 
-                out << link(node:parent) {
-                    defaultBody(parent)
-                }
+                o << link(node:args.node) {
+                    out << args.node.titleForMenu.encodeAsHTML() 
+                } 
+                return o.toString()
+            }
+        }
+        
+        lineage.each { parent ->
+            if (parent != node) {
+                out << body(first:first, node:parent)
             }
             first = false
         }
     }
     
-    def menu = { attrs ->
+    /**
+     * Render a menu based on the content hierarchy
+     * Attributes:
+     *  levels - the number of levels to render, defaults to 2
+     *  custom - if set to boolean "true" will use the body to render each item, passing in the variables:
+     *      first, last, active, link and node variables. The link is the href to the content, node is the content node of that menu item
+     */
+    def menu = { attrs, body ->
+        def node = attrs.node ?: request[ContentController.REQUEST_ATTRIBUTE_NODE]
+        def lineage = request[ContentController.REQUEST_ATTRIBUTE_PAGE].lineage
+
+        def currentLevel = request['_weceem_menu_level'] == null ? 0 : request['_weceem_menu_level']
+        def siblings = currentLevel > 0 || ((attrs[ATTR_SIBLINGS] ?: 'y').toString().toBoolean())
+        def activeClass = attrs[ATTR_ACTIVE_CLASS] ?: 'weceem-menu-active'
+        def firstClass = attrs[ATTR_FIRST_CLASS] ?: 'weceem-menu-first'
+        def lastClass = attrs[ATTR_LAST_CLASS] ?: 'weceem-menu-last'
+        def levelClassPrefix = attrs[ATTR_LEVEL_CLASS_PREFIX] ?: 'weceem-menu-level'
+
+        def custom = attrs[ATTR_CUSTOM]?.toString()?.toBoolean()
+        def levels = attrs[ATTR_LEVELS]?.toString()?.toInteger() ?: 2
+        def bodyToUse = body
+        if (!custom) {
+            bodyToUse = { args -> 
+                def o = new StringBuilder()
+
+                o << "<li class=\"$levelClassPrefix${args.level} ${args.active ? activeClass : ''} ${args.first ? firstClass : ''} ${args.last ? lastClass : ''}\">"
+                o << link(node:args.node) {
+                    out << args.node.titleForMenu.encodeAsHTML() 
+                } 
+                o << "</li>"
+                return o.toString()
+            }
+            
+            if (!custom) out << "<ul>"
+        }
+                
+        def activeNode = lineage ? lineage[currentLevel] : null
+
+        def levelnodes
+        if (siblings) {
+            levelnodes = contentRepositoryService.findChildren(currentLevel == 0 ? null : node, 
+                [status:'published', type:'org.weceem.html.HTMLContent'])
+        } else {
+            levelnodes = [activeNode]
+        }
+            
+        def first = true
+        def lastIndex = levelnodes.size()-1
+        levelnodes?.eachWithIndex { n, i ->
+            out << bodyToUse(first:first, active:n == activeNode, level:currentLevel, last: i == lastIndex, 
+                link:custom ? createLink(node:n, { out << n.titleForMenu.encodeAsHTML()}) : '', node:n)
+            if (currentLevel+1 < levels) {
+                request['_weceem_menu_level'] = currentLevel+1
+                out << menu([custom:false, node:n], bodyToUse)
+                request['_weceem_menu_level'] = currentLevel // back to where we were
+            }
+            first = false
+        }
+
+        if (!custom) out << "</ul>"
     }
     
     def link = { attrs, body -> 

@@ -52,6 +52,10 @@ class ContentRepositoryService {
         }
     }
     
+    List getAllPublicStatuses() {
+        Status.findAllByPublicContent(true)
+    }
+    
     Space findDefaultSpace() {
         def space
         def spaces = Space.list()
@@ -628,7 +632,7 @@ class ContentRepositoryService {
         if (status == null) {
             return cls."${finderName}"(arg0, params)
         } else if (status == ContentRepositoryService.STATUS_ANY_PUBLISHED) {
-            return cls."${finderName}AndStatusInList"(arg0, Status.findAllByPublicContent(true), params)
+            return cls."${finderName}AndStatusInList"(arg0, allPublicStatuses, params)
         } else if (status instanceof Collection) {
             // NOTE: This assumes collection is a collection of codes, not Status objects
             return cls."${finderName}AndStatusInList"(arg0, Status.findAllByCode(status), params)
@@ -652,11 +656,11 @@ class ContentRepositoryService {
      * @todo we can probably improve performance by applying the typeRestriction using some HQL
      */ 
     def findChildren(sourceNode, Map args = Collections.EMPTY_MAP) {
-        if (!sourceNode) return Content.findAll("from Content c where c.parent is null")
-
         // for VirtualContent - the children list is a list of target children
-        if (sourceNode instanceof VirtualContent) {
-            sourceNode = sourceNode.target
+        if (sourceNode) {
+            if (sourceNode instanceof VirtualContent) {
+                sourceNode = sourceNode.target
+            }
         }
         
         def typeRestriction = args.type
