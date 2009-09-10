@@ -63,7 +63,10 @@ class ContentController {
     			def pageInfo = [ URI:uri, 
     			    parentURI:contentInfo.parentURI, 
     			    lineage: contentInfo.lineage, 
-    			    title: content.title]
+    			    title: content.title,
+    			    titleForHTML: content.titleForHTML,
+    			    titleForMenu: content.titleForMenu
+    			    ]
 
                 // Make this available to the rest of the request chain
                 request[REQUEST_ATTRIBUTE_NODE] = content
