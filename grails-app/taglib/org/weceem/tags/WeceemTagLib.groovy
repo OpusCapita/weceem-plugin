@@ -44,6 +44,7 @@ class WeceemTagLib {
     
     def contentRepositoryService
     def weceemSecurityService
+    def pluginManager
     
     private extractCodec(attrs) {
         attrs[ATTR_CODEC] == null ? 'HTML' : attrs[ATTR_CODEC]        
@@ -353,13 +354,10 @@ class WeceemTagLib {
         def type = attrs[ATTR_TYPE]
         def id = attrs[ATTR_ID]
         def iconconf = type.icon
-        def pluginconf = AH.application.applicationMeta.find{it -> it.key == "plugins.${iconconf.plugin}"}
-        def pluginContextPath
-        if (pluginconf) { 
-           pluginContextPath = "plugins/${iconconf.plugin}-${pluginconf.value}/${iconconf.dir}/"
-        } else { 
-           pluginContextPath = "${iconconf.dir}/"
-        }
+        def applicationName = AH.application.metadata["app.name"]
+        def plugin = pluginManager.getGrailsPlugin(iconconf.plugin)
+        def pluginContextPath = (applicationName != iconconf.plugin) ? 
+        "${plugin?.getPluginPath()}/${iconconf.dir}" : "${iconconf.dir}"
         out << "<div id='${id}' class='ui-content-icon'><img src='${g.resource(dir: pluginContextPath, file: iconconf.file)}'/></div>"
     }
 }
