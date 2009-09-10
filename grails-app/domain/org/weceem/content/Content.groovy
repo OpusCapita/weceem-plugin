@@ -61,7 +61,7 @@ class Content implements Comparable {
     Status status
     
     static belongsTo = [space: Space, parent: Content]
-    static transients = [ 'shortTitle', 'versioningProperties', 'versioningContent', 'mimeType', 'weceemSecurityService', 'absoluteURI']
+    static transients = [ 'titleForHTML', 'titleForMenu', 'versioningProperties', 'versioningContent', 'mimeType', 'weceemSecurityService', 'absoluteURI']
     static hasMany = [children: Content]
 
     static constraints = {
@@ -123,7 +123,12 @@ class Content implements Comparable {
     /**
      * Can be overriden by content types to customize the short title used for rendering menu items etc
      */
-    public String getShortTitle() { title }
+    public String getTitleForMenu() { title }
+
+    /**
+     * Can be overriden by content types to customize the long title used for rendering HTML SEO-friendly page titles
+     */
+    public String getTitleForHTML() { title }
 
     /**
      * Must be overriden by content types that can represent their content as text.

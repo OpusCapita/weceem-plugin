@@ -33,12 +33,15 @@ class HTMLContent extends Content {
 
     // 64Kb Unicode text with HTML/Wiki Markup
     String content
-    String caption
+    String menuTitle
+    String htmlTitle
 
     String getVersioningContent() { content }
 
     Map getVersioningProperties() { 
         def r = super.getVersioningProperties() + [ 
+            menuTitle:menuTitle,
+            htmlTitle:htmlTitle,
             keywords:keywords,
             template:template?.ident() // Is this right?
         ] 
@@ -50,7 +53,8 @@ class HTMLContent extends Content {
     static constraints = {
         content(nullable: false, maxSize: 65536)
         keywords(nullable: true, blank: true, maxSize: 200)
-        caption(nullable: true, blank: true, maxSize: 40)
+        menuTitle(nullable: true, blank: true, maxSize: 40)
+        htmlTitle(nullable: true, blank: true, maxSize: 400)
         template(nullable: true)
         status(nullable: false) // Workaround for Grails 1.1.1 constraint inheritance bug
     }
@@ -59,12 +63,14 @@ class HTMLContent extends Content {
         template cascade: 'all', lazy: false // we never want proxies for this
         columns {
             content type:'text'
+            htmlTitle type:'text'
         }
     }
 
     static editors = {
         template(group:'extra')
-        caption(group:'extra')
+        menuTitle(group:'extra')
+        htmlTitle(group:'extra')
         content(editor:'RichHTML')
         keywords()
     }
@@ -74,7 +80,12 @@ class HTMLContent extends Content {
     /**
      * Overriden to return caption for menu items, if supplied
      */
-    public String getShortTitle() { caption ?: title }
+    public String getTitleForMenu() { menuTitle ?: title }
+
+    /**
+     * Overriden to return caption for menu items, if supplied
+     */
+    public String getTitleForHTML() { htmlTitle ?: title }
 
     public String getSummary() {
         def summaryString = ""
