@@ -472,7 +472,7 @@ class WeceemTagLib {
       def groovyTemplate = engine.createTemplate(template.content, template.title)
       try {
           if (attrs.model instanceof Map) {
-              groovyTemplate.make(attrs.model + [body:body]).writeTo(out)
+              groovyTemplate.make(attrs.model + [body:body()]).writeTo(out)
           } else {
               groovyTemplate.make(body:body()).writeTo(out)
           }
