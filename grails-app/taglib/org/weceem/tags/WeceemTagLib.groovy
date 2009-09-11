@@ -447,41 +447,4 @@ class WeceemTagLib {
         out << "<div id='${id}' class='ui-content-icon'><img src='${g.resource(dir: pluginContextPath, file: iconconf.file)}'/></div>"
     }
 
-
-  def render = {attrs, body ->
-      def template = Template.findBySpaceAndTitle(pageScope.space, attrs.id)
-      def path = attrs.path
-      def id = attrs.id
-      if (path) {
-          template = contentRepositoryService.findContentForPath(path, pageScope.space)?.content
-          if (!template) {
-              throwTagError("There is no Template with title [${id}] in the space [${pageScope.space.name}]")
-          }
-      } else if (id) {
-          log.warn("Use of [id] attribute on template tag is deprecated")
-          template = Template.findBySpaceAndTitle(pageScope.space, attrs.id)
-          if (!template) {
-              throwTagError("There is no Template at path [${path}] in the space [${pageScope.space.name}]")
-          }
-      }
-      if (log.debugEnabled) {
-          log.debug "Template tag resolved to template [${template?.dump()}"
-      }
-
-      def engine = grailsAttributes.getPagesTemplateEngine()
-      def groovyTemplate = engine.createTemplate(template.content, template.title)
-      try {
-          if (attrs.model instanceof Map) {
-              groovyTemplate.make(attrs.model + [body:body()]).writeTo(out)
-          } else {
-              groovyTemplate.make(body:body()).writeTo(out)
-          }
-      } catch (Throwable t) {
-          log.error "Error executing template page", GrailsUtil.deepSanitize(t)
-          throwTagError("There is an error in template at [${path}], please see the logs")
-      }
-
-  }
-
-
 }
