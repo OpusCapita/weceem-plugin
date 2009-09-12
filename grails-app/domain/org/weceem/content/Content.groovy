@@ -63,6 +63,7 @@ class Content implements Comparable {
     static belongsTo = [space: Space, parent: Content]
     static transients = [ 'titleForHTML', 'titleForMenu', 'versioningProperties', 'versioningContent', 'mimeType', 'weceemSecurityService', 'absoluteURI']
     static hasMany = [children: Content]
+    static hasOne = [parent: Content]
 
     static constraints = {
         title(size:1..100, nullable: false, blank: false)

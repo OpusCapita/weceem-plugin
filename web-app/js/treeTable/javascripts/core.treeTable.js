@@ -127,7 +127,6 @@ var draggableConf = {
         revert: "invalid",
         revertDuration: 300,
         scroll: true,
-        containment: "#treeTable",
         drag: function(e, ui){
             var hoverItemId = getDecId(hoverItem.id);
             var itemTop = hoverItem.offsetTop;
@@ -146,7 +145,11 @@ var draggableConf = {
         },
         start: function(e, ui){
             $(".selected").removeClass('selected');
+        },
+        stop: function(e, ui){
+            resetInserters();
         }
+        
     }
 
 var droppableConf = {
@@ -158,30 +161,25 @@ var droppableConf = {
             ) {
                 var el = $("#" + this.id);
                 if (el.is(".inserter-before") || el.is(".inserter-after")){
-                    var mainElId = getDecId(el.attr('id'));
-                    var mainEl = $("#content-node-" + mainElId);
                     var target = el;
-                    var swch = el.is('.inserter-before') ? 'before' : 'after'
-                    if (mainEl.is(".parent") && el.is(".inserter-after")){
-                        swch = 'before';
-                        var targetId = getDecId($(".child-of-content-node-"+mainElId+":first")[0].id);
-                        target = $("#inserter-before-"+targetId)[0];
+                    if (el.is('.inserter-after')){
+                        target = $("#"+el.attr('id')+"+tr").size() ? $("#"+el.attr('id')+"+tr") : el
                     }
+                    var mainElId = getDecId(target.attr('id'));
+                    var mainEl = $("#content-node-" + mainElId);
                     var movable = $($(ui.draggable).parents("tr")[0]);
                     var newindex = $("#content-node-" + mainElId + ">td:first>div>h2.title").attr("orderindex");
-                    if (el.is(".inserter-before")){
-                        newindex = (newindex == 0) ? newindex : newindex - 1;
-                    }
+                    if (!$("#"+el.attr('id')+"+tr").size()) newindex++;
                     // @todo clean this up - slow to keep getting the node!
                     $('#confirmDialog').dialog('option', 'index', newindex);
-                    $('#confirmDialog').dialog('option', 'switch', swch);
+                    $('#confirmDialog').dialog('option', 'switch', 'middle');
                     $('#confirmDialog').dialog('option', 'source', movable);
                     $('#confirmDialog').dialog('option', 'target', target);
                     $('#confirmDialog').dialog('open');
                 }else{
-                    var type = $("#" + this.id + ">td>div>h2.title").attr("type");
+                    var type = $("#" + this.id + ">td:first>div>h2.title").attr("type");
                     if (resources["haveChildren"][type]){
-                        var children = $(".child-of-content-node-" + getDecId(this.id) + "[id*=content-node-]>td>div>h2.title")
+                        var children = $(".child-of-content-node-" + getDecId(this.id) + "[id*=content-node-]>td:first>div>h2.title")
                         var newindex = 0;
                         jQuery.each(children, function(index, value){
                             if ($(value).attr('orderindex') > newindex){
@@ -359,13 +357,9 @@ function initTreeTable() {
         	                        $(trg).addClass("parent");
         	                        $("#inserter-after-"+/\d+/.exec($(trg).attr('id'))).insertAfter(trg);
         	                        break;
-        	                    case 'before':
+        	                    case 'middle':
         	                        toggleStyle(src, $(trg));
                                     src.insertBefore("#" + $(trg).attr('id'));
-                                    break;
-                                case 'after':
-                                    toggleStyle(src, $(trg));
-                                    src.insertAfter("#" + $(trg).attr('id'));
                                     break;
     	                    }
     	                    toggleStyle(inserterBefore, $(src));
@@ -374,7 +368,7 @@ function initTreeTable() {
                             inserterBefore.insertBefore("#" + $(src).attr('id'));
                             var indexes = response['indexes'];
                             jQuery.each(indexes, function(key, val){
-                               $("#content-node-" + key + ">div>td:first>a>h2.title").attr('orderindex', val);
+                               $("#content-node-" + key + ">td:first>div>h2.title").attr('orderindex', val);
                             });
                             updateExpanders();
                             resetInserters();

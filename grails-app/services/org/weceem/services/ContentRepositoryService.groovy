@@ -429,12 +429,11 @@ class ContentRepositoryService {
             sourceContent.parent = null
             assert parent.save()
         }
-        if (Content.findAll("from Content c where c.orderIndex=? and c.parent=? ", [orderIndex, targetContent]) == null){
-            sourceContent.orderIndex = orderIndex
-        }else{
-            Content.executeUpdate("update Content c set c.orderIndex=c.orderIndex+1 where c.orderIndex>? and c.parent=?", [orderIndex, targetContent])
-            sourceContent.orderIndex = orderIndex + 1
+        Content inPoint = Content.findByOrderIndexAndParent(orderIndex, targetContent)
+        if (inPoint != null){
+            shiftNodeChildrenOrderIndex(targetContent, orderIndex)
         }
+        sourceContent.orderIndex = orderIndex
         if (targetContent) {
             if (!targetContent.children) targetContent.children = new TreeSet()
             targetContent.addToChildren(sourceContent)
@@ -442,7 +441,23 @@ class ContentRepositoryService {
         }
         return sourceContent.save(flush: true)
      }
-
+    def shiftNodeChildrenOrderIndex(parent = null, shiftedOrderIndex){
+        def criteria = Content.createCriteria()
+        def nodes = criteria {
+            if (parent){
+                eq("parent.id", parent.id)
+            }else{
+                isNull("parent")
+            }
+            ge("orderIndex", shiftedOrderIndex)
+            order("orderIndex", "asc")
+        }
+        def orderIndex = shiftedOrderIndex
+        nodes.each{it->
+            it.orderIndex = ++orderIndex
+            it.save()
+        }
+    }
     /**
      * Use introspection to find all references to the specified content. Requires finding all
      * associations/relationships to other Content and querying them all individually. Hideous but

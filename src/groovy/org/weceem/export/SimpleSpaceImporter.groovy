@@ -58,6 +58,8 @@ class SimpleSpaceImporter implements SpaceImporter {
         xml.children().each{ch ->
             parse(ch, xml, space)
         }
+        // if orderIndexes are duplicated than fix it
+        fixBrokenIndexes()
         //Recursively save each element
         for (cnt in backrefMap.values()){
             saveContent(cnt)
@@ -80,6 +82,48 @@ class SimpleSpaceImporter implements SpaceImporter {
                 "/${ContentFile.DEFAULT_UPLOAD_DIR}"))
         ant.copy(todir: "${filesDir.absolutePath}/${space.name}", failonerror: false) {
             fileset(dir: "${tmpDir.absolutePath}/files")
+        }
+    }
+    
+    /**
+    * Fixing duplicated orderIndexes
+    **/
+    def fixBrokenIndexes(){
+        //update orderIndex
+        def rootNodes = backrefMap.findAll{it ->
+            for (chPair in childrenMap){
+                if (it.key in chPair.value){
+                    return false
+                }
+            }
+            return true
+        }.collect{it -> it.value}
+        // update orderIndex for root nodes 
+        def prevIndex = 0
+        if (rootNodes*.orderIndex.unique().size() != rootNodes.size()){
+            rootNodes.sort().eachWithIndex(){it, i->
+                if (it.orderIndex == prevIndex){
+                    for (j in i..(rootNodes.size()-1)){
+                        rootNodes[j].orderIndex++
+                    }
+                }
+                prevIndex = it.orderIndex
+            }
+        }
+        // update orderIndex for all children
+        childrenMap.each{parent, children->
+            prevIndex = 0
+            def chdr = children.collect{it -> backrefMap[it]}
+            if (chdr*.orderIndex.unique().size() != chdr.size()){
+                chdr.sort().eachWithIndex(){it, i->
+                    if (it.orderIndex == prevIndex){
+                        for (j in i..(chdr.size()-1)){
+                            chdr[j].orderIndex++
+                        }
+                    }
+                    prevIndex = it.orderIndex
+                }
+            }
         }
     }
     
@@ -134,6 +178,7 @@ class SimpleSpaceImporter implements SpaceImporter {
         }
         params.remove "id"
         content.properties = params
+        if (content.orderIndex == null) content.orderIndex = 0
         backrefMap += [(id): content]
         return content
     }
