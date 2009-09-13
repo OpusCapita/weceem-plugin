@@ -5,6 +5,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import org.springframework.core.io.FileSystemResourceLoader
 import org.springframework.mock.web.MockServletContext
+import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 
 import org.weceem.content.*
@@ -27,65 +28,20 @@ class ImportExportTests extends GroovyTestCase
     def importExportService
     def applicationContext
 
-
     protected void setUp() {
         ServletContextHolder.servletContext = new MockServletContext(
                 'test/files/importExport', new FileSystemResourceLoader())
         ServletContextHolder.servletContext.setAttribute(
                 GrailsApplicationAttributes.APPLICATION_CONTEXT,
                 applicationContext)
-
+        ApplicationHolder.application.mainContext.servletContext = ServletContextHolder.servletContext
         new Space(name: 'testSpace', aliasURI:'main').save(flush: true)
     }
-/*
-* Remove this test (defaultExport is no longer supported)
-*/
-//    void testDefaultExport() {
-//        initDefaultData()
-//        def servletContext = ServletContextHolder.servletContext
-
-//        def file = importExportService.exportSpace(
-//                Space.findByName('testSpace'), 'defaultSpaceExporter')
-//        assert file
-//        assert file.exists()
-
-//        def ant = new AntBuilder()
-
-//        def tmpDir = new File(servletContext.getRealPath('/unzip'))
-//        tmpDir.mkdir()
-//        ant.unzip(src: file.absolutePath, dest: tmpDir.absolutePath)
-
-//        assert new File(servletContext.getRealPath('/unzip/content.xml')).exists()
-//        assert new File(servletContext.getRealPath('/unzip/files/test_dir')).exists()
-//        assert new File(servletContext.getRealPath('/unzip/files/test_dir/test_file.txt')).exists()
-
-//        def xmlFile = new File(servletContext.getRealPath('/unzip/content.xml'))
-
-//        def result = new XmlSlurper().parseText(xmlFile.text)
-//        // check total size
-//        assert result.children().size() == 6
-//        // check order
-//        assertEquals 'org.weceem.content.Space', result.children()[0].name().toString()
-//        assertEquals 'org.weceem.content.Template', result.children()[1].name().toString()
-//        assertEquals 'org.weceem.content.VirtualContent', result.children()[5].name().toString() 
-//        
-//        // check values
-//        assertEquals 'testSpace', result.children()[0].name.toString() 
-//        assertEquals 'testTemplate', result.children()[1].aliasURI.toString()
-//        assertEquals 'test_dir', result.children()[4].parent.aliasURI.toString()
-
-//        // Test virtual content
-//        assertEquals 'test_file', result.children()[5].target.aliasURI.toString()
-//        assertEquals 'testHtmlContent', result.children()[5].parent.aliasURI.toString()
-
-//        ant.delete(dir: tmpDir.absolutePath)
-//    }
 
     void testDefaultImport() {
         def servletContext = ServletContextHolder.servletContext
         def importFile = new File(
                 servletContext.getRealPath('/test_default_import.zip'))
-
         def space = new Space(name: 'testSpaceImport', aliasURI:'test')
         space.save(flush: true)
         
@@ -117,7 +73,6 @@ class ImportExportTests extends GroovyTestCase
         def servletContext = ServletContextHolder.servletContext
         def importFile = new File(
                 servletContext.getRealPath('/test_simple_import.zip'))
-
         def space = new Space(name: 'testSpaceImport', aliasURI:'test')
         space.save(flush: true)
         
