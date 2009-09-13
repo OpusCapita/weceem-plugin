@@ -2,7 +2,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="admin"/>
-    <title>Edit content</title>
+    <title>Edit content - ${content.title}</title>
     <g:javascript src="weceem/editor.js"/>
     <g:render template="editor_head" plugin="weceem"/>
   </head>

@@ -343,12 +343,15 @@ class WeceemTagLib {
         def params = makeFindParams(attrs)
         def id = attrs[ATTR_ID]
         def title = attrs[ATTR_TITLE]
+        def path = attrs[ATTR_PATH]
         def c
         if (id) {
             c = Content.get(id)
         } else if (title) {
             c = Content.findByTitle(title, params)
-        } else throwTagError("One of [id] or [title] must be specified")
+        } else if (path) {
+            c = contentRepositoryService.findContentForPath(path, request[ContentController.REQUEST_ATTRIBUTE_SPACE]).content
+        } else throwTagError("One of [id], [title] or [path] must be specified")
         def var = attrs[ATTR_VAR] ?: null
         out << body(var ? [(var):c] : c)
     }
