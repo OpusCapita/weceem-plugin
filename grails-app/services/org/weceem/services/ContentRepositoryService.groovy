@@ -327,12 +327,9 @@ class ContentRepositoryService {
             }
             
             result = content.validate()
-            // Check aliasURI uniqueness within content items with null parent
-            if (parentContent){
-                uniqueURI = Content.find("from Content c where c.parent=? and c.aliasURI=?", [parentContent, content.aliasURI]) ? false : true
-            }else{
-                uniqueURI = Content.find("from Content c where c.parent is NULL and c.aliasURI=?", content.aliasURI) ? false : true
-            }
+            println "------------Result of validate: $result ------------------------"
+            // Check aliasURI uniqueness within content items 
+            uniqueURI = Content.findByParentAndAliasURI(parentContent, content.aliasURI) ? false : true
         }
         
         if (uniqueURI){
@@ -342,7 +339,9 @@ class ContentRepositoryService {
                                  parentContent.children?.last()?.orderIndex + 1 : 0
                 content.orderIndex = orderIndex
                 parentContent.addToChildren(content)
-            } else content.orderIndex = 0
+            } else {
+                content.orderIndex = Content.findAllByParent(null).size() + 1
+            }
         }else{
             if (!parentContent)
                 content.errors.rejectValue("aliasURI", "org.weceem.content.Content.aliasURI.unique")
