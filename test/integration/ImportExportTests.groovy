@@ -146,6 +146,24 @@ class ImportExportTests extends GroovyTestCase
         // check content
         assert WikiItem.findByAliasURIAndSpace('Home', space)
     }
+    
+    void testFixOrderImport() {
+        // test inport file without orderIndexes
+        def servletContext = ServletContextHolder.servletContext
+        def importFile = new File(
+                servletContext.getRealPath('/test_simple_import.zip'))
+        def space = new Space(name: 'testSpaceImport', aliasURI:'test')
+        space.save(flush: true)
+        importExportService.importSpace(space, 'simpleSpaceImporter', importFile)
+        //test for uniqueness orderIndexes on root level
+        def roots = Content.findAllByParentAndSpace(null, space)
+        assert roots.size() == roots*.orderIndex.unique().size()
+        //test for uniqueness orderIndexes on child levels
+        for (root in roots){
+            if (root.children)
+                assert root.children.size() == root.children*.orderIndex.unique().size()
+        }
+    }
 
     private void initDefaultData() {
         def createdDate = new Date()
@@ -190,7 +208,7 @@ class ImportExportTests extends GroovyTestCase
         test_cont.save(flush: true)
         
     }
-
+    
     public void setApplicationContext(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext
     }
