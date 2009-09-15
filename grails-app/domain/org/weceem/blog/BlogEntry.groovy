@@ -25,6 +25,10 @@ import org.weceem.content.*
  */
 class BlogEntry extends Content {
 
+    static searchable = {
+        only = ['content', 'keywords', 'summary', 'title']
+    }
+    
     String keywords
     String summary
 

@@ -24,7 +24,7 @@ import org.weceem.content.*
 class WikiItem extends Content {
 
     static searchable = {
-        only = ['content', 'keywords']
+        only = ['content', 'keywords', 'title']
     }
     
     String keywords

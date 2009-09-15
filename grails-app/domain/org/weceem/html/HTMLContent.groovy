@@ -25,7 +25,7 @@ import org.weceem.content.*
 class HTMLContent extends Content {
 
     static searchable = {
-        only = ['content', 'keywords']
+        only = ['content', 'keywords', 'title']
     }
     
     String keywords
