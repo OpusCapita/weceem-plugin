@@ -168,12 +168,14 @@ class WeceemTagLib {
         def params = makeFindParams(attrs)
         def lineage = request[ContentController.REQUEST_ATTRIBUTE_PAGE].lineage
         def parentHierarchyNode = lineage.size() > 0 ? lineage[-1] : null
+        def status = attrs[ATTR_STATUS] ?: ContentRepositoryService.STATUS_ANY_PUBLISHED
         def siblings 
         if (!parentHierarchyNode) {
             siblings = contentRepositoryService.findAllRootContent( 
                 request[ContentController.REQUEST_ATTRIBUTE_SPACE],attrs[ATTR_TYPE])
         } else {
-            siblings = contentRepositoryService.findChildren( parentHierarchyNode.parent, [type:attrs[ATTR_TYPE], params:params])
+            siblings = contentRepositoryService.findChildren( parentHierarchyNode.parent, 
+                [type:attrs[ATTR_TYPE], params:params, status:status])
         }
         if (attrs[ATTR_FILTER]) siblings = siblings?.findAll(attrs[ATTR_FILTER])
         def var = attrs[ATTR_VAR] ?: null
@@ -353,6 +355,7 @@ class WeceemTagLib {
             c = contentRepositoryService.findContentForPath(path, request[ContentController.REQUEST_ATTRIBUTE_SPACE]).content
         } else throwTagError("One of [id], [title] or [path] must be specified")
         def var = attrs[ATTR_VAR] ?: null
+
         out << body(var ? [(var):c] : c)
     }
     

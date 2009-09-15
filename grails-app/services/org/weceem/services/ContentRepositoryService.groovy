@@ -197,7 +197,9 @@ class ContentRepositoryService {
     // so that we can skip the isAssignableFrom which will affect performance a lot, as this function may be
     // called a lot
     Class getContentClassForType(def type) {
-        if (type == null) type = Content.class
+        if (type == null) {
+            return Content.class
+        }        
         
         def cls = (type instanceof Class) ? type : grailsApplication.getClassForName(type)
         if (cls) {
@@ -626,21 +628,27 @@ class ContentRepositoryService {
         }
     }
     
+    /**
+     * Count child nodes of a given node, where nodes match the type and status (if any) supplied in args
+     * Very useful for rendering the number of published comments on an item, for example in blogs.
+     */
     def countChildren(sourceNode, Map args = null) {
-        if (!sourceNode) return Content.countByParentIsNull()
-
         // for VirtualContent - the children list is a list of target children
         if (sourceNode instanceof VirtualContent) {
             sourceNode = sourceNode.target
         }
         
-        def typeRestriction = args.type
-        // @todo replace this with smarter queries on children instead of requiring loading of all child objects
-        if (typeRestriction && (typeRestriction instanceof Class)) {
-            typeRestriction = typeRestriction.name
-        }
-        def clz = typeRestriction ? ApplicationHolder.application.getClassForName(typeRestriction) : Content
-        return clz.countByParent(sourceNode)
+        def clz = args.type ? getContentClassForType(args.type) : Content
+        return doWithCriteria(clz, criteriaWithStatus(args.status) {
+            projections {
+                count('id')
+            }
+            if (sourceNode) {
+                eq('parent', sourceNode)
+            } else {
+                isNull('parent')
+            }
+        })[0]
     }
     
     /**
@@ -718,14 +726,9 @@ class ContentRepositoryService {
             }
         }
         
-        def typeRestriction = args.type
-        
         // @todo replace this with smarter queries on children instead of requiring loading of all child objects
-        if (typeRestriction && (typeRestriction instanceof Class)) {
-            typeRestriction = typeRestriction.name
-        }
-        def clz = typeRestriction ? ApplicationHolder.application.getClassForName(typeRestriction) : Content
-        def children = doCriteria(clz, args.status, args.params) {
+        def typeRestriction = getContentClassForType(args.type)
+        def children = doCriteria(typeRestriction, args.status, args.params) {
             if (sourceNode == null) {
                 isNull('parent')
             } else {
@@ -797,6 +800,7 @@ class ContentRepositoryService {
         if (sourceNode.parent && contentMatchesStatus(args.status, sourceNode.parent)) {
             references << sourceNode.parent
         }
+        // Allow null here if there's no restriction
         def typeRestriction = args.type ? getContentClassForType(args.type) : null
         def parents = []
         references?.unique()?.each { 
