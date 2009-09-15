@@ -327,7 +327,6 @@ class ContentRepositoryService {
             }
             
             result = content.validate()
-            println "------------Result of validate: $result ------------------------"
             // Check aliasURI uniqueness within content items 
             uniqueURI = Content.findByParentAndAliasURI(parentContent, content.aliasURI) ? false : true
         }
@@ -340,7 +339,13 @@ class ContentRepositoryService {
                 content.orderIndex = orderIndex
                 parentContent.addToChildren(content)
             } else {
-                content.orderIndex = Content.findAllByParent(null).size() + 1
+                def criteria = Content.createCriteria()
+                def nodes = criteria {
+                    isNull("parent")
+                    maxResults(1)
+                    order("orderIndex", "desc")
+                }
+                content.orderIndex = nodes[0].orderIndex + 1
             }
         }else{
             if (!parentContent)

@@ -66,9 +66,9 @@ class WidgetTagLib {
         def groovyTemplate = engine.createTemplate(widget.content, widget.title)
         try {
             if (attrs.model instanceof Map) {
-                groovyTemplate.make(attrs.model).writeTo(out)
+                groovyTemplate.make(attrs.model + pageScope.variables).writeTo(out)
             } else {
-                groovyTemplate.make().writeTo(out)
+                groovyTemplate.make(pageScope.variables).writeTo(out)
             }
         } catch (Throwable t) {
             log.error "Error executing widget page", GrailsUtil.deepSanitize(t)
