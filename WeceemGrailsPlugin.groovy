@@ -1,4 +1,5 @@
 import org.codehaus.groovy.grails.commons.GrailsDomainClass
+import org.codehaus.groovy.grails.commons.GrailsServiceClass
 import grails.util.Environment
 
 import org.weceem.content.*
@@ -73,8 +74,13 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     }
 
     def onChange = { event ->
+        println "ON CHANGE EVENT OCCURED: ${event}"
         if (event.source instanceof GrailsDomainClass) {
             applicationContext.editorService.cacheEditorInfo(event.source.clazz)
+        }
+        if (event.source instanceof GrailsServiceClass) {
+            // Reload all if service / whole app reloaded
+            applicationContext.editorService.cacheEditorInfo()
         }
     }
 

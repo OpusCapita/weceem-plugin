@@ -127,8 +127,8 @@ class RepositoryController {
 
     def treeTable = {
         if (params.space && (Space.count() != 0)) {
-            def nodes = contentRepositoryService.findAllRootContent( params.space, null, 
-                [sort:'aliasURI', fetch:[children:'eager']])
+            def nodes = contentRepositoryService.findAllRootContent( params.space, 
+                [params: [sort:'aliasURI', fetch:[children:'eager']] ])
             def haveChildren = [:]
             for (domainClass in contentRepositoryService.listContentClasses()){
                 def dcInst = domainClass.newInstance()
@@ -610,7 +610,7 @@ class RepositoryController {
      * @param contentType
      */
     private List getRootContents(space, contentType) {
-        def rootNodes = contentRepositoryService.findAllRootContent(space, contentType)
+        def rootNodes = contentRepositoryService.findAllRootContent(space, [type:contentType])
         def result = rootNodes.collect { content ->
             [path: generateContentName(space.id, contentType, content.id),
                 label: content.title, type: content.class.name,
@@ -622,7 +622,7 @@ class RepositoryController {
     }
 
     private List getRootFilesAndDirectories(space) {
-        def items = contentRepositoryService.findAllRootContent(space, ContentFile.class.name)
+        def items = contentRepositoryService.findAllRootContent(space, [type:ContentFile])
         def result = items.collect {
              [path: generateContentName(space.id, 'Files', it.id),
                     label: it.title, type: it.class.name,

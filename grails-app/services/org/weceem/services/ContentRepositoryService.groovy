@@ -190,11 +190,16 @@ class ContentRepositoryService {
         space.delete(flush: true)
     }
 
+    /**
+     * Take a string or Class or null and turn it into a content Class
+     */
     // @todo cache the list of known type ans mappings that are assignable to a Content variable
     // so that we can skip the isAssignableFrom which will affect performance a lot, as this function may be
     // called a lot
-    Class getContentClassForType(String type) {
-        def cls = grailsApplication.getClassForName(type)
+    Class getContentClassForType(def type) {
+        if (type == null) type = Content.class
+        
+        def cls = (type instanceof Class) ? type : grailsApplication.getClassForName(type)
         if (cls) {
             if (!Content.isAssignableFrom(cls)) {
                 throw new IllegalArgumentException("The class $clazz does not extend Content")
@@ -445,6 +450,7 @@ class ContentRepositoryService {
         }
         return sourceContent.save(flush: true)
      }
+     
     def shiftNodeChildrenOrderIndex(parent = null, shiftedOrderIndex){
         def criteria = Content.createCriteria()
         def nodes = criteria {
@@ -462,6 +468,7 @@ class ContentRepositoryService {
             it.save()
         }
     }
+    
     /**
      * Use introspection to find all references to the specified content. Requires finding all
      * associations/relationships to other Content and querying them all individually. Hideous but
@@ -637,7 +644,27 @@ class ContentRepositoryService {
     }
     
     /**
-     * Execute a single-argument dynamic finder, also adding filtering by status
+     * Change a criteria closure so that it includes the restrictions specified in the params as per
+     * normal grails controller mechanisms - max, offset, sort and order
+     */
+    private Closure criteriaWithParams(Map params, Closure originalCriteria) {
+        return { ->
+            originalCriteria.delegate = delegate
+            originalCriteria()
+            if (params?.max != null) {
+                maxResults(params.max)
+            }
+            if (params?.offset != null) {
+                firstResult(params.offset)
+            }
+            if (params?.sort != null) {
+                order(params.sort, params.order ?: 'asc')
+            }
+        }
+    }
+    
+    /**
+     * Wrap a criteria query, adding filtering by status
      * where status can be:
      * - null for 'any' 
      * - a Status instance eg Status.get(1)
@@ -647,27 +674,36 @@ class ContentRepositoryService {
      * - a string integer status code eg "500"
      * 
      */
-    private def findWithStatus(status, Class cls, finderName, arg0 = null, params = null) {
-        if (status == null) {
-            return cls."${finderName}"(arg0, params)
-        } else if (status == ContentRepositoryService.STATUS_ANY_PUBLISHED) {
-            return cls."${finderName}AndStatusInList"(arg0, allPublicStatuses, params)
-        } else if (status instanceof Collection) {
-            // NOTE: This assumes collection is a collection of codes, not Status objects
-            return cls."${finderName}AndStatusInList"(arg0, Status.findAllByCode(status), params)
-        } else if (status instanceof Status) {
-            return cls."${finderName}AndStatus"(arg0, status, params)
-        } else if (status instanceof Integer) {
-            return cls."${finderName}AndStatus"(arg0, Status.findByCode(status), params)
-        } else if (status instanceof IntRange) {
-            return cls."${finderName}AndStatusBetween"(arg0, status.fromInt, status.toInt, params)
-        } else {
-            def s = status.toString()
-            if (s.isInteger()) {
-                return cls."${finderName}AndStatus"(arg0, Status.findByCode(s.toInteger()), params)
-            } else throw new IllegalArgumentException(
-                "The [status] argument must be null (for 'any'), or '${ContentRepositoryService.STATUS_ANY_PUBLISHED}',  an integer (or integer string), a collection of codes (numbers), a Status instance or an IntRange. You supplied [$status]")
+    private def criteriaWithStatus(status, Closure originalCriteria) {
+        return { ->
+            originalCriteria.delegate = delegate
+            originalCriteria()
+
+            if (status != null) {
+                if (status == ContentRepositoryService.STATUS_ANY_PUBLISHED) {
+                    inList('status', allPublicStatuses)
+                } else if (status instanceof Collection) {
+                    // NOTE: This assumes collection is a collection of codes, not Status objects
+                    inList('status', Status.findAllByCodeInList(status))
+                } else if (status instanceof Status) {
+                    eq('status', status)
+                } else if (status instanceof Integer) {
+                    eq('status', Status.findByCode(status) )
+                } else if (status instanceof IntRange) {
+                    between('status', status.fromInt, status.toInt)
+                } else {
+                    def s = status.toString()
+                    if (s.isInteger()) {
+                        eq('status', Status.findByCode(s.toInteger()) )
+                    } else throw new IllegalArgumentException(
+                        "The [status] argument must be null (for 'any'), or '${ContentRepositoryService.STATUS_ANY_PUBLISHED}',  an integer (or integer string), a collection of codes (numbers), a Status instance or an IntRange. You supplied [$status]")
+                }
+            }
         }
+    }
+    
+    protected def doCriteria(clz, status, params, Closure c) {
+        clz.withCriteria( criteriaWithParams( params, criteriaWithStatus(status, c) ) )
     }
     
     /**
@@ -689,7 +725,13 @@ class ContentRepositoryService {
             typeRestriction = typeRestriction.name
         }
         def clz = typeRestriction ? ApplicationHolder.application.getClassForName(typeRestriction) : Content
-        def children = findWithStatus(args.status, clz, 'findAllByParent', sourceNode, args.params)
+        def children = doCriteria(clz, args.status, args.params) {
+            if (sourceNode == null) {
+                isNull('parent')
+            } else {
+                eq('parent', sourceNode)
+            }
+        }
         
         return children //  sortNodes(children, params?.sort, params?.order)
     }
@@ -743,22 +785,22 @@ class ContentRepositoryService {
     }
     
     /**
-     * Find all the parents of the specified node, within the content hierarchy, optionally filtering by a content type class
+     * Find all the parents of the specified node, within the content hierarchy, optionally filtering by status and a content type class
      * @todo we can probably improve performance by applying the typeRestriction using some HQL
      */ 
     def findParents(sourceNode, Map args = Collections.EMPTY_MAP) {
         // @todo change to criteria/select
-        def references = findWithStatus(args.status, VirtualContent, 'findAllByTarget', sourceNode, args.params)*.parent
+        def references = (doCriteria(VirtualContent, args.status, Collections.EMPTY_MAP) {
+            eq('target', sourceNode) 
+        })*.parent
+         
         if (sourceNode.parent && contentMatchesStatus(args.status, sourceNode.parent)) {
             references << sourceNode.parent
         }
-        def typeRestriction = args.type
-        if (typeRestriction && (typeRestriction instanceof Class)) {
-            typeRestriction = typeRestriction.name
-        }
+        def typeRestriction = args.type ? getContentClassForType(args.type) : null
         def parents = []
         references?.unique()?.each { 
-            if (typeRestriction ? it.class.name == typeRestriction : true) {
+            if (typeRestriction ? typeRestriction.isAssignableFrom(it.class) : true) {
                 parents << it
             }
         }
@@ -766,25 +808,29 @@ class ContentRepositoryService {
     }
 
     /**
-     * Locate a root node by uri, type and space
+     * Locate a root node by uri, type, status and space
      */ 
-    def findRootContentByURI(String aliasURI, Space space, String type = null) {
+    def findRootContentByURI(String aliasURI, Space space, Map args = Collections.EMPTY_MAP) {
         if (log.debugEnabled) {
-            log.debug "findRootContentByURI: aliasURI $aliasURI, space ${space?.name}, type ${type}"
+            log.debug "findRootContentByURI: aliasURI $aliasURI, space ${space?.name}, args ${args}"
         }
-        if (!type) type = CONTENT_CLASS
-        getContentClassForType(type)?.find("""from ${type} c \
-            where c.aliasURI = ? and c.space = ? and c.parent is null""",
-            [aliasURI, space])        
+        def r = doCriteria(getContentClassForType(args.type), args.status, args.params) {
+            isNull('parent')
+            eq('aliasURI', aliasURI)
+            eq('space', space)
+            maxResults(1)
+        }
+        return r ? r[0] : null
     }
     
     /**
      * find all root nodes by type and space
      */ 
-    def findAllRootContent(Space space, String type = null, Map params = null) {
-        if (!type) type = CONTENT_CLASS
-        ApplicationHolder.application
-            .getClassForName(type)?.findAllBySpaceAndParent(space, null, params)        
+    def findAllRootContent(Space space, Map args = Collections.EMPTY_MAP) {
+        doCriteria(getContentClassForType(args.type), args.status, args.params) {
+            isNull('parent')
+            eq('space', space)
+        }
     }
     
     /**
@@ -792,6 +838,8 @@ class ContentRepositoryService {
      * Find the content node that is identified by the specified uri path. This always finds a single Content node
      * or none at all. Each node can have multiple URI paths, so this code returns the node AND the uri to its parent
      * so that you can tell where it is in the hierarchy
+     *
+     * This call does NOT filter by path.
      *
      * @param uriPath
      * @param space
