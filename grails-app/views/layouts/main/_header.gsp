@@ -1,8 +1,8 @@
 <div class="container"> 
-    <div id="adminLogo" ></div>
-    <div id="iconbar" >
+    <div id="adminLogo" class="span-18"></div>
+    <div id="iconbar" class="span-6 last prepend-top" style="text-align: right">
         <span title="Current User">
-          Current User: <wcm:loggedInUserName/>
+          Welcome, <wcm:loggedInUserName/>
         </span>
       <g:link controller="register" action="edit"><img src="${createLinkTo(dir:wcm.pluginCtxPath() +'/images/layout',file:'user16.gif')}"/></g:link>
       <a href="#"><img src="${createLinkTo(dir:wcm.pluginCtxPath() +'/images/layout',file:'help16.gif')}"/></a>
