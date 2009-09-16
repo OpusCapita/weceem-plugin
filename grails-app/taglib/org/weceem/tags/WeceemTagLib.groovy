@@ -16,6 +16,7 @@ package org.weceem.tags
 import java.text.SimpleDateFormat
 import org.weceem.controllers.ContentController
 import org.codehaus.groovy.grails.commons.ApplicationHolder as AH
+import org.codehaus.groovy.grails.commons.ConfigurationHolder as CH
 import org.weceem.content.Content
 import org.weceem.services.ContentRepositoryService
 
@@ -446,10 +447,11 @@ class WeceemTagLib {
         def type = attrs[ATTR_TYPE]
         def id = attrs[ATTR_ID]
         def iconconf = type.icon
-        def applicationName = AH.application.metadata["app.name"]
+        def isStandalone = CH.config.org.weceem.plugin.standalone
+        def env = grails.util.GrailsUtil.environment
         def plugin = pluginManager.getGrailsPlugin(iconconf.plugin)
-        def pluginContextPath = (applicationName != iconconf.plugin) ? 
-        "${plugin?.getPluginPath()}/${iconconf.dir}" : "${iconconf.dir}"
+        def pluginContextPath = isStandalone && (env == "development") ?
+         "${iconconf.dir}" : "${plugin?.getPluginPath()}/${iconconf.dir}"
         out << "<div id='${id}' class='ui-content-icon'><img src='${g.resource(dir: pluginContextPath, file: iconconf.file)}'/></div>"
     }
 

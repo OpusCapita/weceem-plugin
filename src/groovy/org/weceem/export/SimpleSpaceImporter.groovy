@@ -113,7 +113,9 @@ class SimpleSpaceImporter implements SpaceImporter {
         // update orderIndex for all children
         childrenMap.each{parent, children->
             prevIndex = 0
-            def chdr = children.collect{it -> backrefMap[it]}
+            def chdr = children.collect{it -> 
+                backrefMap[it]
+            }.findAll{it-> it != null}
             if (chdr*.orderIndex.unique().size() != chdr.size()){
                 chdr.sort().eachWithIndex(){it, i->
                     if (it.orderIndex == prevIndex){
