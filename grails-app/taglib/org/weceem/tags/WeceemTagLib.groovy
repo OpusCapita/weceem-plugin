@@ -34,6 +34,7 @@ class WeceemTagLib {
     static ATTR_OFFSET = "offset"
     static ATTR_PATH = "path"
     static ATTR_STATUS = "status"
+    static ATTR_SPACE = "space"
     static ATTR_VAR = "var"
     static ATTR_SIBLINGS = "siblings"
     static ATTR_LEVELS = "levels"
@@ -310,7 +311,7 @@ class WeceemTagLib {
         if (attrs[ATTR_SPACE]) {
             space = Space.findByAliasURI(attrs[ATTR_SPACE])
             if (!space) {
-                throwTagError "Tag invoked with space attribute value [${attrs[ATTR_SPACE]] but no space could be found with that aliasURI"
+                throwTagError "Tag invoked with space attribute value [${attrs[ATTR_SPACE]}] but no space could be found with that aliasURI"
             }
         }
         def content = attrs[ATTR_NODE]
