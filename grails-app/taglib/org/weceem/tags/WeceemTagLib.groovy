@@ -307,6 +307,12 @@ class WeceemTagLib {
     
     def createLink = { attrs, body -> 
         def space = request[ContentController.REQUEST_ATTRIBUTE_SPACE]
+        if (attrs[ATTR_SPACE]) {
+            space = Space.findByAliasURI(attrs[ATTR_SPACE])
+            if (!space) {
+                throwTagError "Tag invoked with space attribute value [${attrs[ATTR_SPACE]] but no space could be found with that aliasURI"
+            }
+        }
         def content = attrs[ATTR_NODE]
         if (content && !(content instanceof Content)) {
             throwTagError "Tag invoked with [$ATTR_NODE] attribute but the value is not a Content instance"
