@@ -107,7 +107,9 @@
   
   function ancestorsOf(node) {
     var ancestors = [];
-    while(node = parentOf(node)) {
+    //was - while(node = parentOf(node))
+    //temporary workaround of undefiend node variable
+    while(node.size() && (node = parentOf(node))) {
       ancestors[ancestors.length] = node[0];
     }
     return ancestors;

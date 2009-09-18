@@ -24,7 +24,7 @@
 <script type="text/javascript">
 
 var resources = {};
-var cacheParams = {};
+
 
 function init(){
     var haveChildren = {};
@@ -39,6 +39,7 @@ function init(){
     resources["link.deletenode"] = "${createLink(action: 'deleteNode', controller: 'repository')}";
     resources["link.treetable"] = "${createLink(action: 'treeTable', controller: 'repository')}";
     resources["link.preview"] = "${createLink(action: 'preview', controller: 'repository')}";
+    resources["search.request"] = "${createLink(action: 'searchRequest', controller: 'repository')}";
     <g:each var="status" in="${org.weceem.content.Status.list()}">
       resources["${status.description}"] = "${message(code: 'content.status.' + status.description, encodeAs:'JavaScript')}"
     </g:each>
@@ -47,89 +48,12 @@ function init(){
     cacheParams["sortField"] = "title";
 }
 
-function sortByField(fieldname){
-    cacheParams["isAsc"] = !cacheParams["isAsc"];
-    cacheParams["sortField"] = fieldname;
-    sendSearchRequest(cacheParams);
-    $("#searchDiv>div>table>thead>tr>th").attr("class", (cacheParams["isAsc"] ? "asc" : "desc"));
-}
-function catchKey(e){
-    var keyID = (window.event) ? event.keyCode : e.keyCode;
-    
-    switch(keyID){
-        //Enter pressed
-        case 13:
-            $("#search_btn").click();
-            break;
-        //Escape pressed
-        case 27:
-            $("#clear_btn").click();
-            break;
-    }
-}
 
-function sendSearchRequest(searchParams){
-    $("#treeDiv").css("display", "none");
-    $("#searchDiv").css("display", "");
-    $("#searchDiv > div > table > tbody").html("");
-    $.post("${createLink(action: 'searchRequest', controller: 'repository')}",
-        searchParams,
-        function(data){
-            var response = eval('(' + data + ')');
-            var tr = $("<tr>");
-            var td = $("<td>");
-            for (i in response.result){
-                var obj = response.result[i];
-                var body = $("#searchDiv > div > table > tbody")
-                var newTr = tr.clone();
-                var pageTd = td.clone();
-                var statusTd = td.clone();
-                var createTd = td.clone();
-                var changeTd = td.clone();
-                pageTd.html("<div class='item'><div class='ui-icon ui-icon-document' style='display: inline-block'></div>" + 
-                "<h2 class='title'>" + "<a href=" + obj.href + ">" + obj.title + 
-                "<span class='type'>(/" + obj.aliasURI + " - " + obj.type + ")</span></a></h2>" + 
-                "<div >Parent: <a href='#'>"
-                    + obj.parent + "/" + obj.aliasURI + "</a></div></div>");
-                statusTd.text(resources[obj.status]);
-                createTd.text(obj.createdBy);
-                changeTd.text(obj.changedOn);
-                newTr.append(pageTd); newTr.append(statusTd);
-                newTr.append(createTd); newTr.append(changeTd);
-                body.append(newTr);
-            }
-            $('#advSearch').show('slow');
-        });
-}
 
 
 $(function(){
-    document.onkeyup = catchKey;
     init();
     initTreeTable();
-    $("#fromDate").datepicker();
-    $("#toDate").datepicker();
-    $("#search_btn").click(function(){
-        cacheParams["data"] = $("#data")[0].value;
-        cacheParams["space"] = $('#spaceSelector')[0].options[$('#spaceSelector')[0].selectedIndex].text;
-        cacheParams["classFilter"] = ($("#advSearch").css("display") == "none" ? "none" : $("#classFilter")[0].value);
-        cacheParams["fieldFilter"] = $("#fieldFilter")[0].value;
-        cacheParams["fromDateFilter"] = $("#fromDate")[0].value;
-        cacheParams["toDateFilter"] = $("#toDate")[0].value;
-        cacheParams["statusFilter"] = $("#statusFilter")[0].value;
-        sendSearchRequest(cacheParams);
-    });
-    $("#clear_btn").click(function(){
-        cacheParams["sortField"] = "title";
-        cacheParams["isAsc"] = true;
-        $("#treeDiv").css("display", "");
-        $("#searchDiv").css("display", "none");
-        $("#data")[0].value = "";
-        $("#fromDate")[0].value = "";
-        $("#toDate")[0].value = "";
-        $('#advSearch').hide('slow');
-        $("#searchDiv > div > table > tbody").html("");
-    });
 })
 </script>
 </head>

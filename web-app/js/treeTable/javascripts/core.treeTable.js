@@ -1,3 +1,67 @@
+//variable neede for search
+var cacheParams = {};
+
+//variable for mouse Y coordinate
+var mouseTop = null;
+//variable for hovered item
+var hoverItem = null;
+
+function sortByField(fieldname){
+    cacheParams["isAsc"] = !cacheParams["isAsc"];
+    cacheParams["sortField"] = fieldname;
+    sendSearchRequest(cacheParams);
+    $("#searchDiv>div>table>thead>tr>th").attr("class", (cacheParams["isAsc"] ? "asc" : "desc"));
+}
+
+function catchKey(e){
+    var keyID = (window.event) ? event.keyCode : e.keyCode;
+    
+    switch(keyID){
+        //Enter pressed
+        case 13:
+            $("#search_btn").click();
+            break;
+        //Escape pressed
+        case 27:
+            $("#clear_btn").click();
+            break;
+    }
+}
+
+function sendSearchRequest(searchParams){
+    $("#treeDiv").css("display", "none");
+    $("#searchDiv").css("display", "");
+    $("#searchDiv > div > table > tbody").html("");
+    $.post(resources["search.request"],
+        searchParams,
+        function(data){
+            var response = eval('(' + data + ')');
+            var tr = $("<tr>");
+            var td = $("<td>");
+            for (i in response.result){
+                var obj = response.result[i];
+                var body = $("#searchDiv > div > table > tbody")
+                var newTr = tr.clone();
+                var pageTd = td.clone();
+                var statusTd = td.clone();
+                var createTd = td.clone();
+                var changeTd = td.clone();
+                pageTd.html("<div class='item'><div class='ui-icon ui-icon-document' style='display: inline-block'></div>" + 
+                "<h2 class='title'>" + "<a href=" + obj.href + ">" + obj.title + 
+                "<span class='type'>(/" + obj.aliasURI + " - " + obj.type + ")</span></a></h2>" + 
+                "<div >Parent: <a href='#'>"
+                    + obj.parent + "/" + obj.aliasURI + "</a></div></div>");
+                statusTd.text(resources[obj.status]);
+                createTd.text(obj.createdBy);
+                changeTd.text(obj.changedOn);
+                newTr.append(pageTd); newTr.append(statusTd);
+                newTr.append(createTd); newTr.append(changeTd);
+                body.append(newTr);
+            }
+            $('#advSearch').show('slow');
+        });
+}
+
 function updateExpanders(){
     var parents = $("#treeTable>tbody>tr.parent"); //get all parents
     var leaves = $("#treeTable>tbody>tr:not(.parent,.inserter-before,.inserter-after)"); //get all leaves
@@ -115,10 +179,8 @@ function getParentId(element){
 function getDecId(htmlid){
     return /\d+/.exec(htmlid)[0];
 }
-//variable for mouse Y coordinate
-var mouseTop = null;
-//variable for hovered item
-var hoverItem = null;
+
+
 
 var draggableConf = {
         helper: "clone",
@@ -161,20 +223,16 @@ var droppableConf = {
             ) {
                 var el = $("#" + this.id);
                 if (el.is(".inserter-before") || el.is(".inserter-after")){
-                    var target = el;
-                    if (el.is('.inserter-after')){
-                        target = $("#"+el.attr('id')+"+tr").size() ? $("#"+el.attr('id')+"+tr") : el
-                    }
-                    var mainElId = getDecId(target.attr('id'));
-                    var mainEl = $("#content-node-" + mainElId);
+                    var pos = el.is('.inserter-after') ? 'after' : 'before'
+                    var mainElId = getDecId(el.attr('id'));
                     var movable = $($(ui.draggable).parents("tr")[0]);
                     var newindex = $("#content-node-" + mainElId + ">td:first>div>h2.title").attr("orderindex");
                     if (!$("#"+el.attr('id')+"+tr").size()) newindex++;
                     // @todo clean this up - slow to keep getting the node!
                     $('#confirmDialog').dialog('option', 'index', newindex);
-                    $('#confirmDialog').dialog('option', 'switch', 'middle');
+                    $('#confirmDialog').dialog('option', 'switch', pos);
                     $('#confirmDialog').dialog('option', 'source', movable);
-                    $('#confirmDialog').dialog('option', 'target', target);
+                    $('#confirmDialog').dialog('option', 'target', el);
                     $('#confirmDialog').dialog('open');
                 }else{
                     var type = $("#" + this.id + ">td:first>div>h2.title").attr("type");
@@ -188,7 +246,7 @@ var droppableConf = {
                         });
                         // @todo clean this up - slow to keep getting the node!
                         $('#confirmDialog').dialog('option', 'index', ++newindex);
-                        $('#confirmDialog').dialog('option', 'switch', 'in');
+                        $('#confirmDialog').dialog('option', 'switch', 'to');
                         $('#confirmDialog').dialog('option', 'source', $(ui.draggable).parents("tr")[0]);
                         $('#confirmDialog').dialog('option', 'target', this);
                         $('#confirmDialog').dialog('open');
@@ -217,6 +275,34 @@ function removeNode(id) {
 
 /*--------------------------------------------*/
 function initTreeTable() {
+    // Insert branch into specific position: 
+    // target - place to insert item after or before
+    // place - can be 'after' or 'before' or 'to'
+    $.fn.insertBranchTo = function(target, place){
+        var node = $(this);
+        var nodeid = getDecId(node.attr("id"));
+        if (place == "before")
+            $("tr[id$="+nodeid+"]").insertBefore(target);
+        else
+        if (place == "after")
+            $("tr[id$="+nodeid+"]").insertAfter(target);
+        else
+        if (place == "to"){
+            $.each($("tr[id$="+nodeid+"]"), function(index, value){
+                $(value).appendBranchTo(target);
+            });
+            $(target).addClass("parent");
+            return ;
+        }
+        $.each($("tr[id$="+nodeid+"]"), function(index, value){
+            toggleStyle($(value), $(target));
+        })
+        $.each($(".child-of-content-node-"+nodeid), function(index, value){
+            $(value).appendBranchTo(node);
+            $(value).removeClass("child-of-undefined").addClass("child-of-content-node-"+nodeid);
+        });
+        node.css("display", "");
+    }
     // Handle selection of rows with click
     jQuery.each($('tr[id*=content-node-]'), function(index, value){
         $(value)[0].onclick = function(){
@@ -337,9 +423,7 @@ function initTreeTable() {
 	            var src = $(this).dialog('option', 'source');
 	            var trg = $(this).dialog('option', 'target');
 	            var parentId = getParentId(trg);
-	            var inserterAfter = $("#inserter-after-" + getDecId($(src).attr('id'))[0]);
-                var inserterBefore = $("#inserter-before-" + getDecId($(src).attr('id'))[0]);
-                var tid = (swc == "in") ? getDecId($(trg).attr('id')) : (parentId == null ? -1 : parentId)
+                var tid = (swc == "to") ? getDecId($(trg).attr('id')) : (parentId == null ? -1 : parentId)
                 $.post(resources["link.movenode"],
                     {sourceId: getDecId($(src).attr('id')), targetId: tid, index: index},
                     function (data){
@@ -351,21 +435,7 @@ function initTreeTable() {
     	                if (response['result'] == "failure"){
     	                    alert(response['error']);
     	                }else{
-    	                    switch(swc){
-    	                        case 'in':
-        	                        $(src).appendBranchTo(trg);
-        	                        $(trg).addClass("parent");
-        	                        $("#inserter-after-"+/\d+/.exec($(trg).attr('id'))).insertAfter(trg);
-        	                        break;
-        	                    case 'middle':
-        	                        toggleStyle(src, $(trg));
-                                    src.insertBefore("#" + $(trg).attr('id'));
-                                    break;
-    	                    }
-    	                    toggleStyle(inserterBefore, $(src));
-                            toggleStyle(inserterAfter, $(src));
-                            inserterAfter.insertAfter("#" + $(src).attr('id'));
-                            inserterBefore.insertBefore("#" + $(src).attr('id'));
+    	                    $(src).insertBranchTo(trg, swc);
                             var indexes = response['indexes'];
                             jQuery.each(indexes, function(key, val){
                                $("#content-node-" + key + ">td:first>div>h2.title").attr('orderindex', val);
@@ -383,9 +453,11 @@ function initTreeTable() {
 	            var src = $(this).dialog('option', 'source');
 	            var trg = $(this).dialog('option', 'target');
 	            var parentId = getParentId(trg);
-	            var tid = (swc == "in") ? getDecId($(trg).attr('id')) : (parentId == null ? -1 : parentId)
-	            var inserterAfter = $("#inserter-after-" + getDecId($(src).attr('id'))[0]).clone();
+	            var tid = (swc == "to") ? getDecId($(trg).attr('id')) : (parentId == null ? -1 : parentId)
+	            var inserterAfter = $("#inserter-after-" + getDecId($(src).attr('id'))[0]).clone(); 
+	            inserterAfter.appendTo($("#treeTable>tbody"));
                 var inserterBefore = $("#inserter-before-" + getDecId($(src).attr('id'))[0]).clone();
+                inserterBefore.appendTo($("#treeTable>tbody"));
                 inserterAfter.droppable(droppableConf);
                 inserterBefore.droppable(droppableConf);
                 $.post(resources["link.copynode"],
@@ -399,32 +471,15 @@ function initTreeTable() {
         	                if (response['result'] == "failure"){
         	                    alert(response['error']);
         	                }else{
-        	                    var srcCopy = $(src).clone();
+        	                    var srcCopy = $(src).clone(); srcCopy.appendTo($("#treeTable>tbody"));
         	                    $(inserterAfter).attr('id', 'inserter-after-' + response['id']);
         	                    $(inserterBefore).attr('id', 'inserter-before-' + response['id']);
         	                    $(srcCopy).attr('id', 'content-node-' + response['id']);
-        	                    switch (swc){
-        	                        case 'in':
-        	                            $(srcCopy).appendBranchTo(trg);
-        	                            $(trg).addClass("parent");
-                                        break;
-                                    case 'before':
-                                        srcCopy.insertBefore("#" + trg.attr('id'));
-                                        toggleStyle($(srcCopy), trg);
-                                        break;
-                                    case 'after':
-                                        srcCopy.insertAfter("#" + trg.attr('id'));
-                                        toggleStyle($(srcCopy), trg);
-                                        break;
-        	                    }
-        	                    $('#' + srcCopy.attr('id') + '>td>div>h2.title').draggable(draggableConf);
+        	                    $(srcCopy).insertBranchTo(trg, swc);
+        	                    $('#' + srcCopy.attr('id') + '>td>div>div.ui-content-icon').draggable(draggableConf);
         	                    $('#' + srcCopy.attr('id') + '>td>div>h2.title').attr('type', response['ctype']);
         	                    srcCopy.droppable(droppableConf);
-        	                    $('#' + srcCopy.attr('id') + '>td>div>span.type').html(' (Virtual Content)');
-        	                    inserterAfter.insertAfter("#" + srcCopy.attr('id'));
-        	                    inserterBefore.insertBefore("#" + srcCopy.attr('id'));
-                                toggleStyle($(inserterBefore), $(srcCopy));
-                                toggleStyle($(inserterAfter), $(srcCopy));
+        	                    $('#' + srcCopy.attr('id') + '>td>div>h2>a>span.type').html(' (Virtual Content)');
                                 var indexes = response['indexes'];
                                 jQuery.each(indexes, function(key, val){
                                    $("#content-node-" + key + ">td:first>div>h2.title").attr('orderindex', val);
@@ -436,7 +491,33 @@ function initTreeTable() {
     	        $(this).dialog('close');
 	        }
 	    }
-	})
+	});
+	
+// Search initialization
+    document.onkeyup = catchKey;
+    $("#fromDate").datepicker();
+    $("#toDate").datepicker();
+    $("#search_btn").click(function(){
+        cacheParams["data"] = $("#data")[0].value;
+        cacheParams["space"] = $('#spaceSelector')[0].options[$('#spaceSelector')[0].selectedIndex].text;
+        cacheParams["classFilter"] = ($("#advSearch").css("display") == "none" ? "none" : $("#classFilter")[0].value);
+        cacheParams["fieldFilter"] = $("#fieldFilter")[0].value;
+        cacheParams["fromDateFilter"] = $("#fromDate")[0].value;
+        cacheParams["toDateFilter"] = $("#toDate")[0].value;
+        cacheParams["statusFilter"] = $("#statusFilter")[0].value;
+        sendSearchRequest(cacheParams);
+    });
+    $("#clear_btn").click(function(){
+        cacheParams["sortField"] = "title";
+        cacheParams["isAsc"] = true;
+        $("#treeDiv").css("display", "");
+        $("#searchDiv").css("display", "none");
+        $("#data")[0].value = "";
+        $("#fromDate")[0].value = "";
+        $("#toDate")[0].value = "";
+        $('#advSearch').hide('slow');
+        $("#searchDiv > div > table > tbody").html("");
+    });
 
 }
 
