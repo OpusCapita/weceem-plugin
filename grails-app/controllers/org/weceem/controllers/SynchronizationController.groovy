@@ -101,7 +101,7 @@ class SynchronizationController {
                     }
                     content.createAliasURI()
                     if (!content.save()){
-                        println contentParent.errors
+                        println content.errors
                         assert false
                     }
                 }
