@@ -17,40 +17,40 @@ class SynchronizationController {
 
     def index = {}
 
-    def list = {}
+    def list = {
+        def spaces = Space.list()
+        render (view: "list", model: [spaces: spaces])
+    }
 
     /**
      * Renders list of files and Content objects which need to be synchonized.
      */
     def synchronizationList = {
         def existingFiles = new TreeSet()
-        def contentFilesDir = grailsApplication.parentContext.getResource(
-                ContentFile.DEFAULT_UPLOAD_DIR).file
-        contentFilesDir.eachDir {spaceDir ->
-            def space = Space.findByName(spaceDir.name)
-            if (space) {
-                spaceDir.eachFileRecurse {file ->
-                    def relativePath = file.absolutePath.substring(
-                            spaceDir.absolutePath.size() + 1)
-                    def content = contentRepositoryService.findContentForPath(relativePath, space).content
-                    //if content wasn't found then create new
-                    if (!content){
-                        createContentFile("${spaceDir.name}/${relativePath}")
-                        content = contentRepositoryService.findContentForPath(relativePath, space).content
-                        while (content){
-                            existingFiles << content
-                            content = content.parent
-                        }
-                    }else{
-                        existingFiles << content
-                    }
+        def space = Space.get(params.id)
+        def spaceDir = grailsApplication.parentContext.getResource(
+                "${ContentFile.DEFAULT_UPLOAD_DIR}/${space.name}").file
+        spaceDir.eachFileRecurse {file ->
+            def relativePath = file.absolutePath.substring(
+                    spaceDir.absolutePath.size() + 1)
+            def content = contentRepositoryService.findContentForPath(relativePath, space).content
+            //if content wasn't found then create new
+            if (!content){
+                createContentFile("${spaceDir.name}/${relativePath}")
+                content = contentRepositoryService.findContentForPath(relativePath, space).content
+                while (content){
+                    existingFiles << content
+                    content = content.parent
                 }
-                
+            }else{
+                existingFiles << content
             }
         }
-        def allFiles = ContentFile.list()
-        def missedFiles = allFiles - existingFiles
-        render (view: "list", model: [result: missedFiles])
+        def allFiles = ContentFile.findAllBySpace(space);
+        def missedFiles = allFiles.findAll(){f->
+            !(f.id in existingFiles*.id)
+        }
+        render (view: "fileList", model: [result: missedFiles])
     }
     
     /**

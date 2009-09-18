@@ -10,21 +10,21 @@
             <table class="standart">
                 <thead>
                     <tr>
-                        <g:sortableColumn property="title" title="${message(code: 'synchronization.header.contentTitle')}"/>
-                        <g:sortableColumn property="aliasURI" title="${message(code: 'synchronization.header.relativePath')}"/>
-                        <g:sortableColumn property="space.name" title="${message(code: 'synchronization.header.space')}"/>
-                        <th width="15px">&nbsp;</th>
+                        <g:sortableColumn property="name" title="${message(code: 'space.header.name')}"/>
+                        <g:sortableColumn property="aliasURI" title="${message(code: 'space.header.aliasURI')}"/>
+                        <th width="15px"><g:message code="header.operation"/></th>
                     </tr>
                 </thead>
                 <tbody>
-                     <g:each var="cont" in="${result}">
-                        <tr>
-                            <td>${cont.title}</td>
-                            <td>${cont.toRelativePath()}</td>
-                            <td>${cont.space.name}</td>
-                            <td><g:checkBox name="delete-${cont.id}" value="${false}" /></td>
-                        </tr>
-                     </g:each>
+                     <g:each in="${spaces}" status="i" var="space">
+                      <tr class="${(i % 2) == 0 ? 'odd' : 'even'}">
+                        <td>${fieldValue(bean: space, field: 'name')}</td>
+                        <td>${fieldValue(bean: space, field: 'aliasURI')}</td>
+                        <td>
+                          <g:link controller="synchronization" action="synchronizationList" id="${space.id}"><g:message code="command.sync"/></g:link>
+                        </td>
+                      </tr>
+                    </g:each>
                 </tbody>
             </table>
             <div class="span-24 last">
