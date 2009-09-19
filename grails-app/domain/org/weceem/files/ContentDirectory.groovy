@@ -49,7 +49,7 @@ class ContentDirectory extends ContentFile {
         def path = getPath(this.parent)
         def file = new File(ServletContextHolder.servletContext.getRealPath(
                 "/${DEFAULT_UPLOAD_DIR}/${space.name}${path}/${title}"))
-
+        if (!file.exists()) return true
         if (FileUtils.deleteQuietly(file)) {
             def childrenList = new ArrayList(this.children)
             childrenList?.each() { child ->

@@ -28,6 +28,7 @@ class SynchronizationController {
     def synchronizationList = {
         def existingFiles = new TreeSet()
         def space = Space.get(params.id)
+        def createdContent = []
         def spaceDir = grailsApplication.parentContext.getResource(
                 "${ContentFile.DEFAULT_UPLOAD_DIR}/${space.name}").file
         spaceDir.eachFileRecurse {file ->
@@ -36,7 +37,7 @@ class SynchronizationController {
             def content = contentRepositoryService.findContentForPath(relativePath, space).content
             //if content wasn't found then create new
             if (!content){
-                createContentFile("${spaceDir.name}/${relativePath}")
+                createdContent += createContentFile("${spaceDir.name}/${relativePath}")
                 content = contentRepositoryService.findContentForPath(relativePath, space).content
                 while (content){
                     existingFiles << content
@@ -50,7 +51,11 @@ class SynchronizationController {
         def missedFiles = allFiles.findAll(){f->
             !(f.id in existingFiles*.id)
         }
-        render (view: "fileList", model: [result: missedFiles])
+        
+        def dirnum = createdContent.findAll{c-> c instanceof ContentDirectory}.size()
+        def filenum = createdContent.size() - dirnum
+        render (view: "fileList", model: [result: missedFiles, createdContent: createdContent, 
+        space: space, dirnum: dirnum, filenum: filenum])
     }
     
     /**
@@ -82,6 +87,7 @@ class SynchronizationController {
             def parents = tokens[1..(tokens.size() - 1)]
             def ancestor = null
             def content = null
+            def createdContent = []
             parents.eachWithIndex(){ obj, i ->
                 def parentPath = "${parents[0..i].join('/')}"
                 def file = grailsApplication.parentContext.getResource(
@@ -103,6 +109,8 @@ class SynchronizationController {
                     if (!content.save()){
                         println content.errors
                         assert false
+                    }else{
+                        createdContent << content
                     }
                 }
                 if (ancestor){
@@ -115,7 +123,7 @@ class SynchronizationController {
                 }
                 ancestor = content
             }
-            return content
+            return createdContent
         }
         return null
     }
