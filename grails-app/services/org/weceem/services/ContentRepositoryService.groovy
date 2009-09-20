@@ -334,8 +334,11 @@ class ContentRepositoryService {
             }
             
             result = content.validate()
-            // Check aliasURI uniqueness within content items 
+
+            // Check aliasURI uniqueness within content items
+          Content.withNewSession {
             uniqueURI = Content.findByParentAndAliasURI(parentContent, content.aliasURI) ? false : true
+          }            
         }
         
         if (uniqueURI){
