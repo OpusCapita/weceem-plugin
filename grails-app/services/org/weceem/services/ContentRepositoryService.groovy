@@ -336,6 +336,8 @@ class ContentRepositoryService {
             result = content.validate()
 
             // Check aliasURI uniqueness within content items
+          // The withNewSession is a patch for the ADT project that causes an exception when saving a Bar with categories
+          // TODO: (Scott) - take out the withNewSession and test after the 1.2 release
           Content.withNewSession {
             uniqueURI = Content.findByParentAndAliasURI(parentContent, content.aliasURI) ? false : true
           }            
