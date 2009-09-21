@@ -158,13 +158,32 @@ class ContentRepositoryService {
         log.info "Deleting content from space [$space]"
         // Let's brute-force this
         // @todo remove/rework this for 0.2
-        Content.executeUpdate("update org.weceem.html.HTMLContent con set con.template = null where con.space = ?", [space])
-        Content.executeUpdate("update org.weceem.blog.Blog con set con.template = null where con.space = ?", [space])
-        Content.executeUpdate("update org.weceem.content.VirtualContent con set con.target = null where con.space = ?", [space])
-        Content.executeUpdate("update org.weceem.wiki.WikiItem con set con.template = null where con.space = ?", [space])
-        Content.executeUpdate("update org.weceem.content.Content con set con.parent = null where con.space = ?", [space])
-        Content.executeUpdate("delete from org.weceem.content.Content con where con.parent = null and con.space = ?", [space])
+        def contentList = Content.findAllBySpace(space)
+        for (content in contentList){
+            content.parent = null
+            content.save()
+        }
+        def wasDelete = true
+        while (wasDelete){
+            contentList = Content.findAllBySpace(space)
+            wasDelete = false
+            for (content in contentList){
+                if (contentDelete(content)){
+                    wasDelete = true
+                }
+            }
+        }
         log.info "Finished Deleting content from space [$space]"
+    }
+    
+    boolean contentDelete(content){
+        def refs = findReferencesTo(content)
+        if (refs.size() == 0){
+            deleteNode(content)
+            return true
+        }else{
+            return false
+        }
     }
     
     void deleteSpace(Space space) {
@@ -475,6 +494,7 @@ class ContentRepositoryService {
             it.save()
         }
     }
+    
     
     /**
      * Use introspection to find all references to the specified content. Requires finding all
