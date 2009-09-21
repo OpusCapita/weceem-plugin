@@ -17,10 +17,12 @@ import org.weceem.content.*
  */
 
 /**
- * XMLContent class describes the content node of type 'XML'.
+ * HTMLContent class describes the content node of type 'HTML'.
  *
  * @author Stephan Albers
  * @author July Karpey
+ * @author Marc Palmer
+ * @author Viktor Fedorov
  */
 class HTMLContent extends Content {
 

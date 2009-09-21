@@ -90,6 +90,12 @@ class EditorFieldTagLib {
         out << g.render(template:'/editors/codeeditor', plugin:'weceem', 
             model:[name:attrs.property, value:pageScope.content[attrs.property]])
     }
+
+    def editorFieldJSCode = { attrs ->
+        // Workaround for Grails 1.1.x bug invoking tags with body as method - have to use a template instead
+        out << g.render(template:'/editors/codeeditor', plugin:'weceem', 
+            model:[name:attrs.property, value:pageScope.content[attrs.property]])
+    }
     
     def editorResourcesHtmlCode = { attrs ->
         includeEditArea()
@@ -98,6 +104,20 @@ class EditorFieldTagLib {
           editAreaLoader.init({
               id : "editor_${attrs.property}",
               syntax: "html",
+              allow_toggle: false,
+              start_highlight: true
+          });
+        </script> 
+        """
+    }
+    
+    def editorResourcesJSCode = { attrs ->
+        includeEditArea()
+        out << """
+        <script language="javascript" type="text/javascript">
+          editAreaLoader.init({
+              id : "editor_${attrs.property}",
+              syntax: "js",
               allow_toggle: false,
               start_highlight: true
           });
