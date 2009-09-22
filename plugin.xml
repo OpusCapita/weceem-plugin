@@ -38,6 +38,7 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     <resource>org.weceem.files.ContentDirectory</resource>
     <resource>org.weceem.files.ContentFile</resource>
     <resource>org.weceem.html.HTMLContent</resource>
+    <resource>org.weceem.js.JavaScript</resource>
     <resource>org.weceem.wiki.WikiItem</resource>
     <resource>org.weceem.jobs.ExternalLinksJob</resource>
     <resource>org.weceem.services.ContentRepositoryService</resource>

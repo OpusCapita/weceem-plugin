@@ -270,8 +270,6 @@ class WeceemTagLib {
                 o << "</li>"
                 return o.toString()
             }
-            
-            if (!custom) out << "<ul>"
         }
                 
         def activeNode = lineage ? lineage[currentLevel] : null
@@ -286,9 +284,14 @@ class WeceemTagLib {
         }
             
         def first = true
+        def last = false
         def lastIndex = levelnodes.size()-1
         levelnodes?.eachWithIndex { n, i ->
-            out << bodyToUse(first:first, active:n == activeNode, level:currentLevel, last: i == lastIndex, 
+            if (!custom && first) {
+                out << "<ul>"
+            }
+            last = i == lastIndex
+            out << bodyToUse(first:first, active:n == activeNode, level:currentLevel, last: last, 
                 link:custom ? createLink(node:n, { out << n.titleForMenu.encodeAsHTML()}) : '', node:n)
             if (currentLevel+1 < levels) {
                 request['_weceem_menu_level'] = currentLevel+1
@@ -296,9 +299,10 @@ class WeceemTagLib {
                 request['_weceem_menu_level'] = currentLevel // back to where we were
             }
             first = false
+            if (!custom && last) {
+                out << "</ul>"
+            }
         }
-
-        if (!custom) out << "</ul>"
     }
     
     def link = { attrs, body -> 

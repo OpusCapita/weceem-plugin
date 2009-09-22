@@ -1,17 +1,9 @@
 class WeceemPluginUrlMappings {
     static INTERNAL_URI_PREFIXES = [
-        'css/',
-        'js/',
-        'images/',
+        '_weceem',
         'admin/',
-        'WEB-INF/',
-        'content/',
         'plugins/',
-        'uploads/',
-        'login/',
-        'logout/',
-        'register/',
-        'j_spring_',
+        'WEB-INF/',
         'fck',
         'WeceemFiles/'
     ]
@@ -36,8 +28,6 @@ class WeceemPluginUrlMappings {
 
         "/admin/space/$action?/$id?"(controller: 'space')
 
-        "/content/$action?/$id?"(controller:'content')
-        
         "/$uri**" {
             controller = "content"
             action = "show"
@@ -52,11 +42,6 @@ class WeceemPluginUrlMappings {
         "/" {
             controller = "content"
             action = "show"
-        }
-        
-        "/search/$space" {
-            controller = "weceem"
-            action = "search"
         }
 
 

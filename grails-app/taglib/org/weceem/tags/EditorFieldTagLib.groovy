@@ -134,7 +134,7 @@ class EditorFieldTagLib {
     void includeEditArea() {
         if (!request['weceem.editor.editarea.js.included']) {
             out << """
-            <script language="javascript" type="text/javascript" src="${resource(dir: pluginContextPath+'/js/editarea', plugin:'weceem', file: 'edit_area_full.js')}"></script>
+            <script language="javascript" type="text/javascript" src="${resource(dir: pluginContextPath+'/_weceem/js/editarea', plugin:'weceem', file: 'edit_area_full.js')}"></script>
             """
             request['weceem.editor.editarea.js.included'] = true
         }

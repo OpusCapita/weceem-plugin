@@ -1,12 +1,13 @@
 <div class="container"> 
-    <div id="adminLogo" class="span-18"></div>
-    <div id="iconbar" class="span-6 last prepend-top" style="text-align: right">
+    <div id="adminLogo" class="span-14"></div>
+    
+    <div id="iconbar" class="span-10 last prepend-top" style="text-align: right">
         <span title="Current User">
           Welcome, <wcm:loggedInUserName/>
         </span>
-      <g:link controller="register" action="edit"><img src="${createLinkTo(dir:wcm.pluginCtxPath() +'/images/layout',file:'user16.gif')}"/></g:link>
-      <a href="#"><img src="${createLinkTo(dir:wcm.pluginCtxPath() +'/images/layout',file:'help16.gif')}"/></a>
-      <g:link controller="logout"><img src="${createLinkTo(dir:wcm.pluginCtxPath() +'/images/layout',file:'logout16.gif')}"/></g:link>
+        <g:link url="${wcm.userProfileEditUrl().encodeAsHTML()}" class="ui-state-default ui-corner-all button">Profile</g:link>
+        <g:link url="${wcm.userLogOutUrl().encodeAsHTML()}" class="ui-state-default ui-corner-all button">Log Out</g:link>
+        <a href="http://weceem.org/weceem/Documentation" class="ui-state-default ui-corner-all button">Help</a>
     </div>
 
     <div id="navigation" class="span-24 last">
