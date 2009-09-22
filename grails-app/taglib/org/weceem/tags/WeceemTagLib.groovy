@@ -401,7 +401,7 @@ class WeceemTagLib {
                             out << message(code:'human.date.minutes.ago', args:[minutesElapsed])
                         } else {
                             def secondsElapsed = millisDelta.seconds
-                            if (secondsElapsed > 0) {
+                            if (secondsElapsed >= 0) {
                                 out << message(code:'human.date.seconds.ago', args:[secondsElapsed])
                             }
                         }
