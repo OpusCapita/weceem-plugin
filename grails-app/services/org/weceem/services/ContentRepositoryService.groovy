@@ -672,7 +672,7 @@ class ContentRepositoryService {
         }
         
         def clz = args.type ? getContentClassForType(args.type) : Content
-        return doWithCriteria(clz, criteriaWithStatus(args.status) {
+        return (doCriteria(clz, args.status, args.params) {
             projections {
                 count('id')
             }

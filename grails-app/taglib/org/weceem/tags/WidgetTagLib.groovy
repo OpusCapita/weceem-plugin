@@ -66,8 +66,17 @@ class WidgetTagLib {
         def groovyTemplate = engine.createTemplate(widget.content, widget.title)
         try {
             if (attrs.model instanceof Map) {
-                groovyTemplate.make(attrs.model + pageScope.variables).writeTo(out)
+                def model = [:] 
+                model.putAll( pageScope.variables)
+                model.putAll( attrs.model )
+                if (log.debugEnabled) {
+                    log.debug "Widget executing with model: ${model}"
+                }
+                groovyTemplate.make(model).writeTo(out)
             } else {
+                if (log.debugEnabled) {
+                    log.debug "Widget executing with pageScope variables"
+                }
                 groovyTemplate.make(pageScope.variables).writeTo(out)
             }
         } catch (Throwable t) {
