@@ -454,7 +454,15 @@ class ContentRepositoryService {
      */
     Boolean moveNode(Content sourceContent, Content targetContent, orderIndex) {
         if (!sourceContent) return false
-        
+        if (!targetContent){
+            def uniqueURI
+            Content.withNewSession {
+             uniqueURI = Content.findByParentAndAliasURI(targetContent, sourceContent.aliasURI) ? false : true
+            }
+            if (!uniqueURI){
+                return false
+            } 
+        }
         if (sourceContent.metaClass.respondsTo(sourceContent, "move", Content)){
             sourceContent.move(targetContent)
         }
