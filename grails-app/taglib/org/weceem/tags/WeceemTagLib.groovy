@@ -279,7 +279,8 @@ class WeceemTagLib {
         def levelnodes
         if (siblings) {
             levelnodes = contentRepositoryService.findChildren(currentLevel == 0 ? null : node, 
-                [status:ContentRepositoryService.STATUS_ANY_PUBLISHED, type: org.weceem.html.HTMLContent])
+                [status:ContentRepositoryService.STATUS_ANY_PUBLISHED, type: org.weceem.html.HTMLContent,
+                    params:[sort:'orderIndex']])
         } else {
             levelnodes = [activeNode]
         }
