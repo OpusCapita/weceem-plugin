@@ -455,11 +455,20 @@ class ContentRepositoryService {
     Boolean moveNode(Content sourceContent, Content targetContent, orderIndex) {
         if (!sourceContent) return false
         if (!targetContent){
-            def uniqueURI
-            Content.withNewSession {
-             uniqueURI = Content.findByParentAndAliasURI(targetContent, sourceContent.aliasURI) ? false : true
+            def criteria = Content.createCriteria()
+            def nodes = criteria {
+                if (targetContent){
+                    eq("parent.id", targetContent.id)
+                }else{
+                    isNull("parent")
+                }
+                eq("aliasURI", sourceContent.aliasURI)
+                not{
+                    eq("id", sourceContent.id)
+                }
             }
-            if (!uniqueURI){
+            
+            if (nodes.size() > 0){
                 return false
             } 
         }
