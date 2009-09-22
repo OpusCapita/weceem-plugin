@@ -16,7 +16,7 @@
           <nav:eachItem group="weceem.plugin.admin" var="n">
               <div class="span-24 last container">
                   <div class="span-3">
-                      <img src="${resource(dir:pluginContextPath + '/images/weceem/admin/icons', file: n.title+'.gif')}" alt="${message(code:'admin.title.'+n.title, encodeAs:'HTML')}"/>
+                      <img src="${resource(dir:pluginContextPath + '/_weceem/images/weceem/admin/icons', file: n.title+'.gif')}" alt="${message(code:'admin.title.'+n.title, encodeAs:'HTML')}"/>
                       <p class="title">
                         <g:link controller="${n.controller}" action="${n.action}"><g:message code="${'admin.function.title.'+n.title}" encodeAs="HTML"/></g:link>
                       </p>
