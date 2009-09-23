@@ -5,9 +5,9 @@
         <span title="Current User">
           Welcome, <wcm:loggedInUserName/>
         </span>
-        <g:link url="${wcm.userProfileEditUrl().encodeAsHTML()}" class="ui-state-default ui-corner-all button">Profile</g:link>
-        <g:link url="${wcm.userLogOutUrl().encodeAsHTML()}" class="ui-state-default ui-corner-all button">Log Out</g:link>
-        <a href="http://weceem.org/weceem/Documentation" class="ui-state-default ui-corner-all button">Help</a>
+        <g:link url="${wcm.userProfileEditUrl().encodeAsHTML()}">Profile</g:link> |
+        <a href="http://weceem.org/weceem/Documentation">Help</a> |
+        <g:link url="${wcm.userLogOutUrl().encodeAsHTML()}">Log Out</g:link>
     </div>
 
     <div id="navigation" class="span-24 last">
