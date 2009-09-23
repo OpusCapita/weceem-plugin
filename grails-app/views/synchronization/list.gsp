@@ -8,8 +8,8 @@
         <table class="standart">
             <thead>
                 <tr>
-                    <g:sortableColumn property="name" title="${message(code: 'space.header.name')}"/>
-                    <g:sortableColumn property="aliasURI" title="${message(code: 'space.header.aliasURI')}"/>
+                    <th width="15px"><g:message code="space.header.name"/></th>
+                    <th width="15px"><g:message code="space.header.aliasURI"/></th>
                     <th width="15px"><g:message code="header.operation"/></th>
                 </tr>
             </thead>

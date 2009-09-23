@@ -20,11 +20,11 @@
     <nav:resources/>
 
 	<link rel="stylesheet" href="${resource(dir:wcm.pluginCtxPath() +'/_weceem/js/jquery-ui-1.7.1/css/cupertino', file:'jquery-ui-1.7.1.custom.css')}" type="text/css"/>
-	<script type="text/javascript" src="${g.resource(dir: wcm.pluginCtxPath() +'/_weceem/js/jquery-ui-1.7.1/js', file:'jquery-1.3.2.min.js')}"/>
-	<script type="text/javascript" src="${g.resource(dir: wcm.pluginCtxPath() +'/_weceem/js/jquery-ui-1.7.1/js', file:'jquery-ui-1.7.1.custom.min.js')}"/>
+	<script type="text/javascript" src="${g.resource(dir: wcm.pluginCtxPath() +'/_weceem/js/jquery-ui-1.7.1/js', file:'jquery-1.3.2.min.js')}"></script>
+	<script type="text/javascript" src="${g.resource(dir: wcm.pluginCtxPath() +'/_weceem/js/jquery-ui-1.7.1/js', file:'jquery-ui-1.7.1.custom.min.js')}"></script>
 	<link href="${resource(dir:wcm.pluginCtxPath() +'/_weceem/js/fg-menu', file:'fg.menu.css')}" rel="stylesheet" type="text/css" />
 	<link rel="stylesheet" href="${resource(dir: wcm.pluginCtxPath() +'/_weceem/css',file:'weceem.css')}"/>
-	<script type="text/javascript" src="${g.resource(dir: wcm.pluginCtxPath() +'/_weceem/js/fg-menu', file:'fg.menu.js')}"/>
+	<script type="text/javascript" src="${g.resource(dir: wcm.pluginCtxPath() +'/_weceem/js/fg-menu', file:'fg.menu.js')}"></script>
 
 	<!-- Blueprint CSS -->
 	<link rel="stylesheet" href="${resource( dir: wcm.pluginCtxPath() +'/_weceem/css/blueprint', file: 'screen.css')}" type="text/css" media="screen, projection" />

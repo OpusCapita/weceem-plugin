@@ -2,8 +2,8 @@
 <head >
 	<meta name="layout" content="admin"/>
 	<title>Weceem - ${space.name.encodeAsHTML()}</title>
-	<script type="text/javascript" src="${g.resource(dir: wcm.pluginCtxPath() +'/_weceem/js/treeTable/javascripts', file:'jquery.treeTable.js')}"/>
-	<script type="text/javascript" src="${g.resource(dir: wcm.pluginCtxPath() +'/_weceem/js/treeTable/javascripts/', file:'core.treeTable.js')}"/>
+	<script type="text/javascript" src="${g.resource(dir: wcm.pluginCtxPath() +'/_weceem/js/treeTable/javascripts', file:'jquery.treeTable.js')}"></script>
+	<script type="text/javascript" src="${g.resource(dir: wcm.pluginCtxPath() +'/_weceem/js/treeTable/javascripts/', file:'core.treeTable.js')}"></script>
 	<link href="${createLinkTo(dir:wcm.pluginCtxPath()  + '/_weceem/js/treeTable/stylesheets', file:'jquery.treeTable.css')}" rel="stylesheet" type="text/css" />
 
 <style type="text/css">

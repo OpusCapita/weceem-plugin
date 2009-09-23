@@ -422,11 +422,11 @@ class ContentRepositoryService {
                                           aliasURI: sourceContent.aliasURI + "-copy",
                                           target: sourceContent, status: sourceContent.status, 
                                           space: sourceContent.space)
-        if (Content.findAll("from Content c where c.orderIndex=? and c.parent=?", [orderIndex, targetContent]) == null){
-            vcont.orderIndex = orderIndex
-        }else{
-            vcont.orderIndex = orderIndex + 1
+        Content inPoint = Content.findByOrderIndexAndParent(orderIndex, targetContent)
+        if (inPoint != null){
+            shiftNodeChildrenOrderIndex(targetContent, orderIndex)
         }
+        vcont.orderIndex = orderIndex
         if (targetContent) {
             if (VirtualContent.findWhere(parent: targetContent, target: sourceContent)){
                 return null

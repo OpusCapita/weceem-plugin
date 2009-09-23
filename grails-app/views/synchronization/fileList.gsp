@@ -17,8 +17,8 @@
                 <table class="standart">
                     <thead>
                         <tr>
-                            <g:sortableColumn property="title" title="${message(code: 'synchronization.header.contentTitle')}"/>
-                            <g:sortableColumn property="aliasURI" title="${message(code: 'synchronization.header.relativePath')}"/>
+                            <th width="15px"><g:message code="synchronization.header.contentTitle"/></th>
+                            <th width="15px"><g:message code="synchronization.header.relativePath"/></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -39,8 +39,8 @@
             <table class="standart">
                 <thead>
                     <tr>
-                        <g:sortableColumn property="title" title="${message(code: 'synchronization.header.contentTitle')}"/>
-                        <g:sortableColumn property="aliasURI" title="${message(code: 'synchronization.header.relativePath')}"/>
+                        <th width="15px"><g:message code="synchronization.header.contentTitle"/></th>
+                        <th width="15px"><g:message code="synchronization.header.relativePath"/></th>
                         <th width="15px">&nbsp;</th>
                     </tr>
                 </thead>
