@@ -144,6 +144,14 @@ class ContentFile extends Content {
         return path ? "/${path}" : path
     }
     
+    public def findBaseDirectory(){
+        def baseDir = this
+        while (baseDir.parent && (baseDir.parent instanceof ContentFile)){
+            baseDir = baseDir.parent
+        }
+        return baseDir
+    }
+    
     public String toRelativePath(){
         return getPath(this)
     }

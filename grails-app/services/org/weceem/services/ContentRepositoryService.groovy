@@ -899,6 +899,7 @@ class ContentRepositoryService {
 
         // @todo: optimize query 
         def content = findRootContentByURI(tokens[0], space)
+        if (!content) content = findFileRootContentByURI(tokens[0], space)
         log.debug "findContentForPath $uriPath - root content node is $content"
         def lineage = [content]
         if (content && (tokens.size() > 1)) {
@@ -925,6 +926,18 @@ class ContentRepositoryService {
         }
 
         return [content:content, parentURI:parentURIParts.join('/'), lineage:lineage]
+    }
+    
+    def findFileRootContentByURI(String aliasURI, Space space, Map args = Collections.EMPTY_MAP) {
+        if (log.debugEnabled) {
+            log.debug "findFileRootContentByURI: aliasURI $aliasURI, space ${space?.name}, args ${args}"
+        }
+        def r = doCriteria(ContentFile, args.status, args.params) {
+            eq('aliasURI', aliasURI)
+            eq('space', space)
+        }
+        def res = r?.findAll(){it-> (it.parent == null) || !(it.parent instanceof ContentFile)}
+        return res ? res[0] : null
     }
     
     def getAncestors(uri, sourceNode) {
