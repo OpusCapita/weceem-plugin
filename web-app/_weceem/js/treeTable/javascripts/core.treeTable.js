@@ -224,7 +224,14 @@ var droppableConf = {
                 var el = $("#" + this.id);
                 if (el.is(".inserter-before") || el.is(".inserter-after")){
                     var pos = el.is('.inserter-after') ? 'after' : 'before'
-                    var mainElId = getDecId(el.attr('id'));
+                    if ((pos == 'after') && 
+                        ($("#content-node-"+getDecId(el.attr('id'))).is('.parent'))
+                            ){
+                        pos = "to";
+                        el = $("#content-node-"+getDecId(el.attr('id')));
+                    }else{
+                        var mainElId = getDecId(el.attr('id'));
+                    }
                     var movable = $($(ui.draggable).parents("tr")[0]);
                     // @todo clean this up - slow to keep getting the node!
                     $('#confirmDialog').dialog('option', 'switch', pos);
@@ -242,7 +249,7 @@ var droppableConf = {
                     }
                 }
             }
-            resetInserters();
+            //resetInserters();
         },
         hoverClass: "accept",
         over: function(e, ui) {
@@ -278,7 +285,7 @@ function initTreeTable() {
             $("tr[id$=-"+nodeid+"]").insertAfter(target);
         else
         if (place == "to"){
-            $.each($("tr[id$="+nodeid+"]"), function(index, value){
+            $.each($("tr[id$=-"+nodeid+"]"), function(index, value){
                 $(value).appendBranchTo(target);
                 $(value).removeClass("child-of-undefined").addClass("child-of-content-node-"+trgid);
             });
@@ -423,11 +430,11 @@ function initTreeTable() {
                 var children = $(".child-of-content-node-"+trgid+"[id*=content-node-]>td:first>div>h2.title")
                 index = 0;
                 jQuery.each(children, function(index, value){
-                    if ($(value).attr('orderindex') > index){
+                    if ($(value).attr('orderindex') >= index){
                         index = $(value).attr('orderindex');
                     }
                 });
-                index++;
+                //index++;
                 break;
         }
         return index;
