@@ -40,14 +40,7 @@ class ContentFile extends Content {
 
     public void createAliasURI(parent = null) {
         if (aliasURI != title){
-            def path = getPath(this.parent)
-            def oldfile = new File(ServletContextHolder.servletContext.getRealPath(
-                "/${DEFAULT_UPLOAD_DIR}/${space.name}${path}"))            
             aliasURI = title
-            path = getPath(this.parent)
-            def newfile = new File(ServletContextHolder.servletContext.getRealPath(
-                "/${DEFAULT_UPLOAD_DIR}/${space.name}${path}"))
-            oldfile.renameTo(oldfile)
         }
     }
 
