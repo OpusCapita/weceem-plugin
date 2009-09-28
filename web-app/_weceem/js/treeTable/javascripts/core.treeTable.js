@@ -48,7 +48,7 @@ function sendSearchRequest(searchParams){
                 var changeTd = td.clone();
                 pageTd.html("<div class='item'><div class='ui-icon ui-icon-document' style='display: inline-block'></div>" + 
                 "<h2 class='title'>" + "<a href=" + obj.href + ">" + obj.title + 
-                "<span class='type'>(/" + obj.aliasURI + " - " + obj.type + ")</span></a></h2>" + 
+                "&nbsp;<span class='type'>(/" + obj.aliasURI + " - " + obj.type + ")</span></a></h2>" + 
                 "<div >Parent: <a href='#'>"
                     + obj.parent + "/" + obj.aliasURI + "</a></div></div>");
                 statusTd.text(resources[obj.status]);
