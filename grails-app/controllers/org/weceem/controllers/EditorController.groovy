@@ -97,7 +97,8 @@ class EditorController {
         } else {
             eventService.afterContentUpdated(result.content, params)
             flash.message = message(code:'message.content.updated', args:[
-                result.content.title, message(code:'content.item.name.'+result.content.class.name)])
+                result.content.title, 
+                message(code:'content.item.name.'+result.content.class.name)] )
             if (!params.continue) {
                 redirect(controller:'repository', action:'treeTable')
             } else {

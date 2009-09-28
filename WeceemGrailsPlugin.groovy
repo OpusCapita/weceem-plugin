@@ -1,3 +1,4 @@
+import org.apache.commons.logging.LogFactory
 import org.codehaus.groovy.grails.commons.GrailsDomainClass
 import org.codehaus.groovy.grails.commons.GrailsServiceClass
 import grails.util.Environment
@@ -5,6 +6,8 @@ import grails.util.Environment
 import org.weceem.content.*
 
 class WeceemGrailsPlugin {
+    def _log = LogFactory.getLog('org.weceem.WeceemGrailsPlugin')
+
     // the plugin version
     def version = "0.3-SNAPSHOT"
     // the version or versions of Grails the plugin is designed for
@@ -46,6 +49,9 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     }
 
     def doWithApplicationContext = { applicationContext ->
+        _log.info "Weceem plugin running with data source ${applicationContext.dataSource.dump()}"
+        _log.info "Weceem plugin running with grails configuration ${applicationContext.grailsApplication.config}"
+        
         applicationContext.navigationService.registerItem( 'weceem', 
             [controller:'repository', action:'treeTable', title:'content', path:'contentrepo', order:0])
         applicationContext.navigationService.registerItem( 'weceem', 
