@@ -10,7 +10,8 @@
                           >${content?.content}</textarea>
         </div>
         <div id="tabs-2">
-            <fckeditor:editor id="fckeditor" userSpace="${content.space.name}" name="${name}" width="700" height="420" toolbar="Standard" fileBrowser="default">${value}</fckeditor:editor>
+            <fckeditor:editor id="fckeditor" userSpace="${content.space.name}" name="${name}" 
+                width="700" height="420" toolbar="Basic" fileBrowser="default">${value}</fckeditor:editor>
         </div>
     </div>  
 </bean:customField>
