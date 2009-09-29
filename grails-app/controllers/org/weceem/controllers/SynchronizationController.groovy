@@ -116,7 +116,8 @@ class SynchronizationController {
                 if (ancestor){
                     if (ancestor.children == null) ancestor.children = new TreeSet()
                     ancestor.children << content
-                    ancestor.filesCount += 1
+                    if (ancestor instanceof ContentDirectory)
+                        ancestor.filesCount += 1
                     assert ancestor.save(flush: true)
                     content.parent = ancestor
                     assert content.save(flush: true)

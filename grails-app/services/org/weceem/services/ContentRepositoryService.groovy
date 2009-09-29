@@ -653,6 +653,9 @@ class ContentRepositoryService {
         if (log.debugEnabled) {
             log.debug("Updated node with id ${content.id}, properties are now: ${content.dump()}")
         }
+        if (content instanceof ContentFile){
+            content.createAliasURI()
+        }else
         if (!content.aliasURI && content.title) {
             content.createAliasURI()
         }

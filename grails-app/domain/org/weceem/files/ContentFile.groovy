@@ -30,7 +30,8 @@ class ContentFile extends Content {
     }
 
     static editors = {
-        title( editor: 'ReadOnly')
+        title()
+        aliasURI( editor: 'ReadOnly', group: 'extra')
         uploadedFile(editor:'ContentFileUpload')
         mimeType(group:'extra')
         fileSize(group:'extra', editor: 'ReadOnly')
@@ -49,6 +50,7 @@ class ContentFile extends Content {
     Boolean create(Content parentContent) {
         if (!title) {
             title = uploadedFile.originalFilename
+            createAliasURI()
         }
         assert title
         def path = ''
