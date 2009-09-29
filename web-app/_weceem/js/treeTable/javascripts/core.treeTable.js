@@ -136,7 +136,7 @@ function viewSelected() {
         return
     }
     var node = nodes[0]
-    loadPage(resources["link.preview"]+"/"+node)
+    window.open(resources["link.preview"]+"/"+node)
 }
 
 function deleteSelected() {
