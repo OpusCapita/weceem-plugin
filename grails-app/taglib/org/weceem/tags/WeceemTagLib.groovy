@@ -295,7 +295,7 @@ class WeceemTagLib {
                 link:custom ? createLink(node:n, { out << n.titleForMenu.encodeAsHTML()}) : '', node:n)
             if (currentLevel+1 < levels) {
                 request['_weceem_menu_level'] = currentLevel+1
-                out << menu([custom:false, node:n], bodyToUse)
+                out << menu([custom:true, node:n], bodyToUse)
                 request['_weceem_menu_level'] = currentLevel // back to where we were
             }
             first = false
@@ -426,6 +426,7 @@ class WeceemTagLib {
         def node = attrs[ATTR_NODE]
         if (!node) node = request[ContentController.REQUEST_ATTRIBUTE_NODE]
 
+        println "In ifUserCanEdit"
         if (weceemSecurityService.isUserAllowedToEditContent(node)) {
             out << body()
         }
