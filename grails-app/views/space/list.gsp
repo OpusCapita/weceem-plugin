@@ -49,12 +49,12 @@
       <br/>
       <div>
         <g:link action="importSpace">
-            <img src="${createLinkTo(dir:pluginContextPath + '/images/weceem', file: 'fileimport_24.gif')}"
+            <img src="${createLinkTo(dir:pluginContextPath + '/_weceem/images/weceem', file: 'fileimport_24.gif')}"
                 alt="" style="vertical-align: middle;"/>
             <span><g:message code="space.link.import"/></span>
         </g:link>
         <g:link action="exportSpace">
-            <img src="${createLinkTo(dir:pluginContextPath + '/images/weceem', file: 'fileexport_24.gif')}"
+            <img src="${createLinkTo(dir:pluginContextPath + '/_weceem/images/weceem', file: 'fileexport_24.gif')}"
                 alt="" style="vertical-align: middle;"/>
             <span><g:message code="space.link.export"/></span>
         </g:link>
