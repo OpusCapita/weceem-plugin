@@ -68,7 +68,7 @@ class SynchronizationController {
         for (p in params){
             if (pattern.matcher(p.key).matches()){
                 def id = idpattern.matcher(p.key)[0]
-                assert contentRepositoryService.deleteNode(ContentFile.get(id))
+                contentRepositoryService.deleteNode(ContentFile.get(id))
             }
         }
         redirect(controller: "repository")
