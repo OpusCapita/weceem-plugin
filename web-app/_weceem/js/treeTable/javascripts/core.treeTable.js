@@ -5,6 +5,8 @@ var cacheParams = {};
 var mouseTop = null;
 //variable for hovered item
 var hoverItem = null;
+//variable to detect time when key was pressed in search box
+var timeKeyPressed = null;
 
 function sortByField(fieldname){
     cacheParams["isAsc"] = !cacheParams["isAsc"];
@@ -13,18 +15,25 @@ function sortByField(fieldname){
     $("#searchDiv>div>table>thead>tr>th").attr("class", (cacheParams["isAsc"] ? "asc" : "desc"));
 }
 
-function catchKey(e){
-    var keyID = (window.event) ? event.keyCode : e.keyCode;
-    
-    switch(keyID){
-        //Enter pressed
-        case 13:
-            $("#search_btn").click();
-            break;
-        //Escape pressed
-        case 27:
-            $("#clear_btn").click();
-            break;
+
+function performSearch(){
+    cacheParams["data"] = $("#data")[0].value;
+    cacheParams["space"] = $('#spaceSelector')[0].options[$('#spaceSelector')[0].selectedIndex].text;
+    cacheParams["classFilter"] = ($("#advSearch").css("display") == "none" ? "none" : $("#classFilter")[0].value);
+    cacheParams["fieldFilter"] = $("#fieldFilter")[0].value;
+    cacheParams["fromDateFilter"] = $("#fromDate")[0].value;
+    cacheParams["toDateFilter"] = $("#toDate")[0].value;
+    cacheParams["statusFilter"] = $("#statusFilter")[0].value;
+    sendSearchRequest(cacheParams);
+}
+	
+function checkPerformSearch(){
+    var currTime = new Date()
+    if ((currTime.getTime() - timeKeyPressed.getTime()) > 1000){
+        performSearch();
+        timeKeyPressed = null;
+    }else{
+        setTimeout("checkPerformSearch()", 1100);
     }
 }
 
@@ -42,15 +51,16 @@ function sendSearchRequest(searchParams){
                 var obj = response.result[i];
                 var body = $("#searchDiv > div > table > tbody")
                 var newTr = tr.clone();
+                newTr.attr("id", "content-node-" + obj.id)
                 var pageTd = td.clone();
                 var statusTd = td.clone();
                 var createTd = td.clone();
                 var changeTd = td.clone();
                 pageTd.html("<div class='item'><div class='ui-icon ui-icon-document' style='display: inline-block'></div>" + 
                 "<h2 class='title'>" + "<a href=" + obj.href + ">" + obj.title + 
-                "&nbsp;<span class='type'>(/" + obj.aliasURI + " - " + obj.type + ")</span></a></h2>" + 
+                "&nbsp;<span class='type'>(" + obj.aliasURI + " - " + obj.type + ")</span></a></h2>" + 
                 "<div >Parent: <a href='#'>"
-                    + obj.parent + "/" + obj.aliasURI + "</a></div></div>");
+                    + obj.parentURI + "</a></div></div>");
                 statusTd.text(resources[obj.status]);
                 createTd.text(obj.createdBy);
                 changeTd.text(obj.changedOn);
@@ -302,17 +312,28 @@ function initTreeTable() {
         node.css("display", "");
     }
     // Handle selection of rows with click
-    jQuery.each($('tr[id*=content-node-]'), function(index, value){
-        $(value)[0].onclick = function(){
-            var clickedNode = $($(value)[0])
+    $('tr[id*=content-node-]').live('click', function(){
+            var clickedNode = $(this)
             var rowNodes = $('tr[id*=content-node-]')
             var wasSel = clickedNode.hasClass('selected')
             $('tr[id*=content-node-]').removeClass('selected');
             if (!wasSel) {
                 clickedNode.addClass('selected');
             }
+    });
+    
+    
+    
+    $("#data").keypress(function(e){
+        if (timeKeyPressed == null){
+            timeKeyPressed = new Date();
+            checkPerformSearch();
+        }else{
+            timeKeyPressed = new Date();
         }
     });
+    
+    
     $().mousemove(function (e){
         mouseTop = e.pageY - $("#treeTable")[0].offsetTop;
     });
@@ -521,20 +542,11 @@ function initTreeTable() {
 	    }
 	});
 	
+	
 // Search initialization
-    document.onkeyup = catchKey;
     $("#fromDate").datepicker();
     $("#toDate").datepicker();
-    $("#search_btn").click(function(){
-        cacheParams["data"] = $("#data")[0].value;
-        cacheParams["space"] = $('#spaceSelector')[0].options[$('#spaceSelector')[0].selectedIndex].text;
-        cacheParams["classFilter"] = ($("#advSearch").css("display") == "none" ? "none" : $("#classFilter")[0].value);
-        cacheParams["fieldFilter"] = $("#fieldFilter")[0].value;
-        cacheParams["fromDateFilter"] = $("#fromDate")[0].value;
-        cacheParams["toDateFilter"] = $("#toDate")[0].value;
-        cacheParams["statusFilter"] = $("#statusFilter")[0].value;
-        sendSearchRequest(cacheParams);
-    });
+    $("#search_btn").click(function(){performSearch()});
     $("#clear_btn").click(function(){
         cacheParams["sortField"] = "title";
         cacheParams["isAsc"] = true;

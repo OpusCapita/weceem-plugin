@@ -809,7 +809,7 @@ class RepositoryController {
         "createdBy": it.createdBy.toString(), 
         "changedOn": wcm.humanDate(date: it.changedOn), 
         "href": createLink(controller: "editor", action: "edit", id: it.id),
-        "parent": (it.parent == null ? "": ((it.parent.parent == null) ? "/${it.parent.aliasURI}" : it.parent.aliasURI )), 
+        "parentURI": (it.parent == null ? "": "/${it.parent.absoluteURI}"), 
         "type": message(code: "content.item.name.${it.toName()}")]} 
         render ([result: result] as JSON)
     }
