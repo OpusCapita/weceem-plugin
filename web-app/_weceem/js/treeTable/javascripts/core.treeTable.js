@@ -421,6 +421,9 @@ function initTreeTable() {
 		        } else if ($(node).hasClass('duplicateAction')) {
 		            duplicateSelected()
 		        }
+		        $('.fg-menu-container').hide()
+		        $('.moreActions').removeClass('ui-state-active')
+		        $('.moreActions').removeClass('fg-menu-open')
 		    }
 	    })
 	})
