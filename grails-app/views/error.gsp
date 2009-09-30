@@ -31,7 +31,7 @@
   </head>
 
   <body>
-    <img id="logo" src="${g.resource(dir:'images/layout', file:'weceem-logo.png')}"/><h1>An error occurred</h1>
+    <img id="logo" src="${g.resource(dir:'_weceem/images/layout', file:'weceem-logo.png')}"/><h1>An error occurred</h1>
     <g:if test="${exception}">
         <h2>${exception.message.encodeAsHTML()}</h2>
     </g:if>

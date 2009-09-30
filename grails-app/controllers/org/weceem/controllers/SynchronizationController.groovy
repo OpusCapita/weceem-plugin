@@ -62,7 +62,7 @@ class SynchronizationController {
      * Delete content by set of ids
      *
      */
-     def delete = {
+    def delete = {
         def pattern = ~/delete-\d+/
         def idpattern = ~/\d+/
         for (p in params){
@@ -74,6 +74,10 @@ class SynchronizationController {
         redirect(controller: "repository")
      }
 
+    def done = {
+        redirect(controller: "repository")
+    }
+    
     /**
      * Creates ContentFile/ContentDirectory from specified <code>path</code>
      * on the file system.

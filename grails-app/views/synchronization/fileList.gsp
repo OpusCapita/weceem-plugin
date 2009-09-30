@@ -5,6 +5,10 @@
   </head>
   <body >
   
+      <div class="span-24 last">
+        <h1>File Synchronization of space ${space.name.encodeAsHTML()} complete.</h1>
+      </div>
+
     <g:form controller="synchronization">
         <g:if test="${createdContent.size() != 0}">
             <div class="message span-22 prepend-1 append-1 prepent-top append-bottom last ui-state-highlight ui-corner-all">
@@ -32,32 +36,40 @@
                 </table>
             </div>
         </g:if>
-        <div class="message span-22 prepend-1 append-1 prepent-top append-bottom last ui-state-highlight ui-corner-all">
-            The following nodes were found referencing files that no longer exist in the filesystem. To remove nodes click the checkboxes and then press Delete.
-        </div>
-        <div class="container span-24 last">
-            <table class="standart">
-                <thead>
-                    <tr>
-                        <th width="15px"><g:message code="synchronization.header.contentTitle"/></th>
-                        <th width="15px"><g:message code="synchronization.header.relativePath"/></th>
-                        <th width="15px">&nbsp;</th>
-                    </tr>
-                </thead>
-                <tbody>
-                     <g:each var="cont" in="${result}">
-                        <tr>
-                            <td>${cont.title}</td>
-                            <td>${cont.toRelativePath()}</td>
-                            <td><g:checkBox name="delete-${cont.id}" value="${false}" /></td>
-                        </tr>
-                     </g:each>
-                </tbody>
-            </table>
-            <div class="span-24 last">
-                <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="Delete" controller="synchronization" action="delete"/>
+        <g:if test="${result.size()}">
+        
+            <div class="message span-22 prepend-1 append-1 prepent-top append-bottom last ui-state-highlight ui-corner-all">
+                The following nodes were found referencing files that no longer exist in the filesystem. To remove nodes click the checkboxes and then press Delete.
             </div>
-        </div>
+            <div class="container span-24 last">
+                <table class="standart">
+                    <thead>
+                        <tr>
+                            <th width="15px"><g:message code="synchronization.header.contentTitle"/></th>
+                            <th width="15px"><g:message code="synchronization.header.relativePath"/></th>
+                            <th width="15px">&nbsp;</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                         <g:each var="cont" in="${result}">
+                            <tr>
+                                <td>${cont.title}</td>
+                                <td>${cont.toRelativePath()}</td>
+                                <td><g:checkBox name="delete-${cont.id}" value="${false}" /></td>
+                            </tr>
+                         </g:each>
+                    </tbody>
+                </table>
+                <div class="span-24 last">
+                    <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="Delete selected" controller="synchronization" action="delete"/>
+                    <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="Don't delete anything" controller="synchronization" action="done"/>
+                </div>
+            </div>
+        </g:if>
+        <g:else>
+            Good news! Your repository has no content nodes referencing non-existent server files.<br/>
+            <g:link controller="repository" class="button">OK</g:link>
+        </g:else>
     </g:form>
   
   </body>
