@@ -275,10 +275,18 @@ class WeceemTagLib {
         def activeNode = lineage ? lineage[currentLevel] : null
 
         def levelnodes
+        def args = [
+            status:ContentRepositoryService.STATUS_ANY_PUBLISHED, 
+            type: org.weceem.html.HTMLContent,
+            params:[sort:'orderIndex']
+        ]
+            
         if (siblings) {
-            levelnodes = contentRepositoryService.findChildren(currentLevel == 0 ? null : node, 
-                [status:ContentRepositoryService.STATUS_ANY_PUBLISHED, type: org.weceem.html.HTMLContent,
-                    params:[sort:'orderIndex']])
+            if (currentLevel == 0) {
+                levelnodes = contentRepositoryService.findAllRootContent(node.space, args)
+            } else {
+                levelnodes = contentRepositoryService.findChildren(node, args)
+            }
         } else {
             levelnodes = [activeNode]
         }
