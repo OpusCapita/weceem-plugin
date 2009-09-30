@@ -1,11 +1,11 @@
 <script type="text/javascript">
     $(function(){
-        $('#tabs').tabs({
+        $('#tabs-${name}').tabs({
             select: function(event, ui){
                 var tabid = ui.tab.id;
                 var richEditor = FCKeditorAPI.GetInstance("${name}");
                 switch (tabid){
-                    case "tab-1":
+                    case "tab-${name}-1":
                         $.post("${createLink(action: 'convertToWiki', controller: 'editor')}",
                             {text: richEditor.GetXHTML(true)},
                             function (data){
@@ -13,7 +13,7 @@
         	                   $("#wikiEditor")[0].value = response.result;
         	                });
                         break;
-                    case "tab-2":
+                    case "tab-${name}-2":
                         $.post("${createLink(action: 'convertToHtml', controller: 'editor')}",
                             {text: $("#wikiEditor")[0].value},
                             function (data){
