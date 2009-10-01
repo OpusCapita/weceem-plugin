@@ -434,7 +434,6 @@ class WeceemTagLib {
         def node = attrs[ATTR_NODE]
         if (!node) node = request[ContentController.REQUEST_ATTRIBUTE_NODE]
 
-        println "In ifUserCanEdit"
         if (weceemSecurityService.isUserAllowedToEditContent(node)) {
             out << body()
         }

@@ -68,7 +68,7 @@ class WeceemSecurityService {
         getUserName : { -> "unknown" },
         getUserEmail : { -> "unknown@localhost" },
         getUserPrincipal : { -> [name:'unknown', email:"unknown@localhost"] },
-        getUserRoles: { -> ['ADMIN'] }
+        getUserRoles: { -> ['ROLE_ADMIN'] }
     ]
     
     def getUserName() {
@@ -85,7 +85,7 @@ class WeceemSecurityService {
      */
     def isUserAllowedContentStatus(Status status) {
         // Temporary lame impl
-        return securityDelegate.userRoles?.contains('ADMIN')
+        return securityDelegate.userRoles?.contains('ROLE_ADMIN')
     }
     
     /**
@@ -94,8 +94,7 @@ class WeceemSecurityService {
      */
     def isUserAllowedToEditContent(Content content) {
         // Temporary lame impl
-        println "isUserAllowedToEditContent: roles - ${securityDelegate.getUserRoles()}"
-        return securityDelegate.getUserRoles()?.contains('ADMIN')
+        return securityDelegate.getUserRoles()?.contains('ROLE_ADMIN')
     }
     
     /**
@@ -103,7 +102,7 @@ class WeceemSecurityService {
      */
     def isUserAdministrator() {
         // Temporary lame impl
-        return securityDelegate.userRoles?.contains('ADMIN')
+        return securityDelegate.userRoles?.contains('ROLE_ADMIN')
     }
     
     def getUserPrincipal() {
