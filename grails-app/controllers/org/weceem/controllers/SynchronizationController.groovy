@@ -26,32 +26,10 @@ class SynchronizationController {
      * Renders list of files and Content objects which need to be synchonized.
      */
     def synchronizationList = {
-        def existingFiles = new TreeSet()
         def space = Space.get(params.id)
-        def createdContent = []
-        def spaceDir = grailsApplication.parentContext.getResource(
-                "${ContentFile.DEFAULT_UPLOAD_DIR}/${space.name}").file
-        spaceDir.eachFileRecurse {file ->
-            def relativePath = file.absolutePath.substring(
-                    spaceDir.absolutePath.size() + 1)
-            def content = contentRepositoryService.findContentForPath(relativePath, space).content
-            //if content wasn't found then create new
-            if (!content){
-                createdContent += createContentFile("${spaceDir.name}/${relativePath}")
-                content = contentRepositoryService.findContentForPath(relativePath, space).content
-                while (content){
-                    existingFiles << content
-                    content = content.parent
-                }
-            }else{
-                existingFiles << content
-            }
-        }
-        def allFiles = ContentFile.findAllBySpace(space);
-        def missedFiles = allFiles.findAll(){f->
-            !(f.id in existingFiles*.id)
-        }
-        
+        def result = contentRepositoryService.synchronizeSpace(space)
+        def createdContent = result.created
+        def missedFiles = result.missed
         def dirnum = createdContent.findAll{c-> c instanceof ContentDirectory}.size()
         def filenum = createdContent.size() - dirnum
         render (view: "fileList", model: [result: missedFiles, createdContent: createdContent, 
@@ -78,61 +56,6 @@ class SynchronizationController {
         redirect(controller: "repository")
     }
     
-    /**
-     * Creates ContentFile/ContentDirectory from specified <code>path</code>
-     * on the file system.
-     *
-     * @param path
-     */
-    def createContentFile(path) {
-        List tokens = path.replace('\\', '/').split('/')
-        if (tokens.size() > 1) {
-            def space = Space.findByName(tokens[0])
-            def parents = tokens[1..(tokens.size() - 1)]
-            def ancestor = null
-            def content = null
-            def createdContent = []
-            parents.eachWithIndex(){ obj, i ->
-                def parentPath = "${parents[0..i].join('/')}"
-                def file = grailsApplication.parentContext.getResource(
-                        "${ContentFile.DEFAULT_UPLOAD_DIR}/${space.name}/${parentPath}").file
-                content = contentRepositoryService.findContentForPath(parentPath, space).content
-                if (!content){
-                    if (file.isDirectory()){
-                        content = new ContentDirectory(title: file.name,
-                            content: '', filesCount: 0, space: space, orderIndex: 0,
-                            mimeType: '', fileSize: 0, status: Status.findByPublicContent(true))
-                    }else{
-                        def mimeType = servletContext.getMimeType(file.name)
-                        content = new ContentFile(title: file.name,
-                            content: '', space: space, orderIndex: 0, 
-                            mimeType: (mimeType ? mimeType : ''), fileSize: file.length(),
-                            status: Status.findByPublicContent(true))
-                    }
-                    content.createAliasURI()
-                    if (!content.save()){
-                        println content.errors
-                        assert false
-                    }else{
-                        createdContent << content
-                    }
-                }
-                if (ancestor){
-                    if (ancestor.children == null) ancestor.children = new TreeSet()
-                    ancestor.children << content
-                    if (ancestor instanceof ContentDirectory)
-                        ancestor.filesCount += 1
-                    assert ancestor.save(flush: true)
-                    content.parent = ancestor
-                    assert content.save(flush: true)
-                }
-                ancestor = content
-            }
-            return createdContent
-        }
-        return null
-    }
-
     /**
      * Deletes ContentFile/ContentDirectory with specified <code>id</code>.
      *
