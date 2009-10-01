@@ -168,7 +168,9 @@ class ContentRepositoryService {
             contentList = Content.findAllBySpace(space)
             wasDelete = false
             for (content in contentList){
-                if (contentDelete(content)){
+                def refs = findReferencesTo(content)
+                if (refs.size() == 0){
+                    deleteNode(content)
                     wasDelete = true
                 }
             }
@@ -176,36 +178,10 @@ class ContentRepositoryService {
         log.info "Finished Deleting content from space [$space]"
     }
     
-    boolean contentDelete(content){
-        def refs = findReferencesTo(content)
-        if (refs.size() == 0){
-            deleteNode(content)
-            return true
-        }else{
-            return false
-        }
-    }
-    
     void deleteSpace(Space space) {
-        def contents = Content.findAllWhere(space: space)
-        def templateList = []
-        def copiesList = []
-        contents.each() {
-            // @todo This is bad, we should not rely on specific types of relationships
-            // Needs smarter code like the new import/export
-            if (it instanceof Template) {
-                templateList << it
-            } else if (it instanceof VirtualContent) {
-                copiesList << it
-            }
-        }
-        // delete all copies for contents in space
-        copiesList*.delete()
-        // delete other contents
-        (contents - copiesList - templateList)*.delete()
-        // delete all templates from space
-        templateList*.delete()
-        // delete space
+        // Delete space content
+        deleteSpaceContent(space)
+        // Delete space
         space.delete(flush: true)
     }
 
@@ -959,9 +935,9 @@ class ContentRepositoryService {
     }
     
     /**
-    /* Synchronize given space with file system
-    /* 
-    /* @param space - space to synchronize
+     * Synchronize given space with file system
+     * 
+     * @param space - space to synchronize
     **/
     def synchronizeSpace(space) {
         def existingFiles = new TreeSet()
