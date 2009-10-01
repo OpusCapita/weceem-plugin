@@ -1,8 +1,6 @@
 <html>
   <head>
     <meta name="layout" content="admin"/>
-    <content tag="menu"><g:render  plugin="weceem" template="/layouts/menu/design"/></content>
-    <content tag="tab">design</content>
     <title><g:message code="design.title"/></title>
   </head>
 

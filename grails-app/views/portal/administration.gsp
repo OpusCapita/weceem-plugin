@@ -2,8 +2,6 @@
   <head>
     <meta name="layout" content="admin"/>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <content tag="menu"><g:render  plugin="weceem" template="/layouts/menu/administration"/></content>
-    <content tag="tab">administration</content>
     <title><g:message code="administration.title"/></title>
   </head>
 
