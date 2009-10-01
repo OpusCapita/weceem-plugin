@@ -119,9 +119,8 @@ h2 a{
 .ui-content-item{
 
 }
-
-.treeTable .inserter-before td,
-.treeTable .inserter-after td  { padding-left:0 !important; }
+/*.treeTable .inserter-before td,*/
+/*.treeTable .inserter-after td  { padding-left:0 !important; }*/
 
 .treeTable .inserter-before .title,
 .treeTable .inserter-after .title { 

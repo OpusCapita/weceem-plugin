@@ -1,5 +1,5 @@
 <tr id="inserter-before-${c.id}" class="inserter-before ${ c.parent ? 'child-of-content-node-'+c.parent.id : ''} delimeter-${c.id}">
-  <td colspan="5" ><div class="title"></div></td>
+  <td colspan="5" ><div class="title item"></div></td>
 </tr>
 
 <tr id="content-node-${c.id}" class="${ c.parent ? 'child-of-content-node-'+c.parent.id : ''}">
@@ -48,7 +48,7 @@
 </tr>
 
 <tr id="inserter-after-${c.id}" class="inserter-after ${ c.parent ? 'child-of-content-node-'+c.parent.id : ''} delimeter-${c.id}">
-  <td colspan="5" ><div class="title"></div></td>
+  <td colspan="5" ><div class="title item"></div></td>
 </tr>
 
 <g:if test="${c.children.size()}">

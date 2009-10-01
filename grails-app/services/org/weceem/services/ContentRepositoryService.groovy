@@ -740,9 +740,6 @@ class ContentRepositoryService {
      * @todo we can probably improve performance by applying the typeRestriction using some HQL
      */ 
     def findChildren(sourceNode, Map args = Collections.EMPTY_MAP) {
-        if (!sourceNode) {
-            throw new IllegalArgumentException("findChildren cannot be called with a null sourceNode")
-        }
         
         // for VirtualContent - the children list is a list of target children
         if (sourceNode instanceof VirtualContent) {
