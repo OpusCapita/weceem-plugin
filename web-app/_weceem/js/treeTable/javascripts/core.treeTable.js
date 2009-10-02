@@ -408,6 +408,7 @@ function initTreeTable() {
     var moreActionsMenu = $('#moreActionsMenu').html()
     
 	$('.moreActions').each( function () {
+	    var button = $(this)
 	    $(this).menu({
 		    content: moreActionsMenu,		
 		    flyOut: true,
@@ -421,9 +422,7 @@ function initTreeTable() {
 		        } else if ($(node).hasClass('duplicateAction')) {
 		            duplicateSelected()
 		        }
-		        $('.fg-menu-container').hide()
-		        $('.moreActions').removeClass('ui-state-active')
-		        $('.moreActions').removeClass('fg-menu-open')
+                $(button).click()
 		    }
 	    })
 	})
