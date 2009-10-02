@@ -101,7 +101,7 @@ class SpaceController {
                 log.error("Unable to import space", e)
                 flash.message = e instanceof ImportException ? e.message : e.toString()
             } finally {
-                redirect(controller: 'repository', action: 'treeTable')
+                redirect(controller: 'repository', action: 'treeTable', params: ["space": space.name])
             }
         } else {
             flash.message = message(code: 'error.import.emptyFile')
