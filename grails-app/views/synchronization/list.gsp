@@ -20,7 +20,7 @@
           
         </div>
         <div class="prepend-2 span-10 append-2 last">
-            To begin, please choose the space you would like to synchronize.
+            To begin, please choose the space you would like to synchronize.<br/>
             <g:each in="${spaces}" status="i" var="space">
                 <g:link controller="synchronization" action="synchronizationList" id="${space.id}" class="large">${space.name.encodeAsHTML()} (/${space.aliasURI.encodeAsHTML()})</g:link><br/>
             </g:each>

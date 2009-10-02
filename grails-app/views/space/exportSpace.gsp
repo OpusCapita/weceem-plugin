@@ -5,13 +5,14 @@
   </head>
 
   <body>
-    <div class="body">
-      <b class="header"><g:message code="space.title.export"/></b>
+    <div class="span-24 last">
+      <h1><g:message code="space.title.export"/></h1>
 
       <g:if test="${flash.message}">
         <div class="message">${flash.message}</div>
       </g:if>
 
+      <p>Please select a space to export</p>
       <g:form controller="space" method="post" action="startExport">
         <div class="dialog">
           <table>
@@ -36,7 +37,7 @@
               </tr>
               <tr>
                 <td colspan="2">
-                  <input type="submit" class="button" value="${message(code: 'space.command.export')}"/>
+                  <input type="submit"class="button ui-state-default ui-corner-all" value="${message(code: 'space.command.export')}"/>
                 </td>
               </tr>
             </tbody>
