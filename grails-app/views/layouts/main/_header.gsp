@@ -6,7 +6,7 @@
           Welcome, <wcm:loggedInUserName/>
         </span>
         <g:link url="${wcm.userProfileEditUrl().encodeAsHTML()}">Profile</g:link> |
-        <a href="http://weceem.org/weceem/Documentation">Help</a> |
+        <a href="http://www.weceem.org/">Help</a> |
         <g:link url="${wcm.userLogOutUrl().encodeAsHTML()}">Log Out</g:link>
     </div>
 
