@@ -599,7 +599,28 @@ class ContentRepositoryService {
         }
 
     }
-
+    
+    def updateSpace(def id, def params){
+        
+        def space = Space.get(id)
+        if (space){
+            def oldAliasURI = space.aliasURI
+            space.properties = params
+            if (!space.hasErrors() && space.save()) {
+                def oldFile = new File(SCH.servletContext.getRealPath(
+                        "/${ContentFile.DEFAULT_UPLOAD_DIR}/${(oldAliasURI == '') ? ContentFile.EMPTY_ALIAS_URI : oldAliasURI}"))
+                def newFile = new File(SCH.servletContext.getRealPath(
+                        "/${ContentFile.DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? ContentFile.EMPTY_ALIAS_URI : space.aliasURI}"))
+                oldFile.renameTo(newFile)
+                return [space: space]
+            } else {
+                return [errors:space.errors, space:space]
+            }
+        }else{
+            return [notFound: true]
+        }
+    }
+    
     /**
      * Update a node with the new properties supplied, binding them in using Grails binding
      * @return a map containing an optional "errors" list property and optional notFound boolean property
@@ -940,7 +961,7 @@ class ContentRepositoryService {
         def existingFiles = new TreeSet()
         def createdContent = []
         def spaceDir = grailsApplication.parentContext.getResource(
-                "${ContentFile.DEFAULT_UPLOAD_DIR}/${space.name}").file
+                "${ContentFile.DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? ContentFile.EMPTY_ALIAS_URI : space.aliasURI}").file
         spaceDir.eachFileRecurse {file ->
             def relativePath = file.absolutePath.substring(
                     spaceDir.absolutePath.size() + 1)
@@ -982,7 +1003,7 @@ class ContentRepositoryService {
             parents.eachWithIndex(){ obj, i ->
                 def parentPath = "${parents[0..i].join('/')}"
                 def file = grailsApplication.parentContext.getResource(
-                        "${ContentFile.DEFAULT_UPLOAD_DIR}/${space.name}/${parentPath}").file
+                        "${ContentFile.DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? ContentFile.EMPTY_ALIAS_URI : space.aliasURI}/${parentPath}").file
                 content = findContentForPath(parentPath, space).content
                 if (!content){
                     if (file.isDirectory()){

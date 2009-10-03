@@ -21,13 +21,13 @@ class ContentDirectory extends ContentFile {
         if (parentContent && (parentContent instanceof ContentDirectory)) {
             def path = getPath(parentContent)
             def p = ServletContextHolder.servletContext.getRealPath(
-                "/${ContentFile.DEFAULT_UPLOAD_DIR}/${space.name}${path}/${title}")
+                "/${ContentFile.DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}${path}/${title}")
             log.debug "Creating directory path [$p]"
             f = new File(p)
             def r = f.mkdirs()
         } else {
             def p = ServletContextHolder.servletContext.getRealPath(
-                "/${DEFAULT_UPLOAD_DIR}/${space.name}/${title}")
+                "/${DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}/${title}")
             log.debug "Creating directory path [$p]"
             f = new File(p)
             def r = f.mkdirs()
@@ -48,7 +48,7 @@ class ContentDirectory extends ContentFile {
     Boolean deleteContent() {
         def path = getPath(this.parent)
         def file = new File(ServletContextHolder.servletContext.getRealPath(
-                "/${DEFAULT_UPLOAD_DIR}/${space.name}${path}/${title}"))
+                "/${DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}${path}/${title}"))
         if (!file.exists()) return true
         if (FileUtils.deleteQuietly(file)) {
             def childrenList = new ArrayList(this.children)

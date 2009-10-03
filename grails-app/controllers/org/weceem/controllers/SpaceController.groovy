@@ -48,14 +48,13 @@ class SpaceController {
     }
 
     def update = {
-        def space = Space.get(params.id)
-        if (space) {
-            space.properties = params
-            if (!space.hasErrors() && space.save()) {
-                flash.message = "Space '${space.name}' updated"
-                redirect(action: list, id: space.id)
+        def result = contentRepositoryService.updateSpace(params.id, params)
+        if (!result.notFound) {
+            if (!result.errors) {
+                flash.message = "Space '${result.space.name}' updated"
+                redirect(action: list, id: result.space.id)
             } else {
-                render(view: 'edit', model: [space: space])
+                render(view: 'edit', model: [space: result.space])
             }
         } else {
             flash.message = "Space not found with id ${params.id}"
