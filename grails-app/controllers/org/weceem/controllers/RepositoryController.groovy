@@ -780,7 +780,7 @@ class RepositoryController {
         if (params.classFilter != "none") 
             filterClass = Class.forName("${params.classFilter}", true, this.class.classLoader)
         println "Searching $filterClass"
-        def searchResult = filterClass.searchEvery("+title:*$searchStr* +name:$space".toString(), [reload: true])
+        def searchResult = filterClass.searchEvery("*$searchStr* +name:$space".toString(), [reload: true])
         println "Search results for $searchStr on $filterClass: $searchResult"
         def fromDateFilter = null
         def toDateFilter = null
