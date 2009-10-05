@@ -68,7 +68,7 @@ class Content implements Comparable {
 
     static constraints = {
         title(size:1..100, nullable: false, blank: false)
-        aliasURI(nullable: false, blank: false, unique: ['space', 'parent'], maxSize: 50, matches: VALID_ALIAS_URI_PATTERN)
+        aliasURI(nullable: false, blank: false, unique: ['space', 'parent'], maxSize: 50)
         space(nullable: false)
         status(nullable: false)
         orderIndex(nullable: true)
