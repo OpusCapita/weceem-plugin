@@ -18,6 +18,7 @@ import org.weceem.controllers.ContentController
 import org.codehaus.groovy.grails.commons.ApplicationHolder as AH
 import org.codehaus.groovy.grails.commons.ConfigurationHolder as CH
 import org.weceem.content.Content
+import org.weceem.files.ContentFile
 import org.weceem.services.ContentRepositoryService
 
 import org.weceem.content.Template
@@ -393,7 +394,9 @@ class WeceemTagLib {
         if (!attrs[ATTR_PATH]) {
             throwTagError("Attribute [${ATTR_PATH}] must be specified, eg the path to the file: images/icon.png")
         }
-        out << g.resource(dir:"WeceemFiles/${space.name.encodeAsURL()}", file:attrs[ATTR_PATH])
+        def aliasURI = space.aliasURI ?: ContentFile.EMPTY_ALIAS_URI
+        
+        out << g.resource(dir:"WeceemFiles/${aliasURI}", file:attrs[ATTR_PATH])
     }
 
     def humanDate = { attrs ->
