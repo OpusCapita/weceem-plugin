@@ -8,6 +8,8 @@ var hoverItem = null;
 //variable to detect time when key was pressed in search box
 var timeKeyPressed = null;
 
+var nodeIndent = 25;
+
 function sortByField(fieldname){
     cacheParams["isAsc"] = !cacheParams["isAsc"];
     cacheParams["sortField"] = fieldname;
@@ -217,9 +219,20 @@ var draggableConf = {
             }else
             if (mouseTop >= (itemButtom - 8)){
                 resetInserters();
+                var currentPadding = parseInt($("#inserter-after-"+hoverItemId+">td").css('padding-left'), 10);
+                var itemPadding = parseInt($("#content-node-"+hoverItemId+">td").css('padding-left'), 10);
+                if (currentPadding != itemPadding){
+                    $("#inserter-after-"+hoverItemId+">td").css('padding-left', itemPadding);
+                }
                 $("#inserter-after-" + hoverItemId).css('display', '');
             }else{
                 resetInserters();
+                var currentPadding = parseInt($("#inserter-after-"+hoverItemId+">td").css('padding-left'), 10);
+                var itemPadding = parseInt($("#content-node-"+hoverItemId+">td").css('padding-left'), 10);
+                if (currentPadding == itemPadding){
+                    var padding = currentPadding + nodeIndent;
+                    $("#inserter-after-"+hoverItemId+">td").css('padding-left', padding);
+                }
                 $("#inserter-after-" + hoverItemId).css('display', '');
             }
         },
@@ -346,7 +359,7 @@ function initTreeTable() {
     $().mousemove(function (e){
         mouseTop = e.pageY - $("#treeTable")[0].offsetTop;
     });
-  	$("#treeTable").treeTable({indent: 25});
+  	$("#treeTable").treeTable({indent: nodeIndent});
   	$("span.expander").click(function (){resetInserters()});
     resetInserters();
     updateExpanders();
