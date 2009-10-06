@@ -15,7 +15,6 @@
 				default: icontype="document";
 			}
 			%>
-%{--			<div id="content-node-${c.id}" class="ui-icon ui-icon-${icontype}"></div>--}%
             <wcm:renderContentItemIcon type="${c}" id="content-node-${c.id}" />
 			<h2 orderindex="${c.orderIndex == null ? 0 : c.orderIndex}" type="${c.toName()}" class="title">
 			    <g:link controller="editor" action="edit" id="${c.id}">

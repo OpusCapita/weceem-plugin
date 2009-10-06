@@ -49,6 +49,10 @@
 /*  background-image: url(../images/toggle-collapse-light.png);*/
 }
 
+.treeTable tr.inserter-before td, .treeTable tr.inserter-after td{
+    overflow-x: hidden;
+}
+
 .treeTable .ui-draggable-dragging {
   color: #000;
   z-index: 1;

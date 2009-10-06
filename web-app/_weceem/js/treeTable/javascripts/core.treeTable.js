@@ -127,6 +127,13 @@ function getSelectedNodeIds() {
 
 function resetInserters(){
     $("tr[class*=inserter]:visible").css({'display': 'none'});
+    $("tr[class*=inserter-after]").each(function (index, it){
+        var id = getDecId($(it).attr('id'));
+        if ($(".child-of-content-node-"+id).size() > 0){
+            var style = $(".child-of-content-node-"+id+">td").attr('style');
+            $("#inserter-after-"+id+">td").attr('style', style);
+        }
+    });
 }
 
 function viewSelected() {
@@ -213,6 +220,7 @@ var draggableConf = {
                 $("#inserter-after-" + hoverItemId).css('display', '');
             }else{
                 resetInserters();
+                $("#inserter-after-" + hoverItemId).css('display', '');
             }
         },
         start: function(e, ui){
@@ -297,6 +305,7 @@ function initTreeTable() {
         if (place == "to"){
             $.each($("tr[id$=-"+nodeid+"]"), function(index, value){
                 $(value).appendBranchTo(target);
+                $("#inserter-after-"+trgid).insertAfter(target);
                 $(value).removeClass("child-of-undefined").addClass("child-of-content-node-"+trgid);
             });
             $(target).addClass("parent");
