@@ -995,7 +995,7 @@ class ContentRepositoryService {
     def createContentFile(path) {
         List tokens = path.replace('\\', '/').split('/')
         if (tokens.size() > 1) {
-            def space = Space.findByName(tokens[0])
+            def space = Space.findByAliasURI((tokens[0] == ContentFile.EMPTY_ALIAS_URI) ? '' : tokens[0])
             def parents = tokens[1..(tokens.size() - 1)]
             def ancestor = null
             def content = null
