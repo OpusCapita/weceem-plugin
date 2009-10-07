@@ -318,6 +318,11 @@ function initTreeTable() {
         if (place == "to"){
             $.each($("tr[id$=-"+nodeid+"]"), function(index, value){
                 $(value).appendBranchTo(target);
+                var curpad = parseInt($("#"+value.id+">td:first").css('padding-left'), 10);
+                var tarpad = parseInt($("#content-node-"+trgid+">td:first").css('padding-left'), 10);
+                if (curpad == tarpad){
+                    $("#"+value.id+">td:first").css('padding-left', curpad + nodeIndent);
+                }
                 $("#inserter-after-"+trgid).insertAfter(target);
                 $(value).removeClass("child-of-undefined").addClass("child-of-content-node-"+trgid);
             });
