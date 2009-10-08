@@ -62,7 +62,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
       taglib.countChildren([path:"some/path", node: parent])
       fail "Expected exception with path and node attributes"
     } catch(e) {
-      assert e.message =~ "can not specify ${WeceemTagLib.ATTR_NODE} and ${WeceemTagLib.ATTR_PATH} attributes"
+        // we wanted an exception
     }
 
     taglib.countChildren([node: parent])
