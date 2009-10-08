@@ -604,13 +604,13 @@ class ContentRepositoryService {
         
         def space = Space.get(id)
         if (space){
-            def oldAliasURI = space.aliasURI
+            def oldAliasURI = space.makeUploadName()
             space.properties = params
             if (!space.hasErrors() && space.save()) {
                 def oldFile = new File(SCH.servletContext.getRealPath(
-                        "/${ContentFile.DEFAULT_UPLOAD_DIR}/${(oldAliasURI == '') ? ContentFile.EMPTY_ALIAS_URI : oldAliasURI}"))
+                        "/${ContentFile.DEFAULT_UPLOAD_DIR}/${oldAliasURI}"))
                 def newFile = new File(SCH.servletContext.getRealPath(
-                        "/${ContentFile.DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? ContentFile.EMPTY_ALIAS_URI : space.aliasURI}"))
+                        "/${ContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}"))
                 oldFile.renameTo(newFile)
                 return [space: space]
             } else {
@@ -961,7 +961,7 @@ class ContentRepositoryService {
         def existingFiles = new TreeSet()
         def createdContent = []
         def spaceDir = grailsApplication.parentContext.getResource(
-                "${ContentFile.DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? ContentFile.EMPTY_ALIAS_URI : space.aliasURI}").file
+                "${ContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}").file
         spaceDir.eachFileRecurse {file ->
             def relativePath = file.absolutePath.substring(
                     spaceDir.absolutePath.size() + 1)
@@ -1003,7 +1003,7 @@ class ContentRepositoryService {
             parents.eachWithIndex(){ obj, i ->
                 def parentPath = "${parents[0..i].join('/')}"
                 def file = grailsApplication.parentContext.getResource(
-                        "${ContentFile.DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? ContentFile.EMPTY_ALIAS_URI : space.aliasURI}/${parentPath}").file
+                        "${ContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/${parentPath}").file
                 content = findContentForPath(parentPath, space).content
                 if (!content){
                     if (file.isDirectory()){

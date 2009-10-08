@@ -63,10 +63,10 @@ class ContentFile extends Content {
             path = getPath(parentContent)
         }
         new File(ServletContextHolder.servletContext.getRealPath(
-                "/${DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}${path}")).mkdirs()
+                "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}${path}")).mkdirs()
         try {
             def f = new File(ServletContextHolder.servletContext.getRealPath(
-                "/${DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}${path}/${title}"))
+                "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}${path}/${title}"))
             uploadedFile.transferTo(f)
             mimeType = uploadedFile.contentType
             fileSize = f.length()
@@ -84,9 +84,9 @@ class ContentFile extends Content {
             path = getPath(parent)
         }
         def oldFile = new File(ServletContextHolder.servletContext.getRealPath(
-                "/${DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}${path}/${oldTitle}"))
+                "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}${path}/${oldTitle}"))
         def newFile = new File(ServletContextHolder.servletContext.getRealPath(
-                "/${DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}${path}/${title}"))
+                "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}${path}/${title}"))
         oldFile.renameTo(newFile)
     }
 
@@ -108,9 +108,9 @@ class ContentFile extends Content {
             srcPath = getPath(this)
             if (srcPath || dstPath) {
                 def file = new File(ServletContextHolder.servletContext.getRealPath(
-                        "/${DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}/${srcPath}"))
+                        "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/${srcPath}"))
                 def targetDir = new File(ServletContextHolder.servletContext.getRealPath(
-                        "/${DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}/${dstPath}"))
+                        "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/${dstPath}"))
                 try {
                     FileUtils.moveToDirectory file, targetDir, true
                 } catch (Exception e) {
@@ -133,7 +133,7 @@ class ContentFile extends Content {
         }
 
         def file = new File(ServletContextHolder.servletContext.getRealPath(
-                "/${DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}${path}/${title}"))
+                "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}${path}/${title}"))
         if (!file.exists()) return true
         return FileUtils.deleteQuietly(file)
     }
