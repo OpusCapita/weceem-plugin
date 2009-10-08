@@ -14,6 +14,8 @@
 
 package org.weceem.content
 
+import org.weceem.files.*
+
 /**
  * Space class describes a user space.
  *
@@ -39,5 +41,9 @@ class Space {
     static constraints = {
         name(nullable: false, blank: false, unique: true)
         aliasURI(nullable: false, blank: true, unique: true, size:0..80)
+    }
+    
+    public String makeUploadName(){
+        return (aliasURI == "") ? ContentFile.EMPTY_ALIAS_URI : aliasURI
     }
 }
