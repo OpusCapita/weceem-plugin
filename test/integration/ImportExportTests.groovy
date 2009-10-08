@@ -92,12 +92,12 @@ class ImportExportTests extends GroovyTestCase
 
         // check unpacked files
         assertTrue new File(servletContext.getRealPath(
-                "/${ContentFile.DEFAULT_UPLOAD_DIR}/test/test_dir")).exists()
+                "/${ContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/test_dir")).exists()
         assertTrue new File(servletContext.getRealPath(
-                "/${ContentFile.DEFAULT_UPLOAD_DIR}/test/test_dir/test_file.txt")).exists()
+                "/${ContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/test_dir/test_file.txt")).exists()
 
         def ant = new AntBuilder()
-        ant.delete(dir: servletContext.getRealPath("/${ContentFile.DEFAULT_UPLOAD_DIR}/testSpaceImport"))
+        ant.delete(dir: servletContext.getRealPath("/${ContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}"))
     }
     
     void testSimpleExport() {
