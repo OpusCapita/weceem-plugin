@@ -1,6 +1,8 @@
 package org.weceem.services
 
 import org.codehaus.groovy.grails.commons.ApplicationHolder
+import org.codehaus.groovy.grails.web.context.ServletContextHolder as SCH
+import grails.util.Environment
 
 import org.weceem.content.*
 
@@ -20,10 +22,12 @@ class ContentRepositoryService {
 
     public static final String DEFAULT_UPLOAD_DIR = 'WeceemFiles'
     static final CONTENT_CLASS = Content.class.name
-
+    static final STATUS_ANY_PUBLISHED = 'published'
+    
     static transactional = true
 
     def grailsApplication
+    def importExportService
     
     static DEFAULT_STATUSES = [
         [code:100, description:'draft', publicContent:false],
@@ -32,12 +36,24 @@ class ContentRepositoryService {
         [code:400, description:'published', publicContent:true]
     ]
     
+    void createDefaultSpace() {
+        if (Environment.current != Environment.TEST) {
+            if (Space.count() == 0) {
+                createSpace([name:'Default'])
+            }
+        }
+    }
+    
     void createDefaultStatuses() {
         if (Status.count() == 0) {
             DEFAULT_STATUSES.each {
                 assert new Status(it).save()
             }
         }
+    }
+    
+    List getAllPublicStatuses() {
+        Status.findAllByPublicContent(true)
     }
     
     Space findDefaultSpace() {
@@ -57,10 +73,12 @@ class ContentRepositoryService {
         def spaceName
         def space
         
-        def n = uri.indexOf('/')
+        def n = uri?.indexOf('/')
         if (n >= 0) {
             spaceName = uri[0..n-1]
-            uri = uri[n+1..-1]
+            if (n < uri.size()-1) {
+                uri = uri[n+1..-1]
+            }
         }
         
         // Let's try to find the space, or page in the root space
@@ -103,11 +121,82 @@ class ContentRepositoryService {
         [space:space, uri:uri]
     }
     
+    Space createSpace(params) {
+        def s = new Space(params)
+        if (s.save()) {
+            importSpaceTemplate('default', s)
+        }
+        return s // If this fails we still return the original space so we can see errors
+    }
+    
+    /**
+     * Import a named space template (import zip) into the specified space
+     */
+    void importSpaceTemplate(String templateName, Space space) {
+        log.info "Importing space template [${templateName}] into space [${space.name}]"
+        // For now we only load files, in future we may get them as blobs from DB
+        def f = File.createTempFile("default-space-import", null)
+        def resourceName = "classpath:/org/weceem/resources/${templateName}-space-template.zip"
+        def res = ApplicationHolder.application.parentContext.getResource(resourceName).inputStream
+        if (!res) {
+            log.error "Unable to import space template [${templateName}] into space [${space.name}], space template not found at resource ${resourceName}"
+            return
+        }
+        f.withOutputStream { os ->
+            os << res
+        }
+        try {
+            importExportService.importSpace(space, 'simpleSpaceImporter', f)
+        } catch (Throwable t) {
+            log.error "Unable to import space template [${templateName}] into space [${space.name}]", t
+            throw t // rethrow, this is sort of fatal
+        }
+        log.info "Successfully imported space template [${templateName}] into space [${space.name}]"
+    }
+    
+    void deleteSpaceContent(space) {
+        log.info "Deleting content from space [$space]"
+        // Let's brute-force this
+        // @todo remove/rework this for 0.2
+        def contentList = Content.findAllBySpace(space)
+        for (content in contentList){
+            content.parent = null
+            content.save()
+        }
+        def wasDelete = true
+        while (wasDelete){
+            contentList = Content.findAllBySpace(space)
+            wasDelete = false
+            for (content in contentList){
+                def refs = findReferencesTo(content)
+                if (refs.size() == 0){
+                    deleteNode(content)
+                    wasDelete = true
+                }
+            }
+        }
+        log.info "Finished Deleting content from space [$space]"
+    }
+    
+    void deleteSpace(Space space) {
+        // Delete space content
+        deleteSpaceContent(space)
+        // Delete space
+        space.delete(flush: true)
+    }
+
+    /**
+     * Take a string or Class or null and turn it into a content Class
+     */
     // @todo cache the list of known type ans mappings that are assignable to a Content variable
     // so that we can skip the isAssignableFrom which will affect performance a lot, as this function may be
     // called a lot
-    Class getContentClassForType(String type) {
-        def cls = grailsApplication.getClassForName(type)
+    Class getContentClassForType(def type) {
+        if (type == null) {
+            return Content.class
+        }        
+        
+        def cls = (type instanceof Class) ? type : grailsApplication.getClassForName(type)
         if (cls) {
             if (!Content.isAssignableFrom(cls)) {
                 throw new IllegalArgumentException("The class $clazz does not extend Content")
@@ -222,18 +311,8 @@ class ContentRepositoryService {
      * @param parentContent
      */
     Boolean createNode(Content content, Content parentContent = null) {
-        
         log.debug "Creating node: ${content.dump()}"
-        
         if (parentContent == null) parentContent = content.parent
-
-        // Update date orderIndex to last order index + 1 in the parent's child list
-        if (parentContent) {
-            def orderIndex = parentContent.children ?
-                             parentContent.children?.last()?.orderIndex + 1 : 0
-            content.orderIndex = orderIndex
-            parentContent.addToChildren(content) // @todo this is probably fixed in Grails 1.1.1
-        } else content.orderIndex = 0
 
         def result 
         if (content.metaClass.respondsTo(content, 'create', Content)) {
@@ -242,15 +321,43 @@ class ContentRepositoryService {
         } else {
             result = true
         }
-
+        def uniqueURI = true
         if (result) {
             // We complete the AliasURI, AFTER handling the create() event which may need to affect title/aliasURI
             if (!content.aliasURI) {
                 content.createAliasURI()
             }
+            
             result = content.validate()
+
+            // Check aliasURI uniqueness within content items
+          // The withNewSession is a patch for the ADT project that causes an exception when saving a Bar with categories
+          // TODO: (Scott) - take out the withNewSession and test after the 1.2 release
+          Content.withNewSession {
+            uniqueURI = Content.findByParentAndAliasURI(parentContent, content.aliasURI) ? false : true
+          }            
         }
         
+        if (uniqueURI){
+            // Update date orderIndex to last order index + 1 in the parent's child list
+            if (parentContent) {
+                def orderIndex = parentContent.children ?
+                                 parentContent.children?.last()?.orderIndex + 1 : 0
+                content.orderIndex = orderIndex
+                parentContent.addToChildren(content)
+            } else {
+                def criteria = Content.createCriteria()
+                def nodes = criteria {
+                    isNull("parent")
+                    maxResults(1)
+                    order("orderIndex", "desc")
+                }
+                content.orderIndex = nodes[0].orderIndex + 1
+            }
+        }else{
+            if (!parentContent)
+                content.errors.rejectValue("aliasURI", "org.weceem.content.Content.aliasURI.unique")
+        }
         return result
     }
 
@@ -291,11 +398,11 @@ class ContentRepositoryService {
                                           aliasURI: sourceContent.aliasURI + "-copy",
                                           target: sourceContent, status: sourceContent.status, 
                                           space: sourceContent.space)
-        if (Content.findAll("from Content c where c.orderIndex=? and c.parent=?", [orderIndex, targetContent]) == null){
-            vcont.orderIndex = orderIndex
-        }else{
-            vcont.orderIndex = orderIndex + 1
+        Content inPoint = Content.findByOrderIndexAndParent(orderIndex, targetContent)
+        if (inPoint != null){
+            shiftNodeChildrenOrderIndex(targetContent, orderIndex)
         }
+        vcont.orderIndex = orderIndex
         if (targetContent) {
             if (VirtualContent.findWhere(parent: targetContent, target: sourceContent)){
                 return null
@@ -323,7 +430,24 @@ class ContentRepositoryService {
      */
     Boolean moveNode(Content sourceContent, Content targetContent, orderIndex) {
         if (!sourceContent) return false
-        
+        if (!targetContent){
+            def criteria = Content.createCriteria()
+            def nodes = criteria {
+                if (targetContent){
+                    eq("parent.id", targetContent.id)
+                }else{
+                    isNull("parent")
+                }
+                eq("aliasURI", sourceContent.aliasURI)
+                not{
+                    eq("id", sourceContent.id)
+                }
+            }
+            
+            if (nodes.size() > 0){
+                return false
+            } 
+        }
         if (sourceContent.metaClass.respondsTo(sourceContent, "move", Content)){
             sourceContent.move(targetContent)
         }
@@ -333,26 +457,38 @@ class ContentRepositoryService {
             sourceContent.parent = null
             assert parent.save()
         }
-        if (Content.findAll("from Content c where c.orderIndex=? and c.parent=? ", [orderIndex, targetContent]) == null){
-            sourceContent.orderIndex = orderIndex
-        }else{
-            Content.executeUpdate("update Content c set c.orderIndex=c.orderIndex+1 where c.orderIndex>? and c.parent=?", [orderIndex, targetContent])
-            sourceContent.orderIndex = orderIndex + 1
+        Content inPoint = Content.findByOrderIndexAndParent(orderIndex, targetContent)
+        if (inPoint != null){
+            shiftNodeChildrenOrderIndex(targetContent, orderIndex)
         }
+        sourceContent.orderIndex = orderIndex
         if (targetContent) {
             if (!targetContent.children) targetContent.children = new TreeSet()
             targetContent.addToChildren(sourceContent)
             assert targetContent.save()
         }
-        assert sourceContent.save()
-        return true
-        if (sourceContent.metaClass.respondsTo(sourceContent, 'move', Content, Content)) {
-            return sourceContent.move(sourceParentContent, targetContent)
-        } else {
-            return true
+        return sourceContent.save(flush: true)
+     }
+     
+    def shiftNodeChildrenOrderIndex(parent = null, shiftedOrderIndex){
+        def criteria = Content.createCriteria()
+        def nodes = criteria {
+            if (parent){
+                eq("parent.id", parent.id)
+            }else{
+                isNull("parent")
+            }
+            ge("orderIndex", shiftedOrderIndex)
+            order("orderIndex", "asc")
+        }
+        def orderIndex = shiftedOrderIndex
+        nodes.each{it->
+            it.orderIndex = ++orderIndex
+            it.save()
         }
     }
-
+    
+    
     /**
      * Use introspection to find all references to the specified content. Requires finding all
      * associations/relationships to other Content and querying them all individually. Hideous but
@@ -404,24 +540,10 @@ class ContentRepositoryService {
         } else {
             def parent = sourceContent.parent
 
-/* @todo Check but I'm pretty sure we don't want to keep children - users can move them first 
-            if (sourceContent.children) {
-                def children = new ArrayList(sourceContent.children)
-                // define for new parent for all children
-                children?.each() {
-                    sourceContent.children.remove(it)
-                    // update orderIndex for new association
-                    def newIndex = parent?.children?.last()?.orderIndex ?
-                                       parent?.children?.last()?.orderIndex + 1 : 0
-                    it.orderIndex = newIndex
-                    it.parent = parent
-                    it.save()
-                }
-            }
-*/
             // if there is a parent  - we delete node from its association
             if (parent) {
-                parent.children.remove(sourceContent)
+                parent.children = parent.children.findAll{it-> it.id != sourceContent.id}
+                assert parent.save()
             }
 
             // we need to delete all virtual contents that reference sourceContent
@@ -435,6 +557,14 @@ class ContentRepositoryService {
             }
 
             // delete node
+            
+            // @todo replace this with code that looks at all the properties for relationships
+            if (sourceContent.metaClass.hasProperty(sourceContent, 'template')?.type == Template) {
+                sourceContent.template = null
+            }
+            if (sourceContent.metaClass.hasProperty(sourceContent, 'target')?.type == Content) {
+                sourceContent.target = null
+            }
             sourceContent.delete(flush: true)
 
             return true
@@ -443,6 +573,8 @@ class ContentRepositoryService {
 
     /**
      * Deletes content reference 
+     *
+     * @todo Update the naming of this, "link" is not correct terminology. 
      *
      * @param child
      * @param parent
@@ -467,7 +599,28 @@ class ContentRepositoryService {
         }
 
     }
-
+    
+    def updateSpace(def id, def params){
+        
+        def space = Space.get(id)
+        if (space){
+            def oldAliasURI = space.makeUploadName()
+            space.properties = params
+            if (!space.hasErrors() && space.save()) {
+                def oldFile = new File(SCH.servletContext.getRealPath(
+                        "/${ContentFile.DEFAULT_UPLOAD_DIR}/${oldAliasURI}"))
+                def newFile = new File(SCH.servletContext.getRealPath(
+                        "/${ContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}"))
+                oldFile.renameTo(newFile)
+                return [space: space]
+            } else {
+                return [errors:space.errors, space:space]
+            }
+        }else{
+            return [notFound: true]
+        }
+    }
+    
     /**
      * Update a node with the new properties supplied, binding them in using Grails binding
      * @return a map containing an optional "errors" list property and optional notFound boolean property
@@ -497,6 +650,9 @@ class ContentRepositoryService {
         if (log.debugEnabled) {
             log.debug("Updated node with id ${content.id}, properties are now: ${content.dump()}")
         }
+        if (content instanceof ContentFile){
+            content.createAliasURI()
+        }else
         if (!content.aliasURI && content.title) {
             content.createAliasURI()
         }
@@ -515,25 +671,115 @@ class ContentRepositoryService {
     }
     
     /**
-     * Find all the children of the specified node, within the content hierarchy, optionally filtering by a content type class
-     * @todo we can probably improve performance by applying the typeRestriction using some HQL
-     */ 
-    def findChildren(sourceNode, typeRestriction = null, params = null) {
-        if (!sourceNode) return Content.findAll("from Content c where c.parent is null")
-
+     * Count child nodes of a given node, where nodes match the type and status (if any) supplied in args
+     * Very useful for rendering the number of published comments on an item, for example in blogs.
+     */
+    def countChildren(sourceNode, Map args = null) {
         // for VirtualContent - the children list is a list of target children
         if (sourceNode instanceof VirtualContent) {
             sourceNode = sourceNode.target
         }
-        // @todo replace this with smarter queries on children instead of requiring loading of all child objects
-        if (typeRestriction && (typeRestriction instanceof Class)) {
-            typeRestriction = typeRestriction.name
+        
+        def clz = args.type ? getContentClassForType(args.type) : Content
+        return (doCriteria(clz, args.status, args.params) {
+            projections {
+                count('id')
+            }
+            if (sourceNode) {
+                eq('parent', sourceNode)
+            } else {
+                isNull('parent')
+            }
+        })[0]
+    }
+    
+    /**
+     * Change a criteria closure so that it includes the restrictions specified in the params as per
+     * normal grails controller mechanisms - max, offset, sort and order
+     */
+    private Closure criteriaWithParams(Map params, Closure originalCriteria) {
+        return { ->
+            originalCriteria.delegate = delegate
+            originalCriteria()
+            if (params?.max != null) {
+                maxResults(params.max)
+            }
+            if (params?.offset != null) {
+                firstResult(params.offset)
+            }
+            if (params?.sort != null) {
+                order(params.sort, params.order ?: 'asc')
+            }
         }
-        def clz = typeRestriction ? ApplicationHolder.application.getClassForName(typeRestriction) : Content
-        def children = clz.findAllByParent(sourceNode, params)
+    }
+    
+    /**
+     * Wrap a criteria query, adding filtering by status
+     * where status can be:
+     * - null for 'any' 
+     * - a Status instance eg Status.get(1)
+     * - an integer for a status code eg 500
+     * - a list of status codes eg [100, 200, 500]
+     * - a range of integer status codes eg (1..500)
+     * - a string integer status code eg "500"
+     * 
+     */
+    private def criteriaWithStatus(status, Closure originalCriteria) {
+        return { ->
+            originalCriteria.delegate = delegate
+            originalCriteria()
+
+            if (status != null) {
+                if (status == ContentRepositoryService.STATUS_ANY_PUBLISHED) {
+                    inList('status', allPublicStatuses)
+                } else if (status instanceof Collection) {
+                    // NOTE: This assumes collection is a collection of codes, not Status objects
+                    inList('status', Status.findAllByCodeInList(status))
+                } else if (status instanceof Status) {
+                    eq('status', status)
+                } else if (status instanceof Integer) {
+                    eq('status', Status.findByCode(status) )
+                } else if (status instanceof IntRange) {
+                    between('status', status.fromInt, status.toInt)
+                } else {
+                    def s = status.toString()
+                    if (s.isInteger()) {
+                        eq('status', Status.findByCode(s.toInteger()) )
+                    } else throw new IllegalArgumentException(
+                        "The [status] argument must be null (for 'any'), or '${ContentRepositoryService.STATUS_ANY_PUBLISHED}',  an integer (or integer string), a collection of codes (numbers), a Status instance or an IntRange. You supplied [$status]")
+                }
+            }
+        }
+    }
+    
+    protected def doCriteria(clz, status, params, Closure c) {
+        clz.withCriteria( criteriaWithParams( params, criteriaWithStatus(status, c) ) )
+    }
+    
+    /**
+     * Find all the children of the specified node, within the content hierarchy, optionally filtering by a content type class
+     * @todo we can probably improve performance by applying the typeRestriction using some HQL
+     */ 
+    def findChildren(sourceNode, Map args = Collections.EMPTY_MAP) {
+        
+        // for VirtualContent - the children list is a list of target children
+        if (sourceNode instanceof VirtualContent) {
+            sourceNode = sourceNode.target
+        }
+        
+        // @todo replace this with smarter queries on children instead of requiring loading of all child objects
+        def typeRestriction = getContentClassForType(args.type)
+        def children = doCriteria(typeRestriction, args.status, args.params) {
+            if (sourceNode == null) {
+                isNull('parent')
+            } else {
+                eq('parent', sourceNode)
+            }
+        }
         
         return children //  sortNodes(children, params?.sort, params?.order)
     }
+
 
     def sortNodes(nodes, sortProperty, sortDirection = "asc") {
         if (sortProperty) {
@@ -556,46 +802,80 @@ class ContentRepositoryService {
     }
     
     /**
-     * Find all the parents of the specified node, within the content hierarchy, optionally filtering by a content type class
+     * Returns true if the node has a status that matches the supplied status
+     * See findWithStatus() for rules and possible values of "status"
+     */
+    boolean contentMatchesStatus(status, Content node) {
+        if (status == null) {
+            return true
+        } else if (status == ContentRepositoryService.STATUS_ANY_PUBLISHED) {
+            return Status.findAllByPublicContent(true).find { it == node.status }
+        } else if (status instanceof Collection) {
+            // NOTE: This assumes collection is a collection of codes, not Status objects
+            return status.find { it == node.status.code }  
+        } else if (status instanceof Status) {
+            return node.status == status
+        } else if (status instanceof Integer) {
+            return node.status.code == status.code
+        } else if (status instanceof IntRange) {
+            return status.containsWithBounds(node.status.code)
+        } else {
+            def s = status.toString()
+            if (s.isInteger()) {
+                return s.toNumber() == node.status.code
+            } else throw new IllegalArgumentException(
+                "The [status] argument must be null (for 'any'), or '${ContentRepositoryService.STATUS_ANY_PUBLISHED}', an integer (or integer string), a collection of codes (numbers), a Status instance or an IntRange. You supplied [$status]")
+        }        
+    }
+    
+    /**
+     * Find all the parents of the specified node, within the content hierarchy, optionally filtering by status and a content type class
      * @todo we can probably improve performance by applying the typeRestriction using some HQL
      */ 
-    def findParents(sourceNode, typeRestriction = null, params = null) {
+    def findParents(sourceNode, Map args = Collections.EMPTY_MAP) {
         // @todo change to criteria/select
-        def references = VirtualContent.findAllWhere(target: sourceNode)*.parent
-        if (sourceNode.parent) references << sourceNode.parent
-
-        if (typeRestriction && (typeRestriction instanceof Class)) {
-            typeRestriction = typeRestriction.name
+        def references = (doCriteria(VirtualContent, args.status, Collections.EMPTY_MAP) {
+            eq('target', sourceNode) 
+        })*.parent
+         
+        if (sourceNode.parent && contentMatchesStatus(args.status, sourceNode.parent)) {
+            references << sourceNode.parent
         }
+        // Allow null here if there's no restriction
+        def typeRestriction = args.type ? getContentClassForType(args.type) : null
         def parents = []
         references?.unique()?.each { 
-            if (typeRestriction ? it.class.name == typeRestriction : true) {
+            if (typeRestriction ? typeRestriction.isAssignableFrom(it.class) : true) {
                 parents << it
             }
         }
-        return sortNodes(parents, params?.sort, params?.order)
+        return sortNodes(parents, args.params?.sort, args.params?.order)
     }
 
     /**
-     * Locate a root node by uri, type and space
+     * Locate a root node by uri, type, status and space
      */ 
-    def findRootContentByURI(String aliasURI, Space space, String type = null) {
+    def findRootContentByURI(String aliasURI, Space space, Map args = Collections.EMPTY_MAP) {
         if (log.debugEnabled) {
-            log.debug "findRootContentByURI: aliasURI $aliasURI, space ${space?.name}, type ${type}"
+            log.debug "findRootContentByURI: aliasURI $aliasURI, space ${space?.name}, args ${args}"
         }
-        if (!type) type = CONTENT_CLASS
-        getContentClassForType(type)?.find("""from ${type} c \
-            where c.aliasURI = ? and c.space = ? and c.parent = NULL""",
-            [aliasURI, space])        
+        def r = doCriteria(getContentClassForType(args.type), args.status, args.params) {
+            isNull('parent')
+            eq('aliasURI', aliasURI)
+            eq('space', space)
+            maxResults(1)
+        }
+        return r ? r[0] : null
     }
     
     /**
      * find all root nodes by type and space
      */ 
-    def findAllRootContent(Space space, String type = null, Map params = null) {
-        if (!type) type = CONTENT_CLASS
-        ApplicationHolder.application
-            .getClassForName(type)?.findAllBySpaceAndParent(space, null, params)        
+    def findAllRootContent(Space space, Map args = Collections.EMPTY_MAP) {
+        doCriteria(getContentClassForType(args.type), args.status, args.params) {
+            isNull('parent')
+            eq('space', space)
+        }
     }
     
     /**
@@ -604,24 +884,25 @@ class ContentRepositoryService {
      * or none at all. Each node can have multiple URI paths, so this code returns the node AND the uri to its parent
      * so that you can tell where it is in the hierarchy
      *
+     * This call does NOT filter by path.
+     *
      * @param uriPath
-     * @param type
      * @param space
      *
      * @return a map of 'content' (the node), 'lineage' (list of parent Content nodes to reach the node) 
      * and 'parentURI' (the uri to the parent of this instance of the node)
      */
-    def findContentForPath(String uriPath, Space space, String type = null) {
-        log.debug "findContentForPath uri: ${uriPath} type: ${type} space: ${space}"
+    def findContentForPath(String uriPath, Space space) {
+        log.debug "findContentForPath uri: ${uriPath} space: ${space}"
         def tokens = uriPath.split('/')
 
-        // todo: optimize query
-        def content = findRootContentByURI(tokens[0], space, type)
+        // @todo: optimize query 
+        def content = findRootContentByURI(tokens[0], space)
+        if (!content) content = findFileRootContentByURI(tokens[0], space)
         log.debug "findContentForPath $uriPath - root content node is $content"
-        
-        def lineage = []
-        if (content && tokens.size() > 1) {
-            for (n in 1..tokens.size()-1) { 
+        def lineage = [content]
+        if (content && (tokens.size() > 1)) {
+            for (n in 1..tokens.size()-1) {
                 def child = Content.find("""from Content c \
                         where c.parent = ? and c.aliasURI = ?""",
                         [content, tokens[n]])
@@ -636,7 +917,7 @@ class ContentRepositoryService {
                 }
             }
         }
-        
+    
         // Get all the URI parts except the last
         def parentURIParts = []
         if (tokens.size() > 1) {
@@ -646,8 +927,119 @@ class ContentRepositoryService {
         return [content:content, parentURI:parentURIParts.join('/'), lineage:lineage]
     }
     
+    def findFileRootContentByURI(String aliasURI, Space space, Map args = Collections.EMPTY_MAP) {
+        if (log.debugEnabled) {
+            log.debug "findFileRootContentByURI: aliasURI $aliasURI, space ${space?.name}, args ${args}"
+        }
+        def r = doCriteria(ContentFile, args.status, args.params) {
+            eq('aliasURI', aliasURI)
+            eq('space', space)
+        }
+        def res = r?.findAll(){it-> (it.parent == null) || !(it.parent instanceof ContentFile)}
+        return res ? res[0] : null
+    }
+    
     def getAncestors(uri, sourceNode) {
         // Can't impl this yet
     }
+    
+    def getTemplateForContent(def content){
+        def template = (content.metaClass.hasProperty(content, 'template')) ? content.template : null
+        if ((template == null) && (content.parent != null)){
+            return getTemplateForContent(content.parent)
+        }else{
+            return template
+        }
+    }
+    
+    /**
+     * Synchronize given space with file system
+     * 
+     * @param space - space to synchronize
+    **/
+    def synchronizeSpace(space) {
+        def existingFiles = new TreeSet()
+        def createdContent = []
+        def spaceDir = grailsApplication.parentContext.getResource(
+                "${ContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}").file
+        spaceDir.eachFileRecurse {file ->
+            def relativePath = file.absolutePath.substring(
+                    spaceDir.absolutePath.size() + 1)
+            def content = findContentForPath(relativePath, space).content
+            //if content wasn't found then create new
+            if (!content){
+                createdContent += createContentFile("${spaceDir.name}/${relativePath}")
+                content = findContentForPath(relativePath, space).content
+                while (content){
+                    existingFiles << content
+                    content = content.parent
+                }
+            }else{
+                existingFiles << content
+            }
+        }
+        def allFiles = ContentFile.findAllBySpace(space);
+        def missedFiles = allFiles.findAll(){f->
+            !(f.id in existingFiles*.id)
+        }
+        
+        return ["created": createdContent, "missed": missedFiles]
+    }
+    
+    /**
+     * Creates ContentFile/ContentDirectory from specified <code>path</code>
+     * on the file system.
+     *
+     * @param path
+     */
+    def createContentFile(path) {
+        List tokens = path.replace('\\', '/').split('/')
+        if (tokens.size() > 1) {
+            def space = Space.findByAliasURI((tokens[0] == ContentFile.EMPTY_ALIAS_URI) ? '' : tokens[0])
+            def parents = tokens[1..(tokens.size() - 1)]
+            def ancestor = null
+            def content = null
+            def createdContent = []
+            parents.eachWithIndex(){ obj, i ->
+                def parentPath = "${parents[0..i].join('/')}"
+                def file = grailsApplication.parentContext.getResource(
+                        "${ContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/${parentPath}").file
+                content = findContentForPath(parentPath, space).content
+                if (!content){
+                    if (file.isDirectory()){
+                        content = new ContentDirectory(title: file.name,
+                            content: '', filesCount: 0, space: space, orderIndex: 0,
+                            mimeType: '', fileSize: 0, status: Status.findByPublicContent(true))
+                    }else{
+                        def mimeType = SCH.servletContext.getMimeType(file.name)
+                        content = new ContentFile(title: file.name,
+                            content: '', space: space, orderIndex: 0, 
+                            mimeType: (mimeType ? mimeType : ''), fileSize: file.length(),
+                            status: Status.findByPublicContent(true))
+                    }
+                    content.createAliasURI()
+                    if (!content.save()){
+                        println content.errors
+                        assert false
+                    }else{
+                        createdContent << content
+                    }
+                }
+                if (ancestor){
+                    if (ancestor.children == null) ancestor.children = new TreeSet()
+                    ancestor.children << content
+                    if (ancestor instanceof ContentDirectory)
+                        ancestor.filesCount += 1
+                    assert ancestor.save(flush: true)
+                    content.parent = ancestor
+                    assert content.save(flush: true)
+                }
+                ancestor = content
+            }
+            return createdContent
+        }
+        return null
+    }
+    
 }
 

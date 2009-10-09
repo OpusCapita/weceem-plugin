@@ -17,6 +17,7 @@ import org.weceem.content.*
 import org.codehaus.groovy.grails.web.pages.GSPResponseWriter
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
 import org.springframework.web.context.request.RequestContextHolder
+import grails.util.GrailsUtil
 
 class ContentController {
     static String REQUEST_ATTRIBUTE_PAGE = "weceem.page"
@@ -62,7 +63,10 @@ class ContentController {
     			def pageInfo = [ URI:uri, 
     			    parentURI:contentInfo.parentURI, 
     			    lineage: contentInfo.lineage, 
-    			    title: content.title]
+    			    title: content.title,
+    			    titleForHTML: content.titleForHTML,
+    			    titleForMenu: content.titleForMenu
+    			    ]
 
                 // Make this available to the rest of the request chain
                 request[REQUEST_ATTRIBUTE_NODE] = content
@@ -80,19 +84,27 @@ class ContentController {
                     // or better provide a util function for rendering the content inside a template 
                     return renderController.show()
                 } else {
-                    def contentText = content.content
-                    pageInfo.text = contentText
                     
-                    log.debug "Content is: $contentText"
+                    def contentText
+                    if (content.metaClass.hasProperty(content, 'content')) {
+                        contentText = content.content
+                        pageInfo.text = contentText
                     
-                    def template = getTemplateForContent(content)
+                        log.debug "Content is: $contentText"
+                    }
+                    
+                    def template = contentRepositoryService.getTemplateForContent(content)
                     log.debug "Content's template is: $template"
 
                     if (!template) {
-                        // todo: what need to be rendered?
-                        log.debug "Rendering content without template: $contentText"
-                        // @todo This needs to handle ContentFile/ContentDirectory requests and pipe them through request dispatcher
-                        render(text:contentText, contentType:content.mimeType)
+                        if (contentText != null) {
+                            // todo: what need to be rendered?
+                            log.debug "Rendering content of type [${content.mimeType}] without template: $contentText"
+                            // @todo This needs to handle ContentFile/ContentDirectory requests and pipe them through request dispatcher
+                            render(text:contentText, contentType:content.mimeType)
+                        } else {
+                            response.sendError(500, "Unable to render content at ${uri}, no content property and no template defined")
+                        }
                         return
                     }
                 
@@ -103,14 +115,10 @@ class ContentController {
                     // Only Templates can have GSP tags and expressions, the content is included later as part of the model
                     def groovyTemplate = engine.createTemplate(template.content, template.title)
                 
-                    try {
-                        // Pass in the content so it can be rendered in the template
-                        def preparedContent = groovyTemplate?.make([user: activeUser, node: content, page:pageInfo, space:space])
-                        if (preparedContent)  {
-                           preparedContent.writeTo(out)
-                        }
-                    } catch (Exception e) {
-                        log.error("Exception in rendering view", e)
+                    // Pass in the content so it can be rendered in the template
+                    def preparedContent = groovyTemplate?.make([user: activeUser, node: content, page:pageInfo, space:space])
+                    if (preparedContent)  {
+                       preparedContent.writeTo(out)
                     }
 
                     out.flush()
@@ -137,14 +145,5 @@ class ContentController {
         response.sendError(404, msg)
     }
     
-    private def getTemplateForContent(def contentNode) {
-        // get template for content
-        // this might later be extended for more complex cases
-        if (!contentNode) {
-            return null
-        }
-        // todo: StyleSheet, ForumEntry & BlogEntry haven't templates.. think how to render
-        return contentNode.metaClass.hasProperty(contentNode, 'template') ? contentNode.template : null
-    }
     
 }

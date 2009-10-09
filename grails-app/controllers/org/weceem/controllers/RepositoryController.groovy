@@ -24,6 +24,7 @@ import com.lowagie.text.Section
 import com.lowagie.text.html.HtmlParser
 import com.lowagie.text.pdf.PdfWriter
 import java.text.SimpleDateFormat
+import org.compass.core.*
 
 import org.weceem.content.*
 // Design smell
@@ -68,7 +69,19 @@ class RepositoryController {
         if (!(actionName in ACTIONS_NEEDING_SPACE)) return true
 
         if (!params.space) {
-            // Find the default space and redirect so url has space in
+            if (session.currentAdminSpace) {
+                params.space = Space.get(session.currentAdminSpace)
+                // Be careful, the space might have been deleted
+                if (params.space) return true
+                // If it is null we fall through and resolve again
+            } 
+
+            // Find the default space(if there is any) and redirect so url has space in
+            if (Space.count() == 0){
+                flash.message = message(code: 'message.there.are.no.spaces')
+                redirect(controller:'space')
+                return false
+            }
             def space = contentRepositoryService.findDefaultSpace()
             if (log.debugEnabled) {
                 log.debug "Using default space: ${space.name}"
@@ -82,10 +95,16 @@ class RepositoryController {
             }
             params.space = findSelectedSpace()
             if (!params.space) {
+                // @todo in future we should default to another space if none found, with a message
+                // "The space you selected can no longer be found"
                 flash.message = message(code:'message.no.such.space', args:[params.space])
                 params.space = contentRepositoryService.findDefaultSpace()
             }
         }
+        if (params.space) {
+            session.currentAdminSpace = params.space.id
+        }
+        return true
     }
     
     static defaultAction = 'treeTable'
@@ -107,9 +126,9 @@ class RepositoryController {
     }
 
     def treeTable = {
-        if (params.space) {
-            def nodes = contentRepositoryService.findAllRootContent( params.space, null, 
-                [sort:'aliasURI', fetch:[children:'eager']])
+        if (params.space && (Space.count() != 0)) {
+            def nodes = contentRepositoryService.findAllRootContent( params.space, 
+                [params: [sort:'aliasURI', fetch:[children:'eager']] ])
             def haveChildren = [:]
             for (domainClass in contentRepositoryService.listContentClasses()){
                 def dcInst = domainClass.newInstance()
@@ -328,11 +347,9 @@ class RepositoryController {
         contentRepositoryService.createNode(insertedContent, parent)
 
         if (insertedContent.hasErrors() || !insertedContent.save()) {
-            println "insert failed: ${insertedContent.errors}"
             log.debug("Unable to create new content: ${insertedContent.errors}")
             
             def editorToUse = getEditorName(params.contentType)
-            println "EDITOR IS: $editorToUse"
             
             render(view: 'newContent', model: [content: insertedContent,
                     contentType: params.contentType, parentPath: params.parentPath,
@@ -348,8 +365,6 @@ class RepositoryController {
      * @param parentPath
      */
     def createDirectory = {
-        println "params: ${params}"
-        println "space id: "+params['space.id']?.dump()
         def space = Space.get(params['space.id']?.toLong())
         def parent = params.parentPath ? getContent(params.parentPath, space) : null
 
@@ -469,7 +484,7 @@ class RepositoryController {
         }else{
             def indexes = [:]
             contentRepositoryService.findChildren(targetContent)?.collect{indexes.put(it.id, it.orderIndex)}
-            render ([result: 'success', id: vcont.id, indexes: indexes] as JSON)
+            render ([result: 'success', id: vcont.id, indexes: indexes, ctype: vcont.toName()] as JSON)
         }
     }
 
@@ -579,7 +594,7 @@ class RepositoryController {
             */
             document.close()
         } catch(Exception e) {
-            println(e.message)
+            log.error e
         }
 
         response.setContentType("application/pdf")
@@ -595,7 +610,7 @@ class RepositoryController {
      * @param contentType
      */
     private List getRootContents(space, contentType) {
-        def rootNodes = contentRepositoryService.findAllRootContent(space, contentType)
+        def rootNodes = contentRepositoryService.findAllRootContent(space, [type:contentType])
         def result = rootNodes.collect { content ->
             [path: generateContentName(space.id, contentType, content.id),
                 label: content.title, type: content.class.name,
@@ -607,7 +622,7 @@ class RepositoryController {
     }
 
     private List getRootFilesAndDirectories(space) {
-        def items = contentRepositoryService.findAllRootContent(space, ContentFile.class.name)
+        def items = contentRepositoryService.findAllRootContent(space, [type:ContentFile])
         def result = items.collect {
              [path: generateContentName(space.id, 'Files', it.id),
                     label: it.title, type: it.class.name,
@@ -753,8 +768,55 @@ class RepositoryController {
     def preview = {
         // todo: 'id' param for WeceemController simply hardcoded
         def content = Content.get(params.id)
-        println "Content is ${content.dump()}"
-        println "Content abs uri is ${content.absoluteURI}"
         redirect(controller: 'content', action: 'show', params:[uri:content.space.aliasURI+'/'+content.absoluteURI])
+    }
+    
+    def searchRequest = {
+        // define search parameters
+        def searchStr = params.data
+        def space = null
+        if (params.space) space = params.space
+        def filterClass = Content
+        if (params.classFilter != "none") 
+            filterClass = Class.forName("${params.classFilter}", true, this.class.classLoader)
+        println "Searching $filterClass"
+        def searchResult = filterClass.searchEvery("*$searchStr* +name:$space".toString(), [reload: true])
+        println "Search results for $searchStr on $filterClass: $searchResult"
+        def fromDateFilter = null
+        def toDateFilter = null
+        if (params.fromDateFilter != "") fromDateFilter = new Date(params.fromDateFilter)
+        if (params.toDateFilter != "") toDateFilter = new Date(params.toDateFilter)
+        def sortField = params.sortField
+        def ascOrder = Boolean.valueOf(params.isAsc)
+        def statusFilter = Integer.valueOf(params.statusFilter)
+        //performing search
+        searchResult.sort({a,b -> 
+            if (ascOrder) 
+                return a?."$sortField"?.compareTo(b?."$sortField")
+            else
+                return -a?."$sortField"?.compareTo(b?."$sortField")
+        })
+        searchResult = searchResult.findAll{
+            def flag = true
+            if (fromDateFilter){
+                flag = flag && (it."${params.fieldFilter}" > fromDateFilter)
+            }
+            if (toDateFilter){
+                flag = flag && (it."${params.fieldFilter}" < toDateFilter)
+            }
+            flag && ((it.status.code == statusFilter) || (statusFilter == 0))
+        }
+        println "Search results after filtering for $searchStr on $filterClass: $searchResult"
+        def result = searchResult.collect{["id": it.id, "title": it.title, 
+        "aliasURI": it.aliasURI, "status": it.status?.description, 
+        "createdBy": it.createdBy.toString(), 
+        "changedOn": wcm.humanDate(date: it.changedOn).toString(), 
+        "href": createLink(controller: "editor", action: "edit", id: it.id),
+        "parentURI": (it.parent == null ? "": "/${it.parent.absoluteURI}"), 
+        "type": message(code: "content.item.name.${it.toName()}")]} 
+
+        println "Search result $result"
+        println "JSON result: ${[result: result] as JSON}"
+        render ([result: result] as JSON)
     }
 }

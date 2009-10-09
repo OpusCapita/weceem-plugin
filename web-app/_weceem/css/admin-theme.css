@@ -1,0 +1,24 @@
+/* These are classes that extend jQuery UI theme stuff */
+.wcm-button div { position:relative; }
+
+.wcm-button .ui-icon { 
+  position: absolute;
+  top:50%; margin-top:-8px;
+  left:0;
+}
+
+a.wcm-button { float:left; }
+
+button.wcm-button.wcm-button-icon-left div { padding-left: 20px; }
+button.wcm-button.wcm-button-icon-right div { padding-right: 20px; }
+
+button.wcm-button-icon-left .ui-icon { left:-3px; right:auto; }
+button.wcm-button-icon-right .ui-icon { right:-3px; left:auto; }
+
+.wcm-button-icon-solo { display:block; width:8px; text-indent: -9999px; }
+
+
+
+
+
+

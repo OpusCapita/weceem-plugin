@@ -25,11 +25,15 @@ import org.weceem.content.*
  */
 class BlogEntry extends Content {
 
+    static searchable = {
+        only = ['content', 'keywords', 'summary', 'title']
+    }
+    
     String keywords
     String summary
 
     String content
-    
+
     static mapping = {
         cache usage: 'nonstrict-read-write'
         columns {
@@ -49,4 +53,14 @@ class BlogEntry extends Content {
     }
 
     static transients = Content.transients + ['summary']
+
+    String getVersioningContent() { content }
+
+    Map getVersioningProperties() { 
+       def r = super.getVersioningProperties() + [ 
+           keywords:keywords,
+           summary:summary
+       ] 
+       return r
+    }
 }

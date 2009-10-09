@@ -1,9 +1,10 @@
 <html>
 <head >
 	<meta name="layout" content="admin"/>
-	<g:javascript src="treeTable/javascripts/jquery.treeTable.js"/>
-	<g:javascript src="treeTable/javascripts/core.treeTable.js"/>
-	<link href="${createLinkTo(dir:pluginContextPath + '/js/treeTable/stylesheets', file:'jquery.treeTable.css')}" rel="stylesheet" type="text/css" />
+	<title>Weceem - ${space.name.encodeAsHTML()}</title>
+	<script type="text/javascript" src="${g.resource(dir: wcm.pluginCtxPath() +'/_weceem/js/treeTable/javascripts', file:'jquery.treeTable.js')}"></script>
+	<script type="text/javascript" src="${g.resource(dir: wcm.pluginCtxPath() +'/_weceem/js/treeTable/javascripts/', file:'core.treeTable.js')}"></script>
+	<link href="${createLinkTo(dir:wcm.pluginCtxPath()  + '/_weceem/js/treeTable/stylesheets', file:'jquery.treeTable.css')}" rel="stylesheet" type="text/css" />
 
 <style type="text/css">
 	td span.ui-icon { display: inline;}
@@ -15,7 +16,6 @@
 	span.ui-icon-circle-plus { float: left; margin-right: 0.5em; }
 	span.ui-icon-circle-minus { float: left; }
 	a:hover { text-decoration: underline;}
-	table.treeTable tr:hover {background-color: #9EB3BF}
 	ul.childList { font-size: 1em}
 	.ui-state-highlight { height: 1.5em; line-height: 1.2em; }
 
@@ -25,10 +25,11 @@
 
 var resources = {};
 
+
 function init(){
     var haveChildren = {};
     <g:each var="data" in="${haveChildren}">
-        haveChildren["${data.key}"] = ${data.value};
+      haveChildren["${data.key}"] = ${data.value};
     </g:each>
     resources["haveChildren"] = haveChildren;
     resources["content.button.create"] = "${message(code:'content.button.create', encodeAs:'JavaScript')}";
@@ -38,7 +39,17 @@ function init(){
     resources["link.deletenode"] = "${createLink(action: 'deleteNode', controller: 'repository')}";
     resources["link.treetable"] = "${createLink(action: 'treeTable', controller: 'repository')}";
     resources["link.preview"] = "${createLink(action: 'preview', controller: 'repository')}";
+    resources["search.request"] = "${createLink(action: 'searchRequest', controller: 'repository')}";
+    <g:each var="status" in="${org.weceem.content.Status.list()}">
+      resources["${status.description}"] = "${message(code: 'content.status.' + status.description, encodeAs:'JavaScript')}"
+    </g:each>
+    
+    cacheParams["isAsc"] = true;
+    cacheParams["sortField"] = "title";
 }
+
+
+
 
 $(function(){
     init();
@@ -50,25 +61,37 @@ $(function(){
 
     <div class="span-24 last">
         <div class="container">
-            <div class="span-12"><g:render plugin="weceem" template="repository-buttons"/></div>
-            <div class="span-12 last">
-            	Space: <g:select id="spaceSelector" name="space" from="${spaces}" optionKey="id" optionValue="name" onchange="changeSpace()" value="${space.id}"/>
-            	
-                <%-- We have not finished implementing search/filter so we remove it for now
-                <form controller="repository">
-                	<div style="float:right"><span class="sbox_l"></span><span class="sbox"><input type="text" name="date" id="date" /></span><span class="sbox_r"></span><span class="button_l"></span><span class="button"><g:submitButton name="adv" value="Advanced" id="adv"/></span><span class="button_r"></span></div>
-                	<div id="advSearch" style="display:none">
-                			Advanced options:<br/>
-                			Content type: <g:select from="${grailsApplication.domainClasses.findAll({org.weceem.content.Content.isAssignableFrom(it.clazz)}).sort({a,b->a.name.compareTo(b.name)})}" optionKey="name" optionValue="name"/><br/>
-                			Filter by date <g:select from="[[id:'createdOn', value:'created'], [id:'changedOn', value:'changed']]"  optionKey="id" optionValue="value"/> from <g:datePicker precision="day"/> to <g:datePicker  precision="day"/>
-                	</div>
-                </form>
-                 --%>
+            <table class="form">
+              <tr>
+               <td><g:render plugin="weceem" template="repository-buttons"/></td>
+               <td>
+                 <label>Space:</label>
+                 <g:select id="spaceSelector" name="space" from="${spaces}" 
+				 optionKey="id" optionValue="name" onchange="changeSpace()" value="${space.id}"/>
+    		   </td>
+    		   <td>
+    		     <span id="search_btn" class="sbox_l"></span><span class="sbox"><input type="text" name="data" id="data" /></span><span id="clear_btn" class="sbox_r"></span>
+    		   </td>
+    		  </tr>
+    		</table>
+            <form controller="repository">
+            	<div id="advSearch" style="display:none" class="span-24 last"> 
+            			You can filter results by type: <select id="classFilter">
+                                                    	    <option value="none">All</option>
+                                                    	    <g:each in="${grailsApplication.domainClasses.findAll{org.weceem.content.Content.isAssignableFrom(it.clazz) && (it.clazz != org.weceem.content.Content)}.sort({a,b->a.name.compareTo(b.name)})}">
+                                                    	        <option value="${it.fullName}"><g:message code="content.item.name.${it.fullName}"/></option>
+                                                    	    </g:each>
+                                                    	</select>,
+            			status: <g:select id="statusFilter" from="${[['description': 'all', 'code': 0]] + org.weceem.content.Status.list()}" optionKey="code" optionValue="description" />
+            			and date <g:select id="fieldFilter" from="[[id:'createdOn', value:'created'], [id:'changedOn', value:'changed']]"  optionKey="id" optionValue="value"/> from <input id="fromDate" type="text"/> to <input id="toDate" type="text"/>
+            	</div>
+            </form>
             </div>
 
-            <div class="span-24 last">
+            <div id="treeDiv">
+              <div class="table">
                 <table id="treeTable">
-                  <thead style="border-spacing: 10px 10px">
+                  <thead>
                     <tr>
                       <th align="left">Page</th>
                       <th align="left">Status</th>
@@ -80,10 +103,27 @@ $(function(){
                   <tbody>
                 	<g:each in="${content.sort()}" var="c">
                 		<g:render plugin="weceem" template="newtreeTableNode" model="[c:c]"/>
-		
                 	</g:each>
                   </tbody>
                 </table>
+             </div>
+            </div>
+            
+            <div id="searchDiv" style="display: none">
+                <div class="table">
+                    <table class="treeTable">
+                        <thead style="border-spacing: 10px 10px">
+                          <tr>
+                            <th align="left" class="asc"><a href="#" onclick="sortByField('title')">Page&nbsp;&nbsp;</a></th>
+                            <th align="left" class="asc"><a href="#" onclick="sortByField('status.description')">Status&nbsp;&nbsp;</a></th>
+                            <th align="left" class="asc"><a href="#" onclick="sortByField('createdBy')">Created By&nbsp;&nbsp;</a></th>
+                            <th align="left" class="asc"><a href="#" onclick="sortByField('changedOn')">Last changed&nbsp;&nbsp;</a></th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div class="span-24 last prepend-top"><g:render plugin="weceem" template="repository-buttons"/></div>

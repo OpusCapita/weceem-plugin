@@ -4,6 +4,9 @@ import org.weceem.content.*
 import org.weceem.html.*
 import org.weceem.wiki.*
 import org.weceem.tags.*
+import org.codehaus.groovy.grails.plugins.web.taglib.ApplicationTagLib
+import groovy.mock.interceptor.*
+import org.weceem.services.*
 
 class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
     
@@ -21,7 +24,78 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         
         assertEquals "testing", taglib.out.toString()
     }
+
+
+  void testCreateLink() {
+    mockTagLib(WeceemTagLib)
+    def taglib = new WeceemTagLib()
     
+    def g = new MockFor(ApplicationTagLib)
+    g.demand.createLink {hash ->
+      assertEquals "content", hash.controller
+      assertEquals "show", hash.action
+    }
+
+    taglib.metaClass.g = g.proxyInstance()
+
+    def node = new HTMLContent(aliasURI:'someNode', space: new Space(name:'default', aliasURI:'default'))
+    taglib.contentRepositoryService = [findContentForPath : { path, space -> [content: node]}]
+    taglib.request.setAttribute(ContentController.REQUEST_ATTRIBUTE_SPACE, node.space)
+    taglib.createLink(path: 'someNode', null)
+  }
+
+  void testCountChildren() {
+    mockTagLib(WeceemTagLib)
+    def taglib = new WeceemTagLib()
+
+    def parent = new HTMLContent()
+
+    def mockCRService = new MockFor(ContentRepositoryService)
+    mockCRService.demand.countChildren {node, args ->
+      assertEquals parent, node
+    }
+
+    taglib.contentRepositoryService = mockCRService.proxyInstance()
+    taglib.request.setAttribute(ContentController.REQUEST_ATTRIBUTE_NODE, parent)
+
+    try {
+      taglib.countChildren([path:"some/path", node: parent])
+      fail "Expected exception with path and node attributes"
+    } catch(e) {
+        // we wanted an exception
+    }
+
+    taglib.countChildren([node: parent])
+  }
+
+  void testEachChildWithNode() {
+    mockTagLib(WeceemTagLib)
+    def taglib = new WeceemTagLib()
+
+    def parent = new HTMLContent(title: 'parent')
+
+    def anotherNode = new HTMLContent(title: 'another')
+
+    def mockCRService = new MockFor(ContentRepositoryService)
+    mockCRService.demand.findChildren { node, args ->
+      assertEquals parent, node
+    }
+
+    taglib.contentRepositoryService = mockCRService.proxyInstance()
+
+    taglib.request.setAttribute(ContentController.REQUEST_ATTRIBUTE_NODE, anotherNode)
+
+    try {
+      taglib.eachChild([path:"some/path", node: parent], {})
+      fail "Expected exception with path and node attributes"
+    } catch(e) {
+      assert e.message =~ "can not specify ${WeceemTagLib.ATTR_NODE} and ${WeceemTagLib.ATTR_PATH} attributes"
+    }
+
+    taglib.eachChild([node: parent], {})
+  }
+
+
     void testEachChildWithoutFilter() {
         mockTagLib(WeceemTagLib)
         def taglib = new WeceemTagLib()
@@ -36,7 +110,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         nodeB.title = 'Node B'
 
         def mockCRService = [
-            findChildren : { node, type, params ->
+            findChildren : { node, args ->
                 [nodeA, nodeB]
             }
         ]
@@ -62,8 +136,8 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         nodeA.title = 'Node A'
         
         def mockCRService = [
-            findChildren : { node, type, params ->
-                assertEquals HTMLContent, type
+            findChildren : { node, args ->
+                assertEquals HTMLContent, args.type
                 [nodeA]
             }
         ]
@@ -91,7 +165,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         nodeB.title = 'Wiki B'
 
         def mockCRService = [
-            findChildren : { node, type, params ->
+            findChildren : { node, args ->
                 [nodeA, nodeB]
             }
         ]
@@ -119,8 +193,8 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         nodeA.title = 'Node A'
         
         def mockCRService = [
-            findParents : { node, type, params ->
-                assertEquals HTMLContent, type
+            findParents : { node, args ->
+                assertEquals HTMLContent, args.type
                 [parentB]
             }
         ]
@@ -148,7 +222,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         nodeA.title = 'Node A'
 
         def mockCRService = [
-            findParents : { node, type, params ->
+            findParents : { node, args ->
                 [parent, parentB]
             }
         ]

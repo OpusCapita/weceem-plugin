@@ -1,12 +1,13 @@
-<div class="container span-24 last"> 
-    <div id="adminLogo" class="span-12"></div>
-    <div id="iconbar" class="prepend-6 span-6 last">
+<div class="container"> 
+    <div id="adminLogo" class="span-14"></div>
+    
+    <div id="iconbar" class="span-10 last prepend-top" style="text-align: right">
         <span title="Current User">
-          Current User: <wcm:loggedInUserName/>
+          Welcome, <wcm:loggedInUserName/>
         </span>
-      <g:link controller="register" action="edit"><img src="${createLinkTo(dir:wcm.pluginCtxPath() +'/images/layout',file:'user16.gif')}"/></g:link>
-      <a href="#"><img src="${createLinkTo(dir:wcm.pluginCtxPath() +'/images/layout',file:'help16.gif')}"/></a>
-      <g:link controller="logout"><img src="${createLinkTo(dir:wcm.pluginCtxPath() +'/images/layout',file:'logout16.gif')}"/></g:link>
+        <g:link url="${wcm.userProfileEditUrl().encodeAsHTML()}">Profile</g:link> |
+        <a href="http://www.weceem.org/">Help</a> |
+        <g:link url="${wcm.userLogOutUrl().encodeAsHTML()}">Log Out</g:link>
     </div>
 
     <div id="navigation" class="span-24 last">
@@ -18,7 +19,7 @@
       <div class="message span-22 prepend-1 append-1 prepent-top append-bottom last ui-state-highlight ui-corner-all">${flash.message.encodeAsHTML()}</div>
     </g:if>
     <g:if test="${flash.error}">
-      <div class="message span-22 prepend-1 append-1 prepent-top append-bottom last ui-state-error ui-corner-all">${flash.error.encodeAsHTML()}</div>
+      <div class="message span-22 prepend-1 append-1 prepent-top append-bottom last ui-state-error ui-corner-all">${flash.error}</div>
     </g:if>
 
 </div>

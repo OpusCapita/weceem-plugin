@@ -17,15 +17,17 @@ import org.weceem.content.*
  */
 
 /**
- * XMLContent class describes the content node of type 'XML'.
+ * HTMLContent class describes the content node of type 'HTML'.
  *
  * @author Stephan Albers
  * @author July Karpey
+ * @author Marc Palmer
+ * @author Viktor Fedorov
  */
 class HTMLContent extends Content {
 
     static searchable = {
-        only = ['content', 'keywords']
+        only = ['content', 'keywords', 'title']
     }
     
     String keywords
@@ -33,11 +35,15 @@ class HTMLContent extends Content {
 
     // 64Kb Unicode text with HTML/Wiki Markup
     String content
+    String menuTitle
+    String htmlTitle
 
     String getVersioningContent() { content }
 
     Map getVersioningProperties() { 
         def r = super.getVersioningProperties() + [ 
+            menuTitle:menuTitle,
+            htmlTitle:htmlTitle,
             keywords:keywords,
             template:template?.ident() // Is this right?
         ] 
@@ -49,24 +55,39 @@ class HTMLContent extends Content {
     static constraints = {
         content(nullable: false, maxSize: 65536)
         keywords(nullable: true, blank: true, maxSize: 200)
+        menuTitle(nullable: true, blank: true, maxSize: 40)
+        htmlTitle(nullable: true, blank: true, maxSize: 400)
         template(nullable: true)
         status(nullable: false) // Workaround for Grails 1.1.1 constraint inheritance bug
     }
 
     static mapping = {
-        template lazy: false // we never want proxies for this
+        template cascade: 'all', lazy: false // we never want proxies for this
         columns {
             content type:'text'
+            htmlTitle type:'text'
         }
     }
 
     static editors = {
         template(group:'extra')
+        menuTitle(group:'extra')
+        htmlTitle(group:'extra')
         content(editor:'RichHTML')
         keywords()
     }
 
     static transients = Content.transients + [ 'summary']
+
+    /**
+     * Overriden to return caption for menu items, if supplied
+     */
+    public String getTitleForMenu() { menuTitle ?: title }
+
+    /**
+     * Overriden to return caption for menu items, if supplied
+     */
+    public String getTitleForHTML() { htmlTitle ?: title }
 
     public String getSummary() {
         def summaryString = ""

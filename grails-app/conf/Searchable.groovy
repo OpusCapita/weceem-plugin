@@ -31,8 +31,8 @@ searchable {
      *
      * The default is "${user.home}/.grails/projects/${app.name}/searchable-index/${grails.env}"
      */
-    compassConnection = new File(
-        "${userHome}/.grails/projects/${appName}/searchable-index/${grailsEnv}"
+    compassConnection = new File( 
+        System.getProperty('weceem.index.location', "${userHome}/.weceem/searchable-index") 
     ).absolutePath
 
     /**
@@ -160,9 +160,4 @@ environments {
         }
     }
 
-    production {
-        searchable {
-            // add your production settings here
-        }
-    }
 }

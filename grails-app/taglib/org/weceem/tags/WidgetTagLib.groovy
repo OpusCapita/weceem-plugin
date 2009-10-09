@@ -14,6 +14,7 @@
 package org.weceem.tags
 
 import org.weceem.content.*
+import grails.util.GrailsUtil
 
 /**
  * Widget tag library describes the widget tag.
@@ -32,28 +33,60 @@ class WidgetTagLib {
 
     static namespace = "wcm"
     
+    def contentRepositoryService
+    
     def widget = {attrs, body ->
+        def widget
+        def path = attrs.path
+        if (path) {
+            widget = contentRepositoryService.findContentForPath(path, pageScope.space)?.content
+            if (!widget) {
+                throwTagError("There is no Widget at aliasURI [${path}] in the space [${pageScope.space.name}]")
+            }
+        } else if (attrs.id) {
+            log.warn("Use of [id] attribute on widget tag is deprecated")
+            widget = Widget.findBySpaceAndTitle(pageScope.space, attrs.id)
+            if (!widget) {
+                throwTagError("There is no Widget with title [${attrs.id}] in the space [${pageScope.space.name}]. Tip: use path attribute!")
+            }
+        }
+        if (log.debugEnabled) {
+            log.debug "Widget tag resolved to widget [${widget?.dump()}"
+        }
 
-        def widget = Widget.findBySpaceAndTitle(pageScope.space, attrs.id)
-        if (!widget) {
-            throwTagError("There is no Widget with title [${attrs.id}] in the space [${pageScope.space.name}]")
-        }
+        def id = attrs.id ?: widget.id
+        /*
         if (session.mode == 'edit') {
-            out << "<div id=\"${attrs.id}\" onclick=\"window.open('${createLink(controller: 'widget', action: 'edit', id: widget.id, params: ['externalCall': true])}', 'Edit Widget', 'resizable=yes, scrollbars=yes, status=no'\">"
+            out << "<div id=\"${id}\" onclick=\"window.open('${createLink(controller: 'widget', action: 'edit', id: widget.id, params: ['externalCall': true])}', 'Edit Widget', 'resizable=yes, scrollbars=yes, status=no'\">"
         } else {
-            out << "<div id=\"${attrs.id}\">"
-        }
+            out << "<div id=\"${id}\">"
+        }*/
+
         out << body()
 
         def engine = grailsAttributes.getPagesTemplateEngine()
         def groovyTemplate = engine.createTemplate(widget.content, widget.title)
-        if (attrs.model instanceof Map) {
-            groovyTemplate.make(attrs.model).writeTo(out)
-        } else {
-            groovyTemplate.make().writeTo(out)
+        try {
+            if (attrs.model instanceof Map) {
+                def model = [:] 
+                model.putAll( pageScope.variables)
+                model.putAll( attrs.model )
+                if (log.debugEnabled) {
+                    log.debug "Widget executing with model: ${model}"
+                }
+                groovyTemplate.make(model).writeTo(out)
+            } else {
+                if (log.debugEnabled) {
+                    log.debug "Widget executing with pageScope variables"
+                }
+                groovyTemplate.make(pageScope.variables).writeTo(out)
+            }
+        } catch (Throwable t) {
+            log.error "Error executing widget page", GrailsUtil.deepSanitize(t)
+            throwTagError("There is an error in widget at [${path}], please see the logs")
         }
 
-        out << "</div>"
+        //out << "</div>"
     }
     
 }

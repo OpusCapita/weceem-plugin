@@ -12,168 +12,50 @@ import org.weceem.files.*
  * @author Sergei Shushkevich
  */
 class SynchronizationController {
-   
+
+    def contentRepositoryService
+
     def index = {}
 
-    def list = {}
+    def list = {
+        def spaces = Space.list()
+        render (view: "list", model: [spaces: spaces])
+    }
 
     /**
      * Renders list of files and Content objects which need to be synchonized.
      */
     def synchronizationList = {
-        def result = [identifier: 'name', items: []]
-
-        ContentFile.executeUpdate("update ContentFile cf set cf.syncStatus = 1")
-        def orphanedFiles = []
-        def contentIds = []
-
-        def contentFilesDir = grailsApplication.parentContext.getResource(
-                ContentFile.DEFAULT_UPLOAD_DIR).file
-        contentFilesDir.eachDir {spaceDir ->
-            def space = Space.findByName(spaceDir.name)
-            if (space) {
-                spaceDir.eachFileRecurse {file ->
-                    def contentFile
-
-                    def relativePath = file.absolutePath.substring(
-                            spaceDir.absolutePath.size() + 1).replace('\\', '/')
-                    def tokens = relativePath.split('/')
-                    if (tokens.size() > 1) {
-                        contentFile = Content.find("""from Content cn \
-                                        where cn.parent.title=:parent and cn.title=:child \
-                                        and cn.space=:space and (cn.parent is not null and cn.parent.class=:dirClass) \
-                                        and (cn.class=:dirClass or cn.class=:fileClass)""",
-                                        [parent: tokens[tokens.size() - 2], child: file.name,
-                                        space: space, dirClass: ContentDirectory.class.name,
-                                        fileClass: ContentFile.class.name])
-                    } else {
-                        contentFile = ContentFile.find("""from ContentFile cf \
-                                where cf.id not in ( \
-                                    select cn.id from Content cn \
-                                    where cn.parent is not null and cn.parent.class = ?) \
-                                and cf.space = ? and cf.title = ?""",
-                                    [ContentDirectory.class.name, space, file.name])
-                    }
-
-                    if (contentFile) {
-                        contentIds << contentFile.id
-                    } else {
-                        orphanedFiles << file
-                        result.items << [namespace: 'files',
-                                name: "${spaceDir.name}/${relativePath}",
-                                title: file.name, path: "${spaceDir.name}/${relativePath}",
-                                type: (file.directory ? 'Folder' : 'File')]
-                    }
-                }
-            }
-        }
-
-        if (contentIds) {
-            ContentFile.executeUpdate(
-                    "update ContentFile cf set cf.syncStatus = 0 where cf.id in (${contentIds.join(',')})")
-        }
-        ContentFile.findAll("from ContentFile cf where cf.syncStatus = 1").each {
-            result.items << [namespace: 'content', name: it.id, title: it.title,
-                    type: message(code: "content.item.name.${it.class.name}"),
-                    space: it.space.name]
-        }
-
-        render(result as JSON)
+        def space = Space.get(params.id)
+        def result = contentRepositoryService.synchronizeSpace(space)
+        def createdContent = result.created
+        def missedFiles = result.missed
+        def dirnum = createdContent.findAll{c-> c instanceof ContentDirectory}.size()
+        def filenum = createdContent.size() - dirnum
+        render (view: "fileList", model: [result: missedFiles, createdContent: createdContent, 
+        space: space, dirnum: dirnum, filenum: filenum])
     }
-
+    
     /**
-     * Creates ContentFile/ContentDirectory from specified <code>path</code>
-     * on the file system.
+     * Delete content by set of ids
      *
-     * @param path
      */
-    def createContentFile = {
-        println "in"
-        List tokens = params.path.replace('\\', '/').split('/')
-        println "tokens $tokens"
-        if (tokens.size() > 1) {
-            def space = Space.findByName(tokens[0])
-            def parents = tokens[1..<(tokens.size() - 1)]
-            def hierarchyParent = null
-            def valid = true
-            if (parents) {
-                hierarchyParent = ContentDirectory.find("""from ContentDirectory cd \
-                        where cd.title = ? and cd.space = ? \
-                                and cd.id not in ( \
-                                select cn.id from Content cn \
-                                where cn.parent is not null and cn.parent.class = ?)""",
-                        [parents[0], space, ContentDirectory.class.name])
-                println "hier parent $hierarchyParent"
-                if (hierarchyParent) {
-                    if (parents.size() > 1) {
-                        parents[1..<parents.size()].each {
-                            println "finding by parent ${it}"
-                            def content = Content.findWhere(parent: hierarchyParent, title: it)
-                            if (!content) {
-                                valid = false
-                            }
-                            hierarchyParent = content
-                        }
-                    }
-                } else {
-                    valid = false
-                }
+    def delete = {
+        def pattern = ~/delete-\d+/
+        def idpattern = ~/\d+/
+        for (p in params){
+            if (pattern.matcher(p.key).matches()){
+                def id = idpattern.matcher(p.key)[0]
+                contentRepositoryService.deleteNode(ContentFile.get(id))
             }
-            if (valid) {
-                println "valid"
-                def file = grailsApplication.parentContext.getResource(
-                        "${ContentFile.DEFAULT_UPLOAD_DIR}/${params.path}").file
-                def contentFile
-                if (file.directory) {
-                    contentFile = new ContentDirectory(title: file.name,
-                            content: '', filesCount: 0, space: space,
-                            mimeType: '', fileSize: 0, status: 0)
-                } else {
-                    def mimeType = servletContext.getMimeType(file.name)
-                    contentFile = new ContentFile(title: file.name,
-                            content: '', space: space,
-                            mimeType: (mimeType ? mimeType : ''), fileSize: file.length(),
-                            status: 0)
-                }
-                contentFile.createAliasURI(hierarchyParent)
-                contentFile.parent = hierarchyParent
-
-                if (hierarchyParent) {
-                    println "valid"
-                    if (!hierarchyParent.children) hierarchyParent.children = new TreeSet()
-                    def newIndex = hierarchyParent?.children ?
-                                       hierarchyParent.children.last().orderIndex + 1 : 0
-                    contentFile.orderIndex = newIndex
-                    hierarchyParent.children << contentFile
-                    if (!(contentFile instanceof ContentDirectory)) {
-                        hierarchyParent.filesCount += 1
-                    }
-                    if (hierarchyParent.save()) {
-                        println "save ok"
-                        
-                        render([success: true] as JSON)
-                    } else {
-                        println "save fail"
-                        render([success: false, error: message(code: 'error.synchronization.save')] as JSON)
-                    }
-                } else {
-                    contentFile.orderIndex = 0
-                    if (contentFile.save()) {
-                        render([success: true] as JSON)
-                    } else {
-                        render([success: false, error: message(code: 'error.synchronization.save')] as JSON)
-                    }
-
-                }
-            } else {
-                render([success: false, error: message(code: 'error.synchronization.hierarchy')] as JSON)
-            }
-        } else {
-            println "fail"
-            render([success: false] as JSON)
         }
-    }
+        redirect(controller: "repository")
+     }
 
+    def done = {
+        redirect(controller: "repository")
+    }
+    
     /**
      * Deletes ContentFile/ContentDirectory with specified <code>id</code>.
      *
@@ -281,4 +163,5 @@ class SynchronizationController {
 
         return path ? "/${path}" : path
     }
+    
 }

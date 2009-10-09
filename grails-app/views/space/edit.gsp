@@ -1,8 +1,6 @@
 <html>
   <head>
     <meta name="layout" content="admin"/>
-    <content tag="menu"><g:render plugin="weceem" template="/layouts/menu/administration"/></content>
-    <content tag="tab">administration</content>
     <title>Edit Space</title>
   </head>
 
@@ -24,7 +22,7 @@
         <div class="dialog">
           <table>
             <tbody>
-              <g:render plugin="weceem"template="/space/form" model="[space: space]"/>
+              <g:render plugin="weceem" template="/space/form" model="[space: space]"/>
               <tr class="prop">
                 <td colspan="2">
                   <g:actionSubmit class="button" value="Save" action="update"/>&nbsp;

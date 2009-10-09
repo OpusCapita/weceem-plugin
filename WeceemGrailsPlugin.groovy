@@ -1,22 +1,29 @@
+import org.apache.commons.logging.LogFactory
 import org.codehaus.groovy.grails.commons.GrailsDomainClass
+import org.codehaus.groovy.grails.commons.GrailsServiceClass
+import grails.util.Environment
 
 import org.weceem.content.*
 
 class WeceemGrailsPlugin {
+    def _log = LogFactory.getLog('org.weceem.WeceemGrailsPlugin')
+
     // the plugin version
-    def version = "0.2"
+    def version = "0.3-RC1"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.1.1 > *"
+    
     // the other plugins this plugin depends on
     def dependsOn = [
         searchable:'0.5.4 > *', 
         quartz:'0.4.1-SNAPSHOT > *', 
         navigation:'1.1 > *',
-        fckeditor:'0.9.2 > *'
+        fckeditor:'0.9.2 > *',
+        beanFields:'0.2 > *'
     ]
     def observe = ["hibernate"]
     
-    def loadAfter = ['logging']
+//    def loadAfter = ['logging']
 
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
@@ -36,7 +43,6 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     def documentation = "http://grails.org/plugin/weceem"
 
     def doWithSpring = {
-        // TODO Implement runtime spring config (optional)
         simpleSpaceExporter(org.weceem.export.SimpleSpaceExporter)
         simpleSpaceImporter(org.weceem.export.SimpleSpaceImporter)
         defaultSpaceImporter(org.weceem.export.DefaultSpaceImporter)
@@ -44,18 +50,27 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     }
 
     def doWithApplicationContext = { applicationContext ->
+        _log.info "Weceem plugin running with data source ${applicationContext.dataSource.dump()}"
+        _log.info "Weceem plugin running with grails configuration ${applicationContext.grailsApplication.config}"
+        
         applicationContext.navigationService.registerItem( 'weceem', 
             [controller:'repository', action:'treeTable', title:'content', path:'contentrepo', order:0])
         applicationContext.navigationService.registerItem( 'weceem', 
             [controller:'portal', action:'administration', title:'administration', path:'admin',order:2])
         [
             [controller:'space', action:'list', title:'spaces', path:'admin/spaces', order: 0],
-            [controller:'portal', action:'comingsoon', title:'synchronize', path:'admin/files/synchronize', order: 1],
+            [controller:'synchronization', action:'list', title:'synchronize', path:'admin/files/synchronize', order: 1],
             [controller:'portal', action:'comingsoon', title:'plugins', path:'admin/plugins', order: 2],
             [controller:'portal', action:'licenses', title:'licenses', path:'admin/licenses', order: 3],
             [controller:'portal', action:'comingsoon', title:'linkcheck', path:'admin/linkchecker', order: 4] ].each { item ->
                 applicationContext.navigationService.registerItem( 'weceem.plugin.admin', item)
         }
+
+        applicationContext.editorService.cacheEditorInfo()
+        applicationContext.editorService.configureFCKEditor()
+
+        applicationContext.contentRepositoryService.createDefaultStatuses()
+        applicationContext.contentRepositoryService.createDefaultSpace()
     }
 
     def doWithWebDescriptor = { xml ->
@@ -63,14 +78,16 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     }
 
     def doWithDynamicMethods = { ctx ->
-        ctx.editorService.cacheEditorInfo()
-        ctx.contentRepositoryService.createDefaultStatuses()
-        ctx.editorService.configureFCKEditor()
     }
 
     def onChange = { event ->
+        println "ON CHANGE EVENT OCCURED: ${event}"
         if (event.source instanceof GrailsDomainClass) {
             applicationContext.editorService.cacheEditorInfo(event.source.clazz)
+        }
+        if (event.source instanceof GrailsServiceClass) {
+            // Reload all if service / whole app reloaded
+            applicationContext.editorService.cacheEditorInfo()
         }
     }
 

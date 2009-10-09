@@ -1,8 +1,6 @@
 <html>
   <head>
     <meta name="layout" content="admin"/>
-    <content tag="menu"><g:render plugin="weceem" template="/layouts/menu/administration"/></content>
-    <content tag="tab">administration</content>
     <title><g:message code="space.title.list"/></title>
   </head>
 
@@ -14,7 +12,7 @@
         <div class="nav">
           <br/>
           <span class="menuButton" style="padding-left:3px; margin-bottom:8px;">
-            <g:actionSubmit action="create" value="${message(code: 'command.add')}" class="button"/>
+            <g:actionSubmit action="create" value="${message(code: 'command.add')}" class="button ui-state-default ui-corner-all"/>
           </span>
           <br/>
         </div>
@@ -26,7 +24,7 @@
             <tr>
               <g:sortableColumn property="name" title="${message(code: 'space.header.name')}"/>
               <g:sortableColumn property="aliasURI" title="${message(code: 'space.header.aliasURI')}"/>
-              <th width="15px"><g:message code="header.operations"/></th>
+              <th><g:message code="header.operations"/></th>
             </tr>
           </thead>
           <tbody>
@@ -35,8 +33,8 @@
                 <td>${fieldValue(bean: space, field: 'name')}</td>
                 <td>${fieldValue(bean: space, field: 'aliasURI')}</td>
                 <td>
-                  <g:link action="edit" id="${space.id}"><g:message code="command.edit"/></g:link>
-                  <g:link action="delete" id ="${space.id}"><g:message code="command.delete"/></g:link>
+                  <g:link action="edit" class="button ui-corner-all" id="${space.id}"><g:message code="command.edit"/></g:link>
+                  <g:link action="delete" class="button ui-corner-all" id ="${space.id}"><g:message code="command.delete"/></g:link>
                 </td>
               </tr>
             </g:each>
@@ -48,13 +46,13 @@
       </div>
       <br/>
       <div>
-        <g:link action="importSpace">
-            <img src="${createLinkTo(dir:pluginContextPath + '/images/weceem', file: 'fileimport_24.gif')}"
+        <g:link action="importSpace" class="button ui-corner-all" >
+            <img src="${createLinkTo(dir:pluginContextPath + '/_weceem/images/weceem', file: 'fileimport_24.gif')}"
                 alt="" style="vertical-align: middle;"/>
             <span><g:message code="space.link.import"/></span>
         </g:link>
-        <g:link action="exportSpace">
-            <img src="${createLinkTo(dir:pluginContextPath + '/images/weceem', file: 'fileexport_24.gif')}"
+        <g:link action="exportSpace" class="button ui-corner-all">
+            <img src="${createLinkTo(dir:pluginContextPath + '/_weceem/images/weceem', file: 'fileexport_24.gif')}"
                 alt="" style="vertical-align: middle;"/>
             <span><g:message code="space.link.export"/></span>
         </g:link>

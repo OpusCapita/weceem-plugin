@@ -2,8 +2,6 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta name="layout" content="admin"/>
-    <content tag="menu"><g:render plugin="weceem" template="/layouts/menu/content"/></content>
-    <content tag="tab">content</content>
     <title>Content Changes</title>
     <style type="text/css">
     div.added, span.added {

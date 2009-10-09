@@ -43,6 +43,7 @@ span.sbox input {
 	padding: 3px;
 	font: 11px/13px arial;
 	color: #000;
+    margin: 0;
 }
 span.button_l  {
 	background: white url(../images/weceem/btn_l.gif)
@@ -81,4 +82,12 @@ span.lnk a {
 	font: 11px/13px arial;
 	color: #000;
 	text-decoration: none;
+}
+
+th.asc a{
+  background: url(../images/skin/sorted_asc.gif) center right no-repeat;
+}
+
+th.desc a{
+  background: url(../images/skin/sorted_desc.gif) center right no-repeat;
 }

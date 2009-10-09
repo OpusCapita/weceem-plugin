@@ -1,7 +1,6 @@
 package org.weceem.export
 
 import java.text.SimpleDateFormat
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import com.thoughtworks.xstream.XStream
 import groovy.xml.MarkupBuilder
@@ -23,7 +22,7 @@ class SimpleSpaceExporter implements SpaceExporter {
     
     File execute(Space spc) {
         def ts = new SimpleDateFormat('yyMMddHHmmssSSS').format(new Date())
-        def filesDir = new File(ServletContextHolder.servletContext.getRealPath(
+        def filesDir = new File(ApplicationHolder.application.mainContext.servletContext.getRealPath(
                 "/${ContentFile.DEFAULT_UPLOAD_DIR}"))
 
         def baseDir = new File("${filesDir.absolutePath}/export-${ts}")

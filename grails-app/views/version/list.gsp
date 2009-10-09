@@ -1,8 +1,6 @@
 <html>
   <head>
     <meta name="layout" content="admin"/>
-    <content tag="menu"><g:render plugin="weceem" template="/layouts/menu/content"/></content>
-    <content tag="tab">content</content>
     <title><g:message code="contentVersion.title.list"/></title>
     <link href="${createLinkTo(dir:pluginContextPath + '/js/dijit/themes/tundra', file: 'tundra.css')}" media="screen" rel="stylesheet"
         type="text/css"/>

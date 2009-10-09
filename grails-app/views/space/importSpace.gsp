@@ -1,19 +1,19 @@
 <html>
   <head>
     <meta name="layout" content="admin"/>
-    <content tag="menu"><g:render plugin="weceem" template="/layouts/menu/administration"/></content>
-    <content tag="tab">administration</content>
     <title><g:message code="space.title.import"/></title>
   </head>
 
   <body>
-    <div class="body">
-      <b class="header"><g:message code="space.title.import"/></b>
+    <div class="span-24 last">
+      <h1><g:message code="space.title.import"/></h1>
 
       <g:if test="${flash.message}">
         <div class="message">${flash.message}</div>
       </g:if>
 
+      <p>Please select the space you wish to import into</P>
+          
       <g:form controller="space" method="post" action="startImport"
             enctype="multipart/form-data">
         <div class="dialog">
@@ -47,7 +47,7 @@
               </tr>
               <tr>
                 <td colspan="2">
-                  <input type="submit" class="button" value="${message(code: 'space.command.import')}"/>
+                  <input type="submit"  class="button ui-state-default ui-corner-all" value="${message(code: 'space.command.import')}"/>
                 </td>
               </tr>
             </tbody>

@@ -13,9 +13,13 @@ div#adminLogo {
   height: 100px;
 }
 
+#iconbar { 
+  top:1em;
+}
+
 #navigation {
     border-bottom: 1px silver solid;
-    margin-bottom: 10px;
+    margin-bottom: 1.4em;
 }
 
 .editorsaveactions {
@@ -24,22 +28,18 @@ div#adminLogo {
 }
 
 .field-readonly {
-   font-size: 1.5em;
-   
+   font-size: 1.2em;
+   font-weight:bold;
 }
 
 .field input {
-   font-size: 1.5em;
-   padding: 4px; 
+   font-size: 1.2em;
+   padding: 3px; 
 }
 
 /* 
 Tree table stuff
 */
-
-td h2 {
-   display: inline-block;
-}
 
 td.selected {
    background-color: #99c2ff;
@@ -54,15 +54,16 @@ Just change the color-values to apply your own color-scheme.
 */
 
 /* Main navigation */
-.navigation li a { background-color: #365077 }                         /* Background-color */
-.navigation li.navigation_active a { background-color: #4085aa; }      /* Background-color of active item */
-.navigation li.navigation_active a:hover { background-color: #40aac7;} /* Background-color of hovered active item */
-.navigation li a:hover { background-color: #40aac7; }                  /* Background-color of hovered item */
-.navigation li.navigation_active a { color: #fff; }                                   /* Text color */
-.navigation li a { color: #ccc; }                                   /* Text color */
-.navigation li a:hover { color: #fff; }                             /* Text color on hovering */
-.navigation li { border: none; }                          /* Border color */
-.navigation li.navigation_first { border: none; }        /* Border color. Typically same as above */
+.navigation li a, 
+.navigation li a:visited { color: #ccc;  background-color: #365077 }               
+.navigation li a:hover { color: #fff; background-color: #40aac7; }                 
+
+.navigation li.navigation_active a,
+.navigation li.navigation_active a:visited { color:#FFF; background-color: #4085aa; }     
+.navigation li.navigation_active a:hover {  color:#FFF;background-color: #40aac7;} 
+
+.navigation li { border: none; }                          
+.navigation li.navigation_first { border: none; }        
 .navigation li.navigation_active { border-left-color: #555; }       /* Highlight border-color of active item */
 
 /* Sub navigation */
@@ -74,40 +75,22 @@ Just change the color-values to apply your own color-scheme.
 .subnavigation li.subnavigation_active a { color: #e0e0e0; }        /* Text color of active item */
 .subnavigation li.subnavigation_active a { border-color: #e0e0e0; } /* Markings color of active item */
 
+
 .navigation {
     list-style-type: none;
     clear: both;
     margin: 0;
-    font-size: 14px;
+    font-size: 1.2em;
     overflow: hidden; /* Clearing floats */
 }
 
-.navigation li {
-    float: left;
-    /* border: 1px solid #888; */
-    /* border-left-color: #bbb; */
-}
-.navigation li.navigation_first {
-    /* border-left-color: #888; */
-}
-.navigation li.navigation_active {
-    /* border-left-color: #555; */
-}
+.navigation li { display:inline; }
+
 .navigation li a {
-    padding: 0.25em 0.6em;
-    display: block;
-    text-decoration: none;
-    /* background-color: #aaa; */
-    /* color: #fff; */
+  padding: 0.25em 0.6em;
+  display: block;
 }
-.navigation li a:hover {
-    /* background-color: #999; */
-}
-.navigation li.navigation_active a {
-    /* background-color: #555; */
-    color: #fff;
-    cursor: default;
-}
+
 
 .subnavigation {
     list-style-type: none;
@@ -139,4 +122,12 @@ Just change the color-values to apply your own color-scheme.
     /* color: #e0e0e0; */
     cursor: default;
     /* border-color: #e0e0e0; */
+}
+
+/*Footer*/
+.footer { 
+  margin-top:2em; 
+  font-size:0.95em; 
+  color: #999999;
+  text-align:right;
 }

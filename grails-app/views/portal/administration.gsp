@@ -2,8 +2,6 @@
   <head>
     <meta name="layout" content="admin"/>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <content tag="menu"><g:render  plugin="weceem" template="/layouts/menu/administration"/></content>
-    <content tag="tab">administration</content>
     <title><g:message code="administration.title"/></title>
   </head>
 
@@ -16,7 +14,7 @@
           <nav:eachItem group="weceem.plugin.admin" var="n">
               <div class="span-24 last container">
                   <div class="span-3">
-                      <img src="${resource(dir:pluginContextPath + '/images/weceem/admin/icons', file: n.title+'.gif')}" alt="${message(code:'admin.title.'+n.title, encodeAs:'HTML')}"/>
+                      <img src="${resource(dir:pluginContextPath + '/_weceem/images/weceem/admin/icons', file: n.title+'.gif')}" alt="${message(code:'admin.title.'+n.title, encodeAs:'HTML')}"/>
                       <p class="title">
                         <g:link controller="${n.controller}" action="${n.action}"><g:message code="${'admin.function.title.'+n.title}" encodeAs="HTML"/></g:link>
                       </p>
@@ -30,7 +28,7 @@
           <nav:eachItem group="weceem.app.admin" var="n">
               <div class="span-24 last container">
                   <div class="span-3">
-                      <img src="${resource(dir:'/images/weceem/admin/icons', file: n.title+'.gif')}" alt="${message(code:'admin.title.'+n.title, encodeAs:'HTML')}"/>
+                      <img src="${resource(dir:'/_weceem/images/icons', file: n.title+'.gif')}" alt="${message(code:'admin.title.'+n.title, encodeAs:'HTML')}"/>
                       <p class="title">
                         <g:link controller="${n.controller}" action="${n.action}"><g:message code="${'admin.function.title.'+n.title}" encodeAs="HTML"/></g:link>
                       </p>

@@ -39,7 +39,9 @@ class Content implements Comparable {
          
          space(component: true)
     }
-
+    
+    public static icon = [plugin: "weceem", dir: "_weceem/images/weceem", file: "virtual-page.png"]
+    
     // that is also the subject for forums
     String title
 
@@ -60,12 +62,13 @@ class Content implements Comparable {
     Status status
     
     static belongsTo = [space: Space, parent: Content]
-    static transients = [ 'versioningProperties', 'versioningContent', 'mimeType', 'weceemSecurityService', 'absoluteURI']
+    static transients = [ 'titleForHTML', 'titleForMenu', 'versioningProperties', 'versioningContent', 'mimeType', 'weceemSecurityService', 'absoluteURI']
     static hasMany = [children: Content]
+    static hasOne = [parent: Content]
 
     static constraints = {
         title(size:1..100, nullable: false, blank: false)
-        aliasURI(nullable: false, blank: false, unique: ['space', 'parent'], maxSize: 50, matches: VALID_ALIAS_URI_PATTERN)
+        aliasURI(nullable: false, blank: false, unique: ['space', 'parent'], maxSize: 50)
         space(nullable: false)
         status(nullable: false)
         orderIndex(nullable: true)
@@ -119,6 +122,16 @@ class Content implements Comparable {
     
     String getMimeType() { "text/plain" }
     
+    /**
+     * Can be overriden by content types to customize the short title used for rendering menu items etc
+     */
+    public String getTitleForMenu() { title }
+
+    /**
+     * Can be overriden by content types to customize the long title used for rendering HTML SEO-friendly page titles
+     */
+    public String getTitleForHTML() { title }
+
     /**
      * Must be overriden by content types that can represent their content as text.
      * Used for debugging and versioning
@@ -184,7 +197,6 @@ class Content implements Comparable {
         def self = this 
         
         def t = this
-        println "In saveRevision, this is ${t} and it is a ${t.class}"
         
         def criteria = ContentVersion.createCriteria()
         log.debug "In saveRevision of ${this}, doing revision query"
@@ -197,33 +209,13 @@ class Content implements Comparable {
         
         // Ask the content instance what we should serialize in a version
         def verProps = getVersioningProperties()
-        def writer = new StringWriter()
-        def bld = new MarkupBuilder(writer)
-        /*
-        t = this
-        println "In saveRevision before builder, this is ${t} and it is a ${t.class}"
         
-        bld.revision() {
-            println "In saveRevision inside builder, this is ${t} and it is a ${t.class}"
-            def hack = this
-            println "In saveRevision inside builder, hack is ${hack} and it is a ${hack.class}"
-            verProps.each { vp ->
-                def propName = vp.key
-                def propValue = vp.value
-                println "Trying to build XML for $propName = $propValue"
-                "${propName}"(propValue)
-            }
-            content(getVersioningContent())
-        }
-        def xml = writer.toString()
-        */
         def output = new StringBuilder()
         output << "<revision>"
         verProps.each { vp ->
             def propName = vp.key
             def propValue = vp.value
             if (propValue) {
-                println "Trying to build XML for $propName = $propValue"
                 output << "<${propName}>${propValue.encodeAsHTML()}</${propName}>"
             }
         }

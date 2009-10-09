@@ -1,0 +1,132 @@
+/* jQuery TreeTable Core 2.0 stylesheet
+ *
+ * This file contains styles that are used to display the tree table. Each tree
+ * table is assigned the +treeTable+ class.
+ * ========================================================================= */
+
+/* jquery.treeTable.collapsible
+ * ------------------------------------------------------------------------- */
+
+.table { 
+  border:1px solid #ccc;
+  margin-bottom:1.4em;
+}
+
+.treeTable { 
+  border-collapse: collapse; 
+  position:relative;
+  margin:0; 
+} 
+ 
+.treeTable tr td .expander {
+  background-position: left center;
+  background-repeat: no-repeat;
+  cursor: pointer;
+  width:18px;
+  height:18px;
+  float:left;
+  display:inline;
+  padding-top:15px;
+  position:relative;
+  left: 25px;
+}
+
+.treeTable tr.collapsed td .expander {
+  background-image: url(../images/toggle-expand-dark.png);
+}
+
+.treeTable tr.expanded td .expander {
+  background-image: url(../images/toggle-collapse-dark.png);
+}
+
+/* jquery.treeTable.sortable
+ * ------------------------------------------------------------------------- */
+.treeTable tr.collapsed.selected td .expander, .treeTable tr.collapsed.accept td .expander {
+  background-image: url(../images/toggle-expand-dark.png);
+}
+
+.treeTable tr.expanded.selected td .expander, .treeTable tr.expanded.accept td .expander {
+/*  background-image: url(../images/toggle-collapse-light.png);*/
+}
+
+.treeTable tr.inserter-before td, .treeTable tr.inserter-after td{
+    overflow-x: hidden;
+}
+
+.treeTable .ui-draggable-dragging {
+  color: #000;
+  z-index: 1;
+}
+
+.treeTable thead tr,
+.treeTable thead tr:hover { border:none; }
+
+.treeTable tr td { 
+  border-top: 1px solid #f1f1f1;
+  border-bottom: 1px solid #f1f1f1;
+}
+.treeTable tr:hover td { 
+  background-color: #f1f1f1;
+  border-top:1px solid #ccc;
+  border-bottom:1px solid #ccc;
+}
+.treeTable tr.selected td {
+  background-color: #fbf5d3;
+  border-top:1px solid #f9dd34;
+  border-bottom:1px solid #f9dd34;
+}
+
+.accept{
+  background-color: #f1f1f1;
+  border-top:1px solid #ccc;
+  border-bottom:1px solid #ccc;
+}
+
+.treeTable h2 { 
+  margin-bottom:0;
+  font-size:1.1em;
+  font-weight:bold;
+  min-height:25px;
+  padding-top:0.5em;
+}
+
+h2 a{
+    color: #111111;
+}
+.treeTable h2 a span { font-size:1em; color:#999999; font-weight:normal; }
+
+.treeTable a, 
+.treeTable a:hover, 
+.treeTable a:visited { text-decoration:none; }
+.treeTable h2 a:hover  { color:#006699;}
+
+.treeTable .item { 
+  padding-left:35px;
+  position:relative;
+  left: 25px;
+}
+
+.treeTable .ui-icon {
+  position:absolute;
+  left:5px;
+  right:5px;
+}
+
+.treeTable .ui-content-icon {
+  position:absolute;
+  left:5px;
+  right:5px;
+  width: 25px;
+  height: 31px;
+}
+
+.ui-content-item{
+
+}
+/*.treeTable .inserter-before td,*/
+/*.treeTable .inserter-after td  { padding-left:0 !important; }*/
+
+.treeTable .inserter-before .title,
+.treeTable .inserter-after .title { 
+  border-top:1px dashed #999999;
+}

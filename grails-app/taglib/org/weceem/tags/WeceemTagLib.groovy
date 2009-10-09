@@ -15,17 +15,35 @@ package org.weceem.tags
 
 import java.text.SimpleDateFormat
 import org.weceem.controllers.ContentController
+import org.codehaus.groovy.grails.commons.ApplicationHolder as AH
+import org.codehaus.groovy.grails.commons.ConfigurationHolder as CH
+import org.weceem.content.Content
+import org.weceem.files.ContentFile
+import org.weceem.services.ContentRepositoryService
+
+import org.weceem.content.Template
+import grails.util.GrailsUtil
 
 class WeceemTagLib {
     
     static ATTR_ID = "id"
+    static ATTR_NODE = "node"
     static ATTR_TYPE = "type"
     static ATTR_MAX = "max"
     static ATTR_SORT = "sort"
     static ATTR_ORDER = "order"
     static ATTR_OFFSET = "offset"
     static ATTR_PATH = "path"
+    static ATTR_STATUS = "status"
+    static ATTR_SPACE = "space"
     static ATTR_VAR = "var"
+    static ATTR_SIBLINGS = "siblings"
+    static ATTR_LEVELS = "levels"
+    static ATTR_CUSTOM = "custom"
+    static ATTR_ACTIVE_CLASS = "activeClass"
+    static ATTR_FIRST_CLASS = "firstClass"
+    static ATTR_LAST_CLASS = "lastClass"
+    static ATTR_LEVEL_CLASS_PREFIX = "levelClassPrefix"
     static ATTR_CHANGEDSINCE = "changedSince"
     static ATTR_CHANGEDBEFORE = "changedBefore"
     static ATTR_CREATEDSINCE = "changedSince"
@@ -33,11 +51,13 @@ class WeceemTagLib {
     static ATTR_FILTER = "filter"
     static ATTR_FORMAT = "format"
     static ATTR_CODEC = "codec"
-    
+    static ATTR_TITLE = "title"
+
     static namespace = "wcm"
     
     def contentRepositoryService
     def weceemSecurityService
+    def pluginManager
     
     private extractCodec(attrs) {
         attrs[ATTR_CODEC] == null ? 'HTML' : attrs[ATTR_CODEC]        
@@ -57,7 +77,7 @@ class WeceemTagLib {
      * Tag that reveals user info while hiding the implementation details of the authentication system
      */
     def userInfo = { attrs, body -> 
-        def user = User.findByUsername(username)
+        def user = weceemSecurityService.getUserPrincipal()
         def var = attrs[ATTR_VAR] ?: null
         out << body(var ? [(var):user] : user)
     }
@@ -91,7 +111,7 @@ class WeceemTagLib {
         def r = [:]
         r.max = attrs[ATTR_MAX]
         r.offset = attrs[ATTR_OFFSET]
-        r.sort = attrs[ATTR_SORT]
+        r.sort = attrs[ATTR_SORT] ?: 'orderIndex' // Default to orderIndex otherwise things are crazy
         r.order = attrs[ATTR_ORDER] ?: 'asc'
         r.changedSince = attrs[ATTR_CHANGEDSINCE]
         r.changedBefore = attrs[ATTR_CHANGEDBEFORE]
@@ -102,14 +122,15 @@ class WeceemTagLib {
     
     def eachChild = { attrs, body -> 
         def params = makeFindParams(attrs)
-        def baseNode
-        if (attrs[ATTR_PATH]) {
-            baseNode = contentRepositoryService.findContentForPath(attrs[ATTR_PATH], request[ContentController.REQUEST_ATTRIBUTE_SPACE]).content 
-        } else {
-            baseNode = request[ContentController.REQUEST_ATTRIBUTE_NODE]
+        if (attrs[ATTR_NODE] && attrs[ATTR_PATH]) {
+          throwTagError("can not specify ${ATTR_NODE} and ${ATTR_PATH} attributes")
         }
-        def children = contentRepositoryService.findChildren(baseNode, attrs[ATTR_TYPE], params)
-        println "Children was: ${children}"
+        def baseNode = attrs[ATTR_NODE] ?: request[ContentController.REQUEST_ATTRIBUTE_NODE]
+        def status = attrs[ATTR_STATUS] ?: ContentRepositoryService.STATUS_ANY_PUBLISHED
+        if (attrs[ATTR_PATH]) {
+            baseNode = contentRepositoryService.findContentForPath(attrs[ATTR_PATH], request[ContentController.REQUEST_ATTRIBUTE_SPACE]).content
+        }
+        def children = contentRepositoryService.findChildren(baseNode, [type:attrs[ATTR_TYPE], status:status, params:params])
         if (attrs[ATTR_FILTER]) children = children?.findAll(attrs[ATTR_FILTER])
         def var = attrs[ATTR_VAR] ?: null
         children?.each { child ->
@@ -117,9 +138,28 @@ class WeceemTagLib {
         }
     }
     
+    def countChildren = { attrs ->
+       if (attrs[ATTR_NODE] && attrs[ATTR_PATH]) {
+          throwTagError("You cannot specify both ${ATTR_NODE} and ${ATTR_PATH} attributes")
+       }
+
+        def baseNode = attrs[ATTR_NODE]
+        if (!baseNode) {
+            if (attrs[ATTR_PATH]) {
+                baseNode = contentRepositoryService.findContentForPath(attrs[ATTR_PATH], request[ContentController.REQUEST_ATTRIBUTE_SPACE]).content 
+            } else {
+                baseNode = request[ContentController.REQUEST_ATTRIBUTE_NODE]
+            }
+        }
+        def status = attrs[ATTR_STATUS] ?: ContentRepositoryService.STATUS_ANY_PUBLISHED
+        out << contentRepositoryService.countChildren(baseNode, [type:attrs[ATTR_TYPE], status:status])
+    }
+    
     def eachParent = { attrs, body -> 
         def params = makeFindParams(attrs)
-        def parents = contentRepositoryService.findParents(request[ContentController.REQUEST_ATTRIBUTE_NODE], attrs[ATTR_TYPE], params)
+        def status = attrs[ATTR_STATUS] ?: ContentRepositoryService.STATUS_ANY_PUBLISHED
+        def parents = contentRepositoryService.findParents(request[ContentController.REQUEST_ATTRIBUTE_NODE], 
+            [type:attrs[ATTR_TYPE], status:status, params:params])
         if (attrs[ATTR_FILTER]) parents = parents?.findAll(attrs[ATTR_FILTER])
         def var = attrs[ATTR_VAR] ?: null
         parents?.each { parent ->
@@ -131,12 +171,14 @@ class WeceemTagLib {
         def params = makeFindParams(attrs)
         def lineage = request[ContentController.REQUEST_ATTRIBUTE_PAGE].lineage
         def parentHierarchyNode = lineage.size() > 0 ? lineage[-1] : null
+        def status = attrs[ATTR_STATUS] ?: ContentRepositoryService.STATUS_ANY_PUBLISHED
         def siblings 
         if (!parentHierarchyNode) {
             siblings = contentRepositoryService.findAllRootContent( 
                 request[ContentController.REQUEST_ATTRIBUTE_SPACE],attrs[ATTR_TYPE])
         } else {
-            siblings = contentRepositoryService.findChildren( parentHierarchyNode.parent, attrs[ATTR_TYPE], params)
+            siblings = contentRepositoryService.findChildren( parentHierarchyNode.parent, 
+                [type:attrs[ATTR_TYPE], params:params, status:status])
         }
         if (attrs[ATTR_FILTER]) siblings = siblings?.findAll(attrs[ATTR_FILTER])
         def var = attrs[ATTR_VAR] ?: null
@@ -162,21 +204,114 @@ class WeceemTagLib {
         */
     }
     
+    /**
+     * Renders a breadcrumb trail. Renders up to but not including the current page, from the root of
+     * the space. 
+     * Attributes:
+     *  divider - an optional string that is the HTML used between breadcrumb elements. HTML encode the value in your GSP
+     *  custom - an optional value, which if evaluates to boolean "true" will use the supplied tag body to render each
+     *     item in the trail. Variables "first" and "node" are passed to the body
+     */
     def breadcrumb = { attrs, body -> 
-        throwTagError("link not implemented yet")
-/*
-        def lineage = contentRepositoryService.getAncestors(page.relativeURI, request.activeNode)
-        def div = attrs.divider ?: ' > '
+        def node = request[ContentController.REQUEST_ATTRIBUTE_NODE]
+        def lineage = request[ContentController.REQUEST_ATTRIBUTE_PAGE].lineage
+        def div = attrs.divider?.decodeHTML() ?: ' &gt; '
         def first = true
-        lineage.each { parent ->
-            if (!first) {
-                out << div
+        if (!attrs.custom?.toString()?.toBoolean()) {
+            body = { args -> 
+                def o = new StringBuilder()
+                if (!args.first) {
+                    o << div
+                }
+
+                o << link(node:args.node) {
+                    out << args.node.titleForMenu.encodeAsHTML() 
+                } 
+                return o.toString()
             }
-                
-            out << parent.title.encodeAsHTML()
+        }
+        
+        lineage.each { parent ->
+            if (parent != node) {
+                out << body(first:first, node:parent)
+            }
             first = false
         }
-*/
+    }
+    
+    /**
+     * Render a menu based on the content hierarchy
+     * Attributes:
+     *  levels - the number of levels to render, defaults to 2
+     *  custom - if set to boolean "true" will use the body to render each item, passing in the variables:
+     *      first, last, active, link and node variables. The link is the href to the content, node is the content node of that menu item
+     */
+    def menu = { attrs, body ->
+        def node = attrs.node ?: request[ContentController.REQUEST_ATTRIBUTE_NODE]
+        def lineage = request[ContentController.REQUEST_ATTRIBUTE_PAGE].lineage
+
+        def currentLevel = request['_weceem_menu_level'] == null ? 0 : request['_weceem_menu_level']
+        def siblings = currentLevel > 0 || ((attrs[ATTR_SIBLINGS] ?: 'y').toString().toBoolean())
+        def activeClass = attrs[ATTR_ACTIVE_CLASS] ?: 'weceem-menu-active'
+        def firstClass = attrs[ATTR_FIRST_CLASS] ?: 'weceem-menu-first'
+        def lastClass = attrs[ATTR_LAST_CLASS] ?: 'weceem-menu-last'
+        def levelClassPrefix = attrs[ATTR_LEVEL_CLASS_PREFIX] ?: 'weceem-menu-level'
+
+        def custom = attrs[ATTR_CUSTOM]?.toString()?.toBoolean()
+        def levels = attrs[ATTR_LEVELS]?.toString()?.toInteger() ?: 2
+        def bodyToUse = body
+        if (!custom) {
+            bodyToUse = { args -> 
+                def o = new StringBuilder()
+
+                o << "<li class=\"$levelClassPrefix${args.level} ${args.active ? activeClass : ''} ${args.first ? firstClass : ''} ${args.last ? lastClass : ''}\">"
+                o << link(node:args.node) {
+                    out << args.node.titleForMenu.encodeAsHTML() 
+                } 
+                o << "</li>"
+                return o.toString()
+            }
+        }
+                
+        def activeNode = lineage ? lineage[currentLevel] : null
+
+        def levelnodes
+        def args = [
+            status:ContentRepositoryService.STATUS_ANY_PUBLISHED, 
+            type: org.weceem.html.HTMLContent,
+            params:[sort:'orderIndex']
+        ]
+            
+        if (siblings) {
+            if (currentLevel == 0) {
+                levelnodes = contentRepositoryService.findAllRootContent(node.space, args)
+            } else {
+                levelnodes = contentRepositoryService.findChildren(node, args)
+            }
+        } else {
+            levelnodes = [activeNode]
+        }
+            
+        def first = true
+        def last = false
+        def lastIndex = levelnodes.size()-1
+        levelnodes?.eachWithIndex { n, i ->
+            if (!custom && first) {
+                out << "<ul>"
+            }
+            last = i == lastIndex
+            out << bodyToUse(first:first, active:n == activeNode, level:currentLevel, last: last, 
+                link:custom ? createLink(node:n, { out << n.titleForMenu.encodeAsHTML()}) : '', node:n)
+            if (currentLevel+1 < levels) {
+                request['_weceem_menu_level'] = currentLevel+1
+                out << menu([custom:true, node:n], bodyToUse)
+                request['_weceem_menu_level'] = currentLevel // back to where we were
+            }
+            first = false
+            if (!custom && last) {
+                out << "</ul>"
+            }
+        }
     }
     
     def link = { attrs, body -> 
@@ -187,21 +322,38 @@ class WeceemTagLib {
     
     def createLink = { attrs, body -> 
         def space = request[ContentController.REQUEST_ATTRIBUTE_SPACE]
-        def contentInfo = contentRepositoryService.findContentForPath(attrs[ATTR_PATH], space, attrs.type)
-        if (!contentInfo.content) {
-            log.error ("Tag [wcm:createLink] cannot create a link to the content at path ${attrs[ATTR_PATH]} as "+
-                "there is no content node at that URI")
-            out << g.createLink(controller:'content', action:'notFound', params:[path:attrs[ATTR_PATH]])
-            return
+        if (attrs[ATTR_SPACE]) {
+            space = Space.findByAliasURI(attrs[ATTR_SPACE])
+            if (!space) {
+                throwTagError "Tag invoked with space attribute value [${attrs[ATTR_SPACE]}] but no space could be found with that aliasURI"
+            }
         }
-
+        def content = attrs[ATTR_NODE]
+        if (content && !(content instanceof Content)) {
+            throwTagError "Tag invoked with [$ATTR_NODE] attribute but the value is not a Content instance"
+        }
+        if (!content) {
+            def contentInfo = contentRepositoryService.findContentForPath(attrs[ATTR_PATH], space)
+            if (!contentInfo.content) {
+                log.error ("Tag [wcm:createLink] cannot create a link to the content at path ${attrs[ATTR_PATH]} as "+
+                    "there is no content node at that URI")
+                out << g.createLink(controller:'content', action:'notFound', params:[path:attrs[ATTR_PATH]])
+                return
+            }
+            content = contentInfo.content
+        }
+        
+        // @todo This is quite crappy, we should be getting these urls from a cache
         StringBuffer path = new StringBuffer()
-        if(contentInfo.parentURI) {
-            path << contentInfo.parentURI
+        if (space.aliasURI) {
+            path << space.aliasURI
+            path << '/'
+        }
+        if(content.absoluteURI) {
+            path << content.absoluteURI
             path <<  '/'
         }
-        path << contentInfo.content.aliasURI
-        attrs.params = [uri:path.toString(), space: space.name]
+        attrs.params = [uri:path.toString()]
         attrs.controller = 'content'
         attrs.action = 'show'
         out << g.createLink(attrs)
@@ -215,13 +367,18 @@ class WeceemTagLib {
         def params = makeFindParams(attrs)
         def id = attrs[ATTR_ID]
         def title = attrs[ATTR_TITLE]
+        def path = attrs[ATTR_PATH]
         def c
         if (id) {
             c = Content.get(id)
         } else if (title) {
             c = Content.findByTitle(title, params)
-        } else throwTagError("One of [id] or [title] must be specified")
-        out << body(c)
+        } else if (path) {
+            c = contentRepositoryService.findContentForPath(path, request[ContentController.REQUEST_ATTRIBUTE_SPACE]).content
+        } else throwTagError("One of [id], [title] or [path] must be specified")
+        def var = attrs[ATTR_VAR] ?: null
+
+        out << body(var ? [(var):c] : c)
     }
     
     def content = { attrs, body ->
@@ -237,7 +394,9 @@ class WeceemTagLib {
         if (!attrs[ATTR_PATH]) {
             throwTagError("Attribute [${ATTR_PATH}] must be specified, eg the path to the file: images/icon.png")
         }
-        out << g.resource(dir:"WeceemFiles/${space.name.encodeAsURL()}", file:attrs[ATTR_PATH])
+        def aliasURI = space.aliasURI ?: ContentFile.EMPTY_ALIAS_URI
+        
+        out << g.resource(dir:"WeceemFiles/${aliasURI}", file:attrs[ATTR_PATH])
     }
 
     def humanDate = { attrs ->
@@ -258,7 +417,7 @@ class WeceemTagLib {
                             out << message(code:'human.date.minutes.ago', args:[minutesElapsed])
                         } else {
                             def secondsElapsed = millisDelta.seconds
-                            if (secondsElapsed > 0) {
+                            if (secondsElapsed >= 0) {
                                 out << message(code:'human.date.seconds.ago', args:[secondsElapsed])
                             }
                         }
@@ -273,4 +432,50 @@ class WeceemTagLib {
     def loggedInUserName = { attrs ->
         out << weceemSecurityService.userName?.encodeAsHTML()
     }
+    
+    def ifUserCanEdit = { attrs, body ->
+        def node = attrs[ATTR_NODE]
+        if (!node) node = request[ContentController.REQUEST_ATTRIBUTE_NODE]
+
+        if (weceemSecurityService.isUserAllowedToEditContent(node)) {
+            out << body()
+        }
+    }
+    
+    def ifContentIs = { attrs, body ->
+        def node = request[ContentController.REQUEST_ATTRIBUTE_NODE]
+        def targetType = attrs[ATTR_TYPE]
+        if (!targetType)
+            throwTagError("Attribute [${ATTR_TYPE}] is required on tag ifContentIs. It must be a fully qualified class name")
+
+        def targetClass = grailsApplication.getClassForName(targetType)
+        if (!targetClass)
+            throwTagError("Attribute [${ATTR_TYPE}] specified class [${targetType}] but it could not be located")
+        
+        if (targetClass.isAssignableFrom(node.class)) {
+            out << body()
+        }
+    }
+
+    def ifContentIsNot = { attrs ->
+        def node = request[ContentController.REQUEST_ATTRIBUTE_NODE]
+        def targetType = attrs[ATTR_TYPE]
+        
+        if (!grailsApplication.getClassForName(targetType).isAssignableFrom(node.class)) {
+            out << body()
+        }
+    }
+    
+    def renderContentItemIcon = { attrs ->
+        def type = attrs[ATTR_TYPE]
+        def id = attrs[ATTR_ID]
+        def iconconf = type.icon
+        def isStandalone = CH.config.org.weceem.plugin.standalone
+        def env = grails.util.GrailsUtil.environment
+        def plugin = pluginManager.getGrailsPlugin(iconconf.plugin)
+        def pluginContextPath = isStandalone && (env == "development") ?
+         "${iconconf.dir}" : "${plugin?.getPluginPath()}/${iconconf.dir}"
+        out << "<div id='${id}' class='ui-content-icon'><img src='${g.resource(dir: pluginContextPath, file: iconconf.file)}'/></div>"
+    }
+
 }

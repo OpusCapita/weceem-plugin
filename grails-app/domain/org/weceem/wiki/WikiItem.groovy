@@ -24,7 +24,7 @@ import org.weceem.content.*
 class WikiItem extends Content {
 
     static searchable = {
-        only = ['content', 'keywords']
+        only = ['content', 'keywords', 'title']
     }
     
     String keywords
@@ -50,6 +50,7 @@ class WikiItem extends Content {
     }
 
     static mapping = {
+        template cascade: 'all', lazy: false // we never want proxies for this
         cache usage: 'read-write'
         columns {
             content type:'text'
@@ -58,7 +59,7 @@ class WikiItem extends Content {
     
     static editors = {
         template(group:'extra')
-        content(editor:'RichHTML')
+        content(editor:'WikiCode')
         keywords()
     }
 

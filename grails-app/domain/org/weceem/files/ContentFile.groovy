@@ -14,6 +14,8 @@ import org.weceem.content.*
  */
 class ContentFile extends Content {
 
+    public static final String EMPTY_ALIAS_URI = "_ROOT"
+    
     public static final String DEFAULT_UPLOAD_DIR = 'WeceemFiles'
 
     String mimeType
@@ -30,7 +32,8 @@ class ContentFile extends Content {
     }
 
     static editors = {
-        title( editor: 'ReadOnly')
+        title()
+        aliasURI( editor: 'ReadOnly', group: 'extra')
         uploadedFile(editor:'ContentFileUpload')
         mimeType(group:'extra')
         fileSize(group:'extra', editor: 'ReadOnly')
@@ -38,12 +41,10 @@ class ContentFile extends Content {
         syncStatus(hidden: true)
     }
 
-    public void createAliasURI(parent) {
-        def path = ''
-        if (parent && (parent instanceof ContentDirectory)) {
-            path = getPath(parent)
+    public void createAliasURI(parent = null) {
+        if (aliasURI != title){
+            aliasURI = title
         }
-        aliasURI = title.replaceAll(INVALID_ALIAS_URI_CHARS_PATTERN, '-')
     }
 
     Boolean canHaveChildren() { false }
@@ -51,6 +52,7 @@ class ContentFile extends Content {
     Boolean create(Content parentContent) {
         if (!title) {
             title = uploadedFile.originalFilename
+            createAliasURI()
         }
         assert title
         def path = ''
@@ -61,10 +63,10 @@ class ContentFile extends Content {
             path = getPath(parentContent)
         }
         new File(ServletContextHolder.servletContext.getRealPath(
-                "/${DEFAULT_UPLOAD_DIR}/${space.name}${path}")).mkdirs()
+                "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}${path}")).mkdirs()
         try {
             def f = new File(ServletContextHolder.servletContext.getRealPath(
-                "/${DEFAULT_UPLOAD_DIR}/${space.name}${path}/${title}"))
+                "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}${path}/${title}"))
             uploadedFile.transferTo(f)
             mimeType = uploadedFile.contentType
             fileSize = f.length()
@@ -82,9 +84,9 @@ class ContentFile extends Content {
             path = getPath(parent)
         }
         def oldFile = new File(ServletContextHolder.servletContext.getRealPath(
-                "/${DEFAULT_UPLOAD_DIR}/${space.name}${path}/${oldTitle}"))
+                "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}${path}/${oldTitle}"))
         def newFile = new File(ServletContextHolder.servletContext.getRealPath(
-                "/${DEFAULT_UPLOAD_DIR}/${space.name}${path}/${title}"))
+                "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}${path}/${title}"))
         oldFile.renameTo(newFile)
     }
 
@@ -106,9 +108,9 @@ class ContentFile extends Content {
             srcPath = getPath(this)
             if (srcPath || dstPath) {
                 def file = new File(ServletContextHolder.servletContext.getRealPath(
-                        "/${DEFAULT_UPLOAD_DIR}/${space.name}/${srcPath}"))
+                        "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/${srcPath}"))
                 def targetDir = new File(ServletContextHolder.servletContext.getRealPath(
-                        "/${DEFAULT_UPLOAD_DIR}/${space.name}/${dstPath}"))
+                        "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/${dstPath}"))
                 try {
                     FileUtils.moveToDirectory file, targetDir, true
                 } catch (Exception e) {
@@ -131,7 +133,8 @@ class ContentFile extends Content {
         }
 
         def file = new File(ServletContextHolder.servletContext.getRealPath(
-                "/${DEFAULT_UPLOAD_DIR}/${space.name}${path}/${title}"))
+                "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}${path}/${title}"))
+        if (!file.exists()) return true
         return FileUtils.deleteQuietly(file)
     }
 
@@ -145,5 +148,17 @@ class ContentFile extends Content {
         def path = dirs.reverse().join('/')
 
         return path ? "/${path}" : path
+    }
+    
+    public def findBaseDirectory(){
+        def baseDir = this
+        while (baseDir.parent && (baseDir.parent instanceof ContentFile)){
+            baseDir = baseDir.parent
+        }
+        return baseDir
+    }
+    
+    public String toRelativePath(){
+        return getPath(this)
     }
 }
