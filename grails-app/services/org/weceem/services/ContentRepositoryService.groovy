@@ -3,6 +3,9 @@ package org.weceem.services
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.codehaus.groovy.grails.web.context.ServletContextHolder as SCH
 import grails.util.Environment
+// This is for a hack, remove later
+import org.codehaus.groovy.grails.web.metaclass.BindDynamicMethod
+
 
 import org.weceem.content.*
 
@@ -299,7 +302,7 @@ class ContentRepositoryService {
      */
     def createNode(String type, def params) {
         def content = newContentInstance(params.type)
-        content.properties = params
+        content.params = params
         createNode(content)
         return content
     }
@@ -605,7 +608,7 @@ class ContentRepositoryService {
         def space = Space.get(id)
         if (space){
             def oldAliasURI = space.makeUploadName()
-            space.properties = params
+            hackedBindData(space, params)
             if (!space.hasErrors() && space.save()) {
                 def oldFile = new File(SCH.servletContext.getRealPath(
                         "/${ContentFile.DEFAULT_UPLOAD_DIR}/${oldAliasURI}"))
@@ -634,6 +637,11 @@ class ContentRepositoryService {
         }        
     }
     
+    // @todo This is a hack so we can bind without x.properties = y which is broken in production on Grails 1.2-M2
+    public hackedBindData(obj, params) {
+        new BindDynamicMethod().invoke(this, 'bindData', obj, params)
+    }
+    
     def updateNode(Content content, def params) {
         // firstly we save revision: to prevent errors that we have 2 objects
         // in session with the same identifiers
@@ -643,7 +651,7 @@ class ContentRepositoryService {
         content.saveRevision(params.title ?: content.title, params.space ? Space.get(params.'space.id')?.name : content.space.name)
         def oldTitle = content.title
         // map in new values
-        content.properties = params
+        hackedBindData(content, params)
         if (content instanceof ContentFile){
             content.rename(oldTitle)
         }
@@ -962,6 +970,7 @@ class ContentRepositoryService {
         def createdContent = []
         def spaceDir = grailsApplication.parentContext.getResource(
                 "${ContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}").file
+        if (!spaceDir.exists()) spaceDir.mkdirs()
         spaceDir.eachFileRecurse {file ->
             def relativePath = file.absolutePath.substring(
                     spaceDir.absolutePath.size() + 1)
