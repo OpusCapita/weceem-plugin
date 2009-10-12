@@ -335,7 +335,8 @@ class RepositoryController {
         def space = Space.get(params['space.id']?.toLong())
         
         def insertedContent = contentRepositoryService.newContentInstance(params.contentType, space)
-        insertedContent.properties = params
+        // Using bindData to work around Grails 1.2m2 bugs, change to .properties when 1.2-RC1 is live
+        bindData(insertedContent, params)
         if (!insertedContent.aliasURI && insertedContent.title) {
             insertedContent.createAliasURI()
         }

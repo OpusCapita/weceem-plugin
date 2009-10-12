@@ -179,7 +179,9 @@ class SimpleSpaceImporter implements SpaceImporter {
             content = getClass(element.name()).newInstance()    
         }
         params.remove "id"
-        content.properties = params
+        // @todo remove this and revert to x.properties = y after Grails 1.2-RC1
+        grailsApp.mainContext.contentRepositoryService.hackedBindData(content, params)
+        
         if (content.orderIndex == null) content.orderIndex = 0
         backrefMap += [(id): content]
         return content
