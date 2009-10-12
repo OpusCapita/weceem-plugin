@@ -79,7 +79,7 @@ class SimpleSpaceExporter implements SpaceExporter {
         def ant = new AntBuilder()
 
         ant.copy(todir: "${baseDir.absolutePath}/files", failonerror: false) {
-            fileset(dir: "${filesDir.absolutePath}/${spc.name}")
+            fileset(dir: "${filesDir.absolutePath}/${spc.makeUploadName()}")
         }
 
         def tmp = File.createTempFile("export", ".zip")
