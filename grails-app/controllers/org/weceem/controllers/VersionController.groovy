@@ -57,7 +57,8 @@ class VersionController {
             xstream.registerConverter(new DomainConverter(contentVersion.objectClassName))
             def content = Content.get(contentVersion.objectKey)
             if (content) {
-                content.properties = getRestoredProperties(xstream.fromXML(contentVersion.objectContent))
+                // Using bindData to work around Grails 1.2m2 bugs, change to .properties when 1.2-RC1 is live
+                bindData(content, getRestoredProperties(xstream.fromXML(contentVersion.objectContent)) )
                 content.save()
             } else {
                 // if Content was deleted

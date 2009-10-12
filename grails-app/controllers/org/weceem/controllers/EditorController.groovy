@@ -22,7 +22,8 @@ class EditorController {
         workaroundBlankAssociationBug()
         
         def content = contentRepositoryService.newContentInstance(params.type)
-        content.properties = params
+        // Using bindData to work around Grails 1.2m2 bugs, change to .properties when 1.2-RC1 is live
+        bindData(content, params)
 
         return [content: content, editableProperties: editorService.getEditorInfo(content.class)]
     }

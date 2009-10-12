@@ -2,6 +2,7 @@ package org.weceem.export
 
 import javax.xml.parsers.SAXParserFactory
 import org.apache.commons.logging.LogFactory
+import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.apache.commons.logging.Log
 
 import org.weceem.content.*
@@ -17,6 +18,8 @@ class ConfluenceSpaceImporter implements SpaceImporter {
     Log log = LogFactory.getLog(DefaultSpaceImporter)
 
     public void execute(Space space, File file) {
+        def grailsApp = ApplicationHolder.application
+
         def defStatus = Status.findByPublicContent(true)
         def parser = SAXParserFactory.newInstance().newSAXParser()
         def handler = new SAXConfluenceParser()
@@ -39,8 +42,10 @@ class ConfluenceSpaceImporter implements SpaceImporter {
             wi.content = latestItem.body
 
             def wikiItem = WikiItem.findWhere(aliasURI: wi.aliasURI, space: space)
-            if (wikiItem) wikiItem.properties = wi.properties
-            else wikiItem = wi
+            if (wikiItem) {
+                // @todo remove this and revert to x.properties = y after Grails 1.2-RC1
+                grailsApp.mainContext.contentRepositoryService.hackedBindData(wikiItem, wi.properties)
+            } else wikiItem = wi
             wikiItem.save(flush: true)
         }
     }

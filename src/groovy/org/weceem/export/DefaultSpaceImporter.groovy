@@ -23,6 +23,8 @@ class DefaultSpaceImporter implements SpaceImporter {
         tmpDir.delete()
         tmpDir.mkdir()
 
+        def grailsApp = ApplicationHolder.application
+
         def ant = new AntBuilder()
 
         try {
@@ -69,7 +71,9 @@ class DefaultSpaceImporter implements SpaceImporter {
                     if (!template) {
                         template = new Template()
                     }
-                    template.properties = getRestoredProperties(deserialized)
+                    
+                    // @todo remove this and revert to x.properties = y after Grails 1.2-RC1
+                    grailsApp.mainContext.contentRepositoryService.hackedBindData(template, getRestoredProperties(deserialized))
                     if (template.status == null){
                         template.status = defStatus
                     }
@@ -85,7 +89,8 @@ class DefaultSpaceImporter implements SpaceImporter {
                         content = deserialized.class.newInstance()
                     }
 
-                    content.properties = getRestoredProperties(deserialized)
+                    // @todo remove this and revert to x.properties = y after Grails 1.2-RC1
+                    grailsApp.mainContext.contentRepositoryService.hackedBindData(content, getRestoredProperties(deserialized))
                     content.status = defStatus
                     if (content instanceof ContentFile) content.syncStatus = 0
                     if (!content.orderIndex) content.orderIndex = 0

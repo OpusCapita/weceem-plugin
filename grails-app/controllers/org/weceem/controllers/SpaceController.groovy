@@ -22,7 +22,8 @@ class SpaceController {
 
     def create = {
         def space = new Space()
-        space.properties = params
+        // Using bindData to work around Grails 1.2m2 bugs, change to .properties when 1.2-RC1 is live
+        bindData(space, params)
         return ['space': space]
     }
 
@@ -51,6 +52,9 @@ class SpaceController {
         def result = contentRepositoryService.updateSpace(params.id, params)
         if (!result.notFound) {
             if (!result.errors) {
+                def spaceDir = grailsApplication.parentContext.getResource(
+                "${ContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}").file
+                if (spaceDir.exists()) spaceDir.mkdirs()
                 flash.message = "Space '${result.space.name}' updated"
                 redirect(action: list, id: result.space.id)
             } else {

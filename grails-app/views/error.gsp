@@ -42,8 +42,8 @@
         <g:if test="${exception}">
             <strong>Exception Message:</strong> ${exception.message?.encodeAsHTML()} <br />
             <strong>Caused by:</strong> ${exception.cause?.message?.encodeAsHTML()} <br />
-            <strong>Class:</strong> ${exception.className}.encodeAsHTML() <br />
-            <strong>At Line:</strong> [${exception.lineNumber}.encodeAsHTML()] <br />
+            <strong>Class:</strong> ${exception.className.encodeAsHTML()} <br />
+            <strong>At Line:</strong> [${exception.lineNumber.encodeAsHTML()}] <br />
             <strong>Code Snippet:</strong><br />
             <div class="snippet">
                 <g:each var="cs" in="${exception.codeSnippet}">
