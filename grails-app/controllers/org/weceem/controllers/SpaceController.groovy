@@ -51,6 +51,9 @@ class SpaceController {
         def result = contentRepositoryService.updateSpace(params.id, params)
         if (!result.notFound) {
             if (!result.errors) {
+                def spaceDir = grailsApplication.parentContext.getResource(
+                "${ContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}").file
+                if (spaceDir.exists()) spaceDir.mkdirs()
                 flash.message = "Space '${result.space.name}' updated"
                 redirect(action: list, id: result.space.id)
             } else {

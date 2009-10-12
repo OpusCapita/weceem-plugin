@@ -962,6 +962,7 @@ class ContentRepositoryService {
         def createdContent = []
         def spaceDir = grailsApplication.parentContext.getResource(
                 "${ContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}").file
+        if (!spaceDir.exists()) spaceDir.mkdirs()
         spaceDir.eachFileRecurse {file ->
             def relativePath = file.absolutePath.substring(
                     spaceDir.absolutePath.size() + 1)
