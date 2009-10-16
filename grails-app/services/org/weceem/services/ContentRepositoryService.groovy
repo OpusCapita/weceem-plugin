@@ -302,7 +302,7 @@ class ContentRepositoryService {
      */
     def createNode(String type, def params) {
         def content = newContentInstance(params.type)
-        content.params = params
+        hackedBindData(content, params)
         createNode(content)
         return content
     }
