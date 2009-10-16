@@ -791,11 +791,26 @@ class RepositoryController {
         def ascOrder = Boolean.valueOf(params.isAsc)
         def statusFilter = Integer.valueOf(params.statusFilter)
         //performing search
-        searchResult.sort({a,b -> 
-            if (ascOrder) 
-                return a?."$sortField"?.compareTo(b?."$sortField")
-            else
-                return -a?."$sortField"?.compareTo(b?."$sortField")
+        searchResult.sort({a,b ->
+            def fieldPath = sortField.tokenize('.')
+            def valA = a
+            for (field in fieldPath){
+                valA = valA?."$field"
+            }
+            def valB = b
+            for (field in fieldPath){
+                valB = valB?."$field"
+            }
+            if (ascOrder){ 
+                if (valA == null) return -1
+                if (valB == null) return 1
+                return valA.compareTo(valB)
+            }
+            else{
+                if (valA == null) return 1
+                if (valB == null) return -1
+                return valB.compareTo(valA)
+            }
         })
         searchResult = searchResult.findAll{
             def flag = true

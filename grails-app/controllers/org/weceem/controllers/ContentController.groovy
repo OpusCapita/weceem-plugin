@@ -1,6 +1,3 @@
-package org.weceem.controllers
-
-import org.weceem.content.*
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +11,10 @@ import org.weceem.content.*
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.weceem.controllers
+
+import org.weceem.content.*
+
 import org.codehaus.groovy.grails.web.pages.GSPResponseWriter
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
 import org.springframework.web.context.request.RequestContextHolder
