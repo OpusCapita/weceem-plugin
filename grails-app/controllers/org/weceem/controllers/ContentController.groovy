@@ -67,7 +67,7 @@ class ContentController {
     			    title: content.title,
     			    titleForHTML: content.titleForHTML,
     			    titleForMenu: content.titleForMenu
-    			    ]
+    			]
 
                 // Make this available to the rest of the request chain
                 request[REQUEST_ATTRIBUTE_NODE] = content
