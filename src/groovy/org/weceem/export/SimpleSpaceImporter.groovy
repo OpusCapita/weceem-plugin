@@ -147,7 +147,7 @@ class SimpleSpaceImporter implements SpaceImporter {
             if (child.name() != "id"){
                 def currProp = props.find{prop -> prop.name == child.name()}
                 //Check element's type: association or not
-                if (currProp.isAssociation() && (currProp.name != "status")){
+                if (currProp?.isAssociation() && (currProp.name != "status")){
                     if (currProp.name == "children"){
                         def childrenList = []
                         child.children().each{chld ->

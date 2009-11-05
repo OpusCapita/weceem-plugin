@@ -8,7 +8,7 @@ class PortalController {
     static defaultAction = 'content'
 
     def content = { 
-        redirect(controller:'repository')
+        redirect(controller:'repository', action:'treeTable')
     }
     
     def design = {

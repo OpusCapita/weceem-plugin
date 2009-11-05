@@ -95,7 +95,7 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
         //       ----b (3)
 
     }
-    
+
     void tearDown() {
         Content.list().each {
             it.children = [] as SortedSet
@@ -107,6 +107,16 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
         //Content.list()*.delete(flush:true)
     }
 
+    void testResolveSpaceAndURI() {
+        def res = contentRepositoryService.resolveSpaceAndURI('/jcatalog/anything')
+        assert res.space.id == spaceA.id
+        assertEquals 'anything', res.uri
+        
+        res = contentRepositoryService.resolveSpaceAndURI('jcatalog/anything')
+        assert res.space.id == spaceA.id
+        assertEquals 'anything', res.uri
+    }
+    
     void testDeleteNodeA() {
         // Result Tree:
         //   c

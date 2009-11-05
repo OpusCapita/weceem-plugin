@@ -76,6 +76,13 @@ class ContentRepositoryService {
         def spaceName
         def space
         
+        if (uri?.startsWith('/')) {
+            if (uri.length() > 1) {
+                uri = uri[1..uri.length()-1]
+            } else {
+                uri = ''
+            }
+        }
         def n = uri?.indexOf('/')
         if (n >= 0) {
             spaceName = uri[0..n-1]
