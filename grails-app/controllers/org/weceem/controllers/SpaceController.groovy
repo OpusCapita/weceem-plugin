@@ -5,6 +5,7 @@ import org.apache.commons.io.FilenameUtils
 import org.weceem.content.*
 import org.weceem.services.*
 import org.weceem.export.*
+import org.weceem.files.ContentFile
 
 class SpaceController {
 
@@ -52,8 +53,9 @@ class SpaceController {
         def result = contentRepositoryService.updateSpace(params.id, params)
         if (!result.notFound) {
             if (!result.errors) {
+                // @todo This should not be here, should be in updateSpace on repo service
                 def spaceDir = grailsApplication.parentContext.getResource(
-                "${ContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}").file
+                    "${ContentFile.DEFAULT_UPLOAD_DIR}/${result.space.makeUploadName()}").file
                 if (spaceDir.exists()) spaceDir.mkdirs()
                 flash.message = "Space '${result.space.name}' updated"
                 redirect(action: list, id: result.space.id)
@@ -125,13 +127,17 @@ class SpaceController {
      * @param exporter
      */
     def performExport = {
+        log.debug "Starting export of space [${params.space}] - all params: ${params}"
         def space = Space.get(params.space)
+        log.debug "Export found space [${space}]"
         try {
             def file = importExportService.exportSpace(space, params.exporter)
+            log.debug "Exported space to temp file [${file}]"
             response.contentType = importExportService.getExportMimeType(params.exporter)
             response.addHeader('Content-Length', file.length().toString())
-            response.addHeader('Content-disposition',
-                    "attachment;filename=${space.name}.${FilenameUtils.getExtension(file.name)}")
+            def contDisp = "attachment;filename=${space.name}.${FilenameUtils.getExtension(file.name)}"
+            log.debug "Returning exported space to client with content disposition: [${contDisp}]"
+            response.addHeader('Content-disposition', contDisp)
             response.outputStream << file.readBytes()
         } catch (Exception e) {
             flash.message = e.message

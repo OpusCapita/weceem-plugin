@@ -36,6 +36,6 @@ class VirtualContent extends Content {
     }
     
     static mapping = {
-        target lazy:false // we never want proxies for this
+        //target lazy:false // we never want proxies for this, but in Grails < 1.2 final, this gives us bad proxies
     }
 }

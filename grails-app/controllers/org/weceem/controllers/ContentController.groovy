@@ -50,12 +50,18 @@ class ContentController {
             def content = contentInfo?.content
             
             // Resolve virtual content refs
+            if (log.debugEnabled) {
+                log.debug "Content for uri: ${uri} is: ${content?.dump()}"
+                if (content?.metaClass?.hasProperty(content, 'target')) {
+                    log.debug "Content for uri: ${uri} has a target value of [${content.target}]"
+                }
+            }
             if (content instanceof VirtualContent) {
                 content = content.target
             }
 
             if (log.debugEnabled) {
-                log.debug "Content for uri: ${uri} is: ${content?.dump()}"
+                log.debug "Content after resolving virtual content for uri: ${uri} is: ${content?.dump()}"
             }
             
             def activeUser = weceemSecurityService.userName
