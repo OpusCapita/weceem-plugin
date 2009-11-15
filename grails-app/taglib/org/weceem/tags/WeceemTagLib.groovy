@@ -315,8 +315,6 @@ class WeceemTagLib {
         }
     }
 
-
-
     /**
     * output a recursive treemenu based either on a node or the root
      * attributes:
@@ -337,7 +335,8 @@ class WeceemTagLib {
 
         def tmenu = { aNode, level=1 ->
             out << "<ul ${id ? 'id=${id}' : ''} class='menu menu-level-${level}'>"
-            out << "<li class='menu-item'>${aNode.titleForMenu.encodeAsHTML()}"
+            out << "<li class='menu-item'>"
+            out << link(node:aNode, {aNode.titleForMenu.encodeAsHTML()})
             if (level < levels) {
                 contentRepositoryService.findChildren(aNode, args).each {child ->
                     owner.call(child, ++level)
