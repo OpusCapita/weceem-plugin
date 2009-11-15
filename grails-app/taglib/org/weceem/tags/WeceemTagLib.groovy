@@ -314,7 +314,48 @@ class WeceemTagLib {
             }
         }
     }
-    
+
+
+
+    /**
+    * output a recursive treemenu based either on a node or the root
+     * attributes:
+     * node - the node to base the menu on
+     * levels - the number of levels
+     * id - id of the menu
+     */
+    def treeMenu = { attrs ->
+        def node = attrs.node
+        int levels = attrs.levels ? attrs.levels.toInteger() : 2
+        def id = attrs.id
+
+        def args = [
+            status:ContentRepositoryService.STATUS_ANY_PUBLISHED,
+            type: org.weceem.html.HTMLContent,
+            params:[sort:'orderIndex']
+        ]
+
+        def tmenu = { aNode, level=1 ->
+            out << "<ul ${id ? 'id=${id}' : ''} class='menu menu-level-${level}'>"
+            out << "<li class='menu-item'>${aNode.titleForMenu.encodeAsHTML()}"
+            if (level < levels) {
+                contentRepositoryService.findChildren(aNode, args).each {child ->
+                    owner.call(child, ++level)
+                }
+            }
+            out << "</li></ul>"
+        }
+
+        if(node) {
+            tmenu(node)
+        } else {
+            contentRepositoryService.findAllRootContent(request[ContentController.REQUEST_ATTRIBUTE_SPACE], args).each {
+                tmenu(it)
+            }
+        }
+    }
+
+
     def link = { attrs, body -> 
         out << "<a href=\"${createLink(attrs)}\">"
         out << body()
