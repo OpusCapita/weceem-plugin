@@ -38,16 +38,19 @@ class WidgetTagLib {
     def widget = {attrs, body ->
         def widget
         def path = attrs.path
+        def space = attrs.space ? Space.findByAliasURI(attrs.space) : pageScope.space
+        if(!space) {throwTagError("No space by name ${attrs.space}")}
+
         if (path) {
-            widget = contentRepositoryService.findContentForPath(path, pageScope.space)?.content
+            widget = contentRepositoryService.findContentForPath(path, space)?.content
             if (!widget) {
-                throwTagError("There is no Widget at aliasURI [${path}] in the space [${pageScope.space.name}]")
+                throwTagError("There is no Widget at aliasURI [${path}] in the space [${space.name}]")
             }
         } else if (attrs.id) {
             log.warn("Use of [id] attribute on widget tag is deprecated")
-            widget = Widget.findBySpaceAndTitle(pageScope.space, attrs.id)
+            widget = Widget.findBySpaceAndTitle(space, attrs.id)
             if (!widget) {
-                throwTagError("There is no Widget with title [${attrs.id}] in the space [${pageScope.space.name}]. Tip: use path attribute!")
+                throwTagError("There is no Widget with title [${attrs.id}] in the space [${space.name}]. Tip: use path attribute!")
             }
         }
         if (log.debugEnabled) {

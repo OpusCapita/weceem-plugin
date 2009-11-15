@@ -23,6 +23,7 @@ import org.weceem.services.ContentRepositoryService
 
 import org.weceem.content.Template
 import grails.util.GrailsUtil
+import org.weceem.content.Space
 
 class WeceemTagLib {
     
@@ -390,7 +391,8 @@ class WeceemTagLib {
     }
     
     def createLinkToFile = { attrs ->
-        def space = request[ContentController.REQUEST_ATTRIBUTE_SPACE]
+        def space = attrs.space ? Space.findByAliasURI(attrs.space) : request[ContentController.REQUEST_ATTRIBUTE_SPACE]
+        if (!space) {throwTagError("Space ${attrs.space} not found")}
         if (!attrs[ATTR_PATH]) {
             throwTagError("Attribute [${ATTR_PATH}] must be specified, eg the path to the file: images/icon.png")
         }
