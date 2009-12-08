@@ -6,8 +6,8 @@ dataSource {
 }
 hibernate {
     cache.use_second_level_cache=true
-    cache.use_query_cache=true
-    cache.provider_class='com.opensymphony.oscache.hibernate.OSCacheProvider'
+    cache.use_query_cache=true // Warning, turning this on causes lock contention
+    cache.provider_class='org.hibernate.cache.EhCacheProvider'
 }
 // environment specific settings
 environments {
