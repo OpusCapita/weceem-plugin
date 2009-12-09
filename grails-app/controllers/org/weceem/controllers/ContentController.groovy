@@ -25,9 +25,11 @@ class ContentController {
     static String REQUEST_ATTRIBUTE_USER = "weceem.user"
     static String REQUEST_ATTRIBUTE_NODE = "weceem.node"
     static String REQUEST_ATTRIBUTE_SPACE = "weceem.space"
+    static CACHE_NAME_TEMPLATE_CACHE = "gspCache"
     
     def contentRepositoryService
     def weceemSecurityService
+    def cacheService
     
     def show = {
         if (log.debugEnabled) {
@@ -118,9 +120,7 @@ class ContentController {
                     Writer out = GSPResponseWriter.getInstance(response, 65536)
                     GrailsWebRequest webRequest = (GrailsWebRequest) RequestContextHolder.currentRequestAttributes()
                     webRequest.setOut(out)
-                    def engine = grailsAttributes.pagesTemplateEngine
-                    // Only Templates can have GSP tags and expressions, the content is included later as part of the model
-                    def groovyTemplate = engine.createTemplate(template.content, template.title)
+                    def groovyTemplate = contentRepositoryService.getGSPTemplate(template.absoluteURI, template.content)
                 
                     // Pass in the content so it can be rendered in the template
                     def preparedContent = groovyTemplate?.make([user: activeUser, node: content, page:pageInfo, space:space])

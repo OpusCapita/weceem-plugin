@@ -27,10 +27,15 @@ class ContentRepositoryService {
     static final CONTENT_CLASS = Content.class.name
     static final STATUS_ANY_PUBLISHED = 'published'
     
+    static GSP_CONTENT_CLASSES = [ Template.class, Widget.class ]
+    static CACHE_NAME_GSP_CACHE = "gspCache"
+    
     static transactional = true
 
     def grailsApplication
     def importExportService
+    def cacheService
+    def groovyPagesTemplateEngine
     
     static DEFAULT_STATUSES = [
         [code:100, description:'draft', publicContent:false],
@@ -193,6 +198,15 @@ class ContentRepositoryService {
         deleteSpaceContent(space)
         // Delete space
         space.delete(flush: true)
+    }
+
+    def getGSPTemplate(pageName, content) {
+        cacheService.getOrPutObject(CACHE_NAME_GSP_CACHE, pageName) {
+            if (log.debugEnabled) {
+                log.debug "Creating GSP template class for $pageName"
+            }
+            groovyPagesTemplateEngine.createTemplate(content, pageName)
+        }
     }
 
     /**
@@ -655,6 +669,7 @@ class ContentRepositoryService {
         if (log.debugEnabled) {
             log.debug("Updating node with id ${content.id}, with parameters: $params")
         }
+        def oldAbsURI = content.absoluteURI
         content.saveRevision(params.title ?: content.title, params.space ? Space.get(params.'space.id')?.name : content.space.name)
         def oldTitle = content.title
         // map in new values
@@ -675,6 +690,9 @@ class ContentRepositoryService {
         if (content.save()) {
             if (log.debugEnabled) {
                 log.debug("Update node with id ${content.id} saved OK")
+            }
+            if (GSP_CONTENT_CLASSES.contains(content.class)) {
+                cacheService.removeValue("gspCache", oldAbsURI)
             }
             return [content:content]
         } else {

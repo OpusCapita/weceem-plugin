@@ -67,8 +67,7 @@ class WidgetTagLib {
 
         out << body()
 
-        def engine = grailsAttributes.getPagesTemplateEngine()
-        def groovyTemplate = engine.createTemplate(widget.content, widget.title)
+        def groovyTemplate = contentRepositoryService.getGSPTemplate(widget.absoluteURI, widget.content)
         try {
             if (attrs.model instanceof Map) {
                 def model = [:] 
