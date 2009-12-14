@@ -54,7 +54,7 @@ class CacheService implements InitializingBean {
     }
 
     def getOrPutValue(cacheName, key, valueCallable) {
-        getOrPut(cacheName, false, key, objectCallable)
+        getOrPut(cacheName, false, key, valueCallable)
     }
     
     def getOrPut(cacheName, boolean isObject, key, valueCallable) {

@@ -2,10 +2,14 @@ package org.weceem.tags
 
 import grails.util.Environment
 
+import org.weceem.controllers.ContentController
+
 class CacheTagLib {
     static namespace = "wcm"
 
     static MACRO_PATTERN = ~/\$\{(\S+)\}/
+    
+    static REQUEST_ATTRIBUTE_CURRENT_CACHE_SECTION = "org.weceem.tag.cache.current.section"
     
     static transactional = false
     
@@ -16,7 +20,20 @@ class CacheTagLib {
         if ((Environment.current != Environment.PRODUCTION) && params.refresh) {
             cacheService.clearCache(cacheName)
         } 
-        def content = cacheService.getOrPutValue(cacheName, attrs.key, body)
+        def key = attrs.key
+        if (!key) {
+            def n = request[REQUEST_ATTRIBUTE_CURRENT_CACHE_SECTION]
+            if (n == null) {
+                request[REQUEST_ATTRIBUTE_CURRENT_CACHE_SECTION] = 0
+            } else {
+                request[REQUEST_ATTRIBUTE_CURRENT_CACHE_SECTION] += 1
+            }
+            key = request[ContentController.REQUEST_ATTRIBUTE_PAGE].URI+n
+            if (log.warnEnabled) {
+                log.warn "Auto-generating cache key for ${request[ContentController.REQUEST_ATTRIBUTE_PAGE].URI}"
+            }
+        }
+        def content = cacheService.getOrPutValue(cacheName, key, body)
         def model = attrs.model
         if (model) {
              content = expandModel(content, model)
