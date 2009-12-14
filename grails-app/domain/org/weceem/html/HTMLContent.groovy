@@ -62,6 +62,7 @@ class HTMLContent extends Content {
     }
 
     static mapping = {
+        cache usage:'read-write', include: 'non-lazy'
         template cascade: 'all', lazy: false // we never want proxies for this
         columns {
             content type:'text'

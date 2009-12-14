@@ -12,7 +12,7 @@ class Status {
     Boolean publicContent // Indicates if content in this status can be viewed by unauthenticated users
     
     static mapping = {
-        cache usage: 'nonstrict-read-write' 
+        cache usage: 'read-write' 
     }
 
     static constraints = {

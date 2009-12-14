@@ -2,6 +2,7 @@ package org.weceem.services
 
 import org.springframework.beans.factory.InitializingBean
 import net.sf.ehcache.Element
+import net.sf.ehcache.Cache
 import org.apache.commons.logging.LogFactory
 
 class CacheService implements InitializingBean {
@@ -44,6 +45,10 @@ class CacheService implements InitializingBean {
         getCache(cacheName).put( new Element(key, value) )
     }
 
+    def putToCache(Cache cache, key, value) {
+        cache.put( new Element(key, value) )
+    }
+    
     def getOrPutObject(cacheName, key, objectCallable) {
         getOrPut(cacheName, true, key, objectCallable)
     }

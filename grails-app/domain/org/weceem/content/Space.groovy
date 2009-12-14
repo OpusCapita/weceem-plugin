@@ -33,7 +33,7 @@ class Space {
     }
     
     static mapping = {
-        cache usage: 'nonstrict-read-write'
+        cache usage: 'read-write'
         name index: 'space_name_Idx'
         aliasURI index: 'space_aliasURI_Idx'
     }

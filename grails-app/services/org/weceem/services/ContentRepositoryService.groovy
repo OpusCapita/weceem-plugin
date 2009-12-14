@@ -2,6 +2,7 @@ package org.weceem.services
 
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.codehaus.groovy.grails.web.context.ServletContextHolder as SCH
+import org.springframework.beans.factory.InitializingBean
 import grails.util.Environment
 // This is for a hack, remove later
 import org.codehaus.groovy.grails.web.metaclass.BindDynamicMethod
@@ -21,7 +22,7 @@ import org.weceem.files.*
  *
  * @author Sergei Shushkevich
  */
-class ContentRepositoryService {
+class ContentRepositoryService implements InitializingBean {
 
     public static final String DEFAULT_UPLOAD_DIR = 'WeceemFiles'
     static final CONTENT_CLASS = Content.class.name
@@ -29,9 +30,11 @@ class ContentRepositoryService {
     
     static GSP_CONTENT_CLASSES = [ Template.class, Widget.class ]
     static CACHE_NAME_GSP_CACHE = "gspCache"
+    static CACHE_NAME_URI_TO_CONTENT_ID = "uriToContentCache"
     
     static transactional = true
 
+    def uriToIdCache
     def grailsApplication
     def importExportService
     def cacheService
@@ -43,6 +46,11 @@ class ContentRepositoryService {
         [code:300, description:'approved', publicContent:false],
         [code:400, description:'published', publicContent:true]
     ]
+    
+    void afterPropertiesSet() {
+        uriToIdCache = cacheService.getCache(CACHE_NAME_URI_TO_CONTENT_ID)
+        assert uriToIdCache
+    }
     
     void createDefaultSpace() {
         if (Environment.current != Environment.TEST) {
@@ -61,12 +69,12 @@ class ContentRepositoryService {
     }
     
     List getAllPublicStatuses() {
-        Status.findAllByPublicContent(true)
+        Status.findAllByPublicContent(true, [cache:true])
     }
     
     Space findDefaultSpace() {
         def space
-        def spaces = Space.list()
+        def spaces = Space.list([cache:true])
         if (spaces) {
             space = spaces[0]
         }        
@@ -74,7 +82,7 @@ class ContentRepositoryService {
     }
     
     Space findSpaceByURI(String uri) {
-        Space.findByAliasURI(uri)
+        Space.findByAliasURI(uri, [cache:true])
     }
     
     Map resolveSpaceAndURI(String uri) {
@@ -808,6 +816,7 @@ class ContentRepositoryService {
             } else {
                 eq('parent', sourceNode)
             }
+            cache true
         }
         
         return children //  sortNodes(children, params?.sort, params?.order)
@@ -897,6 +906,7 @@ class ContentRepositoryService {
             eq('aliasURI', aliasURI)
             eq('space', space)
             maxResults(1)
+            cache true
         }
         return r ? r[0] : null
     }
@@ -905,9 +915,13 @@ class ContentRepositoryService {
      * find all root nodes by type and space
      */ 
     def findAllRootContent(Space space, Map args = Collections.EMPTY_MAP) {
+        if (log.debugEnabled) {
+            log.debug "findAllRootContent $space, $args"
+        }
         doCriteria(getContentClassForType(args.type), args.status, args.params) {
             isNull('parent')
             eq('space', space)
+            cache true
         }
     }
     
@@ -926,20 +940,49 @@ class ContentRepositoryService {
      * and 'parentURI' (the uri to the parent of this instance of the node)
      */
     def findContentForPath(String uriPath, Space space) {
-        log.debug "findContentForPath uri: ${uriPath} space: ${space}"
+        if (log.debugEnabled) {
+            log.debug "findContentForPath uri: ${uriPath} space: ${space}"
+        }
+
+        // This looks up the uriPath in the cache to see if we can get a Map of the content id and parentURI
+        // If we call getValue on the cache hit, we lose 50% of our performance. Just retrieving
+        // the cache hit is not expensive.
+        def cachedElement = uriToIdCache.get(uriPath)
+        def cachedContentInfo = cachedElement?.getValue()
+        if (cachedContentInfo) {
+            if (log.debugEnabled) {
+                log.debug "Found content info into cache for uri $uriPath: ${cachedContentInfo}"
+            }
+            // @todo will this break with different table mapping strategy eg multiple ids of "1" with separate tables?
+            def c = Content.get(cachedContentInfo.id)
+            // @todo re-load the lineage objects here, currently they are ids!
+            def reloadedLineage = cachedContentInfo.lineage?.collect { l_id ->
+                Content.get(l_id)
+            }
+            if (log.debugEnabled) {
+                log.debug "Reconstituted lineage from cache for uri $uriPath: ${reloadedLineage}"
+            }
+            return !c ? null : [content:c, parentURI:cachedContentInfo.parentURI, lineage:reloadedLineage]
+        }   
+
         def tokens = uriPath.split('/')
 
         // @todo: optimize query 
         def content = findRootContentByURI(tokens[0], space)
         if (!content) content = findFileRootContentByURI(tokens[0], space)
-        log.debug "findContentForPath $uriPath - root content node is $content"
+        if (log.debugEnabled) {
+            log.debug "findContentForPath $uriPath - root content node is $content"
+        }
+        
         def lineage = [content]
         if (content && (tokens.size() > 1)) {
             for (n in 1..tokens.size()-1) {
                 def child = Content.find("""from Content c \
                         where c.parent = ? and c.aliasURI = ?""",
                         [content, tokens[n]])
-                log.debug "findContentForPath $uriPath - found child $child for path token ${tokens[n]}"
+                if (log.debugEnabled) {
+                    log.debug "findContentForPath $uriPath - found child $child for path token ${tokens[n]}"
+                }
                 if (child) {
                     lineage << child
                     content = child
@@ -957,7 +1000,20 @@ class ContentRepositoryService {
             parentURIParts = tokens[0..tokens.size()-2]
         }
 
-        return [content:content, parentURI:parentURIParts.join('/'), lineage:lineage]
+        def parentURI = parentURIParts.join('/')
+
+        // Cache this resolution - found or not
+        // This MUST be a new map otherwise we have immutability problems
+        // Don't writer lineage if the result was null
+        def cacheValue = [id:content?.id, 
+          parentURI:parentURI, lineage: content ? (lineage.collect { l -> l.id }).toArray() : null]
+        
+        if (log.debugEnabled) {
+            log.debug "Caching content info for uri $uriPath: $cacheValue"
+        }
+        cacheService.putToCache(uriToIdCache, uriPath, cacheValue)
+
+        return [content:content, parentURI:parentURI, lineage:lineage]
     }
     
     def findFileRootContentByURI(String aliasURI, Space space, Map args = Collections.EMPTY_MAP) {

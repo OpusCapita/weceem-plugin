@@ -296,7 +296,7 @@ class WeceemTagLib {
         def first = true
         def last = false
         def lastIndex = levelnodes.size()-1
-        levelnodes?.eachWithIndex { n, i ->
+        levelnodes?.eachWithIndex { n, i -> 
             if (!custom && first) {
                 out << "<ul>"
             }
