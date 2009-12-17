@@ -17,6 +17,7 @@ import org.weceem.services.*
  * ContentRepositoryTests class contains tests for tree operations from
  * contentRepositoryService.
  *
+ * These old tests BAD because they are not mocking the services, so they are testing the services and controller
  */
 class ContentControllerTests extends GroovyTestCase {
     def template
@@ -104,6 +105,8 @@ class ContentControllerTests extends GroovyTestCase {
     void testVirtualContentRenderRoot() {
         def con = new ContentController()
         con.contentRepositoryService = new ContentRepositoryService()
+        con.contentRepositoryService.cacheService = new CacheService()
+        con.contentRepositoryService.afterPropertiesSet()
         con.weceemSecurityService = new WeceemSecurityService()
         
         con.params.uri = "/jcatalog/virtContent1"
@@ -118,6 +121,8 @@ class ContentControllerTests extends GroovyTestCase {
     void testVirtualContentRenderDeepChild() {
         def con = new ContentController()
         con.contentRepositoryService = new ContentRepositoryService()
+        con.contentRepositoryService.cacheService = new CacheService()
+        con.contentRepositoryService.afterPropertiesSet()
         con.weceemSecurityService = new WeceemSecurityService()
         con.params.uri = "/jcatalog/lang/de/haus"
         con.show()

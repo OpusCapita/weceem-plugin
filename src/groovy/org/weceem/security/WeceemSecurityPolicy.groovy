@@ -1,0 +1,112 @@
+package org.weceem.security
+
+class WeceemSecurityPolicy {
+    private entriesBySpace = [:]
+    
+    static DEFAULT_POLICY_URI = "*/"
+    static ANY_SPACE_ALIAS = "*"
+
+    static ROLE_ADMIN = "ROLE_ADMIN"
+    static ROLE_USER = "ROLE_USER"
+    static ROLE_GUEST = "ROLE_GUEST"
+
+    static PERMISSION_ADMIN = "admin"
+    static PERMISSION_EDIT = "edit"
+    static PERMISSION_CREATE = "create"
+    static PERMISSION_DELETE = "delete"
+    static PERMISSION_VIEW = "view"
+        
+    void initDefault() {
+        log.info "Initializing default security policy"
+        
+        setDefaultPermissionForSpaceAndRole(PERMISSION_ADMIN, true, ANY_SPACE_ALIAS, ROLE_ADMIN)
+        setDefaultPermissionForSpaceAndRole(PERMISSION_EDIT, true, ANY_SPACE_ALIAS, ROLE_ADMIN)
+        setDefaultPermissionForSpaceAndRole(PERMISSION_VIEW, true, ANY_SPACE_ALIAS, ROLE_ADMIN)
+        setDefaultPermissionForSpaceAndRole(PERMISSION_CREATE, true, ANY_SPACE_ALIAS, ROLE_ADMIN)
+        setDefaultPermissionForSpaceAndRole(PERMISSION_DELETE, true, ANY_SPACE_ALIAS, ROLE_ADMIN)
+        
+        setDefaultPermissionForSpaceAndRole(PERMISSION_EDIT, true, ANY_SPACE_ALIAS, ROLE_USER)
+        setDefaultPermissionForSpaceAndRole(PERMISSION_VIEW, true, ANY_SPACE_ALIAS, ROLE_USER)
+        setDefaultPermissionForSpaceAndRole(PERMISSION_CREATE, true, ANY_SPACE_ALIAS, ROLE_USER)
+        setDefaultPermissionForSpaceAndRole(PERMISSION_DELETE, true, ANY_SPACE_ALIAS, ROLE_USER)
+        
+        setDefaultPermissionForSpaceAndRole(PERMISSION_EDIT, false, ANY_SPACE_ALIAS, ROLE_GUEST)
+        setDefaultPermissionForSpaceAndRole(PERMISSION_VIEW, true, ANY_SPACE_ALIAS, ROLE_GUEST)
+        setDefaultPermissionForSpaceAndRole(PERMISSION_CREATE, false, ANY_SPACE_ALIAS, ROLE_GUEST)
+    }
+
+    void setDefaultPermissionForSpaceAndRole(String perm, boolean permGranted, String alias, String role) {
+        setPermissionForSpaceAndRole(DEFAULT_POLICY_URI, perm, permGranted, alias, role)
+    }
+    
+    void setPermissionForSpaceAndRole(String key, String perm, boolean permGranted, String alias, String role) {
+        def spaceEntries = entriesBySpace.get(alias, new TreeMap({ a, b -> b.compareTo(a) } as Comparator))
+        def uriPerms = spaceEntries.get(key, [:])
+        def permsForRole = uriPerms.get(role, [:])
+        
+        permsForRole[perm] = permGranted
+    }
+    
+    void setURIPermissionForSpaceAndRole(String uri, String perm, boolean permGranted, String alias, String role) {
+        // Force trailing slash so a simple startsWith search works correctly
+        if (!uri.endsWith('/')) {
+            uri += '/'
+        }
+        setPermissionForSpaceAndRole(uri, perm, permGranted, alias, role)
+    }
+    
+    /**
+     * Find out if the permission name supplied is granted for the role, spaceAlias and uri
+     */
+    boolean hasPermission(String spaceAlias, String uri, List roleList, String permission ) {
+        def spaceEntries = entriesBySpace[spaceAlias]
+        if (log.debugEnabled) {
+            log.debug "Found policy entries for space [$spaceAlias]: $spaceEntries"
+        }
+        if (!spaceEntries) {
+            spaceEntries = entriesBySpace[ANY_SPACE_ALIAS]
+            if (log.debugEnabled) {
+                log.debug "Using policy entries for 'any' space as [$spaceAlias] has none defined: $spaceEntries"
+            }
+            if (!spaceEntries) {
+                log.warn "No permissions set for space with alias [$spaceAlias], and no default space permissions set"
+                return false // No permissions set for the "any" space
+            }
+        }
+        
+        if (!uri.endsWith('/')) {
+            uri += '/'
+        }
+        
+        // Assume these are sorted in descending order so that we find longest matches first
+        def uriPermCandidates = (spaceEntries?.findAll { k, v ->
+            (k == DEFAULT_POLICY_URI) || uri.startsWith(k)
+        })
+
+        if (log.debugEnabled) {
+            log.debug "Found policy permissions that could apply for uri [$uri]: $uriPermCandidates"
+        }
+
+        def explicitMatch
+        uriPermCandidates*.value.find { uriPerms ->
+            roleList.find { role ->
+                def permsForRole = uriPerms?.get(role)
+                def explicitGrant = permsForRole?.get(permission)
+                if (explicitGrant != null) {
+                    explicitMatch = explicitGrant
+                    return true
+                } else {
+                    return false
+                }
+            }
+            // We stop the find as soon as we have something that is an actual true/false vs a null
+            return explicitMatch != null 
+        }
+        
+        // See if we need to fallback to space defaults
+        if ((explicitMatch == null) && (uri != DEFAULT_POLICY_URI)) {
+            explicitMatch = hasPermission(spaceAlias, DEFAULT_POLICY_URI, roleList, permission)
+        }
+        return explicitMatch
+    }
+}
