@@ -36,6 +36,19 @@ class SecurityPolicyTests extends grails.test.GrailsUnitTestCase {
         assertFalse policy.hasPermission('weceem', '/anything', [WeceemSecurityPolicy.ROLE_GUEST], WeceemSecurityPolicy.PERMISSION_DELETE)
     }
 
+    void testSpaceRoleDefaults() {
+        policy.setDefaultPermissionForSpaceAndRole(WeceemSecurityPolicy.PERMISSION_VIEW, true, 'spaceA', "user")
+        policy.setDefaultPermissionForSpaceAndRole(WeceemSecurityPolicy.PERMISSION_ADMIN, true, 'spaceB', "admin")
+        policy.setDefaultPermissionForSpaceAndRole(WeceemSecurityPolicy.PERMISSION_VIEW, true, 'spaceB', "admin")
+        policy.setDefaultPermissionForSpaceAndRole(WeceemSecurityPolicy.PERMISSION_VIEW, true, 'spaceA', "admin")
+        
+        assertTrue policy.hasPermission('spaceA', '/anything', ['user'], WeceemSecurityPolicy.PERMISSION_VIEW)
+        assertTrue policy.hasPermission('spaceA', '/anything', ['admin'], WeceemSecurityPolicy.PERMISSION_VIEW)
+        assertTrue policy.hasPermission('spaceB', '/anything', ['admin'], WeceemSecurityPolicy.PERMISSION_VIEW)
+
+        assertFalse policy.hasPermission('spaceB', '/anything', ['user'], WeceemSecurityPolicy.PERMISSION_VIEW)
+    }
+
     void testURIAndSpaceSpecificAccessControl() {
         policy.setURIPermissionForSpaceAndRole("/", WeceemSecurityPolicy.PERMISSION_ADMIN, true, 'spaceA', "spaceA_admin")
         policy.setURIPermissionForSpaceAndRole("/", WeceemSecurityPolicy.PERMISSION_EDIT, true, 'spaceA', "spaceA_admin")
@@ -109,5 +122,76 @@ class SecurityPolicyTests extends grails.test.GrailsUnitTestCase {
             ['spaceA_guest'], WeceemSecurityPolicy.PERMISSION_VIEW)
         assertFalse policy.hasPermission('spaceA', '/extranet', 
             ['spaceA_guest'], WeceemSecurityPolicy.PERMISSION_VIEW)
+    }
+    
+    void testMissingPolicyCausesException() {
+        shouldFail {
+            policy.load('this_path_does_not_exist.groovy')
+        }
+    }
+
+    
+    void testLoadPolicyScript() {
+        policy.load('test/files/testpolicy.groovy')
+        /*
+        "ROLE_ADMIN" {
+            space '', 'test'
+
+            admin true
+            view true
+            edit true
+            delete true
+            create true
+        }
+
+        "ROLE_USER" {
+            space '', 'test'
+
+            view true
+
+            "/blog" {
+                edit true
+                create true
+            }
+        }
+
+
+        "ROLE_GUEST" {
+            space ''
+
+            view true
+        }
+        */
+
+        ['', 'test'].each { spc ->
+            [WeceemSecurityPolicy.PERMISSION_ADMIN,
+             WeceemSecurityPolicy.PERMISSION_CREATE,
+             WeceemSecurityPolicy.PERMISSION_EDIT,
+             WeceemSecurityPolicy.PERMISSION_DELETE,
+             WeceemSecurityPolicy.PERMISSION_VIEW].each { perm ->
+                assertTrue policy.hasPermission(spc, '/anything', ['ROLE_ADMIN'], perm)
+            }
+        }
+        ['', 'test'].each { spc ->
+            assertTrue policy.hasPermission(spc, '/anything', ['ROLE_USER'], WeceemSecurityPolicy.PERMISSION_VIEW)
+            assertFalse policy.hasPermission(spc, '/anything', ['ROLE_USER'], WeceemSecurityPolicy.PERMISSION_ADMIN)
+            assertTrue policy.hasPermission(spc, '/blog/anything', ['ROLE_USER'], WeceemSecurityPolicy.PERMISSION_VIEW)
+            assertTrue policy.hasPermission(spc, '/blog/anything', ['ROLE_USER'], WeceemSecurityPolicy.PERMISSION_EDIT)
+            assertTrue policy.hasPermission(spc, '/blog/anything', ['ROLE_USER'], WeceemSecurityPolicy.PERMISSION_CREATE)
+            assertFalse policy.hasPermission(spc, '/blog/anything', ['ROLE_USER'], WeceemSecurityPolicy.PERMISSION_DELETE)
+        }
+
+        def spc = ''
+        assertTrue policy.hasPermission(spc, '/anything', ['ROLE_GUEST'], WeceemSecurityPolicy.PERMISSION_VIEW)
+        assertFalse policy.hasPermission(spc, '/anything', ['ROLE_GUEST'], WeceemSecurityPolicy.PERMISSION_ADMIN)
+        assertFalse policy.hasPermission(spc, '/anything', ['ROLE_GUEST'], WeceemSecurityPolicy.PERMISSION_CREATE)
+        assertFalse policy.hasPermission(spc, '/anything', ['ROLE_GUEST'], WeceemSecurityPolicy.PERMISSION_EDIT)
+        assertFalse policy.hasPermission(spc, '/anything', ['ROLE_GUEST'], WeceemSecurityPolicy.PERMISSION_DELETE)
+        spc = 'test'
+        assertFalse policy.hasPermission(spc, '/anything', ['ROLE_GUEST'], WeceemSecurityPolicy.PERMISSION_VIEW)
+        assertFalse policy.hasPermission(spc, '/anything', ['ROLE_GUEST'], WeceemSecurityPolicy.PERMISSION_ADMIN)
+        assertFalse policy.hasPermission(spc, '/anything', ['ROLE_GUEST'], WeceemSecurityPolicy.PERMISSION_CREATE)
+        assertFalse policy.hasPermission(spc, '/anything', ['ROLE_GUEST'], WeceemSecurityPolicy.PERMISSION_EDIT)
+        assertFalse policy.hasPermission(spc, '/anything', ['ROLE_GUEST'], WeceemSecurityPolicy.PERMISSION_DELETE)
     }
 }

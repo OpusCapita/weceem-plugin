@@ -5,6 +5,8 @@ class SecurityPermissionsBuilder {
     
     boolean topLevel
     def policy
+    def role
+    def uri
     def spaceAliases 
     
     // ctor variant for top level usage
@@ -15,33 +17,41 @@ class SecurityPermissionsBuilder {
     }
     
     // ctor variant for nested usage
-    SecurityPermissionsBuilder(SecurityPermissionsBuilder parent) {
+    SecurityPermissionsBuilder(SecurityPermissionsBuilder parent, String uri) {
         this(parent.role, parent.policy)
         this.topLevel = false
-        this.uri = parent.uri
+        this.uri = uri
         this.spaceAliases = parent.spaceAliases
     }
 
-    def methodMissing(String name, Object[] args) {
-        assert args.size() == 1
+    def methodMissing(String name, args) {
         switch (name) {
             case PERM_CLAUSE_SPACE:
                 if (!topLevel) {
                     throw new IllegalArgumentException("Cannot set spaces on a nested permissions declaration")
                 }
-                spaceAliases = (args[1] instanceof CharSequence) ? [args[1]] : args[1]
+                assert args.size() >= 1
+                def aliases
+                if (args.size() > 1) {
+                    aliases = args*.toString()
+                } else {
+                    aliases = (args[0] instanceof CharSequence) ? [args[0]] : args[0]
+                }
+                spaceAliases = aliases
                 break;
-            case WeceemSecurityPolicy.PERMISSION_ADMINISTER:
+            case WeceemSecurityPolicy.PERMISSION_ADMIN:
             case WeceemSecurityPolicy.PERMISSION_EDIT:
             case WeceemSecurityPolicy.PERMISSION_CREATE:
             case WeceemSecurityPolicy.PERMISSION_DELETE:
             case WeceemSecurityPolicy.PERMISSION_VIEW:
-                setPermission(name, args[1])
+                assert args.size() == 1
+                setPermission(name, args[0])
                 break;
             default:
-                Closure c = args[1]
+                assert args.size() == 1
+                Closure c = args[0]
                 def uri = name
-                def nestedURIBuilder = new SecurityPermissionsBuilder(this)
+                def nestedURIBuilder = new SecurityPermissionsBuilder(this, uri)
                 c.delegate = nestedURIBuilder
                 c.resolveStrategy = Closure.DELEGATE_FIRST
                 c.call()
@@ -52,9 +62,9 @@ class SecurityPermissionsBuilder {
     void setPermission(perm, value) {
         spaceAliases.each { alias ->
             if (topLevel) {
-                policy.setDefaultPermissionForSpaceAndRole(perm, value.toBoolean(), alias, role)
+                policy.setDefaultPermissionForSpaceAndRole(perm, value, alias, role)
             } else {
-                policy.setURIPermissionForSpaceAndRole(uri, perm, value.toBoolean(), alias, role)
+                policy.setURIPermissionForSpaceAndRole(uri, perm, value, alias, role)
             }
         }
     }

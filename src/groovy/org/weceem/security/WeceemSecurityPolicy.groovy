@@ -16,6 +16,29 @@ class WeceemSecurityPolicy {
     static PERMISSION_DELETE = "delete"
     static PERMISSION_VIEW = "view"
         
+    void load(location) {
+        def g = new GroovyClassLoader().parseClass(new File(location))
+        def script = g.newInstance()
+        assert script instanceof Script
+        script.binding = new Binding()
+        script.run()
+
+        // Get the closure
+        Closure policy = script.binding.policy 
+        if (!policy) {
+            log.error "No policy closure found in script [$location], giving up"
+            throw new RuntimeException("Path to a security policy was specified, but policy did not provide any usable info.")
+        }
+
+        // Get a graph of space>uri>permissions defined by this closure
+        def policyBuilder = new SecurityPolicyBuilder(this)
+
+        // Now call the policy closure, delegating to the builder
+        policy.delegate = policyBuilder
+        policy.resolveStrategy = Closure.DELEGATE_FIRST
+        policy.call()
+    }
+
     void initDefault() {
         log.info "Initializing default security policy"
         
@@ -40,6 +63,9 @@ class WeceemSecurityPolicy {
     }
     
     void setPermissionForSpaceAndRole(String key, String perm, boolean permGranted, String alias, String role) {
+        if (log.debugEnabled) {
+            log.debug "Adding permission to policy for space: ${alias}, uri: ${key}, permission: $perm = $permGranted for role $role"
+        }
         def spaceEntries = entriesBySpace.get(alias, new TreeMap({ a, b -> b.compareTo(a) } as Comparator))
         def uriPerms = spaceEntries.get(key, [:])
         def permsForRole = uriPerms.get(role, [:])

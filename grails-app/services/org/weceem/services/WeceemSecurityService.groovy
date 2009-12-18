@@ -10,102 +10,15 @@ import org.weceem.security.*
 class WeceemSecurityService {
     static transactional = false
     
-    def policyInfo
+    WeceemSecurityPolicy policy
     def grailsApplication
-    
-    // Map/tree of :
-    // Space aliasURI -> Full content URI -> role -> permissions 
-    // 
-    static DEFAULT_PERMISSIONS = [
-        '*':[
-            '*':[
-                ROLE_ADMIN: [VIEW:true, EDIT:true, CREATE: true, ADMIN:true],
-                ROLE_USER: [VIEW:true, EDIT:true, CREATE: true],
-            ]
-        ]
-    ]
-    static DEFAULT_PERMISSIONS_WHEN_NOT_IN_MAP = [ VIEW: true]
 
-    /** 
-     * Policy is just a DSL like this:
-     
-     'role:Admin' {
-         spaces '*'
-         administer true
-     }
-     
-     'group:MillerLtd_User' {
-          spaces 'miller', 'miller_intranet'
-          administer false
-          '/miller/home' {
-              createContent true
-              editContent true
-          }
-          '/miller_intranet/customers' {
-              editContent true
-          }
-      }
-     
-     * so it takes the form of:
-     * 
-     * ROLESTRING {
-     *     spaces '*' or list of aliasURIs stringd
-     *     permissionName true/false
-     *     URIPATH {
-     *          permissionName true/false    
-     *     }
-     *     URIPATH {
-     *          permissionName true/false    
-     *     }
-     * }
-     *
-     * Example:
-     *     'group:MillerLtd_User' {
-     *          spaces 'miller', 'miller_intranet'
-     *          administer false
-     *          '/miller/home' {
-     *              createContent true
-     *              editContent true
-     *          }
-     *          '/miller_intranet/customers' {
-     *              editContent true
-     *          }
-     *     }
-     * However we need to resolve permissions by perm name + uripath + space, and support inheriting perms into 
-     * subnodes of the uri space, so we need to store this differently internally
-     *
-     * We need to access permissions so:
-     *     userHasPermission(permission, space, uri)
-     * which means seeing if any of their roles has the permission on space+uri
-     *
-     * space ---> uri ---> permissions ---> map of roles permitted
-     *
-     */
-     void loadPolicy() {
-         def scriptLocation = grailsApplication.config.weceem.security.policy.path ?: System.getProperty('weceem.security.policy.path')
-         def g = new GroovyClassLoader().parseClass(scriptLocation)
-         assert g instanceof Script
-         g.binding = new Binding()
-         g.run()
-         
-         // Get the closure
-         Closure permissions = g.binding.permissions 
-         if (!permissions) {
-             log.warn "No permissions set in script [$scriptLocation], using defaults"
-             permissionsMap = DEFAULT_PERMISSIONS
-             permissionsNotSetDefault = DEFAULT_PERMISSIONS_WHEN_NOT_IN_MAP
-             return
-         }
-         
-         // Get a graph of space>uri>permissions defined by this closure
-         def policyBuilder = new SecurityPolicyBuilder()
-         permissions.delegate = policyBuilder
-         permissions.resolveStrategy = Closure.DELEGATE_FIRST
-         permissions.call()
-         
-         // then merge those results with our graph applying the ROLE to each
-         policy = policyBuilder.policy
-     }
+    void loadPolicy() {
+        def scriptLocation = grailsApplication.config.weceem.security.policy.path ?: System.getProperty('weceem.security.policy.path')
+        if (scriptLocation) {
+            policy.load(scriptLocation)
+        } else poliy.initDefault()
+    }
      
     
     /** 
@@ -114,7 +27,7 @@ class WeceemSecurityService {
     def securityDelegate = [
         getUserName : { -> "unknown" },
         getUserEmail : { -> "unknown@localhost" },
-        getUserPrincipal : { -> [name:'unknown', email:"unknown@localhost"] },
+        getUserPrincipal : { -> [id:'unknown', name:'unknown', email:"unknown@localhost"] },
         getUserRoles: { -> ['ROLE_ADMIN'] }
     ]
     
