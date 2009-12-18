@@ -9,8 +9,6 @@ class SecurityPolicyTests extends grails.test.GrailsUnitTestCase {
     void setUp() {
         super.setUp()
         
-        mockLogging(WeceemSecurityPolicy, true)
-
         policy = new WeceemSecurityPolicy()
     }
 

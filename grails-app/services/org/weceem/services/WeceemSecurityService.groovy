@@ -1,5 +1,7 @@
 package org.weceem.services
 
+import org.springframework.beans.factory.InitializingBean
+
 import org.weceem.content.Content
 import org.weceem.content.Status
 import org.weceem.security.*
@@ -7,17 +9,22 @@ import org.weceem.security.*
 /**
  * A service that hides the actual security implementation we are using
  */
-class WeceemSecurityService {
+class WeceemSecurityService implements InitializingBean {
     static transactional = false
     
-    WeceemSecurityPolicy policy
+    WeceemSecurityPolicy policy = new WeceemSecurityPolicy()
+    
     def grailsApplication
 
+    void afterPropertiesSet() {
+        loadPolicy()
+    }
+    
     void loadPolicy() {
         def scriptLocation = grailsApplication.config.weceem.security.policy.path ?: System.getProperty('weceem.security.policy.path')
         if (scriptLocation) {
             policy.load(scriptLocation)
-        } else poliy.initDefault()
+        } else policy.initDefault()
     }
      
     
@@ -38,14 +45,23 @@ class WeceemSecurityService {
     def getUserEmail() {
         securityDelegate.getUserEmail()
     }
-    
+
+    protected hasPermission(Content content, perm) {
+        // Look at changing this so absoluteURI is not recalculated every time
+        return policy.hasPermission(
+            content.space.aliasURI, 
+            content.absoluteURI, 
+            securityDelegate.getUserRoles(), 
+            perm)
+    }
+
     /**
      * Called to find out if the current user is allowed to transition content in to the specified status
      * Allows applications to control workflow
      */
     def isUserAllowedContentStatus(Status status) {
-        // Temporary lame impl
-        return securityDelegate.userRoles?.contains('ROLE_ADMIN')
+        // Temporary lame impl, need to add this to policy
+        return true
     }
     
     /**
@@ -53,16 +69,14 @@ class WeceemSecurityService {
      * Allows applications to implement ACLs
      */
     def isUserAllowedToEditContent(Content content) {
-        // Temporary lame impl
-        return securityDelegate.getUserRoles()?.contains('ROLE_ADMIN')
+        hasPermission(content, WeceemSecurityPolicy.PERMISSION_EDIT)
     }
     
     /**
      * Called to find out if the current user is allowed perform administrative actions eg manipulate spaces
      */
     def isUserAdministrator() {
-        // Temporary lame impl
-        return securityDelegate.userRoles?.contains('ROLE_ADMIN')
+        hasPermission(content, WeceemSecurityPolicy.PERMISSION_ADMIN)
     }
     
     def getUserPrincipal() {

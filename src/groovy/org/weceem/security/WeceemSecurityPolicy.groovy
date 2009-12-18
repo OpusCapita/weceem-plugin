@@ -1,6 +1,12 @@
 package org.weceem.security
 
+import org.apache.commons.logging.LogFactory
+import org.apache.commons.logging.Log
+
 class WeceemSecurityPolicy {
+    
+    Log log = LogFactory.getLog(WeceemSecurityPolicy)
+    
     private entriesBySpace = [:]
     
     static DEFAULT_POLICY_URI = "*/"
