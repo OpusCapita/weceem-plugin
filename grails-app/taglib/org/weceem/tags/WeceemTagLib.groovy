@@ -512,12 +512,8 @@ class WeceemTagLib {
         def type = attrs[ATTR_TYPE]
         def id = attrs[ATTR_ID]
         def iconconf = type.icon
-        def isStandalone = CH.config.org.weceem.plugin.standalone
-        def env = grails.util.GrailsUtil.environment
-        def plugin = pluginManager.getGrailsPlugin(iconconf.plugin)
-        def pluginContextPath = isStandalone && (env == "development") ?
-         "${iconconf.dir}" : "${plugin?.getPluginPath()}/${iconconf.dir}"
-        out << "<div id='${id}' class='ui-content-icon'><img src='${g.resource(dir: pluginContextPath, file: iconconf.file)}'/></div>"
-    }
+        def plugin = iconconf.plugin
+        out << "<div id='${id}' class='ui-content-icon'><img src='${g.resource(plugin:plugin, dir: iconconf.dir, file: iconconf.file)}'/></div>"
+    }    
 
 }
