@@ -9,9 +9,9 @@ class WeceemGrailsPlugin {
     def _log = LogFactory.getLog('org.weceem.WeceemGrailsPlugin')
 
     // the plugin version
-    def version = "0.4-SNAPSHOT"
+    def version = "0.8-SNAPSHOT"
     // the version or versions of Grails the plugin is designed for
-    def grailsVersion = "1.1.1 > *"
+    def grailsVersion = "1.2-RC2 > *"
     
     // the other plugins this plugin depends on
     def dependsOn = [
@@ -47,6 +47,10 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         simpleSpaceImporter(org.weceem.export.SimpleSpaceImporter)
         defaultSpaceImporter(org.weceem.export.DefaultSpaceImporter)
         confluenceSpaceImporter(org.weceem.export.ConfluenceSpaceImporter)
+        
+        cacheManager(net.sf.ehcache.CacheManager) { bean -> 
+            bean.destroyMethod = 'shutdown'
+        }
     }
 
     def doWithApplicationContext = { applicationContext ->
