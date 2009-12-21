@@ -39,6 +39,7 @@ class ContentRepositoryService implements InitializingBean {
     def importExportService
     def cacheService
     def groovyPagesTemplateEngine
+    def weceemSecurityService
     
     static DEFAULT_STATUSES = [
         [code:100, description:'draft', publicContent:false],
@@ -962,7 +963,8 @@ class ContentRepositoryService implements InitializingBean {
             if (log.debugEnabled) {
                 log.debug "Reconstituted lineage from cache for uri $uriPath: ${reloadedLineage}"
             }
-            return !c ? null : [content:c, parentURI:cachedContentInfo.parentURI, lineage:reloadedLineage]
+            return c && weceemSecurityService.isUserAllowedToViewContent(c) ? 
+                [content:c, parentURI:cachedContentInfo.parentURI, lineage:reloadedLineage] : null
         }   
 
         def tokens = uriPath.split('/')
@@ -1013,7 +1015,11 @@ class ContentRepositoryService implements InitializingBean {
         }
         cacheService.putToCache(uriToIdCache, uriPath, cacheValue)
 
-        return [content:content, parentURI:parentURI, lineage:lineage]
+        if (c && weceemSecurityService.isUserAllowedToViewContent(c)) {
+            [content:content, parentURI:parentURI, lineage:lineage]
+        } else {
+            return null
+        }
     }
     
     def findFileRootContentByURI(String aliasURI, Space space, Map args = Collections.EMPTY_MAP) {

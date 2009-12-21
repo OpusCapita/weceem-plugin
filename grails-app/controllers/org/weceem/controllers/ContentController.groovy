@@ -14,6 +14,7 @@
 package org.weceem.controllers
 
 import org.weceem.content.*
+import org.weceem.security.WeceemSecurityPolicy
 
 import org.codehaus.groovy.grails.web.pages.GSPResponseWriter
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
@@ -58,8 +59,10 @@ class ContentController {
                     log.debug "Content for uri: ${uri} has a target value of [${content.target}]"
                 }
             }
-            if (content instanceof VirtualContent) {
-                content = content.target
+            if (content) {
+                if (content instanceof VirtualContent) {
+                    content = content.target
+                }
             }
 
             if (log.debugEnabled) {
@@ -68,7 +71,7 @@ class ContentController {
             
             def activeUser = weceemSecurityService.userName
             
-            if (content && content.status.publicContent) {
+            if (content) {
     			def pageInfo = [ URI:uri, 
     			    parentURI:contentInfo.parentURI, 
     			    lineage: contentInfo.lineage, 

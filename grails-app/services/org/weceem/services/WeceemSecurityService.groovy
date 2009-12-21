@@ -46,37 +46,68 @@ class WeceemSecurityService implements InitializingBean {
         securityDelegate.getUserEmail()
     }
 
-    protected hasPermission(Content content, perm) {
+    boolean hasPermissions(Content content, permList) {
         // Look at changing this so absoluteURI is not recalculated every time
         return policy.hasPermission(
             content.space.aliasURI, 
             content.absoluteURI, 
             securityDelegate.getUserRoles(), 
-            perm)
+            permList)
     }
 
     /**
      * Called to find out if the current user is allowed to transition content in to the specified status
      * Allows applications to control workflow
      */
-    def isUserAllowedContentStatus(Status status) {
+    boolean isUserAllowedContentStatus(Status status) {
         // Temporary lame impl, need to add this to policy
         return true
+    }
+
+    /**
+     * Called to find out if the current user is allowed to edit the specified content
+     * Allows applications to implement ACLs
+     */
+    boolean isUserAllowedToDeleteContent(Content content) {
+        hasPermissions(content, [WeceemSecurityPolicy.PERMISSION_DELETE])
     }
     
     /**
      * Called to find out if the current user is allowed to edit the specified content
      * Allows applications to implement ACLs
      */
-    def isUserAllowedToEditContent(Content content) {
-        hasPermission(content, WeceemSecurityPolicy.PERMISSION_EDIT)
+    boolean isUserAllowedToEditContent(Content content) {
+        hasPermissions(content, [WeceemSecurityPolicy.PERMISSION_EDIT])
+    }
+    
+    /**
+     * Called to find out if the current user is allowed to view the specified content
+     * IF the status is not "public" they must also have the EDIT permission
+     */
+    boolean isUserAllowedToViewContent(Content content) {
+        // Now work out if the user is allowed to see the content
+        def allowedToViewContent = false
+        def permsRequired = [WeceemSecurityPolicy.PERMISSION_VIEW]
+        // If the status is not a "published" status then only those with edit permissions
+        // on the url can see it
+        if (!content.status.publicContent) {
+            permsRequired << WeceemSecurityPolicy.PERMISSION_EDIT
+        }
+        if (log.debugEnabled) {
+            log.debug "User requires permissions $permsRequired to view content ${content.absoluteURI}"
+        }
+        allowedToViewContent = hasPermissions(content, permsRequired)
+        if (!allowedToViewContent && log.debugEnabled) {
+            log.debug "User is not denied viewing of content at ${content.absoluteURI}"
+        }
+        return allowedToViewContent
     }
     
     /**
      * Called to find out if the current user is allowed perform administrative actions eg manipulate spaces
      */
-    def isUserAdministrator() {
-        hasPermission(content, WeceemSecurityPolicy.PERMISSION_ADMIN)
+    boolean isUserAdministrator() {
+        hasPermissions(content, [WeceemSecurityPolicy.PERMISSION_ADMIN])
     }
     
     def getUserPrincipal() {

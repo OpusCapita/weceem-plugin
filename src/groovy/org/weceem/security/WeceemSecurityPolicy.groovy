@@ -90,7 +90,7 @@ class WeceemSecurityPolicy {
     /**
      * Find out if the permission name supplied is granted for the role, spaceAlias and uri
      */
-    boolean hasPermission(String spaceAlias, String uri, List roleList, String permission ) {
+    boolean hasPermission(String spaceAlias, String uri, List roleList, List permissionList ) {
         def spaceEntries = entriesBySpace[spaceAlias]
         if (log.debugEnabled) {
             log.debug "Found policy entries for space [$spaceAlias]: $spaceEntries"
@@ -123,7 +123,19 @@ class WeceemSecurityPolicy {
         uriPermCandidates*.value.find { uriPerms ->
             roleList.find { role ->
                 def permsForRole = uriPerms?.get(role)
-                def explicitGrant = permsForRole?.get(permission)
+                
+                def explicitGrant
+                permissionList.each { permission ->
+                    def grant = permsForRole?.get(permission)
+                    if (grant != null) {
+                        if ( explicitGrant != null) { 
+                            explicitGrant &= grant
+                        } else {
+                            explicitGrant = grant
+                        }
+                    }
+                }
+                
                 if (explicitGrant != null) {
                     explicitMatch = explicitGrant
                     return true
@@ -137,7 +149,7 @@ class WeceemSecurityPolicy {
         
         // See if we need to fallback to space defaults
         if ((explicitMatch == null) && (uri != DEFAULT_POLICY_URI)) {
-            explicitMatch = hasPermission(spaceAlias, DEFAULT_POLICY_URI, roleList, permission)
+            explicitMatch = hasPermission(spaceAlias, DEFAULT_POLICY_URI, roleList, permissionList)
         }
         return explicitMatch
     }
