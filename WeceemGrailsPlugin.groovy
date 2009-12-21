@@ -17,9 +17,9 @@ class WeceemGrailsPlugin {
     def dependsOn = [
         searchable:'0.5.4 > *', 
         quartz:'0.4.1-SNAPSHOT > *', 
-        navigation:'1.1 > *',
+        navigation:'1.1.1 > *',
         fckeditor:'0.9.2 > *',
-        beanFields:'0.2 > *'
+        beanFields:'0.4 > *'
     ]
     def observe = ["hibernate"]
     
