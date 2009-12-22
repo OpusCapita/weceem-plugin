@@ -86,13 +86,8 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
 
     def onChange = { event ->
         println "ON CHANGE EVENT OCCURED: ${event}"
-        if (event.source instanceof GrailsDomainClass) {
-            applicationContext.editorService.cacheEditorInfo(event.source.clazz)
-        }
-        if (event.source instanceof GrailsServiceClass) {
-            // Reload all if service / whole app reloaded
-            applicationContext.editorService.cacheEditorInfo()
-        }
+        // Reload all if service / whole app reloaded
+        applicationContext.editorService.cacheEditorInfo()
     }
 
     def onConfigChange = { event ->

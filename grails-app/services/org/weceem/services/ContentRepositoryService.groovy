@@ -15,6 +15,8 @@ import org.weceem.html.*
 import org.weceem.wiki.*
 import org.weceem.files.*
 
+import org.weceem.security.*
+
 /**
  * ContentRepositoryService class provides methods for Content Repository tree
  * manipulations.
@@ -178,7 +180,21 @@ class ContentRepositoryService implements InitializingBean {
         log.info "Successfully imported space template [${templateName}] into space [${space.name}]"
     }
     
-    void deleteSpaceContent(space) {
+    void requirePermissions(Space space, permissionList) {
+        if (!weceemSecurityService.hasPermissions(space, permissionList)) {
+            throw new AccessDeniedException()
+        }
+    }       
+    
+    void requirePermissions(Content content, permissionList) {
+        if (!weceemSecurityService.hasPermissions(content, permissionList)) {
+            throw new AccessDeniedException()
+        }
+    }       
+
+    void deleteSpaceContent(Space space) {
+        requirePermissions(space, [WeceemSecurityPolicy.PERMISSION_ADMIN])        
+
         log.info "Deleting content from space [$space]"
         // Let's brute-force this
         // @todo remove/rework this for 0.2
@@ -203,6 +219,8 @@ class ContentRepositoryService implements InitializingBean {
     }
     
     void deleteSpace(Space space) {
+        requirePermissions(space, [WeceemSecurityPolicy.PERMISSION_ADMIN])        
+
         // Delete space content
         deleteSpaceContent(space)
         // Delete space
@@ -277,7 +295,8 @@ class ContentRepositoryService implements InitializingBean {
      * In the future, we may need more information for the nodes,
      * eg. incoming links
      */
-    Map getContentDetails(content) {
+    Map getContentDetails(Content content) {
+        requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_VIEW])        
         return [id: content.id, className: content.class.name,
                 title: content.title, createdBy: content.createdBy,
                 createdOn: content.createdOn, changedBy: content.changedBy,
@@ -292,7 +311,8 @@ class ContentRepositoryService implements InitializingBean {
      *
      * @param content
      */
-    Map getRelatedContent(content) {
+    Map getRelatedContent(Content content) {
+        requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_VIEW])        
         def result = [:]
         // @todo change to criteria/select
         result.parents = VirtualContent.findAllByTarget(content)*.parent
@@ -318,7 +338,8 @@ class ContentRepositoryService implements InitializingBean {
      *
      * @param content
      */
-    Map getRecentChanges(content) {
+    Map getRecentChanges(Content content) {
+        requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_VIEW])        
         def changes = ContentVersion.findAllByObjectKey(content.ident(),
                 [sort: 'revision', order: 'desc'])
         return [changes: changes]
@@ -344,6 +365,8 @@ class ContentRepositoryService implements InitializingBean {
      * @param parentContent
      */
     Boolean createNode(Content content, Content parentContent = null) {
+        requirePermissions(parentContent ?: content.space, [WeceemSecurityPolicy.PERMISSION_CREATE])        
+
         log.debug "Creating node: ${content.dump()}"
         if (parentContent == null) parentContent = content.parent
 
@@ -401,6 +424,8 @@ class ContentRepositoryService implements InitializingBean {
      * @param oldTitle
      */
     Boolean renameNode(Content content, oldTitle) {
+        requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_EDIT])        
+
         if (content.metaClass.respondsTo(content, 'rename', String)) {
             return content.rename(oldTitle)
         } else {
@@ -417,7 +442,11 @@ class ContentRepositoryService implements InitializingBean {
      * @param targetContent
      * @return new instance of VirtualContentNode or null if there were errors
      */
-    VirtualContent linkNode(sourceContent, targetContent, orderIndex) {
+    VirtualContent linkNode(Content sourceContent, Content targetContent, orderIndex) {
+        // Check they can create under the target
+        requirePermissions(targetContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
+        requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_VIEW])        
+
         if (sourceContent == null){
             return null
         }
@@ -462,6 +491,11 @@ class ContentRepositoryService implements InitializingBean {
      * @param targetContent
      */
     Boolean moveNode(Content sourceContent, Content targetContent, orderIndex) {
+        if (targetContent) {
+            requirePermissions(targetContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
+        }
+        requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_EDIT,WeceemSecurityPolicy.PERMISSION_VIEW])        
+
         if (!sourceContent) return false
         if (!targetContent){
             def criteria = Content.createCriteria()
@@ -504,6 +538,9 @@ class ContentRepositoryService implements InitializingBean {
      }
      
     def shiftNodeChildrenOrderIndex(parent = null, shiftedOrderIndex){
+        // Can't do this until space is supplied
+        //requirePermissions(parent, [WeceemSecurityPolicy.PERMISSION_EDIT])        
+
         def criteria = Content.createCriteria()
         def nodes = criteria {
             if (parent){
@@ -528,6 +565,8 @@ class ContentRepositoryService implements InitializingBean {
      * less ugly than forcing all references to be ContentRef(s) we decided.
      */
     ContentReference[] findReferencesTo(Content content) {
+        requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_VIEW])        
+        
         def results = [] 
         // @todo this will perform rather poorly. We should find all assocation properties FIRST
         // and then run a query for each association, which - with caching - should run a lot faster than
@@ -561,6 +600,8 @@ class ContentRepositoryService implements InitializingBean {
      */
     Boolean deleteNode(Content sourceContent) {
         if (!sourceContent) return Boolean.FALSE
+        
+        requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_DELETE])        
         
         // Create a versioning entry
         sourceContent.saveRevision(sourceContent.title, sourceContent.space.name)
@@ -612,7 +653,10 @@ class ContentRepositoryService implements InitializingBean {
      * @param child
      * @param parent
      */
-    void deleteLink(child, parent) {
+    void deleteLink(Content child, Content parent) {
+        requirePermissions(parent, [WeceemSecurityPolicy.PERMISSION_EDIT])        
+        requirePermissions(child, [WeceemSecurityPolicy.PERMISSION_EDIT])        
+
         // remove child from association
         parent.children?.remove(child)
         parent.save()
@@ -634,8 +678,9 @@ class ContentRepositoryService implements InitializingBean {
     }
     
     def updateSpace(def id, def params){
-        
         def space = Space.get(id)
+        requirePermissions(space, [WeceemSecurityPolicy.PERMISSION_ADMIN])        
+
         if (space){
             def oldAliasURI = space.makeUploadName()
             hackedBindData(space, params)
@@ -659,7 +704,9 @@ class ContentRepositoryService implements InitializingBean {
      * @return a map containing an optional "errors" list property and optional notFound boolean property
      */
     def updateNode(String id, def params) {
-        def content = Content.get(id)
+        Content content = Content.get(id)
+        requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_EDIT])        
+
         if (content) {
             updateNode(content, params)
         } else {
@@ -673,6 +720,8 @@ class ContentRepositoryService implements InitializingBean {
     }
     
     def updateNode(Content content, def params) {
+        requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_EDIT])        
+
         // firstly we save revision: to prevent errors that we have 2 objects
         // in session with the same identifiers
         if (log.debugEnabled) {
@@ -716,7 +765,9 @@ class ContentRepositoryService implements InitializingBean {
      * Count child nodes of a given node, where nodes match the type and status (if any) supplied in args
      * Very useful for rendering the number of published comments on an item, for example in blogs.
      */
-    def countChildren(sourceNode, Map args = null) {
+    def countChildren(Content sourceNode, Map args = null) {
+        requirePermissions(sourceNode, [WeceemSecurityPolicy.PERMISSION_VIEW])        
+
         // for VirtualContent - the children list is a list of target children
         if (sourceNode instanceof VirtualContent) {
             sourceNode = sourceNode.target
@@ -802,7 +853,10 @@ class ContentRepositoryService implements InitializingBean {
      * Find all the children of the specified node, within the content hierarchy, optionally filtering by a content type class
      * @todo we can probably improve performance by applying the typeRestriction using some HQL
      */ 
-    def findChildren(sourceNode, Map args = Collections.EMPTY_MAP) {
+    def findChildren(Content sourceNode, Map args = Collections.EMPTY_MAP) {
+        // @todo we also need to filter the result list by VIEW permission too!
+        assert sourceNode != null
+        requirePermissions(sourceNode, [WeceemSecurityPolicy.PERMISSION_VIEW])        
         
         // for VirtualContent - the children list is a list of target children
         if (sourceNode instanceof VirtualContent) {
@@ -875,7 +929,9 @@ class ContentRepositoryService implements InitializingBean {
      * Find all the parents of the specified node, within the content hierarchy, optionally filtering by status and a content type class
      * @todo we can probably improve performance by applying the typeRestriction using some HQL
      */ 
-    def findParents(sourceNode, Map args = Collections.EMPTY_MAP) {
+    def findParents(Content sourceNode, Map args = Collections.EMPTY_MAP) {
+        requirePermissions(sourceNode, [WeceemSecurityPolicy.PERMISSION_VIEW])        
+
         // @todo change to criteria/select
         def references = (doCriteria(VirtualContent, args.status, Collections.EMPTY_MAP) {
             eq('target', sourceNode) 
@@ -909,13 +965,18 @@ class ContentRepositoryService implements InitializingBean {
             maxResults(1)
             cache true
         }
-        return r ? r[0] : null
+        Content node = r ? r[0] : null
+        if (node) {
+            requirePermissions(node, [WeceemSecurityPolicy.PERMISSION_VIEW])        
+        }
+        return node
     }
     
     /**
      * find all root nodes by type and space
      */ 
     def findAllRootContent(Space space, Map args = Collections.EMPTY_MAP) {
+        requirePermissions(space, [WeceemSecurityPolicy.PERMISSION_VIEW])        
         if (log.debugEnabled) {
             log.debug "findAllRootContent $space, $args"
         }
@@ -955,7 +1016,7 @@ class ContentRepositoryService implements InitializingBean {
                 log.debug "Found content info into cache for uri $uriPath: ${cachedContentInfo}"
             }
             // @todo will this break with different table mapping strategy eg multiple ids of "1" with separate tables?
-            def c = Content.get(cachedContentInfo.id)
+            Content c = Content.get(cachedContentInfo.id)
             // @todo re-load the lineage objects here, currently they are ids!
             def reloadedLineage = cachedContentInfo.lineage?.collect { l_id ->
                 Content.get(l_id)
@@ -963,14 +1024,17 @@ class ContentRepositoryService implements InitializingBean {
             if (log.debugEnabled) {
                 log.debug "Reconstituted lineage from cache for uri $uriPath: ${reloadedLineage}"
             }
-            return c && weceemSecurityService.isUserAllowedToViewContent(c) ? 
-                [content:c, parentURI:cachedContentInfo.parentURI, lineage:reloadedLineage] : null
+            if (c) {
+                requirePermissions(c, [WeceemSecurityPolicy.PERMISSION_VIEW])        
+            }
+            
+            return c ? [content:c, parentURI:cachedContentInfo.parentURI, lineage:reloadedLineage] : null
         }   
 
         def tokens = uriPath.split('/')
 
         // @todo: optimize query 
-        def content = findRootContentByURI(tokens[0], space)
+        Content content = findRootContentByURI(tokens[0], space)
         if (!content) content = findFileRootContentByURI(tokens[0], space)
         if (log.debugEnabled) {
             log.debug "findContentForPath $uriPath - root content node is $content"
@@ -1015,7 +1079,9 @@ class ContentRepositoryService implements InitializingBean {
         }
         cacheService.putToCache(uriToIdCache, uriPath, cacheValue)
 
-        if (c && weceemSecurityService.isUserAllowedToViewContent(c)) {
+        if (content) {
+            requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_VIEW])        
+
             [content:content, parentURI:parentURI, lineage:lineage]
         } else {
             return null
@@ -1031,7 +1097,11 @@ class ContentRepositoryService implements InitializingBean {
             eq('space', space)
         }
         def res = r?.findAll(){it-> (it.parent == null) || !(it.parent instanceof ContentFile)}
-        return res ? res[0] : null
+        Content result = res ? res[0] : null
+        if (result) {
+            requirePermissions(result, [WeceemSecurityPolicy.PERMISSION_VIEW])        
+        }
+        return result
     }
     
     def getAncestors(uri, sourceNode) {
@@ -1053,6 +1123,8 @@ class ContentRepositoryService implements InitializingBean {
      * @param space - space to synchronize
     **/
     def synchronizeSpace(space) {
+        requirePermissions(space, [WeceemSecurityPolicy.PERMISSION_ADMIN])        
+
         def existingFiles = new TreeSet()
         def createdContent = []
         def spaceDir = grailsApplication.parentContext.getResource(
@@ -1114,10 +1186,13 @@ class ContentRepositoryService implements InitializingBean {
                             status: Status.findByPublicContent(true))
                     }
                     content.createAliasURI()
-                    if (!content.save()){
+
+                    requirePermissions(content.parent ?: space, [WeceemSecurityPolicy.PERMISSION_CREATE])        
+
+                    if (!content.save()) {
                         println content.errors
                         assert false
-                    }else{
+                    } else {
                         createdContent << content
                     }
                 }

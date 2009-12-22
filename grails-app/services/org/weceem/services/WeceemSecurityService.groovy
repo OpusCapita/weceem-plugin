@@ -4,6 +4,7 @@ import org.springframework.beans.factory.InitializingBean
 
 import org.weceem.content.Content
 import org.weceem.content.Status
+import org.weceem.content.Space
 import org.weceem.security.*
 
 /**
@@ -44,6 +45,15 @@ class WeceemSecurityService implements InitializingBean {
     
     def getUserEmail() {
         securityDelegate.getUserEmail()
+    }
+
+    boolean hasPermissions(Space space, permList) {
+        // Look at changing this so absoluteURI is not recalculated every time
+        return policy.hasPermission(
+            space.aliasURI, 
+            null,  
+            securityDelegate.getUserRoles(), 
+            permList)
     }
 
     boolean hasPermissions(Content content, permList) {

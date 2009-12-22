@@ -24,7 +24,24 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
     void setUp() {
         
         contentRepositoryService = new ContentRepositoryService()
+        contentRepositoryService.cacheService = new CacheService()
+        contentRepositoryService.weceemSecurityService = new WeceemSecurityService()
+        contentRepositoryService.weceemSecurityService.with {
+            grailsApplication = [
+                config: [
+                    weceem: [
+                        security: [
+                            policy: [
+                                path: ''
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+            afterPropertiesSet()
+        }
         contentRepositoryService.grailsApplication = ApplicationHolder.application
+
         defStatus = new Status(code: 400, description: "published", publicContent: true)
         assert defStatus.save(flush:true)
         spaceA = new Space(name: 'jcatalog', aliasURI: 'jcatalog')

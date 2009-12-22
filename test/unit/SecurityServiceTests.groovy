@@ -15,19 +15,22 @@ class SecurityServiceTests extends grails.test.GrailsUnitTestCase {
         mockLogging(WeceemSecurityService, true)
 
         service = new WeceemSecurityService()
-        service.grailsApplication = [
-            config: [
-                weceem: [
-                    security: [
-                        policy: [
-                            path: ''
+        
+        service.with {
+            grailsApplication = [
+                config: [
+                    weceem: [
+                        security: [
+                            policy: [
+                                path: ''
+                            ]
                         ]
                     ]
                 ]
             ]
-        ]
-        service.afterPropertiesSet()
-
+            afterPropertiesSet()
+        }
+        
         mockSpace = new Space(name:'Test', aliasURI:'test')
     }
 

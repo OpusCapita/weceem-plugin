@@ -129,7 +129,8 @@ class WeceemTagLib {
         def baseNode = attrs[ATTR_NODE] ?: request[ContentController.REQUEST_ATTRIBUTE_NODE]
         def status = attrs[ATTR_STATUS] ?: ContentRepositoryService.STATUS_ANY_PUBLISHED
         if (attrs[ATTR_PATH]) {
-            baseNode = contentRepositoryService.findContentForPath(attrs[ATTR_PATH], request[ContentController.REQUEST_ATTRIBUTE_SPACE]).content
+            baseNode = contentRepositoryService.findContentForPath(attrs[ATTR_PATH], 
+                request[ContentController.REQUEST_ATTRIBUTE_SPACE])?.content
         }
         def children = contentRepositoryService.findChildren(baseNode, [type:attrs[ATTR_TYPE], status:status, params:params])
         if (attrs[ATTR_FILTER]) children = children?.findAll(attrs[ATTR_FILTER])
@@ -147,7 +148,8 @@ class WeceemTagLib {
         def baseNode = attrs[ATTR_NODE]
         if (!baseNode) {
             if (attrs[ATTR_PATH]) {
-                baseNode = contentRepositoryService.findContentForPath(attrs[ATTR_PATH], request[ContentController.REQUEST_ATTRIBUTE_SPACE]).content 
+                baseNode = contentRepositoryService.findContentForPath(attrs[ATTR_PATH], 
+                    request[ContentController.REQUEST_ATTRIBUTE_SPACE])?.content 
             } else {
                 baseNode = request[ContentController.REQUEST_ATTRIBUTE_NODE]
             }
@@ -375,7 +377,7 @@ class WeceemTagLib {
         }
         if (!content) {
             def contentInfo = contentRepositoryService.findContentForPath(attrs[ATTR_PATH], space)
-            if (!contentInfo.content) {
+            if (!contentInfo?.content) {
                 log.error ("Tag [wcm:createLink] cannot create a link to the content at path ${attrs[ATTR_PATH]} as "+
                     "there is no content node at that URI")
                 out << g.createLink(controller:'content', action:'notFound', params:[path:attrs[ATTR_PATH]])
@@ -415,7 +417,8 @@ class WeceemTagLib {
         } else if (title) {
             c = Content.findByTitle(title, params)
         } else if (path) {
-            c = contentRepositoryService.findContentForPath(path, request[ContentController.REQUEST_ATTRIBUTE_SPACE]).content
+            c = contentRepositoryService.findContentForPath(path, 
+                request[ContentController.REQUEST_ATTRIBUTE_SPACE])?.content
         } else throwTagError("One of [id], [title] or [path] must be specified")
         def var = attrs[ATTR_VAR] ?: null
 

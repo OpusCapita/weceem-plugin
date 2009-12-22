@@ -106,6 +106,12 @@ class WeceemSecurityPolicy {
             }
         }
         
+        // If the uri is null this means we are checking for permissions to access the SPACE rather than a URI in the space
+        // eg we use the default permissions for the space 
+        if (uri == null) {
+            uri = DEFAULT_POLICY_URI
+        }
+        
         if (!uri.endsWith('/')) {
             uri += '/'
         }

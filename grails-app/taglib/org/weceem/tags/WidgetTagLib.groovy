@@ -15,6 +15,7 @@ package org.weceem.tags
 
 import org.weceem.content.*
 import grails.util.GrailsUtil
+import org.weceem.security.AccessDeniedException
 
 /**
  * Widget tag library describes the widget tag.
@@ -83,6 +84,8 @@ class WidgetTagLib {
                 }
                 groovyTemplate.make(pageScope.variables).writeTo(out)
             }
+        } catch (AccessDeniedException ade) {
+            log.error "Security errors prevented widget from rendering", GrailsUtil.deepSanitize(ade)
         } catch (Throwable t) {
             log.error "Error executing widget page", GrailsUtil.deepSanitize(t)
             throwTagError("There is an error in widget at [${path}], please see the logs")
