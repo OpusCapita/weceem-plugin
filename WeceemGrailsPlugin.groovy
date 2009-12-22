@@ -21,7 +21,7 @@ class WeceemGrailsPlugin {
         fckeditor:'0.9.2 > *',
         beanFields:'0.4 > *'
     ]
-    def observe = ["hibernate"]
+    def observe = ["hibernate", 'services']
     
 //    def loadAfter = ['logging']
 
