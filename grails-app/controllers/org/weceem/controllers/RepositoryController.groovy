@@ -500,7 +500,9 @@ class RepositoryController {
         def targetContent = Content.get(params.targetId)
         if (contentRepositoryService.moveNode(sourceContent, targetContent, params.index.toInteger())) {
             def indexes = [:]
-            contentRepositoryService.findChildren(targetContent)?.collect{indexes.put(it.id, it.orderIndex)}
+            if (targetContent) {
+                contentRepositoryService.findChildren(targetContent)?.collect{indexes.put(it.id, it.orderIndex)}
+            }
             render([result: 'success', indexes: indexes] as JSON)
         } else {
             render([result: 'failure', error: message(code: 'error.contentRepository.moveNode')] as JSON)
