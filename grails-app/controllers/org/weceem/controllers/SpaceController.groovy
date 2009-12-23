@@ -3,6 +3,7 @@ package org.weceem.controllers
 import org.apache.commons.io.FilenameUtils
 
 import org.weceem.content.*
+import org.weceem.security.WeceemSecurityPolicy
 import org.weceem.services.*
 import org.weceem.export.*
 import org.weceem.files.ContentFile
@@ -11,7 +12,8 @@ class SpaceController {
 
     def importExportService
     def contentRepositoryService
-
+    def weceemSecurityService
+    
     static allowedMethods = [delete: ['GET', 'POST'], save: 'POST', update: 'POST']
 
     static defaultAction = 'list'
@@ -93,6 +95,9 @@ class SpaceController {
      */
     def startImport = {
         def space = Space.get(params.space)
+
+        assert weceemSecurityService.hasPermissions(space, [WeceemSecurityPolicy.PERMISSION_ADMIN])
+        
         def file = request.getFile('file')
 
         if (!file.empty) {
@@ -129,6 +134,7 @@ class SpaceController {
     def performExport = {
         log.debug "Starting export of space [${params.space}] - all params: ${params}"
         def space = Space.get(params.space)
+        assert weceemSecurityService.hasPermissions(space, [WeceemSecurityPolicy.PERMISSION_ADMIN])
         log.debug "Export found space [${space}]"
         try {
             def file = importExportService.exportSpace(space, params.exporter)

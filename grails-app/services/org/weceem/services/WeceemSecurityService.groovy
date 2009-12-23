@@ -22,7 +22,11 @@ class WeceemSecurityService implements InitializingBean {
     }
     
     void loadPolicy() {
-        def scriptLocation = grailsApplication.config.weceem.security.policy.path ?: System.getProperty('weceem.security.policy.path')
+        def loc = grailsApplication.config.weceem.security.policy.path
+        if (!(loc instanceof String)) {
+            loc = null
+        }
+        def scriptLocation = loc ?: System.getProperty('weceem.security.policy.path')
         if (scriptLocation) {
             policy.load(scriptLocation)
         } else policy.initDefault()
@@ -46,22 +50,34 @@ class WeceemSecurityService implements InitializingBean {
     def getUserEmail() {
         securityDelegate.getUserEmail()
     }
+    
+    def getUserRoles() {
+        def roles = securityDelegate.getUserRoles().clone()
+        roles << ["user:${userName}"]
+        return roles
+    }
 
     boolean hasPermissions(Space space, permList) {
+        if (log.debugEnabled) {
+            log.debug "Checking if user $userName with roles $userRoles has permissions $permList on space $space"
+        }
         // Look at changing this so absoluteURI is not recalculated every time
         return policy.hasPermission(
             space.aliasURI, 
             null,  
-            securityDelegate.getUserRoles(), 
+            getUserRoles(), 
             permList)
     }
 
     boolean hasPermissions(Content content, permList) {
+        if (log.debugEnabled) {
+            log.debug "Checking if user $userName with roles $userRoles has permissions $permList on content at ${content.aliasURI}"
+        }
         // Look at changing this so absoluteURI is not recalculated every time
         return policy.hasPermission(
             content.space.aliasURI, 
             content.absoluteURI, 
-            securityDelegate.getUserRoles(), 
+            getUserRoles(), 
             permList)
     }
 
