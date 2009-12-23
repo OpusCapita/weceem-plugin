@@ -1078,7 +1078,7 @@ class ContentRepositoryService implements InitializingBean {
             log.debug "Caching content info for uri $uriPath: $cacheValue"
         }
         cacheService.putToCache(uriToIdCache, uriPath, cacheValue)
-
+        
         if (content) {
             requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_VIEW])        
 
