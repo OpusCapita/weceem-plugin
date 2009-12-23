@@ -441,7 +441,7 @@ class WeceemTagLib {
         }
         def aliasURI = space.aliasURI ?: ContentFile.EMPTY_ALIAS_URI
         
-        out << g.resource(dir:"WeceemFiles/${aliasURI}", file:attrs[ATTR_PATH])
+        out << g.resource(dir:"${ContentFile.DEFAULT_UPLOAD_DIR}/${aliasURI}", file:attrs[ATTR_PATH])
     }
 
     def humanDate = { attrs ->

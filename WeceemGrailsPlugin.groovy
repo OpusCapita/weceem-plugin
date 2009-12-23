@@ -28,7 +28,7 @@ class WeceemGrailsPlugin {
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
         "grails-app/views/error.gsp",
-        "web-app/WeceemFiles/**/*"
+        "web-app/${org.weceem.files.ContentFile.DEFAULT_UPLOAD_DIR}/**/*"
     ]
 
     // TODO Fill in these fields

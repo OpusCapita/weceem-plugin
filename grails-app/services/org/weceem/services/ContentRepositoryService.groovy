@@ -26,7 +26,6 @@ import org.weceem.security.*
  */
 class ContentRepositoryService implements InitializingBean {
 
-    public static final String DEFAULT_UPLOAD_DIR = 'WeceemFiles'
     static final CONTENT_CLASS = Content.class.name
     static final STATUS_ANY_PUBLISHED = 'published'
     
