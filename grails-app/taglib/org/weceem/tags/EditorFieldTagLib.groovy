@@ -35,7 +35,6 @@ class EditorFieldTagLib {
     }
 
     def editorFieldTemplate = { attrs ->
-        System.out.println "Template field - space is ${pageScope.content.space.dump()}"
         def templates = Template.findAllBySpace( pageScope.content.space, [sort:'title'])
         out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
             noSelection: ['':'- No template -'],
