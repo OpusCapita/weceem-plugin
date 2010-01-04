@@ -606,42 +606,39 @@ class ContentRepositoryService implements InitializingBean {
         sourceContent.saveRevision(sourceContent.title, sourceContent.space.name)
         
         if (sourceContent.metaClass.respondsTo(sourceContent, 'deleteContent')) {
-            if (sourceContent.deleteContent()) {
-                sourceContent.delete(flush: true)
-                return true
-            } else return false
-        } else {
-            def parent = sourceContent.parent
-
-            // if there is a parent  - we delete node from its association
-            if (parent) {
-                parent.children = parent.children.findAll{it-> it.id != sourceContent.id}
-                assert parent.save()
-            }
-
-            // we need to delete all virtual contents that reference sourceContent
-            def copies = VirtualContent.findAllWhere(target: sourceContent)
-            copies?.each() {
-               if (it.parent) {
-                   parent = Content.get(it.parent.id)
-                   parent.children.remove(it)
-               }
-               it.delete()
-            }
-
-            // delete node
-            
-            // @todo replace this with code that looks at all the properties for relationships
-            if (sourceContent.metaClass.hasProperty(sourceContent, 'template')?.type == Template) {
-                sourceContent.template = null
-            }
-            if (sourceContent.metaClass.hasProperty(sourceContent, 'target')?.type == Content) {
-                sourceContent.target = null
-            }
-            sourceContent.delete(flush: true)
-
-            return true
+            if (!sourceContent.deleteContent()) return false
         }
+
+        def parent = sourceContent.parent
+
+        // if there is a parent  - we delete node from its association
+        if (parent) {
+            parent.children = parent.children.findAll{it-> it.id != sourceContent.id}
+            assert parent.save()
+        }
+
+        // we need to delete all virtual contents that reference sourceContent
+        def copies = VirtualContent.findAllWhere(target: sourceContent)
+        copies?.each() {
+           if (it.parent) {
+               parent = Content.get(it.parent.id)
+               parent.children.remove(it)
+           }
+           it.delete()
+        }
+
+        // delete node
+        
+        // @todo replace this with code that looks at all the properties for relationships
+        if (sourceContent.metaClass.hasProperty(sourceContent, 'template')?.type == Template) {
+            sourceContent.template = null
+        }
+        if (sourceContent.metaClass.hasProperty(sourceContent, 'target')?.type == Content) {
+            sourceContent.target = null
+        }
+        sourceContent.delete(flush: true)
+
+        return true
     }
 
     /**
@@ -1000,36 +997,38 @@ class ContentRepositoryService implements InitializingBean {
      * @return a map of 'content' (the node), 'lineage' (list of parent Content nodes to reach the node) 
      * and 'parentURI' (the uri to the parent of this instance of the node)
      */
-    def findContentForPath(String uriPath, Space space) {
+    def findContentForPath(String uriPath, Space space, boolean useCache = true) {
         if (log.debugEnabled) {
             log.debug "findContentForPath uri: ${uriPath} space: ${space}"
         }
 
-        // This looks up the uriPath in the cache to see if we can get a Map of the content id and parentURI
-        // If we call getValue on the cache hit, we lose 50% of our performance. Just retrieving
-        // the cache hit is not expensive.
-        def cachedElement = uriToIdCache.get(uriPath)
-        def cachedContentInfo = cachedElement?.getValue()
-        if (cachedContentInfo) {
-            if (log.debugEnabled) {
-                log.debug "Found content info into cache for uri $uriPath: ${cachedContentInfo}"
-            }
-            // @todo will this break with different table mapping strategy eg multiple ids of "1" with separate tables?
-            Content c = Content.get(cachedContentInfo.id)
-            // @todo re-load the lineage objects here, currently they are ids!
-            def reloadedLineage = cachedContentInfo.lineage?.collect { l_id ->
-                Content.get(l_id)
-            }
-            if (log.debugEnabled) {
-                log.debug "Reconstituted lineage from cache for uri $uriPath: ${reloadedLineage}"
-            }
-            if (c) {
-                requirePermissions(c, [WeceemSecurityPolicy.PERMISSION_VIEW])        
-            }
+        if (useCache) {
+            // This looks up the uriPath in the cache to see if we can get a Map of the content id and parentURI
+            // If we call getValue on the cache hit, we lose 50% of our performance. Just retrieving
+            // the cache hit is not expensive.
+            def cachedElement = uriToIdCache.get(uriPath)
+            def cachedContentInfo = cachedElement?.getValue()
+            if (cachedContentInfo) {
+                if (log.debugEnabled) {
+                    log.debug "Found content info into cache for uri $uriPath: ${cachedContentInfo}"
+                }
+                // @todo will this break with different table mapping strategy eg multiple ids of "1" with separate tables?
+                Content c = Content.get(cachedContentInfo.id)
+                // @todo re-load the lineage objects here, currently they are ids!
+                def reloadedLineage = cachedContentInfo.lineage?.collect { l_id ->
+                    Content.get(l_id)
+                }
+                if (log.debugEnabled) {
+                    log.debug "Reconstituted lineage from cache for uri $uriPath: ${reloadedLineage}"
+                }
+                if (c) {
+                    requirePermissions(c, [WeceemSecurityPolicy.PERMISSION_VIEW])        
+                }
             
-            return c ? [content:c, parentURI:cachedContentInfo.parentURI, lineage:reloadedLineage] : null
-        }   
-
+                return c ? [content:c, parentURI:cachedContentInfo.parentURI, lineage:reloadedLineage] : null
+            }   
+        }
+        
         def tokens = uriPath.split('/')
 
         // @todo: optimize query 
@@ -1132,11 +1131,11 @@ class ContentRepositoryService implements InitializingBean {
         spaceDir.eachFileRecurse {file ->
             def relativePath = file.absolutePath.substring(
                     spaceDir.absolutePath.size() + 1)
-            def content = findContentForPath(relativePath, space).content
+            def content = findContentForPath(relativePath, space, false)?.content
             //if content wasn't found then create new
             if (!content){
                 createdContent += createContentFile("${spaceDir.name}/${relativePath}")
-                content = findContentForPath(relativePath, space).content
+                content = findContentForPath(relativePath, space, false)?.content
                 while (content){
                     existingFiles << content
                     content = content.parent
@@ -1160,6 +1159,10 @@ class ContentRepositoryService implements InitializingBean {
      * @param path
      */
     def createContentFile(path) {
+        if (log.debugEnabled) {
+            log.debug "Creating content node for server file at [$path]"
+        }
+        
         List tokens = path.replace('\\', '/').split('/')
         if (tokens.size() > 1) {
             def space = Space.findByAliasURI((tokens[0] == ContentFile.EMPTY_ALIAS_URI) ? '' : tokens[0])
@@ -1171,7 +1174,7 @@ class ContentRepositoryService implements InitializingBean {
                 def parentPath = "${parents[0..i].join('/')}"
                 def file = grailsApplication.parentContext.getResource(
                         "${ContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/${parentPath}").file
-                content = findContentForPath(parentPath, space).content
+                content = findContentForPath(parentPath, space)?.content
                 if (!content){
                     if (file.isDirectory()){
                         content = new ContentDirectory(title: file.name,
@@ -1200,8 +1203,17 @@ class ContentRepositoryService implements InitializingBean {
                     ancestor.children << content
                     if (ancestor instanceof ContentDirectory)
                         ancestor.filesCount += 1
+                    if (log.debugEnabled) {
+                        log.debug "Updated parent node of new file node [${ancestor.dump()}]"
+                    }
                     assert ancestor.save(flush: true)
                     content.parent = ancestor
+                    if (log.debugEnabled) {
+                        log.debug "Saving content node of new file node [${content.dump()}]"
+                    }
+                    if (log.debugEnabled && !content.validate()) {
+                        log.debug "Saving content node of new file node is about to fail. Node: [${content.dump()}], Errors: [${content.errors}]"
+                    }
                     assert content.save(flush: true)
                 }
                 ancestor = content
