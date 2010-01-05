@@ -181,13 +181,13 @@ class ContentRepositoryService implements InitializingBean {
     
     void requirePermissions(Space space, permissionList) {
         if (!weceemSecurityService.hasPermissions(space, permissionList)) {
-            throw new AccessDeniedException()
+            throw new AccessDeniedException("User [${weceemSecurityService.userName}] with roles [${weceemSecurityService.userRoles}] does not have the permissions [$permissionList] to access space [${space.name}]")
         }
     }       
     
     void requirePermissions(Content content, permissionList) {
         if (!weceemSecurityService.hasPermissions(content, permissionList)) {
-            throw new AccessDeniedException()
+            throw new AccessDeniedException("User [${weceemSecurityService.userName}] with roles [${weceemSecurityService.userRoles}] does not have the permissions [$permissionList] to access content at [${content.absoluteURI}] in space [${content.space.name}]")
         }
     }       
 
