@@ -23,7 +23,9 @@ class WeceemSecurityPolicy {
     static PERMISSION_VIEW = "view"
         
     void load(location) {
-        def g = new GroovyClassLoader().parseClass(new File(location))
+        log.info "Loading security policy from script [$location]"
+        def f = new File(location)
+        def g = new GroovyClassLoader().parseClass(f)
         def script = g.newInstance()
         assert script instanceof Script
         script.binding = new Binding()
