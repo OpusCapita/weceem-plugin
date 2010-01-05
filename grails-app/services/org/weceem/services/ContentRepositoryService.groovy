@@ -179,13 +179,13 @@ class ContentRepositoryService implements InitializingBean {
         log.info "Successfully imported space template [${templateName}] into space [${space.name}]"
     }
     
-    void requirePermissions(Space space, permissionList) {
+    void requirePermissions(Space space, permissionList) throws AccessDeniedException {
         if (!weceemSecurityService.hasPermissions(space, permissionList)) {
             throw new AccessDeniedException("User [${weceemSecurityService.userName}] with roles [${weceemSecurityService.userRoles}] does not have the permissions [$permissionList] to access space [${space.name}]")
         }
     }       
     
-    void requirePermissions(Content content, permissionList) {
+    void requirePermissions(Content content, permissionList) throws AccessDeniedException {
         if (!weceemSecurityService.hasPermissions(content, permissionList)) {
             throw new AccessDeniedException("User [${weceemSecurityService.userName}] with roles [${weceemSecurityService.userRoles}] does not have the permissions [$permissionList] to access content at [${content.absoluteURI}] in space [${content.space.name}]")
         }

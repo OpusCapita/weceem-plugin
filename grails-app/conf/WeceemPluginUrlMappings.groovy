@@ -44,7 +44,7 @@ class WeceemPluginUrlMappings {
             action = "show"
         }
 
-
+        "403"(view:'/denied')
         "500"(view:'/error')
     }
 }
