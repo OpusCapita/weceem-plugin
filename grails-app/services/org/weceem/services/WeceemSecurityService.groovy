@@ -53,7 +53,7 @@ class WeceemSecurityService implements InitializingBean {
     
     def getUserRoles() {
         def roles = securityDelegate.getUserRoles().clone()
-        roles << ["user:${userName}"]
+        roles << ["USER_${userName}"]
         return roles
     }
 
