@@ -358,9 +358,12 @@ class WeceemTagLib {
 
 
     def link = { attrs, body -> 
-        out << "<a href=\"${createLink(attrs)}\">"
-        out << body()
-        out << "</a>"
+        def o = out
+        o << "<a href=\"${createLink(attrs)}\""
+        attrs.remove('path')
+        o << "${attrs.collect {k, v -> " $k=\"$v\"" }.join('')}>"
+        o << body()
+        o << "</a>"
     }
     
     def createLink = { attrs, body -> 
