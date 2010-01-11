@@ -782,9 +782,7 @@ class RepositoryController {
         def filterClass = Content
         if (params.classFilter != "none") 
             filterClass = Class.forName("${params.classFilter}", true, this.class.classLoader)
-        println "Searching $filterClass"
         def searchResult = filterClass.searchEvery("*$searchStr* +name:$space".toString(), [reload: true])
-        println "Search results for $searchStr on $filterClass: $searchResult"
         def fromDateFilter = null
         def toDateFilter = null
         if (params.fromDateFilter != "") fromDateFilter = new Date(params.fromDateFilter)
@@ -824,7 +822,6 @@ class RepositoryController {
             }
             flag && ((it.status.code == statusFilter) || (statusFilter == 0))
         }
-        println "Search results after filtering for $searchStr on $filterClass: $searchResult"
         def result = searchResult.collect{["id": it.id, "title": it.title, 
         "aliasURI": it.aliasURI, "status": it.status?.description, 
         "createdBy": it.createdBy.toString(), 
@@ -833,8 +830,6 @@ class RepositoryController {
         "parentURI": (it.parent == null ? "": "/${it.parent.absoluteURI}"), 
         "type": message(code: "content.item.name.${it.toName()}")]} 
 
-        println "Search result $result"
-        println "JSON result: ${[result: result] as JSON}"
         render ([result: result] as JSON)
     }
 }

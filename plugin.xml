@@ -65,8 +65,8 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     <resolvers>
       <resolver type='grailsPlugins' name='grailsPlugins' />
     </resolvers>
-    <dependency group='org.apache.ant' name='ant' version='1.7.1' conf='runtime' transitive='true' />
-    <dependency group='commons-codec' name='commons-codec' version='1.3' conf='runtime' transitive='true' />
+    <dependency group='org.apache.ant' name='ant-launcher' version='1.7.1' conf='compile' transitive='true' />
+    <dependency group='org.apache.ant' name='ant' version='1.7.1' conf='compile' transitive='true' />
   </dependencies>
   <behavior />
 </plugin>

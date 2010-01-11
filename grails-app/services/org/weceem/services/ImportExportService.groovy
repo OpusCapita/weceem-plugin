@@ -16,8 +16,15 @@ class ImportExportService {
     
     def importSpace(Space space, String importerName, File file) throws ImportException {
         // @todo couldn't inject this service, circular dependency problem. Investigate
-        grailsApplication.mainContext.contentRepositoryService.deleteSpaceContent(space)
-        getImporters()."${importerName}"?.execute(space, file)
+        Content.withTransaction { txn ->
+            try {
+                grailsApplication.mainContext.contentRepositoryService.deleteSpaceContent(space)
+                getImporters()."${importerName}"?.execute(space, file)
+            } catch (Throwable t) {
+                txn.setRollbackOnly()
+                log.error(t)
+            }
+        }
     }
 
     def exportSpace(Space space, String exporterName) {

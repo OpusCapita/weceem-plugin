@@ -147,9 +147,14 @@ class ContentRepositoryService implements InitializingBean {
     }
     
     Space createSpace(params) {
-        def s = new Space(params)
-        if (s.save()) {
-            importSpaceTemplate('default', s)
+        def s
+        Content.withTransaction { txn ->
+            s = new Space(params)
+            if (s.save()) {
+                importSpaceTemplate('default', s)
+            } else {
+                log.error "Unable to create space with properties: ${params} - errors occurred: ${s.errors}"
+            }
         }
         return s // If this fails we still return the original space so we can see errors
     }
@@ -1192,7 +1197,7 @@ class ContentRepositoryService implements InitializingBean {
                     requirePermissions(content.parent ?: space, [WeceemSecurityPolicy.PERMISSION_CREATE])        
 
                     if (!content.save()) {
-                        println content.errors
+                        log.error "Failed to save content ${content} - errors: ${content.errors}"
                         assert false
                     } else {
                         createdContent << content
