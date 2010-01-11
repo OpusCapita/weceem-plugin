@@ -15,6 +15,19 @@ log4j = {
     info   'grails.app'
 
     debug  'grails.app.service'
+}
 
-    warn   'org.mortbay.log'
+environments {
+    test {
+        log4j = {
+            root {
+                info 'stdout'
+            }
+
+            warn  'org.codehaus.groovy.grails.web.servlet',  //  controllers
+        	       'org.codehaus.groovy.grails.web.pages' //  GSP
+            debug   'grails.app'
+
+        }
+    }
 }

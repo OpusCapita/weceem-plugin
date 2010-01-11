@@ -9,9 +9,9 @@ class WeceemGrailsPlugin {
     def _log = LogFactory.getLog('org.weceem.WeceemGrailsPlugin')
 
     // the plugin version
-    def version = "0.8-SNAPSHOT"
+    def version = "0.8"
     // the version or versions of Grails the plugin is designed for
-    def grailsVersion = "1.2-RC2 > *"
+    def grailsVersion = "1.2.0 > *"
     
     // the other plugins this plugin depends on
     def dependsOn = [
@@ -43,7 +43,6 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     def documentation = "http://grails.org/plugin/weceem"
 
     def doWithSpring = {
-        System.out.println "WECEEM In doWithSpring"
 
         simpleSpaceExporter(org.weceem.export.SimpleSpaceExporter)
         simpleSpaceImporter(org.weceem.export.SimpleSpaceImporter)
@@ -56,7 +55,6 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     }
 
     def doWithApplicationContext = { applicationContext ->
-        System.out.println "WECEEM In doWithAppCtx"
 
         _log.info "Weceem plugin running with data source ${applicationContext.dataSource.dump()}"
         _log.info "Weceem plugin running with grails configuration ${applicationContext.grailsApplication.config}"
@@ -74,29 +72,21 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
                 applicationContext.navigationService.registerItem( 'weceem.plugin.admin', item)
         }
 
-        System.out.println "WECEEM In doWithAppCtx 1"
         applicationContext.editorService.cacheEditorInfo()
-        System.out.println "WECEEM In doWithAppCtx 2"
         applicationContext.editorService.configureFCKEditor()
 
-        System.out.println "WECEEM In doWithAppCtx 3"
         applicationContext.contentRepositoryService.createDefaultStatuses()
-        System.out.println "WECEEM In doWithAppCtx 4"
         applicationContext.contentRepositoryService.createDefaultSpace()
-        System.out.println "WECEEM In doWithAppCtx 5"
     }
 
     def doWithWebDescriptor = { xml ->
-        System.out.println "WECEEM In doWithWebDesc"
         // TODO Implement additions to web.xml (optional)
     }
 
     def doWithDynamicMethods = { ctx ->
-        System.out.println "WECEEM In doWithDynMethods"
     }
 
     def onChange = { event ->
-        println "ON CHANGE EVENT OCCURED: ${event}"
         // Reload all if service / whole app reloaded
         applicationContext.editorService.cacheEditorInfo()
     }

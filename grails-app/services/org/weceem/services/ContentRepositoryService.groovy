@@ -1011,7 +1011,7 @@ class ContentRepositoryService implements InitializingBean {
             // This looks up the uriPath in the cache to see if we can get a Map of the content id and parentURI
             // If we call getValue on the cache hit, we lose 50% of our performance. Just retrieving
             // the cache hit is not expensive.
-            def cachedElement = uriToIdCache.get(uriPath)
+            def cachedElement = uriToIdCache.get(space.aliasURI+':'+uriPath)
             def cachedContentInfo = cachedElement?.getValue()
             if (cachedContentInfo) {
                 if (log.debugEnabled) {
@@ -1080,7 +1080,9 @@ class ContentRepositoryService implements InitializingBean {
         if (log.debugEnabled) {
             log.debug "Caching content info for uri $uriPath: $cacheValue"
         }
-        cacheService.putToCache(uriToIdCache, uriPath, cacheValue)
+        if (useCache) {
+            cacheService.putToCache(uriToIdCache, space.aliasURI+':'+uriPath, cacheValue)
+        }
         
         if (content) {
             requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_VIEW])        

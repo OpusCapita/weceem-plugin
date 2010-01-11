@@ -16,15 +16,18 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
     def nodeC
     def nodeWiki
     def spaceA
+    def spaceB
     def template
     def defStatus
     
     def extraNode
 
     void setUp() {
+        super.setUp()
         
         contentRepositoryService = new ContentRepositoryService()
         contentRepositoryService.cacheService = new CacheService()
+        contentRepositoryService.cacheService.cacheManager = new net.sf.ehcache.CacheManager()
         contentRepositoryService.weceemSecurityService = new WeceemSecurityService()
         contentRepositoryService.weceemSecurityService.with {
             grailsApplication = [
@@ -41,11 +44,16 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
             afterPropertiesSet()
         }
         contentRepositoryService.grailsApplication = ApplicationHolder.application
-
+        contentRepositoryService.afterPropertiesSet()
+        
         defStatus = new Status(code: 400, description: "published", publicContent: true)
         assert defStatus.save(flush:true)
+
         spaceA = new Space(name: 'jcatalog', aliasURI: 'jcatalog')
         assert spaceA.save(flush: true)
+        spaceB = new Space(name: 'other', aliasURI: 'other')
+        assert spaceB.save(flush: true)
+
         template = new Template(title: 'template', aliasURI: 'template',
                     space: spaceA, status: defStatus,
                     createdBy: 'admin', createdOn: new Date(),
@@ -111,6 +119,13 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
         //   ----d
         //       ----b (3)
 
+
+        assert new HTMLContent(title: 'Other Index', aliasURI: 'contentA',
+                content: 'Other Index page', status: defStatus,
+                createdBy: 'admin', createdOn: new Date(),
+                space: spaceB, 
+                orderIndex: 0).save()
+        
     }
 
     void tearDown() {
@@ -132,6 +147,26 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
         res = contentRepositoryService.resolveSpaceAndURI('jcatalog/anything')
         assert res.space.id == spaceA.id
         assertEquals 'anything', res.uri
+
+        res = contentRepositoryService.resolveSpaceAndURI('other/anything')
+        assert res.space.id == spaceB.id
+        assertEquals 'anything', res.uri
+    }
+
+    void testFindContentForPath() {
+        // Without cache
+        assertEquals nodeA.id, contentRepositoryService.findContentForPath('contentA', spaceA, false).content.id
+        assertEquals nodeB.id, contentRepositoryService.findContentForPath('contentA/contentB', spaceA, false).content.id
+        assertFalse nodeA.id == contentRepositoryService.findContentForPath('contentA', spaceB, false).content.id
+        assertNull contentRepositoryService.findContentForPath('contentA/contentB', spaceB, false)
+
+        // With cache, once to load, second to hit
+        2.times {
+            assertEquals nodeA.id, contentRepositoryService.findContentForPath('contentA', spaceA).content.id
+            assertEquals nodeB.id, contentRepositoryService.findContentForPath('contentA/contentB', spaceA).content.id
+            assertFalse nodeA.id == contentRepositoryService.findContentForPath('contentA', spaceB).content.id
+            assertNull contentRepositoryService.findContentForPath('contentA/contentB', spaceB)
+        }
     }
     
     void testDeleteNodeA() {

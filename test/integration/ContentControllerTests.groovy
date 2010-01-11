@@ -70,8 +70,6 @@ class ContentControllerTests extends GroovyTestCase {
         def spaceA = new Space(name: 'jcatalog', aliasURI: 'jcatalog').save(flush: true)
         assert spaceA
         
-        println "Saved space: ${spaceA.dump()}"
-        
         template = new Template(title: 'template', aliasURI: 'template',
                     space: spaceA, status: defStatus,
                     createdBy: 'admin', createdOn: new Date(),
