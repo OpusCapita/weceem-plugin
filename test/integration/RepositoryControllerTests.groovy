@@ -19,6 +19,8 @@ import org.weceem.files.*
  */
 class RepositoryControllerTests extends GroovyTestCase {
 
+    static transactional = true
+    
     def grailsApplication
     def spaceA
     def nodeA

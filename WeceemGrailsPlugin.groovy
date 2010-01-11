@@ -9,26 +9,26 @@ class WeceemGrailsPlugin {
     def _log = LogFactory.getLog('org.weceem.WeceemGrailsPlugin')
 
     // the plugin version
-    def version = "0.3.2"
+    def version = "0.8"
     // the version or versions of Grails the plugin is designed for
-    def grailsVersion = "1.1.1 > *"
+    def grailsVersion = "1.2.0 > *"
     
     // the other plugins this plugin depends on
     def dependsOn = [
         searchable:'0.5.4 > *', 
-        quartz:'0.4.1-SNAPSHOT > *', 
-        navigation:'1.1 > *',
+        quartz:'0.4.1 > *', 
+        navigation:'1.1.1 > *',
         fckeditor:'0.9.2 > *',
-        beanFields:'0.2 > *'
+        beanFields:'0.4 > *'
     ]
-    def observe = ["hibernate"]
+    def observe = ["hibernate", 'services']
     
 //    def loadAfter = ['logging']
 
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
         "grails-app/views/error.gsp",
-        "web-app/WeceemFiles/**/*"
+        "web-app/${org.weceem.files.ContentFile.DEFAULT_UPLOAD_DIR}/**/*"
     ]
 
     // TODO Fill in these fields
@@ -43,13 +43,19 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     def documentation = "http://grails.org/plugin/weceem"
 
     def doWithSpring = {
+
         simpleSpaceExporter(org.weceem.export.SimpleSpaceExporter)
         simpleSpaceImporter(org.weceem.export.SimpleSpaceImporter)
         defaultSpaceImporter(org.weceem.export.DefaultSpaceImporter)
         confluenceSpaceImporter(org.weceem.export.ConfluenceSpaceImporter)
+        
+        cacheManager(net.sf.ehcache.CacheManager) { bean -> 
+            bean.destroyMethod = 'shutdown'
+        }
     }
 
     def doWithApplicationContext = { applicationContext ->
+
         _log.info "Weceem plugin running with data source ${applicationContext.dataSource.dump()}"
         _log.info "Weceem plugin running with grails configuration ${applicationContext.grailsApplication.config}"
         
@@ -81,14 +87,8 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     }
 
     def onChange = { event ->
-        println "ON CHANGE EVENT OCCURED: ${event}"
-        if (event.source instanceof GrailsDomainClass) {
-            applicationContext.editorService.cacheEditorInfo(event.source.clazz)
-        }
-        if (event.source instanceof GrailsServiceClass) {
-            // Reload all if service / whole app reloaded
-            applicationContext.editorService.cacheEditorInfo()
-        }
+        // Reload all if service / whole app reloaded
+        applicationContext.editorService.cacheEditorInfo()
     }
 
     def onConfigChange = { event ->

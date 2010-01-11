@@ -26,23 +26,23 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
     }
 
 
-  void testCreateLink() {
-    mockTagLib(WeceemTagLib)
-    def taglib = new WeceemTagLib()
-    
-    def g = new MockFor(ApplicationTagLib)
-    g.demand.createLink {hash ->
-      assertEquals "content", hash.controller
-      assertEquals "show", hash.action
+    void testCreateLink() {
+        mockTagLib(WeceemTagLib)
+        def taglib = new WeceemTagLib()
+
+        def g = new MockFor(ApplicationTagLib)
+        g.demand.createLink {hash ->
+        assertEquals "content", hash.controller
+        assertEquals "show", hash.action
+        }
+
+        taglib.metaClass.g = g.proxyInstance()
+
+        def node = new HTMLContent(aliasURI:'someNode', space: new Space(name:'default', aliasURI:'default'))
+        taglib.contentRepositoryService = [findContentForPath : { path, space -> [content: node]}]
+        taglib.request.setAttribute(ContentController.REQUEST_ATTRIBUTE_SPACE, node.space)
+        taglib.createLink(path: 'someNode', null)
     }
-
-    taglib.metaClass.g = g.proxyInstance()
-
-    def node = new HTMLContent(aliasURI:'someNode', space: new Space(name:'default', aliasURI:'default'))
-    taglib.contentRepositoryService = [findContentForPath : { path, space -> [content: node]}]
-    taglib.request.setAttribute(ContentController.REQUEST_ATTRIBUTE_SPACE, node.space)
-    taglib.createLink(path: 'someNode', null)
-  }
 
   void testCountChildren() {
     mockTagLib(WeceemTagLib)

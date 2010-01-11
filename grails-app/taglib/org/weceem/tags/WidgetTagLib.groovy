@@ -15,6 +15,7 @@ package org.weceem.tags
 
 import org.weceem.content.*
 import grails.util.GrailsUtil
+import org.weceem.security.AccessDeniedException
 
 /**
  * Widget tag library describes the widget tag.
@@ -38,16 +39,19 @@ class WidgetTagLib {
     def widget = {attrs, body ->
         def widget
         def path = attrs.path
+        def space = attrs.space ? Space.findByAliasURI(attrs.space) : pageScope.space
+        if(!space) {throwTagError("No space by name ${attrs.space}")}
+
         if (path) {
-            widget = contentRepositoryService.findContentForPath(path, pageScope.space)?.content
+            widget = contentRepositoryService.findContentForPath(path, space)?.content
             if (!widget) {
-                throwTagError("There is no Widget at aliasURI [${path}] in the space [${pageScope.space.name}]")
+                throwTagError("There is no Widget at aliasURI [${path}] in the space [${space.name}]")
             }
         } else if (attrs.id) {
             log.warn("Use of [id] attribute on widget tag is deprecated")
-            widget = Widget.findBySpaceAndTitle(pageScope.space, attrs.id)
+            widget = Widget.findBySpaceAndTitle(space, attrs.id)
             if (!widget) {
-                throwTagError("There is no Widget with title [${attrs.id}] in the space [${pageScope.space.name}]. Tip: use path attribute!")
+                throwTagError("There is no Widget with title [${attrs.id}] in the space [${space.name}]. Tip: use path attribute!")
             }
         }
         if (log.debugEnabled) {
@@ -64,8 +68,7 @@ class WidgetTagLib {
 
         out << body()
 
-        def engine = grailsAttributes.getPagesTemplateEngine()
-        def groovyTemplate = engine.createTemplate(widget.content, widget.title)
+        def groovyTemplate = contentRepositoryService.getGSPTemplate(widget.absoluteURI, widget.content)
         try {
             if (attrs.model instanceof Map) {
                 def model = [:] 
@@ -81,6 +84,8 @@ class WidgetTagLib {
                 }
                 groovyTemplate.make(pageScope.variables).writeTo(out)
             }
+        } catch (AccessDeniedException ade) {
+            log.error "Security errors prevented widget from rendering", GrailsUtil.deepSanitize(ade)
         } catch (Throwable t) {
             log.error "Error executing widget page", GrailsUtil.deepSanitize(t)
             throwTagError("There is an error in widget at [${path}], please see the logs")

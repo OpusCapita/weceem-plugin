@@ -72,7 +72,7 @@ class Content implements Comparable {
         space(nullable: false)
         status(nullable: false)
         orderIndex(nullable: true)
-        parent(nullable: true)
+        parent(nullable: true, lazy:true)
         createdBy(nullable: true)
         createdOn(nullable: true)
         changedBy(nullable: true)
@@ -87,7 +87,7 @@ class Content implements Comparable {
         title index:'content_contentName_Idx'
         aliasURI index:'content_aliasURI_Idx'
         space index:'content_space_Idx', lazy: false // we never want proxies for this
-        children cascade:"all"
+        children cascade:"all", lazy: true
         status lazy:false
     }
 

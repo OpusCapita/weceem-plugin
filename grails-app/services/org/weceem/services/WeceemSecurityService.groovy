@@ -1,64 +1,36 @@
 package org.weceem.services
 
+import org.springframework.beans.factory.InitializingBean
+
 import org.weceem.content.Content
 import org.weceem.content.Status
+import org.weceem.content.Space
+import org.weceem.security.*
 
 /**
  * A service that hides the actual security implementation we are using
  */
-class WeceemSecurityService {
+class WeceemSecurityService implements InitializingBean {
     static transactional = false
     
-    def policyInfo
-    def grailsApplication
+    WeceemSecurityPolicy policy = new WeceemSecurityPolicy()
     
-    /** 
-     * Policy is just a DSL like this:
-     
-     'role:Admin' {
-         spaces '*'
-         administer true
-     }
-     
-     'group:MillerLtd_User' {
-          spaces 'miller', 'miller_intranet'
-          administer false
-          '/miller/home' {
-              createContent true
-              editContent true
-          }
-          '/miller_intranet/customers' {
-              editContent true
-          }
-      }
-     
-     * so it takes the form of:
-     * 
-     * ROLESTRING {
-     *     spaces '*' or list of aliasURIs stringd
-     *     permissionName true/false
-     *     URIPATH {
-     *          permissionName true/false    
-     *     }
-     *     URIPATH {
-     *          permissionName true/false    
-     *     }
-     * }
-     *
-     * However we need to resolve permissions by perm name + uripath + space, and support inheriting perms into 
-     * subnodes of the uri space, so we need to store this differently internally
-     *
-     * We need to access permissions so:
-     *     userHasPermission(permission, space, uri)
-     * which means seeing if any of their roles has the permission on space+uri
-     *
-     * space ---> uri ---> permissions ---> map of roles permitted
-     *
-     void loadPolicy() {
-         def scriptLocation = grailsApplication.config.weceem.security.policy.path ?: System.getProperty('weceem.security.policy.path')
-         def g = new GroovyClassLoader().parseClass(scriptLocation)
-     }
-     */
+    def grailsApplication
+
+    void afterPropertiesSet() {
+        loadPolicy()
+    }
+    
+    void loadPolicy() {
+        def loc = grailsApplication.config.weceem.security.policy.path
+        if (!(loc instanceof String)) {
+            loc = null
+        }
+        def scriptLocation = loc ?: System.getProperty('weceem.security.policy.path')
+        if (scriptLocation) {
+            policy.load(scriptLocation)
+        } else policy.initDefault()
+    }
      
     
     /** 
@@ -67,7 +39,7 @@ class WeceemSecurityService {
     def securityDelegate = [
         getUserName : { -> "unknown" },
         getUserEmail : { -> "unknown@localhost" },
-        getUserPrincipal : { -> [name:'unknown', email:"unknown@localhost"] },
+        getUserPrincipal : { -> [id:'unknown', name:'unknown', email:"unknown@localhost"] },
         getUserRoles: { -> ['ROLE_ADMIN'] }
     ]
     
@@ -79,30 +51,89 @@ class WeceemSecurityService {
         securityDelegate.getUserEmail()
     }
     
+    def getUserRoles() {
+        def roles = securityDelegate.getUserRoles().clone()
+        roles << ["USER_${userName}"]
+        return roles
+    }
+
+    boolean hasPermissions(Space space, permList) {
+        if (log.debugEnabled) {
+            log.debug "Checking if user $userName with roles $userRoles has permissions $permList on space $space"
+        }
+        // Look at changing this so absoluteURI is not recalculated every time
+        return policy.hasPermission(
+            space.aliasURI, 
+            null,  
+            getUserRoles(), 
+            permList)
+    }
+
+    boolean hasPermissions(Content content, permList) {
+        if (log.debugEnabled) {
+            log.debug "Checking if user $userName with roles $userRoles has permissions $permList on content at ${content.aliasURI}"
+        }
+        // Look at changing this so absoluteURI is not recalculated every time
+        return policy.hasPermission(
+            content.space.aliasURI, 
+            content.absoluteURI, 
+            getUserRoles(), 
+            permList)
+    }
+
     /**
      * Called to find out if the current user is allowed to transition content in to the specified status
      * Allows applications to control workflow
      */
-    def isUserAllowedContentStatus(Status status) {
-        // Temporary lame impl
-        return securityDelegate.userRoles?.contains('ROLE_ADMIN')
+    boolean isUserAllowedContentStatus(Status status) {
+        // Temporary lame impl, need to add this to policy
+        return true
+    }
+
+    /**
+     * Called to find out if the current user is allowed to edit the specified content
+     * Allows applications to implement ACLs
+     */
+    boolean isUserAllowedToDeleteContent(Content content) {
+        hasPermissions(content, [WeceemSecurityPolicy.PERMISSION_DELETE])
     }
     
     /**
      * Called to find out if the current user is allowed to edit the specified content
      * Allows applications to implement ACLs
      */
-    def isUserAllowedToEditContent(Content content) {
-        // Temporary lame impl
-        return securityDelegate.getUserRoles()?.contains('ROLE_ADMIN')
+    boolean isUserAllowedToEditContent(Content content) {
+        hasPermissions(content, [WeceemSecurityPolicy.PERMISSION_EDIT])
+    }
+    
+    /**
+     * Called to find out if the current user is allowed to view the specified content
+     * IF the status is not "public" they must also have the EDIT permission
+     */
+    boolean isUserAllowedToViewContent(Content content) {
+        // Now work out if the user is allowed to see the content
+        def allowedToViewContent = false
+        def permsRequired = [WeceemSecurityPolicy.PERMISSION_VIEW]
+        // If the status is not a "published" status then only those with edit permissions
+        // on the url can see it
+        if (!content.status.publicContent) {
+            permsRequired << WeceemSecurityPolicy.PERMISSION_EDIT
+        }
+        if (log.debugEnabled) {
+            log.debug "User requires permissions $permsRequired to view content ${content.absoluteURI}"
+        }
+        allowedToViewContent = hasPermissions(content, permsRequired)
+        if (!allowedToViewContent && log.debugEnabled) {
+            log.debug "User is not denied viewing of content at ${content.absoluteURI}"
+        }
+        return allowedToViewContent
     }
     
     /**
      * Called to find out if the current user is allowed perform administrative actions eg manipulate spaces
      */
-    def isUserAdministrator() {
-        // Temporary lame impl
-        return securityDelegate.userRoles?.contains('ROLE_ADMIN')
+    boolean isUserAdministrator() {
+        hasPermissions(content, [WeceemSecurityPolicy.PERMISSION_ADMIN])
     }
     
     def getUserPrincipal() {

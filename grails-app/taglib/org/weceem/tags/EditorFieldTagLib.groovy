@@ -35,7 +35,6 @@ class EditorFieldTagLib {
     }
 
     def editorFieldTemplate = { attrs ->
-        System.out.println "Template field - space is ${pageScope.content.space.dump()}"
         def templates = Template.findAllBySpace( pageScope.content.space, [sort:'title'])
         out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
             noSelection: ['':'- No template -'],
@@ -134,7 +133,7 @@ class EditorFieldTagLib {
     void includeEditArea() {
         if (!request['weceem.editor.editarea.js.included']) {
             out << """
-            <script language="javascript" type="text/javascript" src="${resource(dir: pluginContextPath+'/_weceem/js/editarea', plugin:'weceem', file: 'edit_area_full.js')}"></script>
+            <script language="javascript" type="text/javascript" src="${resource(dir: '_weceem/js/editarea', plugin:'weceem', file: 'edit_area_full.js')}"></script>
             """
             request['weceem.editor.editarea.js.included'] = true
         }

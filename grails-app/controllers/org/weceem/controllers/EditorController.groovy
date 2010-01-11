@@ -79,6 +79,7 @@ class EditorController {
     }
     
     def cancel = {
+        flash.message = "Editing of content cancelled"
         redirect(controller:'repository')
     }
 

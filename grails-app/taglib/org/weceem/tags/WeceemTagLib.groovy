@@ -23,6 +23,7 @@ import org.weceem.services.ContentRepositoryService
 
 import org.weceem.content.Template
 import grails.util.GrailsUtil
+import org.weceem.content.Space
 
 class WeceemTagLib {
     
@@ -128,7 +129,8 @@ class WeceemTagLib {
         def baseNode = attrs[ATTR_NODE] ?: request[ContentController.REQUEST_ATTRIBUTE_NODE]
         def status = attrs[ATTR_STATUS] ?: ContentRepositoryService.STATUS_ANY_PUBLISHED
         if (attrs[ATTR_PATH]) {
-            baseNode = contentRepositoryService.findContentForPath(attrs[ATTR_PATH], request[ContentController.REQUEST_ATTRIBUTE_SPACE]).content
+            baseNode = contentRepositoryService.findContentForPath(attrs[ATTR_PATH], 
+                request[ContentController.REQUEST_ATTRIBUTE_SPACE])?.content
         }
         def children = contentRepositoryService.findChildren(baseNode, [type:attrs[ATTR_TYPE], status:status, params:params])
         if (attrs[ATTR_FILTER]) children = children?.findAll(attrs[ATTR_FILTER])
@@ -146,7 +148,8 @@ class WeceemTagLib {
         def baseNode = attrs[ATTR_NODE]
         if (!baseNode) {
             if (attrs[ATTR_PATH]) {
-                baseNode = contentRepositoryService.findContentForPath(attrs[ATTR_PATH], request[ContentController.REQUEST_ATTRIBUTE_SPACE]).content 
+                baseNode = contentRepositoryService.findContentForPath(attrs[ATTR_PATH], 
+                    request[ContentController.REQUEST_ATTRIBUTE_SPACE])?.content 
             } else {
                 baseNode = request[ContentController.REQUEST_ATTRIBUTE_NODE]
             }
@@ -295,7 +298,7 @@ class WeceemTagLib {
         def first = true
         def last = false
         def lastIndex = levelnodes.size()-1
-        levelnodes?.eachWithIndex { n, i ->
+        levelnodes?.eachWithIndex { n, i -> 
             if (!custom && first) {
                 out << "<ul>"
             }
@@ -313,11 +316,54 @@ class WeceemTagLib {
             }
         }
     }
-    
+
+    /**
+    * output a recursive treemenu based either on a node or the root
+     * attributes:
+     * node - the node to base the menu on
+     * levels - the number of levels
+     * id - id of the menu
+     */
+    def treeMenu = { attrs ->
+        def node = attrs.node
+        int levels = attrs.levels ? attrs.levels.toInteger() : 2
+        def id = attrs.id
+
+        def args = [
+            status:ContentRepositoryService.STATUS_ANY_PUBLISHED,
+            type: org.weceem.html.HTMLContent,
+            params:[sort:'orderIndex']
+        ]
+
+        def tmenu = { aNode, level=1 ->
+            out << "<ul ${id ? 'id=${id}' : ''} class='menu menu-level-${level}'>"
+            out << "<li class='menu-item'>"
+            out << link(node:aNode, {aNode.titleForMenu.encodeAsHTML()})
+            if (level < levels) {
+                contentRepositoryService.findChildren(aNode, args).each {child ->
+                    owner.call(child, ++level)
+                }
+            }
+            out << "</li></ul>"
+        }
+
+        if(node) {
+            tmenu(node)
+        } else {
+            contentRepositoryService.findAllRootContent(request[ContentController.REQUEST_ATTRIBUTE_SPACE], args).each {
+                tmenu(it)
+            }
+        }
+    }
+
+
     def link = { attrs, body -> 
-        out << "<a href=\"${createLink(attrs)}\">"
-        out << body()
-        out << "</a>"
+        def o = out
+        o << "<a href=\"${createLink(attrs)}\""
+        attrs.remove('path')
+        o << "${attrs.collect {k, v -> " $k=\"$v\"" }.join('')}>"
+        o << body()
+        o << "</a>"
     }
     
     def createLink = { attrs, body -> 
@@ -334,7 +380,7 @@ class WeceemTagLib {
         }
         if (!content) {
             def contentInfo = contentRepositoryService.findContentForPath(attrs[ATTR_PATH], space)
-            if (!contentInfo.content) {
+            if (!contentInfo?.content) {
                 log.error ("Tag [wcm:createLink] cannot create a link to the content at path ${attrs[ATTR_PATH]} as "+
                     "there is no content node at that URI")
                 out << g.createLink(controller:'content', action:'notFound', params:[path:attrs[ATTR_PATH]])
@@ -374,7 +420,8 @@ class WeceemTagLib {
         } else if (title) {
             c = Content.findByTitle(title, params)
         } else if (path) {
-            c = contentRepositoryService.findContentForPath(path, request[ContentController.REQUEST_ATTRIBUTE_SPACE]).content
+            c = contentRepositoryService.findContentForPath(path, 
+                request[ContentController.REQUEST_ATTRIBUTE_SPACE])?.content
         } else throwTagError("One of [id], [title] or [path] must be specified")
         def var = attrs[ATTR_VAR] ?: null
 
@@ -390,13 +437,14 @@ class WeceemTagLib {
     }
     
     def createLinkToFile = { attrs ->
-        def space = request[ContentController.REQUEST_ATTRIBUTE_SPACE]
+        def space = attrs.space ? Space.findByAliasURI(attrs.space) : request[ContentController.REQUEST_ATTRIBUTE_SPACE]
+        if (!space) {throwTagError("Space ${attrs.space} not found")}
         if (!attrs[ATTR_PATH]) {
             throwTagError("Attribute [${ATTR_PATH}] must be specified, eg the path to the file: images/icon.png")
         }
         def aliasURI = space.aliasURI ?: ContentFile.EMPTY_ALIAS_URI
         
-        out << g.resource(dir:"WeceemFiles/${aliasURI}", file:attrs[ATTR_PATH])
+        out << g.resource(dir:"${ContentFile.DEFAULT_UPLOAD_DIR}/${aliasURI}", file:attrs[ATTR_PATH])
     }
 
     def humanDate = { attrs ->
@@ -470,12 +518,8 @@ class WeceemTagLib {
         def type = attrs[ATTR_TYPE]
         def id = attrs[ATTR_ID]
         def iconconf = type.icon
-        def isStandalone = CH.config.org.weceem.plugin.standalone
-        def env = grails.util.GrailsUtil.environment
-        def plugin = pluginManager.getGrailsPlugin(iconconf.plugin)
-        def pluginContextPath = isStandalone && (env == "development") ?
-         "${iconconf.dir}" : "${plugin?.getPluginPath()}/${iconconf.dir}"
-        out << "<div id='${id}' class='ui-content-icon'><img src='${g.resource(dir: pluginContextPath, file: iconconf.file)}'/></div>"
-    }
+        def plugin = iconconf.plugin
+        out << "<div id='${id}' class='ui-content-icon'><img src='${g.resource(plugin:plugin, dir: iconconf.dir, file: iconconf.file)}'/></div>"
+    }    
 
 }

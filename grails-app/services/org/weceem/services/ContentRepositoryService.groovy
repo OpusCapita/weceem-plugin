@@ -2,6 +2,7 @@ package org.weceem.services
 
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.codehaus.groovy.grails.web.context.ServletContextHolder as SCH
+import org.springframework.beans.factory.InitializingBean
 import grails.util.Environment
 // This is for a hack, remove later
 import org.codehaus.groovy.grails.web.metaclass.BindDynamicMethod
@@ -14,6 +15,8 @@ import org.weceem.html.*
 import org.weceem.wiki.*
 import org.weceem.files.*
 
+import org.weceem.security.*
+
 /**
  * ContentRepositoryService class provides methods for Content Repository tree
  * manipulations.
@@ -21,16 +24,23 @@ import org.weceem.files.*
  *
  * @author Sergei Shushkevich
  */
-class ContentRepositoryService {
+class ContentRepositoryService implements InitializingBean {
 
-    public static final String DEFAULT_UPLOAD_DIR = 'WeceemFiles'
     static final CONTENT_CLASS = Content.class.name
     static final STATUS_ANY_PUBLISHED = 'published'
     
+    static GSP_CONTENT_CLASSES = [ Template.class, Widget.class ]
+    static CACHE_NAME_GSP_CACHE = "gspCache"
+    static CACHE_NAME_URI_TO_CONTENT_ID = "uriToContentCache"
+    
     static transactional = true
 
+    def uriToIdCache
     def grailsApplication
     def importExportService
+    def cacheService
+    def groovyPagesTemplateEngine
+    def weceemSecurityService
     
     static DEFAULT_STATUSES = [
         [code:100, description:'draft', publicContent:false],
@@ -38,6 +48,11 @@ class ContentRepositoryService {
         [code:300, description:'approved', publicContent:false],
         [code:400, description:'published', publicContent:true]
     ]
+    
+    void afterPropertiesSet() {
+        uriToIdCache = cacheService.getCache(CACHE_NAME_URI_TO_CONTENT_ID)
+        assert uriToIdCache
+    }
     
     void createDefaultSpace() {
         if (Environment.current != Environment.TEST) {
@@ -56,12 +71,12 @@ class ContentRepositoryService {
     }
     
     List getAllPublicStatuses() {
-        Status.findAllByPublicContent(true)
+        Status.findAllByPublicContent(true, [cache:true])
     }
     
     Space findDefaultSpace() {
         def space
-        def spaces = Space.list()
+        def spaces = Space.list([cache:true])
         if (spaces) {
             space = spaces[0]
         }        
@@ -69,7 +84,7 @@ class ContentRepositoryService {
     }
     
     Space findSpaceByURI(String uri) {
-        Space.findByAliasURI(uri)
+        Space.findByAliasURI(uri, [cache:true])
     }
     
     Map resolveSpaceAndURI(String uri) {
@@ -132,9 +147,14 @@ class ContentRepositoryService {
     }
     
     Space createSpace(params) {
-        def s = new Space(params)
-        if (s.save()) {
-            importSpaceTemplate('default', s)
+        def s
+        Content.withTransaction { txn ->
+            s = new Space(params)
+            if (s.save()) {
+                importSpaceTemplate('default', s)
+            } else {
+                log.error "Unable to create space with properties: ${params} - errors occurred: ${s.errors}"
+            }
         }
         return s // If this fails we still return the original space so we can see errors
     }
@@ -164,7 +184,21 @@ class ContentRepositoryService {
         log.info "Successfully imported space template [${templateName}] into space [${space.name}]"
     }
     
-    void deleteSpaceContent(space) {
+    void requirePermissions(Space space, permissionList) throws AccessDeniedException {
+        if (!weceemSecurityService.hasPermissions(space, permissionList)) {
+            throw new AccessDeniedException("User [${weceemSecurityService.userName}] with roles [${weceemSecurityService.userRoles}] does not have the permissions [$permissionList] to access space [${space.name}]")
+        }
+    }       
+    
+    void requirePermissions(Content content, permissionList) throws AccessDeniedException {
+        if (!weceemSecurityService.hasPermissions(content, permissionList)) {
+            throw new AccessDeniedException("User [${weceemSecurityService.userName}] with roles [${weceemSecurityService.userRoles}] does not have the permissions [$permissionList] to access content at [${content.absoluteURI}] in space [${content.space.name}]")
+        }
+    }       
+
+    void deleteSpaceContent(Space space) {
+        requirePermissions(space, [WeceemSecurityPolicy.PERMISSION_ADMIN])        
+
         log.info "Deleting content from space [$space]"
         // Let's brute-force this
         // @todo remove/rework this for 0.2
@@ -189,10 +223,21 @@ class ContentRepositoryService {
     }
     
     void deleteSpace(Space space) {
+        requirePermissions(space, [WeceemSecurityPolicy.PERMISSION_ADMIN])        
+
         // Delete space content
         deleteSpaceContent(space)
         // Delete space
         space.delete(flush: true)
+    }
+
+    def getGSPTemplate(pageName, content) {
+        cacheService.getOrPutObject(CACHE_NAME_GSP_CACHE, pageName) {
+            if (log.debugEnabled) {
+                log.debug "Creating GSP template class for $pageName"
+            }
+            groovyPagesTemplateEngine.createTemplate(content, pageName)
+        }
     }
 
     /**
@@ -254,7 +299,8 @@ class ContentRepositoryService {
      * In the future, we may need more information for the nodes,
      * eg. incoming links
      */
-    Map getContentDetails(content) {
+    Map getContentDetails(Content content) {
+        requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_VIEW])        
         return [id: content.id, className: content.class.name,
                 title: content.title, createdBy: content.createdBy,
                 createdOn: content.createdOn, changedBy: content.changedBy,
@@ -269,7 +315,8 @@ class ContentRepositoryService {
      *
      * @param content
      */
-    Map getRelatedContent(content) {
+    Map getRelatedContent(Content content) {
+        requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_VIEW])        
         def result = [:]
         // @todo change to criteria/select
         result.parents = VirtualContent.findAllByTarget(content)*.parent
@@ -295,7 +342,8 @@ class ContentRepositoryService {
      *
      * @param content
      */
-    Map getRecentChanges(content) {
+    Map getRecentChanges(Content content) {
+        requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_VIEW])        
         def changes = ContentVersion.findAllByObjectKey(content.ident(),
                 [sort: 'revision', order: 'desc'])
         return [changes: changes]
@@ -321,6 +369,8 @@ class ContentRepositoryService {
      * @param parentContent
      */
     Boolean createNode(Content content, Content parentContent = null) {
+        requirePermissions(parentContent ?: content.space, [WeceemSecurityPolicy.PERMISSION_CREATE])        
+
         log.debug "Creating node: ${content.dump()}"
         if (parentContent == null) parentContent = content.parent
 
@@ -378,6 +428,8 @@ class ContentRepositoryService {
      * @param oldTitle
      */
     Boolean renameNode(Content content, oldTitle) {
+        requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_EDIT])        
+
         if (content.metaClass.respondsTo(content, 'rename', String)) {
             return content.rename(oldTitle)
         } else {
@@ -394,7 +446,11 @@ class ContentRepositoryService {
      * @param targetContent
      * @return new instance of VirtualContentNode or null if there were errors
      */
-    VirtualContent linkNode(sourceContent, targetContent, orderIndex) {
+    VirtualContent linkNode(Content sourceContent, Content targetContent, orderIndex) {
+        // Check they can create under the target
+        requirePermissions(targetContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
+        requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_VIEW])        
+
         if (sourceContent == null){
             return null
         }
@@ -439,6 +495,11 @@ class ContentRepositoryService {
      * @param targetContent
      */
     Boolean moveNode(Content sourceContent, Content targetContent, orderIndex) {
+        if (targetContent) {
+            requirePermissions(targetContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
+        }
+        requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_EDIT,WeceemSecurityPolicy.PERMISSION_VIEW])        
+
         if (!sourceContent) return false
         if (!targetContent){
             def criteria = Content.createCriteria()
@@ -481,6 +542,9 @@ class ContentRepositoryService {
      }
      
     def shiftNodeChildrenOrderIndex(parent = null, shiftedOrderIndex){
+        // Can't do this until space is supplied
+        //requirePermissions(parent, [WeceemSecurityPolicy.PERMISSION_EDIT])        
+
         def criteria = Content.createCriteria()
         def nodes = criteria {
             if (parent){
@@ -505,6 +569,8 @@ class ContentRepositoryService {
      * less ugly than forcing all references to be ContentRef(s) we decided.
      */
     ContentReference[] findReferencesTo(Content content) {
+        requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_VIEW])        
+        
         def results = [] 
         // @todo this will perform rather poorly. We should find all assocation properties FIRST
         // and then run a query for each association, which - with caching - should run a lot faster than
@@ -539,46 +605,45 @@ class ContentRepositoryService {
     Boolean deleteNode(Content sourceContent) {
         if (!sourceContent) return Boolean.FALSE
         
+        requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_DELETE])        
+        
         // Create a versioning entry
         sourceContent.saveRevision(sourceContent.title, sourceContent.space.name)
         
         if (sourceContent.metaClass.respondsTo(sourceContent, 'deleteContent')) {
-            if (sourceContent.deleteContent()) {
-                sourceContent.delete(flush: true)
-                return true
-            } else return false
-        } else {
-            def parent = sourceContent.parent
-
-            // if there is a parent  - we delete node from its association
-            if (parent) {
-                parent.children = parent.children.findAll{it-> it.id != sourceContent.id}
-                assert parent.save()
-            }
-
-            // we need to delete all virtual contents that reference sourceContent
-            def copies = VirtualContent.findAllWhere(target: sourceContent)
-            copies?.each() {
-               if (it.parent) {
-                   parent = Content.get(it.parent.id)
-                   parent.children.remove(it)
-               }
-               it.delete()
-            }
-
-            // delete node
-            
-            // @todo replace this with code that looks at all the properties for relationships
-            if (sourceContent.metaClass.hasProperty(sourceContent, 'template')?.type == Template) {
-                sourceContent.template = null
-            }
-            if (sourceContent.metaClass.hasProperty(sourceContent, 'target')?.type == Content) {
-                sourceContent.target = null
-            }
-            sourceContent.delete(flush: true)
-
-            return true
+            if (!sourceContent.deleteContent()) return false
         }
+
+        def parent = sourceContent.parent
+
+        // if there is a parent  - we delete node from its association
+        if (parent) {
+            parent.children = parent.children.findAll{it-> it.id != sourceContent.id}
+            assert parent.save()
+        }
+
+        // we need to delete all virtual contents that reference sourceContent
+        def copies = VirtualContent.findAllWhere(target: sourceContent)
+        copies?.each() {
+           if (it.parent) {
+               parent = Content.get(it.parent.id)
+               parent.children.remove(it)
+           }
+           it.delete()
+        }
+
+        // delete node
+        
+        // @todo replace this with code that looks at all the properties for relationships
+        if (sourceContent.metaClass.hasProperty(sourceContent, 'template')?.type == Template) {
+            sourceContent.template = null
+        }
+        if (sourceContent.metaClass.hasProperty(sourceContent, 'target')?.type == Content) {
+            sourceContent.target = null
+        }
+        sourceContent.delete(flush: true)
+
+        return true
     }
 
     /**
@@ -589,7 +654,10 @@ class ContentRepositoryService {
      * @param child
      * @param parent
      */
-    void deleteLink(child, parent) {
+    void deleteLink(Content child, Content parent) {
+        requirePermissions(parent, [WeceemSecurityPolicy.PERMISSION_EDIT])        
+        requirePermissions(child, [WeceemSecurityPolicy.PERMISSION_EDIT])        
+
         // remove child from association
         parent.children?.remove(child)
         parent.save()
@@ -611,8 +679,9 @@ class ContentRepositoryService {
     }
     
     def updateSpace(def id, def params){
-        
         def space = Space.get(id)
+        requirePermissions(space, [WeceemSecurityPolicy.PERMISSION_ADMIN])        
+
         if (space){
             def oldAliasURI = space.makeUploadName()
             hackedBindData(space, params)
@@ -636,7 +705,9 @@ class ContentRepositoryService {
      * @return a map containing an optional "errors" list property and optional notFound boolean property
      */
     def updateNode(String id, def params) {
-        def content = Content.get(id)
+        Content content = Content.get(id)
+        requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_EDIT])        
+
         if (content) {
             updateNode(content, params)
         } else {
@@ -650,11 +721,14 @@ class ContentRepositoryService {
     }
     
     def updateNode(Content content, def params) {
+        requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_EDIT])        
+
         // firstly we save revision: to prevent errors that we have 2 objects
         // in session with the same identifiers
         if (log.debugEnabled) {
             log.debug("Updating node with id ${content.id}, with parameters: $params")
         }
+        def oldAbsURI = content.absoluteURI
         content.saveRevision(params.title ?: content.title, params.space ? Space.get(params.'space.id')?.name : content.space.name)
         def oldTitle = content.title
         // map in new values
@@ -676,6 +750,9 @@ class ContentRepositoryService {
             if (log.debugEnabled) {
                 log.debug("Update node with id ${content.id} saved OK")
             }
+            if (GSP_CONTENT_CLASSES.contains(content.class)) {
+                cacheService.removeValue("gspCache", oldAbsURI)
+            }
             return [content:content]
         } else {
             if (log.debugEnabled) {
@@ -689,7 +766,9 @@ class ContentRepositoryService {
      * Count child nodes of a given node, where nodes match the type and status (if any) supplied in args
      * Very useful for rendering the number of published comments on an item, for example in blogs.
      */
-    def countChildren(sourceNode, Map args = null) {
+    def countChildren(Content sourceNode, Map args = null) {
+        requirePermissions(sourceNode, [WeceemSecurityPolicy.PERMISSION_VIEW])        
+
         // for VirtualContent - the children list is a list of target children
         if (sourceNode instanceof VirtualContent) {
             sourceNode = sourceNode.target
@@ -775,7 +854,10 @@ class ContentRepositoryService {
      * Find all the children of the specified node, within the content hierarchy, optionally filtering by a content type class
      * @todo we can probably improve performance by applying the typeRestriction using some HQL
      */ 
-    def findChildren(sourceNode, Map args = Collections.EMPTY_MAP) {
+    def findChildren(Content sourceNode, Map args = Collections.EMPTY_MAP) {
+        // @todo we also need to filter the result list by VIEW permission too!
+        assert sourceNode != null
+        requirePermissions(sourceNode, [WeceemSecurityPolicy.PERMISSION_VIEW])        
         
         // for VirtualContent - the children list is a list of target children
         if (sourceNode instanceof VirtualContent) {
@@ -790,6 +872,7 @@ class ContentRepositoryService {
             } else {
                 eq('parent', sourceNode)
             }
+            cache true
         }
         
         return children //  sortNodes(children, params?.sort, params?.order)
@@ -847,7 +930,9 @@ class ContentRepositoryService {
      * Find all the parents of the specified node, within the content hierarchy, optionally filtering by status and a content type class
      * @todo we can probably improve performance by applying the typeRestriction using some HQL
      */ 
-    def findParents(sourceNode, Map args = Collections.EMPTY_MAP) {
+    def findParents(Content sourceNode, Map args = Collections.EMPTY_MAP) {
+        requirePermissions(sourceNode, [WeceemSecurityPolicy.PERMISSION_VIEW])        
+
         // @todo change to criteria/select
         def references = (doCriteria(VirtualContent, args.status, Collections.EMPTY_MAP) {
             eq('target', sourceNode) 
@@ -879,17 +964,27 @@ class ContentRepositoryService {
             eq('aliasURI', aliasURI)
             eq('space', space)
             maxResults(1)
+            cache true
         }
-        return r ? r[0] : null
+        Content node = r ? r[0] : null
+        if (node) {
+            requirePermissions(node, [WeceemSecurityPolicy.PERMISSION_VIEW])        
+        }
+        return node
     }
     
     /**
      * find all root nodes by type and space
      */ 
     def findAllRootContent(Space space, Map args = Collections.EMPTY_MAP) {
+        requirePermissions(space, [WeceemSecurityPolicy.PERMISSION_VIEW])        
+        if (log.debugEnabled) {
+            log.debug "findAllRootContent $space, $args"
+        }
         doCriteria(getContentClassForType(args.type), args.status, args.params) {
             isNull('parent')
             eq('space', space)
+            cache true
         }
     }
     
@@ -907,21 +1002,56 @@ class ContentRepositoryService {
      * @return a map of 'content' (the node), 'lineage' (list of parent Content nodes to reach the node) 
      * and 'parentURI' (the uri to the parent of this instance of the node)
      */
-    def findContentForPath(String uriPath, Space space) {
-        log.debug "findContentForPath uri: ${uriPath} space: ${space}"
+    def findContentForPath(String uriPath, Space space, boolean useCache = true) {
+        if (log.debugEnabled) {
+            log.debug "findContentForPath uri: ${uriPath} space: ${space}"
+        }
+
+        if (useCache) {
+            // This looks up the uriPath in the cache to see if we can get a Map of the content id and parentURI
+            // If we call getValue on the cache hit, we lose 50% of our performance. Just retrieving
+            // the cache hit is not expensive.
+            def cachedElement = uriToIdCache.get(space.aliasURI+':'+uriPath)
+            def cachedContentInfo = cachedElement?.getValue()
+            if (cachedContentInfo) {
+                if (log.debugEnabled) {
+                    log.debug "Found content info into cache for uri $uriPath: ${cachedContentInfo}"
+                }
+                // @todo will this break with different table mapping strategy eg multiple ids of "1" with separate tables?
+                Content c = Content.get(cachedContentInfo.id)
+                // @todo re-load the lineage objects here, currently they are ids!
+                def reloadedLineage = cachedContentInfo.lineage?.collect { l_id ->
+                    Content.get(l_id)
+                }
+                if (log.debugEnabled) {
+                    log.debug "Reconstituted lineage from cache for uri $uriPath: ${reloadedLineage}"
+                }
+                if (c) {
+                    requirePermissions(c, [WeceemSecurityPolicy.PERMISSION_VIEW])        
+                }
+            
+                return c ? [content:c, parentURI:cachedContentInfo.parentURI, lineage:reloadedLineage] : null
+            }   
+        }
+        
         def tokens = uriPath.split('/')
 
         // @todo: optimize query 
-        def content = findRootContentByURI(tokens[0], space)
+        Content content = findRootContentByURI(tokens[0], space)
         if (!content) content = findFileRootContentByURI(tokens[0], space)
-        log.debug "findContentForPath $uriPath - root content node is $content"
+        if (log.debugEnabled) {
+            log.debug "findContentForPath $uriPath - root content node is $content"
+        }
+        
         def lineage = [content]
         if (content && (tokens.size() > 1)) {
             for (n in 1..tokens.size()-1) {
                 def child = Content.find("""from Content c \
                         where c.parent = ? and c.aliasURI = ?""",
                         [content, tokens[n]])
-                log.debug "findContentForPath $uriPath - found child $child for path token ${tokens[n]}"
+                if (log.debugEnabled) {
+                    log.debug "findContentForPath $uriPath - found child $child for path token ${tokens[n]}"
+                }
                 if (child) {
                     lineage << child
                     content = child
@@ -939,7 +1069,28 @@ class ContentRepositoryService {
             parentURIParts = tokens[0..tokens.size()-2]
         }
 
-        return [content:content, parentURI:parentURIParts.join('/'), lineage:lineage]
+        def parentURI = parentURIParts.join('/')
+
+        // Cache this resolution - found or not
+        // This MUST be a new map otherwise we have immutability problems
+        // Don't writer lineage if the result was null
+        def cacheValue = [id:content?.id, 
+          parentURI:parentURI, lineage: content ? (lineage.collect { l -> l.id }).toArray() : null]
+        
+        if (log.debugEnabled) {
+            log.debug "Caching content info for uri $uriPath: $cacheValue"
+        }
+        if (useCache) {
+            cacheService.putToCache(uriToIdCache, space.aliasURI+':'+uriPath, cacheValue)
+        }
+        
+        if (content) {
+            requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_VIEW])        
+
+            [content:content, parentURI:parentURI, lineage:lineage]
+        } else {
+            return null
+        }
     }
     
     def findFileRootContentByURI(String aliasURI, Space space, Map args = Collections.EMPTY_MAP) {
@@ -951,7 +1102,11 @@ class ContentRepositoryService {
             eq('space', space)
         }
         def res = r?.findAll(){it-> (it.parent == null) || !(it.parent instanceof ContentFile)}
-        return res ? res[0] : null
+        Content result = res ? res[0] : null
+        if (result) {
+            requirePermissions(result, [WeceemSecurityPolicy.PERMISSION_VIEW])        
+        }
+        return result
     }
     
     def getAncestors(uri, sourceNode) {
@@ -973,6 +1128,8 @@ class ContentRepositoryService {
      * @param space - space to synchronize
     **/
     def synchronizeSpace(space) {
+        requirePermissions(space, [WeceemSecurityPolicy.PERMISSION_ADMIN])        
+
         def existingFiles = new TreeSet()
         def createdContent = []
         def spaceDir = grailsApplication.parentContext.getResource(
@@ -981,11 +1138,11 @@ class ContentRepositoryService {
         spaceDir.eachFileRecurse {file ->
             def relativePath = file.absolutePath.substring(
                     spaceDir.absolutePath.size() + 1)
-            def content = findContentForPath(relativePath, space).content
+            def content = findContentForPath(relativePath, space, false)?.content
             //if content wasn't found then create new
             if (!content){
                 createdContent += createContentFile("${spaceDir.name}/${relativePath}")
-                content = findContentForPath(relativePath, space).content
+                content = findContentForPath(relativePath, space, false)?.content
                 while (content){
                     existingFiles << content
                     content = content.parent
@@ -1009,6 +1166,10 @@ class ContentRepositoryService {
      * @param path
      */
     def createContentFile(path) {
+        if (log.debugEnabled) {
+            log.debug "Creating content node for server file at [$path]"
+        }
+        
         List tokens = path.replace('\\', '/').split('/')
         if (tokens.size() > 1) {
             def space = Space.findByAliasURI((tokens[0] == ContentFile.EMPTY_ALIAS_URI) ? '' : tokens[0])
@@ -1020,7 +1181,7 @@ class ContentRepositoryService {
                 def parentPath = "${parents[0..i].join('/')}"
                 def file = grailsApplication.parentContext.getResource(
                         "${ContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/${parentPath}").file
-                content = findContentForPath(parentPath, space).content
+                content = findContentForPath(parentPath, space)?.content
                 if (!content){
                     if (file.isDirectory()){
                         content = new ContentDirectory(title: file.name,
@@ -1034,10 +1195,13 @@ class ContentRepositoryService {
                             status: Status.findByPublicContent(true))
                     }
                     content.createAliasURI()
-                    if (!content.save()){
-                        println content.errors
+
+                    requirePermissions(content.parent ?: space, [WeceemSecurityPolicy.PERMISSION_CREATE])        
+
+                    if (!content.save()) {
+                        log.error "Failed to save content ${content} - errors: ${content.errors}"
                         assert false
-                    }else{
+                    } else {
                         createdContent << content
                     }
                 }
@@ -1046,8 +1210,17 @@ class ContentRepositoryService {
                     ancestor.children << content
                     if (ancestor instanceof ContentDirectory)
                         ancestor.filesCount += 1
+                    if (log.debugEnabled) {
+                        log.debug "Updated parent node of new file node [${ancestor.dump()}]"
+                    }
                     assert ancestor.save(flush: true)
                     content.parent = ancestor
+                    if (log.debugEnabled) {
+                        log.debug "Saving content node of new file node [${content.dump()}]"
+                    }
+                    if (log.debugEnabled && !content.validate()) {
+                        log.debug "Saving content node of new file node is about to fail. Node: [${content.dump()}], Errors: [${content.errors}]"
+                    }
                     assert content.save(flush: true)
                 }
                 ancestor = content

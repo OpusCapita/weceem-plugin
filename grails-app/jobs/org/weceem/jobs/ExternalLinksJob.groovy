@@ -36,7 +36,6 @@ class ExternalLinksJob {
     def timeout = DateUtils.MILLIS_PER_HOUR*6
 
     def execute(){
-        println "Check external links"
 
         RelatedContent.findAllWhere("isInternal": false).each() {
             // open connection to external link
@@ -48,9 +47,7 @@ class ExternalLinksJob {
                 def code = connection.responseCode
                 // ?? code value can be stored in status field
                 it.status = "worked"
-                println "Response code for link $it.toContent: $code"
             } catch (UnknownHostException) {
-                println ("Unknown Host for link: "+it.toContent)
                 it.status = "unknownHost"
             }
             it.lastCheckedOn = new Date()

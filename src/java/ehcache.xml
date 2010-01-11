@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="ehcache.xsd"
+             updateCheck="true" monitoring="autodetect">
+
+    <defaultCache
+         maxElementsInMemory="10000"
+         eternal="false"
+         timeToIdleSeconds="1800"
+         timeToLiveSeconds="6000"
+         overflowToDisk="false"
+         memoryStoreEvictionPolicy="LRU"
+         />
+         
+     <cache name="gspCache"
+         maxElementsInMemory="5000"
+         eternal="false"
+         timeToIdleSeconds="3600"
+         timeToLiveSeconds="3600"
+         overflowToDisk="false"
+         memoryStoreEvictionPolicy="LFU"/>
+
+     <cache name="uriToContentCache"
+         maxElementsInMemory="1000"
+         eternal="false"
+         timeToIdleSeconds="3600"
+         timeToLiveSeconds="3600"
+         overflowToDisk="false"
+         memoryStoreEvictionPolicy="LFU"/>
+
+     <cache name="contentCache"
+         maxElementsInMemory="1000"
+         eternal="false"
+         timeToIdleSeconds="3600"
+         timeToLiveSeconds="3600"
+         overflowToDisk="false"
+         memoryStoreEvictionPolicy="LFU"/>
+     
+     <!-- For immutable constants/pre-prepared data only -->
+     <cache name="eternalCache"
+            maxElementsInMemory="10000"
+            eternal="true"
+            overflowToDisk="false"/>
+</ehcache>
