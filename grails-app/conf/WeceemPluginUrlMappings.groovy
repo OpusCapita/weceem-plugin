@@ -40,7 +40,8 @@ class WeceemPluginUrlMappings {
         delegate.(adminURI+"/space/$action?/$id?")(controller: 'space')
 
         // This is tricky
-        def contentURI = "/${WeceemPluginUrlMappings.CONTENT_PREFIX}/$uri**"
+        def contentURI = (WeceemPluginUrlMappings.CONTENT_PREFIX ? '/' : '')+"${WeceemPluginUrlMappings.CONTENT_PREFIX}/$uri**"
+        
         invokeMethod(contentURI, {
             controller = "content"
             action = "show"
