@@ -5,6 +5,9 @@ grails.views.gsp.encoding="UTF-8"
 
 org.weceem.plugin.standalone="true"
 
+//weceem.content.prefix="mycontent"
+//weceem.admin.prefix="cms"
+
 log4j = {
     root {
         info 'stdout'
@@ -14,7 +17,9 @@ log4j = {
 	       'org.codehaus.groovy.grails.web.pages' //  GSP
     info   'grails.app'
 
-    debug  'grails.app.service'
+    debug  'grails.app.service',
+            'org.codehaus.groovy.grails.web.mapping' // URL mapping
+    
 }
 
 environments {
