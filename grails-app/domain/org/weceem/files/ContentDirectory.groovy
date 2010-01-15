@@ -19,7 +19,7 @@ class ContentDirectory extends ContentFile {
     Boolean create(Content parentContent) {
         def f
         if (parentContent && (parentContent instanceof ContentDirectory)) {
-            def path = getPath(parentContent)
+            def path = getPathTo(parentContent)
             def p = ServletContextHolder.servletContext.getRealPath(
                 "/${ContentFile.DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}${path}/${title}")
             log.debug "Creating directory path [$p]"
@@ -44,9 +44,17 @@ class ContentDirectory extends ContentFile {
         uploadedFile(hidden:true)
     }
 
+    // Deny access
+    static handleRequest = { content ->
+        request.accessDeniedMessage = "Directory browsing not allowed"
+        response.sendError(403, "Directory browsing not allowed")
+        return null
+    }
+     
+     
     // we need to delete all content children here (recursively)
     Boolean deleteContent() {
-        def path = getPath(this.parent)
+        def path = getPathTo(this.parent)
         def file = new File(ServletContextHolder.servletContext.getRealPath(
                 "/${DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}${path}/${title}"))
         if (!file.exists()) return true

@@ -50,7 +50,7 @@ class HTMLContent extends Content {
         return r
     }
     
-    String getMimeType() { "text/html" }
+    String getMimeType() { "text/html" } // @todo we probably need to allow inclusion of charset
 
     static constraints = {
         content(nullable: false, maxSize: 65536)

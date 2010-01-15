@@ -158,8 +158,16 @@ class ContentController {
         }
     }
     
-    def showById = {
-        
+    def renderFile(File f) {
+        throw new RuntimeException("Not implemented yet")
+    }
+    
+    /**
+     * Use the servlet container to return the file - more optimal
+     */
+    def renderAppResource(String path) {
+        request.getRequestDispatcher(path).forward(request, response)
+        return null
     }
     
     def notFound = {
