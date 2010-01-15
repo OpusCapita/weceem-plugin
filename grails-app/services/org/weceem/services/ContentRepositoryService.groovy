@@ -146,12 +146,14 @@ class ContentRepositoryService implements InitializingBean {
         [space:space, uri:uri]
     }
     
-    Space createSpace(params) {
+    Space createSpace(params, templateName = 'default') {
         def s
         Content.withTransaction { txn ->
             s = new Space(params)
             if (s.save()) {
-                importSpaceTemplate('default', s)
+                if (templateName) {
+                    importSpaceTemplate('default', s)
+                }
             } else {
                 log.error "Unable to create space with properties: ${params} - errors occurred: ${s.errors}"
             }
