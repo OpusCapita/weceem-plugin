@@ -133,6 +133,7 @@ class EditorService {
         editorInfo[cls.name] ?: Collections.EMPTY_LIST
     }
     
+    // @todo This should definitely not be here.
     def configureFCKEditor(){
         def settings = ConfigurationHolder.config
         def co = new ConfigObject()

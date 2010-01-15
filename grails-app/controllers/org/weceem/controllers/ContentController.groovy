@@ -90,55 +90,58 @@ class ContentController {
                     request[REQUEST_ATTRIBUTE_PAGE] = pageInfo
                     request[REQUEST_ATTRIBUTE_SPACE] = space
 
-                    // See if there is a controller specific to this content type
-                    // @todo change this to get the name of the renderer from domain class static convention
-                    def renderControllerClass = grailsApplication.getControllerClass("${content.class.name}Render")
-                    if (renderControllerClass) {
-                        def renderController = renderControllerClass.newInstance()
-                        // @todo this is flawed, eg a Wiki render controller has to handle templating itself currently/
-                        // We should capture the output of the response as text, although that limits to text,
-                        // or better provide a util function for rendering the content inside a template 
-                        return renderController.show()
-                    } else {
-                    
-                        def contentText
-                        if (content.metaClass.hasProperty(content, 'content')) {
-                            contentText = content.content
-                            pageInfo.text = contentText
-                    
-                            log.debug "Content is: $contentText"
+                    // See if the content will handle rendering itself
+                    def contentClass = content.class
+                    if (contentClass.metaClass.hasProperty(contentClass, 'handleRequest')) {
+                        if (log.debugEnabled) {
+                            log.debug "Content of type ${contentClass} at uri ${params.uri} is handling its own rendering"
+                            
+                            assert contentClass.handleRequest instanceof Closure
                         }
-                    
-                        def template = contentRepositoryService.getTemplateForContent(content)
-                        log.debug "Content's template is: $template"
-
-                        if (!template) {
-                            if (contentText != null) {
-                                // todo: what need to be rendered?
-                                log.debug "Rendering content of type [${content.mimeType}] without template: $contentText"
-                                // @todo This needs to handle ContentFile/ContentDirectory requests and pipe them through request dispatcher
-                                render(text:contentText, contentType:content.mimeType)
-                            } else {
-                                response.sendError(500, "Unable to render content at ${uri}, no content property and no template defined")
-                            }
-                            return
-                        }
-                
-                        Writer out = GSPResponseWriter.getInstance(response, 65536)
-                        GrailsWebRequest webRequest = (GrailsWebRequest) RequestContextHolder.currentRequestAttributes()
-                        webRequest.setOut(out)
-                        def groovyTemplate = contentRepositoryService.getGSPTemplate(template.absoluteURI, template.content)
-                
-                        // Pass in the content so it can be rendered in the template
-                        def preparedContent = groovyTemplate?.make([user: activeUser, node: content, page:pageInfo, space:space])
-                        if (preparedContent)  {
-                           preparedContent.writeTo(out)
-                        }
-
-                        out.flush()
-                        webRequest.renderView = false
-                        return null
+                        
+                        def handler = contentClass.handleRequest.clone()
+                        handler.delegate = this
+                        handler.resolveStrategy = Closure.DELEGATE_FIRST
+                        return handler.call(content)
                     }
+
+                    def contentText
+                    if (content.metaClass.hasProperty(content, 'content')) {
+                        contentText = content.content
+                        pageInfo.text = contentText
+                
+                        log.debug "Content is: $contentText"
+                    }
+                
+                    def template = contentRepositoryService.getTemplateForContent(content)
+                    log.debug "Content's template is: $template"
+
+                    if (!template) {
+                        if (contentText != null) {
+                            // todo: what need to be rendered?
+                            log.debug "Rendering content of type [${content.mimeType}] without template: $contentText"
+                            // @todo This needs to handle ContentFile/ContentDirectory requests and pipe them through request dispatcher
+                            render(text:contentText, contentType:content.mimeType)
+                        } else {
+                            response.sendError(500, "Unable to render content at ${uri}, no content property and no template defined")
+                        }
+                        return
+                    }
+            
+                    Writer out = GSPResponseWriter.getInstance(response, 65536)
+                    GrailsWebRequest webRequest = (GrailsWebRequest) RequestContextHolder.currentRequestAttributes()
+                    webRequest.setOut(out)
+                    def groovyTemplate = contentRepositoryService.getGSPTemplate(template.absoluteURI, template.content)
+            
+                    // Pass in the content so it can be rendered in the template
+                    def preparedContent = groovyTemplate?.make([user: activeUser, node: content, page:pageInfo, space:space])
+                    if (preparedContent)  {
+                       preparedContent.writeTo(out)
+                    }
+
+                    out.flush()
+                    webRequest.renderView = false
+                    return null
                 
                 } else {
                     response.sendError 404, "No content found for this URI"

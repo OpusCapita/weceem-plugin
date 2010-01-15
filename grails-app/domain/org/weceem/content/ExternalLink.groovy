@@ -13,6 +13,10 @@ class ExternalLink extends Content {
     String description
 
     String getVersioningContent() { url }
+    
+    static handleRequest = { content ->
+        redirect(url:content.url)
+    }
 
     Map getVersioningProperties() { 
         def r = super.getVersioningProperties() + [ 
