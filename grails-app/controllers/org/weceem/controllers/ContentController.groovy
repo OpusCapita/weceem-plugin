@@ -90,6 +90,11 @@ class ContentController {
                     request[REQUEST_ATTRIBUTE_PAGE] = pageInfo
                     request[REQUEST_ATTRIBUTE_SPACE] = space
 
+                    // Set mime type if there is one
+                    if (content.mimeType) {
+                        response.setContentType(content.mimeType)
+                    }
+
                     // See if the content will handle rendering itself
                     def contentClass = content.class
                     if (contentClass.metaClass.hasProperty(contentClass, 'handleRequest')) {
@@ -149,10 +154,6 @@ class ContentController {
             return
         }
 
-        if (content.mimeType) {
-            reponse.setContentType(content.mimeType)
-        }
-        
         Writer out = GSPResponseWriter.getInstance(response, 65536)
         GrailsWebRequest webRequest = (GrailsWebRequest) RequestContextHolder.currentRequestAttributes()
         webRequest.setOut(out)
