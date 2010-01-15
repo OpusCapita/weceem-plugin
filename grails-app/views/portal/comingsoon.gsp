@@ -1,6 +1,6 @@
 <html>
   <head>
-    <meta name="layout" content="admin"/>
+    <meta name="layout" content="${wcm.adminLayout().toString()}"/>
     <title>This feature is coming soon</title>
   </head>
 

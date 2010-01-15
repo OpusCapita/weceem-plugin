@@ -1,6 +1,6 @@
 <html>
   <head>
-    <meta name="layout" content="admin"/>
+    <meta name="layout" content="${wcm.adminLayout().toString()}"/>
     <title><g:message code="synchronization.title"/></title>
   </head>
   <body>

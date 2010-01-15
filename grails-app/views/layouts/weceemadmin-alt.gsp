@@ -14,6 +14,7 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
   <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title><g:layoutTitle default="Weceem"/></title>
     <link rel="shortcut icon" href="${resource(dir:'_weceem/images/favicon.ico')}"/>
 
@@ -42,15 +43,9 @@
   <body onload="${pageProperty(name:'body.onload')}" class="${pageProperty(name:'body.class')}">
   
   <div class="container">
-    <g:if test="${!params.externalCall}">
-        <g:render plugin="weceem" template="/layouts/main/header"/>
-    </g:if>
+    <h1>Alternative Admin UI</h1>
   
     <g:layoutBody/>
-    
-    <g:if test="${!params.externalCall}">
-        <g:render plugin="weceem" template="/layouts/main/footer"/>
-    </g:if>
   </div>
   
   </body>

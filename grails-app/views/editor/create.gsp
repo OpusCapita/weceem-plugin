@@ -1,7 +1,6 @@
 <html>
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <meta name="layout" content="admin"/>
+    <meta name="layout" content="${wcm.adminLayout().toString()}"/>
     <title>Create new content</title>
     <g:render template="editor_head" plugin="weceem"/>
   </head>

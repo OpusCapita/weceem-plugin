@@ -1,6 +1,6 @@
 <html>
 <head >
-	<meta name="layout" content="admin"/>
+	<meta name="layout" content="${wcm.adminLayout().toString()}"/>
 	<title>Weceem - ${space.name.encodeAsHTML()}</title>
 	<script type="text/javascript" src="${g.resource(dir: '_weceem/js/treeTable/javascripts', file:'jquery.treeTable.js')}"></script>
 	<script type="text/javascript" src="${g.resource(dir: '_weceem/js/treeTable/javascripts/', file:'core.treeTable.js')}"></script>

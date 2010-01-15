@@ -1,6 +1,6 @@
 <html>
   <head>
-    <meta name="layout" content="admin"/>
+    <meta name="layout" content="${wcm.adminLayout().toString()}"/>
     <title><g:message code="contentVersion.title.list"/></title>
     <link href="${createLinkTo(dir:pluginContextPath + '/js/dijit/themes/tundra', file: 'tundra.css')}" media="screen" rel="stylesheet"
         type="text/css"/>

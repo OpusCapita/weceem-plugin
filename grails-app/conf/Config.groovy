@@ -7,6 +7,7 @@ org.weceem.plugin.standalone="true"
 
 //weceem.content.prefix="mycontent"
 //weceem.admin.prefix="cms"
+//weceem.admin.layout="weceemadmin-alt"
 
 log4j = {
     root {

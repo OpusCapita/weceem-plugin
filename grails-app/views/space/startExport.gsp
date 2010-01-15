@@ -1,6 +1,6 @@
 <html>
   <head>
-    <meta name="layout" content="admin"/>
+    <meta name="layout" content="${wcm.adminLayout().toString()}"/>
     <meta http-equiv="Refresh" content="1;URL=${createLink(action: 'performExport', params: params)}">
     <title><g:message code="space.title.export"/></title>
   </head>
