@@ -16,6 +16,10 @@ class EditorFieldTagLib {
         out << bean.input(beanName:'content', property:attrs.property, noLabel:true)
     }
 
+    def editorFieldBoolean = { attrs ->
+        out << bean.checkBox(beanName:'content', property:attrs.property, noLabel:true)
+    }
+
     def editorFieldTitle = { attrs ->
         out << bean.input(beanName:'content', property:attrs.property, noLabel:true, 'class':"big")
     }
