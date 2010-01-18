@@ -38,28 +38,29 @@ class EditorService {
         
     }
 
-    void cachePropertyInfo(Class cls) {
+    void cachePropertyInfo(final Class cls) {
         if (!cls.metaClass.hasProperty(cls, 'editors')) return
         
         assert Content.isAssignableFrom(cls)
 
         def ancestorChain = [cls]
-        while (cls.superclass && (cls.superclass != Object)) {
-            ancestorChain.push(cls.superclass)
-            cls = cls.superclass
+        Class currentClass = cls
+        while (currentClass.superclass && (currentClass.superclass != Object)) {
+            ancestorChain.push(currentClass.superclass)
+            currentClass = currentClass.superclass
         }
 
         def data = []
 
         while (ancestorChain) {
-            cls = ancestorChain.pop()
-            if (cls.metaClass.hasProperty(cls, 'editors')) {
-                def superClassInfo = editorInfo[cls.name]
+            currentClass = ancestorChain.pop()
+            if (currentClass.metaClass.hasProperty(currentClass, 'editors')) {
+                def superClassInfo = editorInfo[currentClass.name]
                 if (!superClassInfo) {
-                    log.debug "Parsing editors property on $cls"
+                    log.debug "Parsing editors property on $currentClass descendent of $cls"
                     
-                    def config = evaluateEditors(cls)
-                    log.debug "Found CMS config info on $cls: $config"
+                    def config = evaluateEditors(currentClass)
+                    log.debug "Found CMS config info on $currentClass descendent of $cls: $config"
                     config.each { clsPropInfo -> 
                         //if (!data.find( { clsPropInfo.property == it.property})) {
                         def existing = data.find( { clsPropInfo.property == it.property})
