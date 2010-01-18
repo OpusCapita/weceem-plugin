@@ -28,6 +28,8 @@ class Template extends Content {
         only = ['content']
     }
     
+    static standaloneContent = false
+    
     // 64Kb Unicode text with HTML/GSP Markup
     String content
 

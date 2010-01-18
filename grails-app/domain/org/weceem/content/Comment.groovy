@@ -27,6 +27,8 @@ class Comment extends Content {
     String websiteUrl
     String content
     
+    static standaloneContent = false
+    
     static constraints = {
         author(maxSize:80, blank: false, nullable: false)
         email(email:true, maxSize:80, blank: false, nullable: false)

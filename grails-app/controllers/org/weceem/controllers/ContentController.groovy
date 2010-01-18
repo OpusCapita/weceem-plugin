@@ -84,6 +84,18 @@ class ContentController {
         			    titleForMenu: content.titleForMenu
         			]
 
+                    def contentClass = content.class
+
+                    // See if it is renderable directly - eg Widget and Template are not renderable on their own
+                    if (contentClass.metaClass.hasProperty(contentClass, 'standaloneContent')) {
+                        def canRender = contentClass.standaloneContent
+                        if (!canRender) {
+                            log.warn "Request for [${params.uri}] resulted in content node that is not standalone and cannot be rendered directly"
+                            response.sendError(406 /* Not acceptable */, "Content is not intended for rendering")
+                            return null
+                        }
+                    }
+                    
                     // Make this available to the rest of the request chain
                     request[REQUEST_ATTRIBUTE_NODE] = content
                     request[REQUEST_ATTRIBUTE_USER] = activeUser
@@ -96,7 +108,6 @@ class ContentController {
                     }
 
                     // See if the content will handle rendering itself
-                    def contentClass = content.class
                     if (contentClass.metaClass.hasProperty(contentClass, 'handleRequest')) {
                         if (log.debugEnabled) {
                             log.debug "Content of type ${contentClass} at uri ${params.uri} is handling its own rendering"

@@ -7,4 +7,5 @@ class Folder extends Content {
 
     static transients = Content.transients
 
+    static standaloneContent = false
 }

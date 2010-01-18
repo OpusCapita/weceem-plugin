@@ -30,6 +30,8 @@ package org.weceem.content
  */
 class Widget extends Content {
 
+    static standaloneContent = false
+
     Integer width
     Integer height
     Integer color
