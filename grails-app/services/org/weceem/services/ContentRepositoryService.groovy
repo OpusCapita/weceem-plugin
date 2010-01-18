@@ -29,13 +29,14 @@ class ContentRepositoryService implements InitializingBean {
     static final CONTENT_CLASS = Content.class.name
     static final STATUS_ANY_PUBLISHED = 'published'
     
-    static GSP_CONTENT_CLASSES = [ Template.class, Widget.class ]
     static CACHE_NAME_GSP_CACHE = "gspCache"
     static CACHE_NAME_URI_TO_CONTENT_ID = "uriToContentCache"
     
     static transactional = true
 
     def uriToIdCache
+    def gspClassCache
+    
     def grailsApplication
     def importExportService
     def cacheService
@@ -52,6 +53,8 @@ class ContentRepositoryService implements InitializingBean {
     void afterPropertiesSet() {
         uriToIdCache = cacheService.getCache(CACHE_NAME_URI_TO_CONTENT_ID)
         assert uriToIdCache
+        gspClassCache =  cacheService.getCache(CACHE_NAME_GSP_CACHE)
+        assert gspClassCache
     }
     
     void createDefaultSpace() {
@@ -752,8 +755,9 @@ class ContentRepositoryService implements InitializingBean {
             if (log.debugEnabled) {
                 log.debug("Update node with id ${content.id} saved OK")
             }
-            if (GSP_CONTENT_CLASSES.contains(content.class)) {
-                cacheService.removeValue("gspCache", oldAbsURI)
+            // If this was content that created a cached GSP class, clear it now
+            if (gspClassCache.isKeyInCache(oldAbsURI)) {
+                gspClassCache.remove(oldAbsURI)
             }
             return [content:content]
         } else {

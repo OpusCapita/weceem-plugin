@@ -429,9 +429,10 @@ class WeceemTagLib {
     }
     
     def content = { attrs, body ->
-        // If null codec, default to HTML, but blank string codec means no encoding takes place
         def codec = attrs.codec
-        def text = request[ContentController.REQUEST_ATTRIBUTE_NODE]?.content
+        // See if there is pre-rendered content, if so use that
+        def text = request[ContentController.REQUEST_PRERENDERED_CONTENT] ?: 
+            request[ContentController.REQUEST_ATTRIBUTE_NODE]?.content
         def content = codec ? text."encodeAs$codec"() : text 
         out << content
     }

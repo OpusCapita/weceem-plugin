@@ -29,6 +29,8 @@ class ContentController {
     static String REQUEST_ATTRIBUTE_USER = "weceem.user"
     static String REQUEST_ATTRIBUTE_NODE = "weceem.node"
     static String REQUEST_ATTRIBUTE_SPACE = "weceem.space"
+    static String REQUEST_PRERENDERED_CONTENT = "weceem.prerendered.content"
+    
     static CACHE_NAME_TEMPLATE_CACHE = "gspCache"
     
     def contentRepositoryService
@@ -139,6 +141,63 @@ class ContentController {
         }
     }
     
+    def evaluateGSPContent(Content content, model) {
+        def groovyTemplate = contentRepositoryService.getGSPTemplate(content.absoluteURI, content.content)
+        return groovyTemplate?.make(model)
+    }
+    
+    /**
+     * Render a content node with support for GSP tags and template
+     *
+     * Works in one of two ways:
+     * 1. If content node is a template, evaluates the template and passes in model, presumed to contain "node" for for content
+     * 2. If content node is not a template, evaluats the content as a GSP, then passes it as pre-rendered body content
+     * to the template of "content" if there is one.
+     */
+    void renderGSPContent(Content content, model = null) {
+        if (model == null) {
+            model = [:]
+        }
+        model.user = request[REQUEST_ATTRIBUTE_USER]
+        model.page = request[REQUEST_ATTRIBUTE_PAGE]
+        model.space = request[REQUEST_ATTRIBUTE_SPACE]
+        // Prepare the existing output stream
+        Writer out = GSPResponseWriter.getInstance(response, 65536)
+        GrailsWebRequest webRequest = (GrailsWebRequest) RequestContextHolder.currentRequestAttributes()
+        webRequest.setOut(out)
+
+        boolean isTemplate = content instanceof Template
+        
+        if (isTemplate) {
+            // Pass in the content so it can be rendered in the template by wcm:content
+            request[REQUEST_ATTRIBUTE_NODE] = model.node
+        } else {
+            request[REQUEST_PRERENDERED_CONTENT] = evaluateGSPContent(content, model)
+            request[REQUEST_ATTRIBUTE_NODE] = content
+            model.node = content
+        }
+        
+
+        // See if there is a template for the content
+        def template = isTemplate ? content : contentRepositoryService.getTemplateForContent(content)
+        if (template) {
+            def templatedContent = evaluateGSPContent(template, model)
+            templatedContent.writeTo(out)
+        } else {
+            out << request[REQUEST_PRERENDERED_CONTENT]
+        }
+
+        // flush the existing output stream
+        out.flush()
+        webRequest.renderView = false
+        return
+    }
+
+    /** 
+     * Render the content using our convention based approach
+     * If the content has a template, it is passed to the template for rendering as the "node" variable in the model
+     * If the content has no template, if it has a content property it will be rendered verbatim to the client
+     */     
     def renderContent(Content content) {
         
         def pageInfo = request[REQUEST_ATTRIBUTE_PAGE]
@@ -164,25 +223,9 @@ class ContentController {
             }
             return
         }
-
-        Writer out = GSPResponseWriter.getInstance(response, 65536)
-        GrailsWebRequest webRequest = (GrailsWebRequest) RequestContextHolder.currentRequestAttributes()
-        webRequest.setOut(out)
-        def groovyTemplate = contentRepositoryService.getGSPTemplate(template.absoluteURI, template.content)
-
-        // Pass in the content so it can be rendered in the template
-        def preparedContent = groovyTemplate?.make([
-            user: request[REQUEST_ATTRIBUTE_USER], 
-            node: content, 
-            page: pageInfo, 
-            space: request[REQUEST_ATTRIBUTE_SPACE]])
-        if (preparedContent)  {
-           preparedContent.writeTo(out)
-        }
-
-        out.flush()
-        webRequest.renderView = false
-        return null        
+        
+        // Render the template, this call will handle the content too by passing it in as model to template
+        return renderGSPContent(template, [node: content])
     }
     
     def renderFile(File f) {

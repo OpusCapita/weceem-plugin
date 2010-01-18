@@ -30,6 +30,8 @@ class HTMLContent extends Content {
         only = ['content', 'keywords', 'title']
     }
     
+    Boolean allowGSP = false
+    
     String keywords
     Template template
 
@@ -52,6 +54,14 @@ class HTMLContent extends Content {
     
     String getMimeType() { "text/html" } // @todo we probably need to allow inclusion of charset
 
+    static handleRequest = { content ->
+        if (content.allowGSP) {
+            renderGSPContent(content)
+        } else {
+            renderContent(content)
+        }
+    }
+    
     static constraints = {
         content(nullable: false, maxSize: 65536)
         keywords(nullable: true, blank: true, maxSize: 200)
