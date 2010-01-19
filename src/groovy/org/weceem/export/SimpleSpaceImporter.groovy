@@ -240,6 +240,7 @@ class SimpleSpaceImporter implements SpaceImporter {
         (java.lang.Number): {value->
             value.toInteger()},
         (java.lang.String): {value -> value},
+        (java.lang.Boolean): {value -> value.toBoolean()},
         (org.weceem.content.Status): {value-> Status.findByCode(value)}
     ]
 
