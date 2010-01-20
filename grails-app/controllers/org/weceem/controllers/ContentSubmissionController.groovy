@@ -27,7 +27,8 @@ class ContentSubmissionController {
             // The rendering functions expect a space
             request[ContentController.REQUEST_ATTRIBUTE_PREPARED_MODEL] = [submittedContent:content]
             def newparams = [uri:formPath]
-//            content.discard()
+            content.discard()
+            flash[ContentController.FLASH_MESSAGE] = "contentSubmission.content.has.errors"
             forward(controller:'content', action:'show', params:newparams)
         } else {
             if (log.debugEnabled) {
