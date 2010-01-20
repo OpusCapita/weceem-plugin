@@ -37,7 +37,7 @@ class ConfluenceSpaceImporter implements SpaceImporter {
         def pageGroups = handler.pages.groupBy { it.title }
         pageGroups.each {k, v ->
             def wi = new WikiItem(title: k, space: space, status: defStatus)
-            wi.createAliasURI()
+            wi.createAliasURI(null)
             def latestItem = v.max { Long.valueOf(it.version) }
             wi.content = latestItem.body
 

@@ -395,14 +395,14 @@ class ContentRepositoryService implements InitializingBean {
         if (result) {
             // We complete the AliasURI, AFTER handling the create() event which may need to affect title/aliasURI
             if (!content.aliasURI) {
-                content.createAliasURI()
+                content.createAliasURI(parentContent)
             }
             
             result = content.validate()
         }
         
+        // Update date orderIndex to last order index + 1 in the parent's child list
         if (result){
-            // Update date orderIndex to last order index + 1 in the parent's child list
             if (parentContent) {
                 def orderIndex = parentContent.children ?
                                  parentContent.children?.last()?.orderIndex + 1 : 0
@@ -757,10 +757,10 @@ class ContentRepositoryService implements InitializingBean {
             log.debug("Updated node with id ${content.id}, properties are now: ${content.dump()}")
         }
         if (content instanceof ContentFile){
-            content.createAliasURI()
+            content.createAliasURI(content.parent)
         }else
         if (!content.aliasURI && content.title) {
-            content.createAliasURI()
+            content.createAliasURI(content.parent)
         }
         def ok = content.validate()
         if (content.save()) {
@@ -1212,7 +1212,8 @@ class ContentRepositoryService implements InitializingBean {
                             mimeType: (mimeType ? mimeType : ''), fileSize: file.length(),
                             status: Status.findByPublicContent(true))
                     }
-                    content.createAliasURI()
+                    // @todo this needs fixing, we don't know the parent yet!
+                    content.createAliasURI(content.parent)
 
                     requirePermissions(content.parent ?: space, [WeceemSecurityPolicy.PERMISSION_CREATE])        
 

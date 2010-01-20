@@ -87,7 +87,7 @@ class ContentFile extends Content {
         syncStatus(hidden: true)
     }
 
-    public void createAliasURI(parent = null) {
+    public void createAliasURI(parent) {
         if (aliasURI != title){
             aliasURI = title
         }
@@ -115,7 +115,7 @@ class ContentFile extends Content {
     Boolean create(Content parentContent) {
         if (!title) {
             title = uploadedFile.originalFilename
-            createAliasURI()
+            createAliasURI(parentContent)
         }
         assert title
         def path = ''

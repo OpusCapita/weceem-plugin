@@ -14,6 +14,8 @@
 
 package org.weceem.content
 
+import org.codehaus.groovy.grails.commons.ApplicationHolder
+
 /**
  * Comment class encapsulates comments on any content node, where the submitting person 
  * may not be a user of the system - eg comments need to be spam checked and IP address tracked
@@ -39,6 +41,14 @@ class Comment extends Content {
     }
     
     static transients = Content.transients
-
+    
+    @Override
+    public void createAliasURI(parent) {
+        def kidList = ApplicationHolder.application.mainContext.contentRepositoryService.findChildren(parent, 
+            [max:1, sort:'orderIndex', order:'desc', type:'org.weceem.content.Comment'])
+        def lastIdx = kidList ? kidList[0].orderIndex : 0
+        aliasURI = "comment-"+(lastIdx+1)
+    }
+    
     String getVersioningContent() { content }
 }

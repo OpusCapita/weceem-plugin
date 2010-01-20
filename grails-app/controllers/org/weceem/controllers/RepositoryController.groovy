@@ -330,6 +330,7 @@ class RepositoryController {
      * Creates and save node.
      * Creates reference according to 'parentId' parameter.
      */
+/* @todo I think this is obsolete
     def insertNode = {
 
         def space = Space.get(params['space.id']?.toLong())
@@ -343,7 +344,7 @@ class RepositoryController {
             parent = null
         }
         if (!insertedContent.aliasURI && insertedContent.title) {
-            insertedContent.createAliasURI()
+            insertedContent.createAliasURI(contentRepositoryService)
         }
 
         contentRepositoryService.createNode(insertedContent, parent)
@@ -360,6 +361,7 @@ class RepositoryController {
             redirect(action: treeTable)
         }
     }
+*
 
     /**
      * @param dirname
@@ -374,7 +376,7 @@ class RepositoryController {
             def contentDirectory = new ContentDirectory(title: params.dirname,
                     content: '', filesCount: 0, space: space,
                     mimeType: '', fileSize: 0, status: Status.findByCode(params.statuscode))
-            contentDirectory.createAliasURI((parent && (parent instanceof ContentDirectory)) ? parent : null)
+            contentDirectory.createAliasURI(contentRepositoryService, (parent && (parent instanceof ContentDirectory)) ? parent : null)
             if (contentDirectory.save()) {
                 if (!contentRepositoryService.createNode(contentDirectory, parent)) {
                     flash.error = message(code: 'error.contentRepository.fileSystem')
