@@ -44,6 +44,7 @@ class WidgetTagLib {
 
         if (path) {
             widget = contentRepositoryService.findContentForPath(path, space)?.content
+            println "Response from fCP $path is: ${widget?.dump()}"
             if (!widget) {
                 throwTagError("There is no Widget at aliasURI [${path}] in the space [${space.name}]")
             }
@@ -68,7 +69,7 @@ class WidgetTagLib {
 
         out << body()
 
-        def groovyTemplate = contentRepositoryService.getGSPTemplate(widget.absoluteURI, widget.content)
+        def groovyTemplate = contentRepositoryService.getGSPTemplate(widget)
         try {
             if (attrs.model instanceof Map) {
                 def model = [:] 

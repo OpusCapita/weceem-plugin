@@ -22,6 +22,7 @@ class ImportExportService {
                 getImporters()."${importerName}"?.execute(space, file)
             } catch (Throwable t) {
                 txn.setRollbackOnly()
+                t.printStackTrace()
                 log.error(t)
             }
         }

@@ -81,6 +81,17 @@ class WeceemSecurityService implements InitializingBean {
             permList)
     }
 
+    boolean hasPermissions(Space space, String uri, permList) {
+        if (log.debugEnabled) {
+            log.debug "Checking if user $userName with roles $userRoles has permissions $permList on content at ${uri}"
+        }
+        return policy.hasPermission(
+            space.aliasURI, 
+            uri, 
+            getUserRoles(), 
+            permList)
+    }
+    
     /**
      * Called to find out if the current user is allowed to transition content in to the specified status
      * Allows applications to control workflow
@@ -88,6 +99,15 @@ class WeceemSecurityService implements InitializingBean {
     boolean isUserAllowedContentStatus(Status status) {
         // Temporary lame impl, need to add this to policy
         return true
+    }
+
+    /**
+     * Called to find out if the current user is allowed to create the specified content type under the
+     * specified content node.
+     * Allows applications to implement ACLs
+     */
+    boolean isUserAllowedToCreateContent(Content parent, Class<Content> type) {
+        hasPermissions(content, [WeceemSecurityPolicy.PERMISSION_CREATE])
     }
 
     /**

@@ -337,14 +337,15 @@ class RepositoryController {
         def insertedContent = contentRepositoryService.newContentInstance(params.contentType, space)
         // Using bindData to work around Grails 1.2m2 bugs, change to .properties when 1.2-RC1 is live
         bindData(insertedContent, params)
-        if (!insertedContent.aliasURI && insertedContent.title) {
-            insertedContent.createAliasURI()
-        }
 
         def parent = params.parentPath ? getContent(params.parentPath, space) : null
         if (parent && (!parent.canHaveChildren() || (parent instanceof ContentDirectory))) {
             parent = null
         }
+        if (!insertedContent.aliasURI && insertedContent.title) {
+            insertedContent.createAliasURI()
+        }
+
         contentRepositoryService.createNode(insertedContent, parent)
 
         if (insertedContent.hasErrors() || !insertedContent.save()) {

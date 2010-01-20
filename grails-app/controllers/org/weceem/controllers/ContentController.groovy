@@ -141,9 +141,14 @@ class ContentController {
         }
     }
     
-    def evaluateGSPContent(Content content, model) {
-        def groovyTemplate = contentRepositoryService.getGSPTemplate(content.absoluteURI, content.content)
+    static evaluateGSPContent(contentRepositoryService, Content content, model) {
+        def groovyTemplate = contentRepositoryService.getGSPTemplate(content)
         return groovyTemplate?.make(model)
+    }
+    
+    
+    void renderGSPContent(Content content, model = null) {
+        ContentController.renderGSPContent( contentRepositoryService, request, response, content, model)
     }
     
     /**
@@ -154,7 +159,7 @@ class ContentController {
      * 2. If content node is not a template, evaluats the content as a GSP, then passes it as pre-rendered body content
      * to the template of "content" if there is one.
      */
-    void renderGSPContent(Content content, model = null) {
+    static renderGSPContent(contentRepositoryService, request, response, Content content, model = null) {
         if (model == null) {
             model = [:]
         }
@@ -171,8 +176,12 @@ class ContentController {
         if (isTemplate) {
             // Pass in the content so it can be rendered in the template by wcm:content
             request[REQUEST_ATTRIBUTE_NODE] = model.node
+            // Set mime type to the one for this template if there is not one set by content already
+            if (content.mimeType) {
+                response.setContentType(content.mimeType)
+            }
         } else {
-            request[REQUEST_PRERENDERED_CONTENT] = evaluateGSPContent(content, model)
+            request[REQUEST_PRERENDERED_CONTENT] = evaluateGSPContent(contentRepositoryService, content, model)
             request[REQUEST_ATTRIBUTE_NODE] = content
             model.node = content
         }
@@ -181,7 +190,7 @@ class ContentController {
         // See if there is a template for the content
         def template = isTemplate ? content : contentRepositoryService.getTemplateForContent(content)
         if (template) {
-            def templatedContent = evaluateGSPContent(template, model)
+            def templatedContent = evaluateGSPContent(contentRepositoryService, template, model)
             templatedContent.writeTo(out)
         } else {
             out << request[REQUEST_PRERENDERED_CONTENT]
@@ -190,7 +199,6 @@ class ContentController {
         // flush the existing output stream
         out.flush()
         webRequest.renderView = false
-        return
     }
 
     /** 
@@ -220,6 +228,7 @@ class ContentController {
                 render(text:contentText, contentType:content.mimeType)
             } else {
                 response.sendError(500, "Unable to render content at ${uri}, no content property and no template defined")
+                return null
             }
             return
         }

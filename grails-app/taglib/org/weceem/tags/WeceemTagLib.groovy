@@ -35,6 +35,8 @@ class WeceemTagLib {
     static ATTR_ORDER = "order"
     static ATTR_OFFSET = "offset"
     static ATTR_PATH = "path"
+    static ATTR_PARENT = "parent"
+    static ATTR_SUCCESS = "success"
     static ATTR_STATUS = "status"
     static ATTR_SPACE = "space"
     static ATTR_VAR = "var"
@@ -361,7 +363,8 @@ class WeceemTagLib {
         def o = out
         o << "<a href=\"${createLink(attrs)}\""
         attrs.remove('path')
-        o << "${attrs.collect {k, v -> " $k=\"$v\"" }.join('')}>"
+        o << attrs.collect {k, v -> " $k=\"$v\"" }.join('')
+        o << '>'
         o << body()
         o << "</a>"
     }
@@ -523,4 +526,42 @@ class WeceemTagLib {
         out << "<div id='${id}' class='ui-content-icon'><img src='${g.resource(plugin:plugin, dir: iconconf.dir, file: iconconf.file)}'/></div>"
     }    
 
+    /**
+     * Utility function to get a content node from an attribute value that can be any of:
+     * 
+     * a number type - the id of a content node to get
+     * a Content node - will be returned as the value
+     * anything that can be coerced to a String - if results in a number, will 
+     *    call get on it else calls findContentForPath in the current space
+     */
+    Content attributeToContent(attribValue) {
+        if (attribValue instanceof Number) {
+            Content.get(attribValue.toLong())
+        } else if (attribValue instanceof Content) {
+            attribValue
+        } else {
+            def s = attribValue.toString()
+            if (s.isLong()) {
+                Content.get(s.toLong())
+            } else {
+                contentRepositoryService.findContentForPath(s, request[ContentController.REQUEST_ATTRIBUTE_SPACE])
+            }
+        }
+    }
+
+    def submitContent = { attrs ->
+        def parent = attributeToContent(attrs[ATTR_PARENT])
+        def type = attrs[ATTR_TYPE]
+        def success = attributeToContent(attrs[ATTR_SUCCESS])
+        def currentContentPath = request[ContentController.REQUEST_ATTRIBUTE_PAGE].URI
+        def space = request[ContentController.REQUEST_ATTRIBUTE_SPACE]
+        
+        out << g.createLink(controller:'contentSubmission', action:'submit', params:[
+            spaceId:space.id,
+            parentId:parent.id,
+            type:type,
+            successPath:success.absoluteURI,
+            formPath:currentContentPath
+        ])
+    }
 }

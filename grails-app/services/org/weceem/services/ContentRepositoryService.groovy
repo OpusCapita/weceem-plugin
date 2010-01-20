@@ -236,12 +236,13 @@ class ContentRepositoryService implements InitializingBean {
         space.delete(flush: true)
     }
 
-    def getGSPTemplate(pageName, content) {
-        cacheService.getOrPutObject(CACHE_NAME_GSP_CACHE, pageName) {
+    def getGSPTemplate(content) {
+        def absURI = content.absoluteURI
+        cacheService.getOrPutObject(CACHE_NAME_GSP_CACHE, makeURICacheKey(content.space, absURI)) {
             if (log.debugEnabled) {
-                log.debug "Creating GSP template class for $pageName"
+                log.debug "Creating GSP template class for $absURI"
             }
-            groovyPagesTemplateEngine.createTemplate(content, pageName)
+            groovyPagesTemplateEngine.createTemplate(content.content, 'Content:'+absURI)
         }
     }
 
@@ -358,12 +359,14 @@ class ContentRepositoryService implements InitializingBean {
      * Creates new Content node and it's relation from request parameters
      *
      * @param content
-     * @param parentContent
      */
-    def createNode(String type, def params) {
+    def createNode(String type, def params, spaceOverride = null, parentOverride = null) {
         def content = newContentInstance(params.type)
         hackedBindData(content, params)
-        createNode(content)
+        if (spaceOverride) {
+            content.space = spaceOverride
+        }
+        createNode(content, parentOverride)
         return content
     }
 
@@ -376,7 +379,9 @@ class ContentRepositoryService implements InitializingBean {
     Boolean createNode(Content content, Content parentContent = null) {
         requirePermissions(parentContent ?: content.space, [WeceemSecurityPolicy.PERMISSION_CREATE])        
 
-        log.debug "Creating node: ${content.dump()}"
+        if (log.debugEnabled) {
+            log.debug "Creating node: ${content.dump()}"
+        }
         if (parentContent == null) parentContent = content.parent
 
         def result 
@@ -395,12 +400,12 @@ class ContentRepositoryService implements InitializingBean {
             
             result = content.validate()
 
-            // Check aliasURI uniqueness within content items
-          // The withNewSession is a patch for the ADT project that causes an exception when saving a Bar with categories
-          // TODO: (Scott) - take out the withNewSession and test after the 1.2 release
-          Content.withNewSession {
-            uniqueURI = Content.findByParentAndAliasURI(parentContent, content.aliasURI) ? false : true
-          }            
+           // Check aliasURI uniqueness within content items
+           // The withNewSession is a patch for the ADT project that causes an exception when saving a Bar with categories
+           // @todo (Scott) - take out the withNewSession and test after the 1.2 release
+           Content.withNewSession {
+              uniqueURI = Content.findByParentAndAliasURI(parentContent, content.aliasURI) ? false : true
+           }            
         }
         
         if (uniqueURI){
@@ -646,6 +651,9 @@ class ContentRepositoryService implements InitializingBean {
         if (sourceContent.metaClass.hasProperty(sourceContent, 'target')?.type == Content) {
             sourceContent.target = null
         }
+
+        invalidateCachingForURI(sourceContent.space, sourceContent.absoluteURI)
+
         sourceContent.delete(flush: true)
 
         return true
@@ -724,6 +732,17 @@ class ContentRepositoryService implements InitializingBean {
     public hackedBindData(obj, params) {
         new BindDynamicMethod().invoke(this, 'bindData', obj, params)
     }
+
+    void makeURICacheKey(Space space, uri) {
+        space.aliasURI+':'+uri
+    }
+
+    void invalidateCachingForURI( Space space, uri) {
+        // If this was content that created a cached GSP class, clear it now
+        def key = makeURICacheKey(space,uri)
+        gspClassCache.remove(key) // even if its not a GSP lets just assume so, quicker than checking & remove
+        uriToIdCache.remove(key)
+    }
     
     def updateNode(Content content, def params) {
         requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_EDIT])        
@@ -755,10 +774,8 @@ class ContentRepositoryService implements InitializingBean {
             if (log.debugEnabled) {
                 log.debug("Update node with id ${content.id} saved OK")
             }
-            // If this was content that created a cached GSP class, clear it now
-            if (gspClassCache.isKeyInCache(oldAbsURI)) {
-                gspClassCache.remove(oldAbsURI)
-            }
+            
+            invalidateCachingForURI(space, oldAbsURI)
             return [content:content]
         } else {
             if (log.debugEnabled) {
@@ -1013,11 +1030,13 @@ class ContentRepositoryService implements InitializingBean {
             log.debug "findContentForPath uri: ${uriPath} space: ${space}"
         }
 
+        def cacheKey = makeURICacheKey(space, uriPath)
+        
         if (useCache) {
             // This looks up the uriPath in the cache to see if we can get a Map of the content id and parentURI
             // If we call getValue on the cache hit, we lose 50% of our performance. Just retrieving
             // the cache hit is not expensive.
-            def cachedElement = uriToIdCache.get(space.aliasURI+':'+uriPath)
+            def cachedElement = uriToIdCache.get(cacheKey)
             def cachedContentInfo = cachedElement?.getValue()
             if (cachedContentInfo) {
                 if (log.debugEnabled) {
@@ -1087,7 +1106,7 @@ class ContentRepositoryService implements InitializingBean {
             log.debug "Caching content info for uri $uriPath: $cacheValue"
         }
         if (useCache) {
-            cacheService.putToCache(uriToIdCache, space.aliasURI+':'+uriPath, cacheValue)
+            cacheService.putToCache(uriToIdCache, cacheKey, cacheValue)
         }
         
         if (content) {
@@ -1236,5 +1255,34 @@ class ContentRepositoryService implements InitializingBean {
         return null
     }
     
+    Content createUserSubmittedContent(space, parent, type, data) throws AccessDeniedException {
+        if (!(space instanceof Space)) {
+            space = Space.get(space.toLong())
+        }
+        assert space
+        if (parent) {
+            if (!(parent instanceof Content)) {
+                parent = Content.get(parent.toLong())
+            }
+        } else {
+            parent = null
+        }
+        
+        Class contentClass = getContentClassForType(type)
+        // check CREATE permission on the uri & user
+        if (weceemSecurityService.isUserAllowedToCreateContent(parent, contentClass)) {
+            // create content and populate
+            def newContent = createNode(type, data, space, paren)
+            // Always force the space to what the original author intended
+            newContent.space = space
+            // Check for binding errors
+            if (newContent.hasErrors()) {
+                return newContent // Get out now
+            }
+            return newContent.save() // it might not work, but hasErrors will be set if not
+        } else {
+            throw new AccessDeniedException("User [${weceemSecurityService.userName}] with roles [${weceemSecurityService.userRoles}] does not have the permissions [$permissionList] to create content at [${space.aliasURUI}/${parent.absoluteURI}]")
+        }
+    }
 }
 
