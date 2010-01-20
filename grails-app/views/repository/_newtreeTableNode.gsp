@@ -5,20 +5,10 @@
 <tr id="content-node-${c.id}" class="${ c.parent ? 'child-of-content-node-'+c.parent.id : ''}">
 	<td>
 	  <div class="item">
-			<% 
-			switch (c.class.name) {
-				case 'ContentFile':icontype="image"; break; 
-				case 'ContentDirectory':icontype="folder-collapsed"; break; 
-				case 'StyleSheet':icontype="script"; break; 
-				case 'Template':icontype="script"; break; 
-				case 'Widget':icontype="script"; break; 
-				default: icontype="document";
-			}
-			%>
             <wcm:renderContentItemIcon type="${c}" id="content-node-${c.id}" />
-			<h2 orderindex="${c.orderIndex == null ? 0 : c.orderIndex}" type="${c.toName()}" class="title">
+			<h2 orderindex="${c.orderIndex == null ? 0 : c.orderIndex}" type="${c.class.name}" class="title">
 			    <g:link controller="editor" action="edit" id="${c.id}">
-			     ${c.title.encodeAsHTML()}        <span class="type">( /${c.aliasURI.encodeAsHTML()} - <g:message code="content.item.name.${c.toName()}"/>)</span>
+			     ${c.title.encodeAsHTML()}        <span class="type">( /${c.aliasURI.encodeAsHTML()} - <g:message code="content.item.name.${c.class.name}"/>)</span>
 			    </g:link>
 			</h2>
 		</div>		

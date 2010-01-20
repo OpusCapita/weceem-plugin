@@ -107,7 +107,7 @@ class WeceemSecurityService implements InitializingBean {
      * Allows applications to implement ACLs
      */
     boolean isUserAllowedToCreateContent(Content parent, Class<Content> type) {
-        hasPermissions(content, [WeceemSecurityPolicy.PERMISSION_CREATE])
+        hasPermissions(parent, [WeceemSecurityPolicy.PERMISSION_CREATE])
     }
 
     /**

@@ -46,11 +46,7 @@ class SimpleSpaceExporter implements SpaceExporter {
                         if (cntProp != null){
                             def cntPropClass = cntProp.class
                             def cntPropClassName = ""
-                            if (cntProp.metaClass.respondsTo(cntProp, "toName")){
-                                cntPropClassName = cntProp.toName()
-                            }else{
-                                cntPropClassName = cntProp.class.name
-                            }
+                            cntPropClassName = cntProp.class.name
                             //Check property's type: association or not
                             if (prop.isAssociation() && !Status.isAssignableFrom(cntPropClass)){
                                 if (Collection.isAssignableFrom(cntPropClass)){

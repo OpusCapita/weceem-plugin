@@ -29,7 +29,9 @@ class ContentController {
     static String REQUEST_ATTRIBUTE_USER = "weceem.user"
     static String REQUEST_ATTRIBUTE_NODE = "weceem.node"
     static String REQUEST_ATTRIBUTE_SPACE = "weceem.space"
+    static String REQUEST_ATTRIBUTE_PREPARED_MODEL = "weceem.prepared.model"
     static String REQUEST_PRERENDERED_CONTENT = "weceem.prerendered.content"
+    static String FLASH_MESSAGE = 'weceem.message'
     
     static CACHE_NAME_TEMPLATE_CACHE = "gspCache"
     
@@ -37,7 +39,7 @@ class ContentController {
     def weceemSecurityService
     def cacheService
     
-    def show = {
+    def show = { 
         try {
             if (log.debugEnabled) {
                 log.debug "Content request for uri: ${params.uri}"
@@ -138,7 +140,7 @@ class ContentController {
             request.accessDeniedMessage = ade.message
             response.sendError 403, ade.message
             return null
-        }
+        }        
     }
     
     static evaluateGSPContent(contentRepositoryService, Content content, model) {
@@ -163,6 +165,13 @@ class ContentController {
         if (model == null) {
             model = [:]
         }
+
+        // Copy in any data supplied by an outside bit of code, eg the content submission controller
+        def previousModel = request[REQUEST_ATTRIBUTE_PREPARED_MODEL]
+        if (previousModel) {
+            model.putAll(previousModel)
+        }
+        
         model.user = request[REQUEST_ATTRIBUTE_USER]
         model.page = request[REQUEST_ATTRIBUTE_PAGE]
         model.space = request[REQUEST_ATTRIBUTE_SPACE]

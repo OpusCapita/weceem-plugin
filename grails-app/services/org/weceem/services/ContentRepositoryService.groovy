@@ -360,13 +360,13 @@ class ContentRepositoryService implements InitializingBean {
      *
      * @param content
      */
-    def createNode(String type, def params, spaceOverride = null, parentOverride = null) {
-        def content = newContentInstance(params.type)
+    def createNode(String type, def params, Closure postInit) {
+        def content = newContentInstance(type)
         hackedBindData(content, params)
-        if (spaceOverride) {
-            content.space = spaceOverride
+        if (postInit) {
+            postInit(content)
         }
-        createNode(content, parentOverride)
+        createNode(content, content.parent)
         return content
     }
 
@@ -391,7 +391,7 @@ class ContentRepositoryService implements InitializingBean {
         } else {
             result = true
         }
-        def uniqueURI = true
+
         if (result) {
             // We complete the AliasURI, AFTER handling the create() event which may need to affect title/aliasURI
             if (!content.aliasURI) {
@@ -399,16 +399,9 @@ class ContentRepositoryService implements InitializingBean {
             }
             
             result = content.validate()
-
-           // Check aliasURI uniqueness within content items
-           // The withNewSession is a patch for the ADT project that causes an exception when saving a Bar with categories
-           // @todo (Scott) - take out the withNewSession and test after the 1.2 release
-           Content.withNewSession {
-              uniqueURI = Content.findByParentAndAliasURI(parentContent, content.aliasURI) ? false : true
-           }            
         }
         
-        if (uniqueURI){
+        if (result){
             // Update date orderIndex to last order index + 1 in the parent's child list
             if (parentContent) {
                 def orderIndex = parentContent.children ?
@@ -775,7 +768,7 @@ class ContentRepositoryService implements InitializingBean {
                 log.debug("Update node with id ${content.id} saved OK")
             }
             
-            invalidateCachingForURI(space, oldAbsURI)
+            invalidateCachingForURI(content.space, oldAbsURI)
             return [content:content]
         } else {
             if (log.debugEnabled) {
@@ -1267,14 +1260,19 @@ class ContentRepositoryService implements InitializingBean {
         } else {
             parent = null
         }
+
+        // Need to get the status before we query!
+        def stat = Status.listOrderByCode(max:1, order:'asc')[0]
         
         Class contentClass = getContentClassForType(type)
         // check CREATE permission on the uri & user
         if (weceemSecurityService.isUserAllowedToCreateContent(parent, contentClass)) {
             // create content and populate
-            def newContent = createNode(type, data, space, paren)
-            // Always force the space to what the original author intended
-            newContent.space = space
+            def newContent = createNode(type, data) { c ->
+                c.space = space
+                c.parent = parent
+                c.status = stat
+            }
             // Check for binding errors
             if (newContent.hasErrors()) {
                 return newContent // Get out now

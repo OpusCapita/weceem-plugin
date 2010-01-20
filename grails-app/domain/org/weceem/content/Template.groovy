@@ -29,6 +29,8 @@ class Template extends Content {
     }
     
     static standaloneContent = false
+
+    String getMimeType() { "text/html" }
     
     // 64Kb Unicode text with HTML/GSP Markup
     String content
@@ -43,7 +45,7 @@ class Template extends Content {
         content(editor:'HtmlCode')
     }
 
-    static transients = Content.transients
+    static transients = (Content.transients - 'mimeType')
 
     static mapping = {
         cache usage: 'nonstrict-read-write'

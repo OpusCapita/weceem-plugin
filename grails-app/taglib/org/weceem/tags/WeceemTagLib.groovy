@@ -556,12 +556,19 @@ class WeceemTagLib {
         def currentContentPath = request[ContentController.REQUEST_ATTRIBUTE_PAGE].URI
         def space = request[ContentController.REQUEST_ATTRIBUTE_SPACE]
         
-        out << g.createLink(controller:'contentSubmission', action:'submit', params:[
+        out << g.createLink(mapping:'contentSubmission', action:'submit', params:[
             spaceId:space.id,
             parentId:parent.id,
             type:type,
             successPath:success.absoluteURI,
             formPath:currentContentPath
         ])
-    }
+/*        out << g.createLink(controller:'contentSubmission', action:'submit', params:[
+            spaceId:space.id,
+            parentId:parent.id,
+            type:type,
+            successPath:success.absoluteURI,
+            formPath:currentContentPath
+        ])
+*/    }
 }

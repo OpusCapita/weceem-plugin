@@ -20,7 +20,4 @@ class Status {
         description(nullable: false, size:1..80) 
     }
     
-    String toName(){
-        return this.class.name
-    }
 }

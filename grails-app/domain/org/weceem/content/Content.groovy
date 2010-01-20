@@ -199,7 +199,6 @@ class Content implements Comparable {
         def t = this
         
         def criteria = ContentVersion.createCriteria()
-        log.debug "In saveRevision of ${this}, doing revision query"
         def lastRevision = criteria.get {
             eq('objectKey', ident())
             projections {
@@ -224,7 +223,6 @@ class Content implements Comparable {
         output << "</revision>"
 
         def xml = output.toString()
-        log.debug "XML: ${xml}"         
         def cv = new ContentVersion(objectKey: ident(),
                 revision: (lastRevision ? lastRevision + 1 : 1),
                 objectClassName: self.class.name,
@@ -239,9 +237,5 @@ class Content implements Comparable {
             log.error "In createVersion of ${this}, save failed: ${cv.errors}"
             assert false
         }
-    }
-    
-    String toName(){
-        return this.class.name
     }
 }

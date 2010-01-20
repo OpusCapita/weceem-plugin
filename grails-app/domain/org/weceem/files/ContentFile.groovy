@@ -70,7 +70,7 @@ class ContentFile extends Content {
 
     MultipartFile uploadedFile
 
-    static transients = ['uploadedFile']
+    static transients = (Content.transients - 'mimeType') + 'uploadedFile'
 
     static constraints = {
         // @todo this is ugly, ContentDirectory should never have one, and all files SHOULD

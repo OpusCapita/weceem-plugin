@@ -40,7 +40,7 @@ class WidgetTagLib {
         def widget
         def path = attrs.path
         def space = attrs.space ? Space.findByAliasURI(attrs.space) : pageScope.space
-        if(!space) {throwTagError("No space by name ${attrs.space}")}
+        if(!space) {throwTagError("No space by name ${attrs.space} or in page scope")}
 
         if (path) {
             widget = contentRepositoryService.findContentForPath(path, space)?.content

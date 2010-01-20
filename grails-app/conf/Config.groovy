@@ -18,7 +18,8 @@ log4j = {
 	       'org.codehaus.groovy.grails.web.pages' //  GSP
     info   'grails.app'
 
-    debug  'grails.app.service',
+    debug   'grails.app.controller',
+            'grails.app.service',
             'org.codehaus.groovy.grails.web.mapping' // URL mapping
     
 }

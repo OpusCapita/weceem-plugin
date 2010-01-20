@@ -486,7 +486,7 @@ class RepositoryController {
         }else{
             def indexes = [:]
             contentRepositoryService.findChildren(targetContent)?.collect{indexes.put(it.id, it.orderIndex)}
-            render ([result: 'success', id: vcont.id, indexes: indexes, ctype: vcont.toName()] as JSON)
+            render ([result: 'success', id: vcont.id, indexes: indexes, ctype: vcont.class.name] as JSON)
         }
     }
 
@@ -829,7 +829,7 @@ class RepositoryController {
         "changedOn": wcm.humanDate(date: it.changedOn).toString(), 
         "href": createLink(controller: "editor", action: "edit", id: it.id),
         "parentURI": (it.parent == null ? "": "/${it.parent.absoluteURI}"), 
-        "type": message(code: "content.item.name.${it.toName()}")]} 
+        "type": message(code: "content.item.name.${it.class.name}")]} 
 
         render ([result: result] as JSON)
     }

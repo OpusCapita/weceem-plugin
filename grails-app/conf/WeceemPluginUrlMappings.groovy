@@ -3,8 +3,10 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 class WeceemPluginUrlMappings {
     static CONTENT_PREFIX = ((ConfigurationHolder.config.weceem.content.prefix instanceof String) ? 
         ConfigurationHolder.config.weceem.content.prefix : '')
+    static TOOLS_PREFIX = ((ConfigurationHolder.config.weceem.tools.prefix instanceof String) ? 
+        ConfigurationHolder.config.weceem.tools.prefix : 'cms')
     static ADMIN_PREFIX = ((ConfigurationHolder.config.weceem.admin.prefix instanceof String) ?
-        ConfigurationHolder.config.weceem.admin.prefix : 'admin')
+        ConfigurationHolder.config.weceem.admin.prefix : 'cms/admin')
     
     static FORBIDDEN_SPACE_URIS = [
         // Internal/app resources
@@ -14,7 +16,9 @@ class WeceemPluginUrlMappings {
         "fck",
         "WeceemFiles/",
         // Admin links
-        "${WeceemPluginUrlMappings.ADMIN_PREFIX}/"
+        "${WeceemPluginUrlMappings.ADMIN_PREFIX}/",
+        "${WeceemPluginUrlMappings.TOOLS_PREFIX}/",
+        "submit/"
     ]
     
     static mappings = {
@@ -39,6 +43,16 @@ class WeceemPluginUrlMappings {
 
         delegate.(adminURI+"/space/$action?/$id?")(controller: 'space')
 
+        def toolFunctionsPrefix = (WeceemPluginUrlMappings.TOOLS_PREFIX ? '/' : '')+"${WeceemPluginUrlMappings.TOOLS_PREFIX}"
+
+        name contentSubmission: "/submit/$action?" {
+            controller = "contentSubmission"
+        }
+
+        "/submit/$action?" {
+            controller = "contentSubmission"
+        }
+        
         // This is tricky
         def contentURI = (WeceemPluginUrlMappings.CONTENT_PREFIX ? '/' : '')+"${WeceemPluginUrlMappings.CONTENT_PREFIX}/$uri**"
         
@@ -48,6 +62,7 @@ class WeceemPluginUrlMappings {
             constraints {
                 // @todo this is very ugly, clean up
                 uri(validator: { v ->
+                    println "uri value is: $v"
                     !WeceemPluginUrlMappings.FORBIDDEN_SPACE_URIS.find { pref -> return v?.startsWith(pref) }
                 })
             }
