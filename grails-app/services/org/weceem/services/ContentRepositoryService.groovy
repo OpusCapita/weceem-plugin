@@ -755,7 +755,7 @@ class ContentRepositoryService implements InitializingBean {
         new BindDynamicMethod().invoke(this, 'bindData', obj, params)
     }
 
-    void makeURICacheKey(Space space, uri) {
+    String makeURICacheKey(Space space, uri) {
         space.aliasURI+':'+uri
     }
 
