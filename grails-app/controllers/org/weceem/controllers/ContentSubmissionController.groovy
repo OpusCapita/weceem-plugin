@@ -17,8 +17,7 @@ class ContentSubmissionController {
         def type = params.remove('type')
         def space = Space.get(spaceId.toString().toLong())
         
-        params.ipAddress = request.getRemoteAddr() 
-        def content = contentRepositoryService.createUserSubmittedContent(space, parentId, type, params)
+        def content = contentRepositoryService.createUserSubmittedContent(space, parentId, type, params, request)
         // redirect to/render content with model populated, and link to new content included
         if (content.hasErrors()) {
             if (log.debugEnabled) {

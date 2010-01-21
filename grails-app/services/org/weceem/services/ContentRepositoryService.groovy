@@ -378,7 +378,6 @@ class ContentRepositoryService implements InitializingBean {
      */
     Boolean createNode(Content content, Content parentContent = null) {
         requirePermissions(parentContent ?: content.space, [WeceemSecurityPolicy.PERMISSION_CREATE])        
-        if (weceemSecurityService.isUserAllowedToCreateContent(parent, contentClass)) {
 
         if (parentContent == null) parentContent = content.parent
 
@@ -1285,7 +1284,7 @@ class ContentRepositoryService implements InitializingBean {
         return null
     }
     
-    Content createUserSubmittedContent(space, parent, type, data) throws AccessDeniedException {
+    Content createUserSubmittedContent(space, parent, type, data, request) throws AccessDeniedException {
         if (!(space instanceof Space)) {
             space = Space.get(space.toLong())
         }
@@ -1303,18 +1302,32 @@ class ContentRepositoryService implements InitializingBean {
         
         Class contentClass = getContentClassForType(type)
         // check CREATE permission on the uri & user
-        requirePermissions(parent ?: space, [WeceemSecurityPolicy.PERMISSION_CREATE], contentClass)
+        def n = parent ?: space
+        requirePermissions(n, [WeceemSecurityPolicy.PERMISSION_CREATE], contentClass)
         // create content and populate
+
+        // Prevent setting status and other internal values
+        def publicProperties = contentClass.publicSubmitProperties 
+        def dataKeys = data.collect { k, v -> k }
+        // We eliminate all properties that are not in this list, so status etc cannot be set
+        if (publicProperties) {
+            dataKeys.each { k ->
+                if (!publicProperties.contains(k)) {
+                    data.remove(k)
+                }
+            }
+        }
+        
+        // Now create it
         def newContent = createNode(type, data) { c ->
             c.space = space
             c.parent = parent
             c.status = stat
+            // We should convention-ize this so they can have different fields
+            c.ipAddress = request.remoteAddr
         }
         // Check for binding errors
-        if (newContent.hasErrors()) {
-            return newContent // Get out now
-        }
-        return newContent.save() // it might not work, but hasErrors will be set if not
+        return newContent.hasErrors() ? newContent : newContent.save() // it might not work, but hasErrors will be set if not
     }
 }
 

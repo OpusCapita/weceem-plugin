@@ -31,6 +31,14 @@ class Comment extends Content {
     
     static standaloneContent = false
     
+    static publicSubmitProperties = [
+        'title',
+        'author',
+        'email',
+        'websiteUrl',
+        'content'
+    ]
+    
     static constraints = {
         author(maxSize:80, blank: false, nullable: false)
         email(email:true, maxSize:80, blank: false, nullable: false)
