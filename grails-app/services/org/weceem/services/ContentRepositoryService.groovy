@@ -6,7 +6,7 @@ import org.springframework.beans.factory.InitializingBean
 import grails.util.Environment
 // This is for a hack, remove later
 import org.codehaus.groovy.grails.web.metaclass.BindDynamicMethod
-
+import org.hibernate.exception.ConstraintViolationException
 
 import org.weceem.content.*
 
@@ -360,7 +360,7 @@ class ContentRepositoryService implements InitializingBean {
      *
      * @param content
      */
-    def createNode(String type, def params, Closure postInit) {
+    def createNode(String type, def params, Closure postInit = null) {
         def content = newContentInstance(type)
         hackedBindData(content, params)
         if (postInit) {
@@ -379,11 +379,12 @@ class ContentRepositoryService implements InitializingBean {
     Boolean createNode(Content content, Content parentContent = null) {
         requirePermissions(parentContent ?: content.space, [WeceemSecurityPolicy.PERMISSION_CREATE])        
 
-        if (log.debugEnabled) {
-            log.debug "Creating node: ${content.dump()}"
-        }
         if (parentContent == null) parentContent = content.parent
 
+        if (log.debugEnabled) {
+            log.debug "Creating node: ${content.dump()} with parent [$parentContent]"
+        }
+        
         def result 
         if (content.metaClass.respondsTo(content, 'create', Content)) {
             // Call the event so that nodes can perform post-creation tasks
@@ -393,33 +394,61 @@ class ContentRepositoryService implements InitializingBean {
         }
 
         if (result) {
+            // @todo This is not safe in concurrent environments, you can end up with 2 
+            // nodes with same orderIndex - which is not prevented by constraints but may be annoying for users
+            // Try to update this to use executeUpdate to set the index, at some point
+            def orderIndex = -1
+            Content.withNewSession {
+                def criteria = Content.createCriteria()
+                def nodes = criteria {
+                    if (parentContent) {
+                        eq("parent", parentContent)
+                    } else {
+                        isNull("parent")
+                    }
+                    maxResults(1)
+                    order("orderIndex", "desc")
+                }
+                orderIndex = nodes ? nodes[0].orderIndex + 1 : 0
+            }
+            content.orderIndex = orderIndex
+
+            if (parentContent) {
+                parentContent.addToChildren(content)
+            }
+
             // We complete the AliasURI, AFTER handling the create() event which may need to affect title/aliasURI
             if (!content.aliasURI) {
                 content.createAliasURI(parentContent)
             }
             
-            result = content.validate()
-        }
-        
-        // Update date orderIndex to last order index + 1 in the parent's child list
-        if (result){
-            if (parentContent) {
-                def orderIndex = parentContent.children ?
-                                 parentContent.children?.last()?.orderIndex + 1 : 0
-                content.orderIndex = orderIndex
-                parentContent.addToChildren(content)
-            } else {
-                def criteria = Content.createCriteria()
-                def nodes = criteria {
-                    isNull("parent")
-                    maxResults(1)
-                    order("orderIndex", "desc")
+            // We must have generated aliasURI and set parent here to be sure that the uri is unique
+            boolean saved = false
+            int attempts = 0
+            while (!saved && (attempts++ < 100)) {
+                try {
+                    if (content.save(flush:true)) {
+                        saved = true
+                    }
+                } catch (ConstraintViolationException cve) {
+                    // See if we get a new aliasURI from the content, and if so try again
+                    def oldAliasURI = content.aliasURI
+                    content.createAliasURI(parentContent)
+                    if (oldAliasURI != content.aliasURI) {
+                        if (log.warnEnabled) {
+                            log.warn "Failed to create new content ${content.dump()} due to constraint violation, trying again with new aliasURI"
+                        }
+                    } else {
+                        log.error "Failed to create new content ${content.dump()} due to constraint violation, giving up as aliasURI is invariant"
+                        result = false
+                        break;
+                    }
                 }
-                content.orderIndex = nodes[0].orderIndex + 1
             }
-        }else{
-            if (!parentContent)
-                content.errors.rejectValue("aliasURI", "org.weceem.content.Content.aliasURI.unique")
+
+            if (!result) {
+                parent.discard() // revert the changes we made to parent
+            }
         }
         return result
     }
@@ -547,7 +576,7 @@ class ContentRepositoryService implements InitializingBean {
     def shiftNodeChildrenOrderIndex(parent = null, shiftedOrderIndex){
         // Can't do this until space is supplied
         //requirePermissions(parent, [WeceemSecurityPolicy.PERMISSION_EDIT])        
-
+        // @todo this is probably flushing the session with incomplete changes - use withNewSession?
         def criteria = Content.createCriteria()
         def nodes = criteria {
             if (parent){
@@ -871,6 +900,9 @@ class ContentRepositoryService implements InitializingBean {
      * @todo we can probably improve performance by applying the typeRestriction using some HQL
      */ 
     def findChildren(Content sourceNode, Map args = Collections.EMPTY_MAP) {
+        if (log.debugEnabled) {
+            log.debug "Finding children of ${sourceNode.absoluteURI} with args $args"
+        }
         // @todo we also need to filter the result list by VIEW permission too!
         assert sourceNode != null
         requirePermissions(sourceNode, [WeceemSecurityPolicy.PERMISSION_VIEW])        
@@ -882,6 +914,9 @@ class ContentRepositoryService implements InitializingBean {
         
         // @todo replace this with smarter queries on children instead of requiring loading of all child objects
         def typeRestriction = getContentClassForType(args.type)
+        if (log.debugEnabled) {
+            log.debug "Finding children of ${sourceNode.absoluteURI} restricting type to ${typeRestriction}"
+        }
         def children = doCriteria(typeRestriction, args.status, args.params) {
             if (sourceNode == null) {
                 isNull('parent')

@@ -44,10 +44,14 @@ class Comment extends Content {
     
     @Override
     public void createAliasURI(parent) {
-        def kidList = ApplicationHolder.application.mainContext.contentRepositoryService.findChildren(parent, 
-            [max:1, sort:'orderIndex', order:'desc', type:'org.weceem.content.Comment'])
-        def lastIdx = kidList ? kidList[0].orderIndex : 0
-        aliasURI = "comment-"+(lastIdx+1)
+        Content.withNewSession {
+            def kidList = ApplicationHolder.application.mainContext.contentRepositoryService.findChildren(parent, [
+                 type:'org.weceem.content.Comment', 
+                 params:[max:1, sort:'orderIndex', order:'desc']
+            ])
+            def lastIdx = kidList ? kidList[0].orderIndex : 0
+            aliasURI = "comment-"+(lastIdx+1)
+        }    
     }
     
     String getVersioningContent() { content }

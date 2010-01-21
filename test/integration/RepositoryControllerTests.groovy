@@ -109,7 +109,7 @@ class RepositoryControllerTests extends GroovyTestCase {
         //   ----d
         //       ----b (3)
     }
-    
+/*    
     void testInsertNode() {
         def controller = new RepositoryController()
         controller.grailsApplication = grailsApplication
@@ -137,6 +137,7 @@ class RepositoryControllerTests extends GroovyTestCase {
         assertEquals parent, node.parent
         assertNotNull parent.children?.find { it.id == node.id }
     }
+*/
 
     void testCreateDirectory() {
         createDirectory([dirname: 'sample_dir', 'space.id': spaceA.ident(), statuscode: defStatus.code])

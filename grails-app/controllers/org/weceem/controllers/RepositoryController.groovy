@@ -376,7 +376,7 @@ class RepositoryController {
             def contentDirectory = new ContentDirectory(title: params.dirname,
                     content: '', filesCount: 0, space: space,
                     mimeType: '', fileSize: 0, status: Status.findByCode(params.statuscode))
-            contentDirectory.createAliasURI(contentRepositoryService, (parent && (parent instanceof ContentDirectory)) ? parent : null)
+            contentDirectory.createAliasURI((parent && (parent instanceof ContentDirectory)) ? parent : null)
             if (contentDirectory.save()) {
                 if (!contentRepositoryService.createNode(contentDirectory, parent)) {
                     flash.error = message(code: 'error.contentRepository.fileSystem')

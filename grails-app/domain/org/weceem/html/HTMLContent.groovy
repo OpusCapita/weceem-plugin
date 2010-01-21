@@ -67,6 +67,7 @@ class HTMLContent extends Content {
         keywords(nullable: true, blank: true, maxSize: 200)
         menuTitle(nullable: true, blank: true, maxSize: 40)
         htmlTitle(nullable: true, blank: true, maxSize: 400)
+        allowGSP(nullable: true)
         template(nullable: true)
         status(nullable: false) // Workaround for Grails 1.1.1 constraint inheritance bug
     }
