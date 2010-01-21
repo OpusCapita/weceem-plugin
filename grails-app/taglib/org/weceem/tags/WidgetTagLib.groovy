@@ -44,7 +44,6 @@ class WidgetTagLib {
 
         if (path) {
             widget = contentRepositoryService.findContentForPath(path, space)?.content
-            println "Response from fCP $path is: ${widget?.dump()}"
             if (!widget) {
                 throwTagError("There is no Widget at aliasURI [${path}] in the space [${space.name}]")
             }
