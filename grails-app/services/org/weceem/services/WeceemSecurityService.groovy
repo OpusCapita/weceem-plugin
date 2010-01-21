@@ -57,7 +57,7 @@ class WeceemSecurityService implements InitializingBean {
         return roles
     }
 
-    boolean hasPermissions(Space space, permList) {
+    boolean hasPermissions(Space space, permList, Class<Content> type = null) {
         if (log.debugEnabled) {
             log.debug "Checking if user $userName with roles $userRoles has permissions $permList on space $space"
         }
@@ -69,7 +69,7 @@ class WeceemSecurityService implements InitializingBean {
             permList)
     }
 
-    boolean hasPermissions(Content content, permList) {
+    boolean hasPermissions(Content content, permList, Class<Content> type = null) {
         if (log.debugEnabled) {
             log.debug "Checking if user $userName with roles $userRoles has permissions $permList on content at ${content.aliasURI}"
         }
@@ -81,7 +81,7 @@ class WeceemSecurityService implements InitializingBean {
             permList)
     }
 
-    boolean hasPermissions(Space space, String uri, permList) {
+    boolean hasPermissions(Space space, String uri, permList, Class<Content> type = null) {
         if (log.debugEnabled) {
             log.debug "Checking if user $userName with roles $userRoles has permissions $permList on content at ${uri}"
         }
@@ -107,7 +107,7 @@ class WeceemSecurityService implements InitializingBean {
      * Allows applications to implement ACLs
      */
     boolean isUserAllowedToCreateContent(Content parent, Class<Content> type) {
-        hasPermissions(parent, [WeceemSecurityPolicy.PERMISSION_CREATE])
+        hasPermissions(parent, [WeceemSecurityPolicy.PERMISSION_CREATE], type)
     }
 
     /**

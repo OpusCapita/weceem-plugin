@@ -189,14 +189,14 @@ class ContentRepositoryService implements InitializingBean {
         log.info "Successfully imported space template [${templateName}] into space [${space.name}]"
     }
     
-    void requirePermissions(Space space, permissionList) throws AccessDeniedException {
-        if (!weceemSecurityService.hasPermissions(space, permissionList)) {
+    void requirePermissions(Space space, permissionList, Class<Content> type = null) throws AccessDeniedException {
+        if (!weceemSecurityService.hasPermissions(space, permissionList, type)) {
             throw new AccessDeniedException("User [${weceemSecurityService.userName}] with roles [${weceemSecurityService.userRoles}] does not have the permissions [$permissionList] to access space [${space.name}]")
         }
     }       
     
-    void requirePermissions(Content content, permissionList) throws AccessDeniedException {
-        if (!weceemSecurityService.hasPermissions(content, permissionList)) {
+    void requirePermissions(Content content, permissionList, Class<Content> type = null) throws AccessDeniedException {
+        if (!weceemSecurityService.hasPermissions(content, permissionList, type)) {
             throw new AccessDeniedException("User [${weceemSecurityService.userName}] with roles [${weceemSecurityService.userRoles}] does not have the permissions [$permissionList] to access content at [${content.absoluteURI}] in space [${content.space.name}]")
         }
     }       
@@ -378,6 +378,7 @@ class ContentRepositoryService implements InitializingBean {
      */
     Boolean createNode(Content content, Content parentContent = null) {
         requirePermissions(parentContent ?: content.space, [WeceemSecurityPolicy.PERMISSION_CREATE])        
+        if (weceemSecurityService.isUserAllowedToCreateContent(parent, contentClass)) {
 
         if (parentContent == null) parentContent = content.parent
 
@@ -1302,21 +1303,18 @@ class ContentRepositoryService implements InitializingBean {
         
         Class contentClass = getContentClassForType(type)
         // check CREATE permission on the uri & user
-        if (weceemSecurityService.isUserAllowedToCreateContent(parent, contentClass)) {
-            // create content and populate
-            def newContent = createNode(type, data) { c ->
-                c.space = space
-                c.parent = parent
-                c.status = stat
-            }
-            // Check for binding errors
-            if (newContent.hasErrors()) {
-                return newContent // Get out now
-            }
-            return newContent.save() // it might not work, but hasErrors will be set if not
-        } else {
-            throw new AccessDeniedException("User [${weceemSecurityService.userName}] with roles [${weceemSecurityService.userRoles}] does not have the permissions [$permissionList] to create content at [${space.aliasURUI}/${parent.absoluteURI}]")
+        requirePermissions(parent ?: space, [WeceemSecurityPolicy.PERMISSION_CREATE], contentClass)
+        // create content and populate
+        def newContent = createNode(type, data) { c ->
+            c.space = space
+            c.parent = parent
+            c.status = stat
         }
+        // Check for binding errors
+        if (newContent.hasErrors()) {
+            return newContent // Get out now
+        }
+        return newContent.save() // it might not work, but hasErrors will be set if not
     }
 }
 

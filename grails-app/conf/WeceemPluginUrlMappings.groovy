@@ -62,7 +62,6 @@ class WeceemPluginUrlMappings {
             constraints {
                 // @todo this is very ugly, clean up
                 uri(validator: { v ->
-                    println "uri value is: $v"
                     !WeceemPluginUrlMappings.FORBIDDEN_SPACE_URIS.find { pref -> return v?.startsWith(pref) }
                 })
             }
