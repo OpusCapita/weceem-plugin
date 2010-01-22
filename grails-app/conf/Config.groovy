@@ -5,7 +5,7 @@ grails.views.gsp.encoding="UTF-8"
 
 org.weceem.plugin.standalone="true"
 
-//weceem.content.prefix="mycontent"
+//weceem.content.prefix="content"
 //weceem.admin.prefix="cms"
 //weceem.admin.layout="weceemadmin-alt"
 
@@ -18,7 +18,7 @@ log4j = {
 	       'org.codehaus.groovy.grails.web.pages' //  GSP
     info   'grails.app'
 
-    info   'grails.app.controller',
+    debug   'grails.app.controller',
             'grails.app.service',
             'org.codehaus.groovy.grails.web.mapping' // URL mapping
     
