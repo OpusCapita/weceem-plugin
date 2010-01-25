@@ -45,11 +45,7 @@ class WeceemPluginUrlMappings {
 
         def toolFunctionsPrefix = (WeceemPluginUrlMappings.TOOLS_PREFIX ? '/' : '')+"${WeceemPluginUrlMappings.TOOLS_PREFIX}"
 
-        name contentSubmission: "/submit/$action?" {
-            controller = "contentSubmission"
-        }
-
-        "/submit/$action?" {
+        name contentSubmission: delegate.(toolFunctionsPrefix+"/submit/$action?") {
             controller = "contentSubmission"
         }
         

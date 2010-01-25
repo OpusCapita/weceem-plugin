@@ -583,6 +583,6 @@ class WeceemTagLib {
                 o << "<input type=\"hidden\" name=\"$k\" value=\"$v\"/>"
         }
         o << body()
-        o << "</form>"
+        o << "</form>" 
     }
 }

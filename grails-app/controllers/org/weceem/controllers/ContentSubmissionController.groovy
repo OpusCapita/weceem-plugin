@@ -36,7 +36,7 @@ class ContentSubmissionController {
             flash[ContentController.FLASH_MESSAGE] = content.status.publicContent ? 
                 "contentSubmission.content.accepted.published" : 
                 "contentSubmission.content.accepted.not.published"
-            redirect(controller:'content', params:[uri:space.aliasURI+'/'+successPath])
+            redirect(controller:'content', action:'show', params:[uri:space.aliasURI+'/'+successPath])
         }
     }
 }
