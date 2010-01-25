@@ -4,7 +4,7 @@ import org.weceem.content.Space
 
 class ContentSubmissionController {
 
-    static allowedMethods = [submit:'POST', update:'POST', delete:'POST']
+    static allowedMethods = [submit:'POST' /*, update:'POST', delete:'POST'*/]
     
     def weceemSecurityService
     def contentRepositoryService
@@ -38,11 +38,5 @@ class ContentSubmissionController {
                 "contentSubmission.content.accepted.not.published"
             redirect(controller:'content', params:[uri:space.aliasURI+'/'+successPath])
         }
-    }
-    
-    def update = {
-    }
-    
-    def delete = {
     }
 }
