@@ -549,7 +549,7 @@ class WeceemTagLib {
         }
     }
 
-    def submitContent = { attrs ->
+    def submitContentLink = { attrs ->
         def parent = attributeToContent(attrs[ATTR_PARENT])
         def type = attrs[ATTR_TYPE]
         def success = attributeToContent(attrs[ATTR_SUCCESS])
@@ -563,12 +563,26 @@ class WeceemTagLib {
             successPath:success.absoluteURI,
             formPath:currentContentPath
         ])
-/*        out << g.createLink(controller:'contentSubmission', action:'submit', params:[
-            spaceId:space.id,
+    }
+
+    def submitContentForm = { attrs, body ->
+        def parent = attributeToContent(attrs[ATTR_PARENT])
+        def type = attrs[ATTR_TYPE]
+        def success = attributeToContent(attrs[ATTR_SUCCESS])
+        def currentContentPath = request[ContentController.REQUEST_ATTRIBUTE_PAGE].URI
+        def space = request[ContentController.REQUEST_ATTRIBUTE_SPACE]
+        
+        def link = g.createLink(mapping:'contentSubmission', action:'submit')
+        def o = out
+        o << "<form action=\"${link}\" method=\"POST\">"
+        [spaceId:space.id,
             parentId:parent.id,
             type:type,
             successPath:success.absoluteURI,
-            formPath:currentContentPath
-        ])
-*/    }
+            formPath:currentContentPath].each { k, v ->
+                o << "<input type=\"hidden\" name=\"$k\" value=\"$v\"/>"
+        }
+        o << body()
+        o << "</form>"
+    }
 }
