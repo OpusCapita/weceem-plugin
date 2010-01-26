@@ -196,8 +196,10 @@ class WeceemTagLib {
         throwTagError("eachDescendent not implemented yet")
     }
     
+    // @todo this is meant to go through the entire content database, filtering using the args supplied
+    // expensive and unnecessary?
     def eachContent = { attrs, body -> 
-        throwTagError("link not implemented yet")
+        throwTagError("eachContent not implemented yet")
         /*
         def params = makeFindParams(attrs)
         def content = contentRepositoryService.findContent(attrs[ATTR_TYPE], params)
@@ -584,5 +586,11 @@ class WeceemTagLib {
         }
         o << body()
         o << "</form>" 
+    }
+    
+    def eachComment = { attrs, body ->
+        attrs[ATTR_TYPE] = org.weceem.content.Comment
+        attrs[ATTR_VAR] = "comment"
+        out << wcm.eachChild(attrs, body)
     }
 }
