@@ -4,9 +4,9 @@ class WeceemPluginUrlMappings {
     static CONTENT_PREFIX = ((ConfigurationHolder.config.weceem.content.prefix instanceof String) ? 
         ConfigurationHolder.config.weceem.content.prefix : '')
     static TOOLS_PREFIX = ((ConfigurationHolder.config.weceem.tools.prefix instanceof String) ? 
-        ConfigurationHolder.config.weceem.tools.prefix : 'cms')
+        ConfigurationHolder.config.weceem.tools.prefix : 'wcm')
     static ADMIN_PREFIX = ((ConfigurationHolder.config.weceem.admin.prefix instanceof String) ?
-        ConfigurationHolder.config.weceem.admin.prefix : 'cms/admin')
+        ConfigurationHolder.config.weceem.admin.prefix : 'wcm/admin')
     
     static FORBIDDEN_SPACE_URIS = [
         // Internal/app resources
@@ -18,7 +18,6 @@ class WeceemPluginUrlMappings {
         // Admin links
         "${WeceemPluginUrlMappings.ADMIN_PREFIX}/",
         "${WeceemPluginUrlMappings.TOOLS_PREFIX}/",
-        "submit/"
     ]
     
     static mappings = {
@@ -47,6 +46,10 @@ class WeceemPluginUrlMappings {
 
         name contentSubmission: delegate.(toolFunctionsPrefix+"/submit/$action?") {
             controller = "contentSubmission"
+        }
+        
+        name feed: delegate.(toolFunctionsPrefix+"/feed/$action/$uri**") {
+            controller = "feeds"
         }
         
         // This is tricky

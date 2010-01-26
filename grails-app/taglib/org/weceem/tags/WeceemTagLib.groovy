@@ -57,6 +57,7 @@ class WeceemTagLib {
     static ATTR_FORMAT = "format"
     static ATTR_CODEC = "codec"
     static ATTR_TITLE = "title"
+    static ATTR_VERSION = "version"
 
     static namespace = "wcm"
     
@@ -396,20 +397,24 @@ class WeceemTagLib {
             content = contentInfo.content
         }
         
-        // @todo This is quite crappy, we should be getting these urls from a cache
-        StringBuffer path = new StringBuffer()
-        if (space.aliasURI) {
-            path << space.aliasURI
-            path << '/'
-        }
-        if(content.absoluteURI) {
-            path << content.absoluteURI
-            path <<  '/'
-        }
-        attrs.params = [uri:path.toString()]
+        attrs.params = [uri:WeceemTagLib.makeFullContentURI(content)]
         attrs.controller = 'content'
         attrs.action = 'show'
         out << g.createLink(attrs)
+    }
+    
+    /**
+     * Make a full URI to content including the space URI
+     */
+    static makeFullContentURI(Content content) {
+        // @todo This is quite crappy, we should be getting these urls from a cache
+        StringBuffer path = new StringBuffer()
+        if (content.space.aliasURI) {
+            path << content.space.aliasURI
+            path << '/'
+        }
+        path << content.absoluteURI
+        path.toString()
     }
     
     def date = { attrs, body -> 
@@ -546,9 +551,9 @@ class WeceemTagLib {
         } else {
             def s = attribValue.toString()
             if (s.isLong()) {
-                Content.get(s.toLong())
+                return Content.get(s.toLong())
             } else {
-                contentRepositoryService.findContentForPath(s, request[ContentController.REQUEST_ATTRIBUTE_SPACE])
+                return contentRepositoryService.findContentForPath(s, request[ContentController.REQUEST_ATTRIBUTE_SPACE])?.content
             }
         }
     }
@@ -602,9 +607,9 @@ class WeceemTagLib {
      */
     def archiveList = { attrs, body ->
         def type = attrs[ATTR_TYPE] ?: org.weceem.blog.BlogEntry
-        def parent = attributeToContent(attrs[ATTR_PARENT]) 
+        def parent = attributeToContent(attrs[ATTR_PATH]) 
         if (!parent) {
-            throwTagError( "archiveList tag requires [$ATTR_PARENT] attribute")
+            throwTagError( "archiveList tag requires [$ATTR_PATH] attribute")
         }
         def monthsWithContent = contentRepositoryService.findMonthsWithContent(parent, type)
         monthsWithContent.each { entry ->
@@ -612,11 +617,26 @@ class WeceemTagLib {
         }
     }
     
+    // @todo Make this client locale aware!
     def monthName = { attrs ->
         def v = attrs[ATTR_VALUE]
         if (!v) {
             throwTagError( "archiveList tag requires [$ATTR_VALUE] attribute")
         }
         out << new DateFormatSymbols().months[v-1]
+    }
+    
+    def createFeedLink = { attrs ->
+        def path = attributeToContent(attrs[ATTR_PATH])
+        out << g.createLink(mapping:'feeds', action:attrs[ATTR_TYPE], params:[uri:WeceemTagLib.makeFullContentURI(path)])
+    }
+
+    def feedLink = { attrs ->
+        def path = attributeToContent(attrs[ATTR_PATH])
+        System.out.println "Content for path ${attrs[ATTR_PATH]} was [$path]"
+        out << feed.meta( kind:attrs[ATTR_TYPE], version:attrs[ATTR_VERSION] ?: '',
+            mapping:'feed', 
+            action:attrs[ATTR_TYPE], 
+            params:[uri:WeceemTagLib.makeFullContentURI(path)] )
     }
 }

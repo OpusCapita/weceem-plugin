@@ -26,6 +26,10 @@ log4j = {
 }
 
 environments {
+    development {
+        grails.serverURL = 'http://localhost:8080/weceem'
+    }
+    
     test {
         log4j = {
             root {
