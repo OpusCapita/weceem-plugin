@@ -209,6 +209,9 @@ class ContentRepositoryService implements InitializingBean {
         // @todo remove/rework this for 0.2
         def contentList = Content.findAllBySpace(space)
         for (content in contentList){
+            // Invalidate the caches before parent is changedBy
+            invalidateCachingForURI(content.space, content.absoluteURI)
+
             content.parent = null
             content.save()
         }
@@ -648,6 +651,9 @@ class ContentRepositoryService implements InitializingBean {
             if (!sourceContent.deleteContent()) return false
         }
 
+        // Do this now before absoluteURI gets trashed by changing the parent
+        invalidateCachingForURI(sourceContent.space, sourceContent.absoluteURI)
+
         def parent = sourceContent.parent
 
         // if there is a parent  - we delete node from its association
@@ -675,8 +681,6 @@ class ContentRepositoryService implements InitializingBean {
         if (sourceContent.metaClass.hasProperty(sourceContent, 'target')?.type == Content) {
             sourceContent.target = null
         }
-
-        invalidateCachingForURI(sourceContent.space, sourceContent.absoluteURI)
 
         sourceContent.delete(flush: true)
 
@@ -764,6 +768,7 @@ class ContentRepositoryService implements InitializingBean {
     void invalidateCachingForURI( Space space, uri) {
         // If this was content that created a cached GSP class, clear it now
         def key = makeURICacheKey(space,uri)
+        log.debug "Removing cached info for cache key [$key]"
         gspClassCache.remove(key) // even if its not a GSP lets just assume so, quicker than checking & remove
         uriToIdCache.remove(key)
     }
@@ -1331,5 +1336,95 @@ class ContentRepositoryService implements InitializingBean {
         // Check for binding errors
         return newContent.hasErrors() ? newContent : newContent.save() // it might not work, but hasErrors will be set if not
     }
+    
+    /**
+     * Return a list of month/year pairs for all months where there is content under the parent (children) of the specified type
+     * Results are in descending year and month order
+     */
+    def findMonthsWithContent(parentOrSpace, contentType) {
+        def type = getContentClassForType(contentType)
+        def parentClause = parentOrSpace instanceof Content ? "parent = :parent" : "space = :parent"
+        def monthsYears = type.executeQuery("""select distinct month(changedOn), year(changedOn) from 
+${type.name} where $parentClause and status.publicContent = true and changedOn < current_timestamp() 
+order by year(changedOn) desc, month(changedOn) desc""", [parent:parentOrSpace])
+
+        return monthsYears?.collect() {
+            [month: it[0]+1, year: it[1]]
+        }      
+    }
+        
+    /** 
+     * Get all the content within a given month and year
+     */
+     /*
+    def findContentForMonth(parentOrSpace, contentType, month, year) {
+        if (params.category) {
+            def tag = BlogTag.findByName(params.category)
+            def dates = [null, new Date()]
+            if (params.month != null) {
+                calculateDatesForMonth(params, dates)
+            }
+
+            if (tag) {
+              def tagCriteria = BlogTagLink.createCriteria()
+              println "dates: ${dates.dump()}"
+              def tagLinks = tagCriteria {
+                  maxResults(params.max ? params.max.toInteger() : 10)
+                  firstResult(params.offset ? params.offset.toInteger() : 0)
+                  eq('tag', tag)
+                  article {
+                      eq('live', true)
+                      if (dates[0]) {
+                          ge('publishDate', dates[0])
+                      }
+                      le('publishDate', dates[1])
+                      order( "publishDate", "desc")
+                  }
+              }
+              def results =  tagLinks.collect() { it.article }
+              return results
+            } else 
+              return []
+        } else {
+            if (params.month != null) {
+                def dates = [new Date(0), new Date()]
+                calculateDatesForMonth(params, dates)
+                return BlogArticle.findAllByLiveAndPublishDateBetween(true, dates[0], dates[1],
+                    [sort:'publishDate', order:'desc', max: params.max, offset: params.offset])        
+            } else {
+                return BlogArticle.findAllByLiveAndPublishDateLessThanEquals(true, new Date(),
+                    [sort:'publishDate', order:'desc', max: params.max, offset: params.offset])        
+            }            
+        }
+    }
+    
+    private calculateDatesForMonth(params, dates) {
+        def t = new GregorianCalendar()
+        t.set(Calendar.DAY_OF_MONTH, 1)
+        t.set(Calendar.MILLISECOND, 0)
+        t.set(Calendar.HOUR_OF_DAY, 0)
+        t.set(Calendar.MINUTE, 0)
+        t.set(Calendar.SECOND, 0)
+        t.set(Calendar.MONTH, params.month?.toInteger()-1)
+        params.archiveMonth = t.get(Calendar.MONTH)+1 // we want 1-based month numbers for niceness
+        def y 
+        if (params.year) {
+            y = params.year.toInteger() 
+        } else {
+            def c = new GregorianCalendar()
+            y = c.get(Calendar.YEAR)
+        }
+        t.set(Calendar.YEAR, y)
+        params.archiveYear = y
+        dates[0] = t.time
+        
+        t.set(Calendar.DAY_OF_MONTH, t.getActualMaximum(Calendar.DAY_OF_MONTH))
+        t.set(Calendar.HOUR_OF_DAY, t.getActualMaximum(Calendar.HOUR_OF_DAY))
+        t.set(Calendar.MINUTE, t.getActualMaximum(Calendar.MINUTE))
+        t.set(Calendar.SECOND, t.getActualMaximum(Calendar.SECOND))
+        t.set(Calendar.MILLISECOND, t.getActualMaximum(Calendar.MILLISECOND))
+        dates[1] = t.time     
+    }
+    */
 }
 

@@ -14,6 +14,7 @@
 package org.weceem.tags
 
 import java.text.SimpleDateFormat
+import java.text.DateFormatSymbols
 import org.weceem.controllers.ContentController
 import org.codehaus.groovy.grails.commons.ApplicationHolder as AH
 import org.codehaus.groovy.grails.commons.ConfigurationHolder as CH
@@ -40,6 +41,7 @@ class WeceemTagLib {
     static ATTR_STATUS = "status"
     static ATTR_SPACE = "space"
     static ATTR_VAR = "var"
+    static ATTR_VALUE = "value"
     static ATTR_SIBLINGS = "siblings"
     static ATTR_LEVELS = "levels"
     static ATTR_CUSTOM = "custom"
@@ -592,5 +594,29 @@ class WeceemTagLib {
         attrs[ATTR_TYPE] = org.weceem.content.Comment
         attrs[ATTR_VAR] = "comment"
         out << wcm.eachChild(attrs, body)
+    }
+    
+    /**
+     * Invokes the body for every month/year combination that has content under the parent, of the specified type
+     * Results are in reverse year and month order
+     */
+    def archiveList = { attrs, body ->
+        def type = attrs[ATTR_TYPE] ?: org.weceem.blog.BlogEntry
+        def parent = attributeToContent(attrs[ATTR_PARENT]) 
+        if (!parent) {
+            throwTagError( "archiveList tag requires [$ATTR_PARENT] attribute")
+        }
+        def monthsWithContent = contentRepositoryService.findMonthsWithContent(parent, type)
+        monthsWithContent.each { entry ->
+            out << body(month:entry.month, year:entry.year)
+        }
+    }
+    
+    def monthName = { attrs ->
+        def v = attrs[ATTR_VALUE]
+        if (!v) {
+            throwTagError( "archiveList tag requires [$ATTR_VALUE] attribute")
+        }
+        out << new DateFormatSymbols().months[v-1]
     }
 }
