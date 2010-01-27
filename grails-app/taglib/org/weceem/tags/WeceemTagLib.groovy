@@ -613,7 +613,8 @@ class WeceemTagLib {
         }
         def monthsWithContent = contentRepositoryService.findMonthsWithContent(parent, type)
         monthsWithContent.each { entry ->
-            out << body(month:entry.month, year:entry.year)
+            out << body(month:entry.month, year:entry.year, 
+                link:g.createLink(mapping:'archive', params:[uri:WeceemTagLib.makeFullContentURI(parent)+"/${entry.year}/${entry.month}"]) )
         }
     }
     

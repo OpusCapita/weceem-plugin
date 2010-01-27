@@ -59,6 +59,8 @@ class Content implements Comparable {
     String changedBy
     Date changedOn
     
+    Date publicationDate
+
     Status status
     
     static belongsTo = [space: Space, parent: Content]
@@ -77,6 +79,7 @@ class Content implements Comparable {
         createdOn(nullable: true)
         changedBy(nullable: true)
         changedOn(nullable: true)
+        publicationDate(nullable: true)
         language(nullable: true, size:0..3)
     }
 
@@ -103,6 +106,7 @@ class Content implements Comparable {
         createdOn editor:'ReadOnlyDate', group:'extra'
         changedBy editor:'ReadOnly', group:'extra'
         changedOn editor:'ReadOnlyDate', group:'extra'
+        publicationDate group:'extra'
         parent hidden:true
         children hidden:true
     }

@@ -42,6 +42,7 @@ class BlogEntry extends Content {
     }
     
     static constraints = {
+        summary(maxSize:500)
         content(maxSize:100000)
         status(nullable: false)
     }
@@ -53,6 +54,8 @@ class BlogEntry extends Content {
     }
 
     static transients = Content.transients + ['summary']
+
+    String getMimeType() { "text/html" }
 
     String getVersioningContent() { content }
 

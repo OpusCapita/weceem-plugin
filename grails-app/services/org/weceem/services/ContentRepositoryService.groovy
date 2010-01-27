@@ -1350,9 +1350,9 @@ class ContentRepositoryService implements InitializingBean {
     def findMonthsWithContent(parentOrSpace, contentType) {
         def type = getContentClassForType(contentType)
         def parentClause = parentOrSpace instanceof Content ? "parent = :parent" : "space = :parent"
-        def monthsYears = type.executeQuery("""select distinct month(changedOn), year(changedOn) from 
-${type.name} where $parentClause and status.publicContent = true and changedOn < current_timestamp() 
-order by year(changedOn) desc, month(changedOn) desc""", [parent:parentOrSpace])
+        def monthsYears = type.executeQuery("""select distinct month(publicationDate), year(publicationDate) from 
+${type.name} where $parentClause and status.publicContent = true and publicationDate < current_timestamp() 
+order by year(publicationDate) desc, month(publicationDate) desc""", [parent:parentOrSpace])
         return monthsYears?.collect() {
             [month: it[0]+1, year: it[1]]
         }      
@@ -1389,9 +1389,9 @@ order by year(changedOn) desc, month(changedOn) desc""", [parent:parentOrSpace])
                 eq('parent', parentOrSpace)
             }
 
-            ge('changedOn', startDate)
-            le('changedOn', endDate)
-            order('changedOn', 'desc')
+            ge('publicationDate', startDate)
+            le('publicationDate', endDate)
+            order('publicationDate', 'desc')
             cache true
         }
         

@@ -63,7 +63,7 @@ class HTMLContent extends Content {
     }
     
     static constraints = {
-        content(nullable: false, maxSize: 65536)
+        content(nullable: false, maxSize: 500000)
         keywords(nullable: true, blank: true, maxSize: 200)
         menuTitle(nullable: true, blank: true, maxSize: 40)
         htmlTitle(nullable: true, blank: true, maxSize: 400)

@@ -17,10 +17,8 @@ class FeedsController {
         def space = info.space
         def uri = info.uri
         def node = contentRepositoryService.findContentForPath(uri, space)?.content
-        println "Found content node for uri [$uri]: $node"
         if (node) {
             def nodes = contentRepositoryService.findChildren(node, [status:ContentRepositoryService.STATUS_ANY_PUBLISHED, max:25])
-            println "Found children of uri [$uri]: $nodes"
             return [parent: node, nodes: nodes, space:space]
         }
     }
@@ -40,9 +38,9 @@ class FeedsController {
             data.nodes.each { n ->
                 entry {
                     title = n.title
-                    publishedDate = n.changedOn
+                    publishedDate = n.publicationDate
                     link = g.createLink(controller:'content', action:'show', params:[uri: WeceemTagLib.makeFullContentURI(n)], absolute:true)
-                    return n.content
+                    content(type:n.mimeType, value: n.summary ?: n.content)
                 }
             }
         }
