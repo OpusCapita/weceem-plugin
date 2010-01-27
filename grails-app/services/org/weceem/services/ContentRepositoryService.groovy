@@ -912,12 +912,14 @@ class ContentRepositoryService implements InitializingBean {
         }
         // @todo we also need to filter the result list by VIEW permission too!
         assert sourceNode != null
-        requirePermissions(sourceNode, [WeceemSecurityPolicy.PERMISSION_VIEW])        
-        
+
         // for VirtualContent - the children list is a list of target children
         if (sourceNode instanceof VirtualContent) {
             sourceNode = sourceNode.target
         }
+
+        requirePermissions(sourceNode, [WeceemSecurityPolicy.PERMISSION_VIEW])        
+        
         
         // @todo replace this with smarter queries on children instead of requiring loading of all child objects
         def typeRestriction = getContentClassForType(args.type)
@@ -933,10 +935,13 @@ class ContentRepositoryService implements InitializingBean {
             cache true
         }
         
-        return children //  sortNodes(children, params?.sort, params?.order)
+        return children
     }
 
 
+    /**
+     * Sort function for queries that cannot be sorted in the database, i.e. aggregated data
+     */
     def sortNodes(nodes, sortProperty, sortDirection = "asc") {
         if (sortProperty) {
             if (sortDirection == "asc") {
@@ -1340,6 +1345,7 @@ class ContentRepositoryService implements InitializingBean {
     /**
      * Return a list of month/year pairs for all months where there is content under the parent (children) of the specified type
      * Results are in descending year and month order
+     * @todo Implement permissions use here, or is it ok to ignore this, it only leaks dates?
      */
     def findMonthsWithContent(parentOrSpace, contentType) {
         def type = getContentClassForType(contentType)
@@ -1347,84 +1353,111 @@ class ContentRepositoryService implements InitializingBean {
         def monthsYears = type.executeQuery("""select distinct month(changedOn), year(changedOn) from 
 ${type.name} where $parentClause and status.publicContent = true and changedOn < current_timestamp() 
 order by year(changedOn) desc, month(changedOn) desc""", [parent:parentOrSpace])
-
         return monthsYears?.collect() {
             [month: it[0]+1, year: it[1]]
         }      
     }
         
     /** 
-     * Get all the content within a given month and year
+     * Get all the content within a given time period, inclusive at both ends
+     * 
+     * 
      */
-     /*
-    def findContentForMonth(parentOrSpace, contentType, month, year) {
-        if (params.category) {
-            def tag = BlogTag.findByName(params.category)
-            def dates = [null, new Date()]
-            if (params.month != null) {
-                calculateDatesForMonth(params, dates)
+    def findContentForTimePeriod(parentOrSpace, startDate, endDate, args = [:]) {
+        if (log.debugEnabled) {
+            log.debug "Finding children of ${parentOrSpace} with args $args"
+        }
+        assert parentOrSpace != null
+
+        // for VirtualContent - the children list is a list of target children
+        if (parentOrSpace instanceof VirtualContent) {
+            parentOrSpace = parentOrSpace.target
+        }
+
+        requirePermissions(parentOrSpace, [WeceemSecurityPolicy.PERMISSION_VIEW])        
+        
+        // @todo replace this with smarter queries on children instead of requiring loading of all child objects
+        def typeRestriction = getContentClassForType(args.type)
+        if (log.debugEnabled) {
+            log.debug "Finding children of ${parentOrSpace} restricting type to ${typeRestriction}"
+        }
+        def children = doCriteria(typeRestriction, args.status, args.params) {
+            if (parentOrSpace instanceof Space) {
+                isNull('parent')
+                eq('space', parentOrSpace)
+            } else {
+                eq('parent', parentOrSpace)
             }
 
-            if (tag) {
-              def tagCriteria = BlogTagLink.createCriteria()
-              println "dates: ${dates.dump()}"
-              def tagLinks = tagCriteria {
-                  maxResults(params.max ? params.max.toInteger() : 10)
-                  firstResult(params.offset ? params.offset.toInteger() : 0)
-                  eq('tag', tag)
-                  article {
-                      eq('live', true)
-                      if (dates[0]) {
-                          ge('publishDate', dates[0])
-                      }
-                      le('publishDate', dates[1])
-                      order( "publishDate", "desc")
-                  }
-              }
-              def results =  tagLinks.collect() { it.article }
-              return results
-            } else 
-              return []
-        } else {
-            if (params.month != null) {
-                def dates = [new Date(0), new Date()]
-                calculateDatesForMonth(params, dates)
-                return BlogArticle.findAllByLiveAndPublishDateBetween(true, dates[0], dates[1],
-                    [sort:'publishDate', order:'desc', max: params.max, offset: params.offset])        
-            } else {
-                return BlogArticle.findAllByLiveAndPublishDateLessThanEquals(true, new Date(),
-                    [sort:'publishDate', order:'desc', max: params.max, offset: params.offset])        
-            }            
+            ge('changedOn', startDate)
+            le('changedOn', endDate)
+            order('changedOn', 'desc')
+            cache true
         }
+        
+        return children
     }
     
-    private calculateDatesForMonth(params, dates) {
+    /**
+     * Calculates start and end timestamps for first and last second in given month and year, 
+     * returning object containing:
+     * start - Date of 00:00:00 at start of month
+     * end - Date of 23:59:59 at end of month
+     * @param month Number in range 1-12
+     * @param year Number 
+     */
+    def calculateMonthStartEndDates(month, year) {
         def t = new GregorianCalendar()
         t.set(Calendar.DAY_OF_MONTH, 1)
         t.set(Calendar.MILLISECOND, 0)
         t.set(Calendar.HOUR_OF_DAY, 0)
         t.set(Calendar.MINUTE, 0)
         t.set(Calendar.SECOND, 0)
-        t.set(Calendar.MONTH, params.month?.toInteger()-1)
-        params.archiveMonth = t.get(Calendar.MONTH)+1 // we want 1-based month numbers for niceness
-        def y 
-        if (params.year) {
-            y = params.year.toInteger() 
-        } else {
-            def c = new GregorianCalendar()
-            y = c.get(Calendar.YEAR)
-        }
-        t.set(Calendar.YEAR, y)
-        params.archiveYear = y
-        dates[0] = t.time
+        t.set(Calendar.MONTH, month-1)
+        t.set(Calendar.YEAR, year)
+        
+        def result = [:]
+        result.start = t.time
         
         t.set(Calendar.DAY_OF_MONTH, t.getActualMaximum(Calendar.DAY_OF_MONTH))
         t.set(Calendar.HOUR_OF_DAY, t.getActualMaximum(Calendar.HOUR_OF_DAY))
         t.set(Calendar.MINUTE, t.getActualMaximum(Calendar.MINUTE))
         t.set(Calendar.SECOND, t.getActualMaximum(Calendar.SECOND))
         t.set(Calendar.MILLISECOND, t.getActualMaximum(Calendar.MILLISECOND))
-        dates[1] = t.time     
+        result.end = t.time
+        
+        return result
     }
-    */
+    
+    /**
+     * Calculates start and end timestamps for first and last second in given day, month and year, 
+     * returning object containing:
+     * start - Date of 00:00:00 at start of the day
+     * end - Date of 23:59:59 at end of the day
+     * @param day Number in range 1-31
+     * @param month Number in range 1-12
+     * @param year Number 
+     */
+    def calculateDayStartEndDates(day, month, year) {
+        def t = new GregorianCalendar()
+        t.set(Calendar.DAY_OF_MONTH, day)
+        t.set(Calendar.MILLISECOND, 0)
+        t.set(Calendar.HOUR_OF_DAY, 0)
+        t.set(Calendar.MINUTE, 0)
+        t.set(Calendar.SECOND, 0)
+        t.set(Calendar.MONTH, month-1)
+        t.set(Calendar.YEAR, year)
+        
+        def result = [:]
+        result.start = t.time
+        
+        t.set(Calendar.HOUR_OF_DAY, t.getActualMaximum(Calendar.HOUR_OF_DAY))
+        t.set(Calendar.MINUTE, t.getActualMaximum(Calendar.MINUTE))
+        t.set(Calendar.SECOND, t.getActualMaximum(Calendar.SECOND))
+        t.set(Calendar.MILLISECOND, t.getActualMaximum(Calendar.MILLISECOND))
+        result.end = t.time
+        
+        return result
+    }
 }
 

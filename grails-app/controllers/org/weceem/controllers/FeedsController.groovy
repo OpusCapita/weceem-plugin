@@ -1,7 +1,6 @@
 package org.weceem.controllers
 
 import org.weceem.services.ContentRepositoryService
-import org.weceem.services.ContentRepositoryService
 import org.weceem.tags.WeceemTagLib
 
 /**
@@ -38,9 +37,7 @@ class FeedsController {
             description = data.parent.title
             link = g.createLink(controller:'content', action:'show', params:[uri: WeceemTagLib.makeFullContentURI(data.parent)], absolute:true)
             
-            println "In feed r"
             data.nodes.each { n ->
-                println "Rendering feed entry for $n"
                 entry {
                     title = n.title
                     publishedDate = n.changedOn
