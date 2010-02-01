@@ -4,6 +4,7 @@ import org.weceem.content.Content
 import org.weceem.content.Space
 import org.weceem.content.Status
 import org.weceem.content.Template
+import org.weceem.script.WcmScript
 import org.codehaus.groovy.grails.web.pages.TagLibraryLookup
 
 class EditorFieldTagLib {
@@ -43,6 +44,13 @@ class EditorFieldTagLib {
         out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
             noSelection: ['':'- No template -'],
             from: templates, optionValue:'title', optionKey:'id')
+    }
+
+    def editorFieldWcmScript = { attrs ->
+        def templates = WcmScript.findAllBySpace( pageScope.content.space, [sort:'title'])
+        out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
+            noSelection: ['':'- No template -'],
+            from: templates, optionValue:{ it.title + " (${it.absoluteURI})"}, optionKey:'id')
     }
 
     def editorFieldStatus = { attrs ->
@@ -100,6 +108,12 @@ class EditorFieldTagLib {
             model:[name:attrs.property, value:pageScope.content[attrs.property]])
     }
     
+    def editorFieldGroovyCode = { attrs ->
+        // Workaround for Grails 1.1.x bug invoking tags with body as method - have to use a template instead
+        out << g.render(template:'/editors/codeeditor', plugin:'weceem', 
+            model:[name:attrs.property, value:pageScope.content[attrs.property]])
+    }
+    
     def editorResourcesHtmlCode = { attrs ->
         includeEditArea()
         out << """
@@ -128,6 +142,20 @@ class EditorFieldTagLib {
         """
     }
     
+    def editorResourcesGroovyCode = { attrs ->
+       includeEditArea()
+       out << """
+       <script language="javascript" type="text/javascript">
+         editAreaLoader.init({
+             id : "editor_${attrs.property}",
+             syntax: "c",
+             allow_toggle: false,
+             start_highlight: true
+         });
+       </script> 
+       """
+    }
+
     def editorFieldCssCode = { attrs ->
         // Workaround for Grails 1.1.x bug invoking tags with body as method - have to use a template instead
         out << g.render(template:'/editors/codeeditor', plugin:'weceem', 

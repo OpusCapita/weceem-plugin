@@ -14,6 +14,7 @@ import org.weceem.content.*
 import org.weceem.html.*
 import org.weceem.wiki.*
 import org.weceem.files.*
+import org.weceem.script.WcmScript
 
 import org.weceem.security.*
 
@@ -1458,6 +1459,14 @@ order by year(publicationDate) desc, month(publicationDate) desc""", [parent:par
         result.end = t.time
         
         return result
+    }
+    
+    def getScriptInstance(WcmScript s) {
+        def code = s.content
+        def cls = new GroovyClassLoader().parseClass(code)
+        assert Script.isAssignableFrom(cls)
+        
+        cls.newInstance()
     }
 }
 

@@ -17,7 +17,7 @@ class WeceemPluginUrlMappings {
         "WeceemFiles/",
         // Admin links
         "${WeceemPluginUrlMappings.ADMIN_PREFIX}/",
-        "${WeceemPluginUrlMappings.TOOLS_PREFIX}/",
+        "${WeceemPluginUrlMappings.TOOLS_PREFIX}/"
     ]
     
     static mappings = {
@@ -66,7 +66,9 @@ class WeceemPluginUrlMappings {
             constraints {
                 // @todo this is very ugly, clean up
                 uri(validator: { v ->
-                    !WeceemPluginUrlMappings.FORBIDDEN_SPACE_URIS.find { pref -> return v?.startsWith(pref) }
+                    !WeceemPluginUrlMappings.FORBIDDEN_SPACE_URIS.find { pref -> 
+                        return v?.startsWith(pref) 
+                    }
                 })
             }
         })

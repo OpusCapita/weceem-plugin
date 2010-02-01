@@ -21,6 +21,7 @@ import org.springframework.web.context.request.RequestContextHolder
 import grails.util.GrailsUtil
 
 import org.weceem.content.*
+import org.weceem.script.WcmScript
 import org.weceem.security.WeceemSecurityPolicy
 import org.weceem.security.AccessDeniedException
 
@@ -123,11 +124,11 @@ class ContentController {
                         handler.delegate = this
                         handler.resolveStrategy = Closure.DELEGATE_FIRST
                         return handler.call(content)
-                    }
+                    } else {
 
-                    // Fall back to standard rendering
-                    return renderContent(content)
-                
+                        // Fall back to standard rendering
+                        return renderContent(content)
+                    }
                 } else {
                     response.sendError 404, "No content found for this URI"
                     return null
@@ -208,6 +209,13 @@ class ContentController {
         // flush the existing output stream
         out.flush()
         webRequest.renderView = false
+    }
+    
+    /** 
+     * Get a new instance of a script content's Groovy code
+     */
+    def getScriptInstance(WcmScript s) {
+        contentRepositoryService.getScriptInstance(s)
     }
 
     /** 
