@@ -770,7 +770,7 @@ class ContentRepositoryService implements InitializingBean {
         // If this was content that created a cached GSP class, clear it now
         def key = makeURICacheKey(space,uri)
         log.debug "Removing cached info for cache key [$key]"
-        gspClassCache.remove(key) // even if its not a GSP lets just assume so, quicker than checking & remove
+        gspClassCache.remove(key) // even if its not a GSP/script lets just assume so, quicker than checking & remove
         uriToIdCache.remove(key)
     }
     
@@ -1462,10 +1462,20 @@ order by year(publicationDate) desc, month(publicationDate) desc""", [parent:par
     }
     
     def getScriptInstance(WcmScript s) {
-        def code = s.content
-        def cls = new GroovyClassLoader().parseClass(code)
-        assert Script.isAssignableFrom(cls)
+        def absURI = s.absoluteURI
+        if (log.debugEnabled) {
+            log.debug "Getting Groovy script class for $absURI"
+        }
         
+        def cls = cacheService.getOrPutObject(CACHE_NAME_GSP_CACHE, makeURICacheKey(s.space, absURI)) {
+            if (log.debugEnabled) {
+                log.debug "Compiling Groovy script class for $absURI"
+            }
+            def code = s.content
+            def cls = new GroovyClassLoader().parseClass(code)
+            assert Script.isAssignableFrom(cls)
+            return cls
+        }
         cls.newInstance()
     }
 }
