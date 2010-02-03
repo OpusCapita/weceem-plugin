@@ -1461,7 +1461,11 @@ order by year(publicationDate) desc, month(publicationDate) desc""", [parent:par
         return result
     }
     
-    def getScriptInstance(WcmScript s) {
+    /**
+     * Get an instace of the Groovy Script object defined by the WcmScript content node.
+     * Uses caching of compiled classes to prevent permgen explosion, and unique classloaders
+     */ 
+    Script getScriptInstance(WcmScript s) {
         def absURI = s.absoluteURI
         if (log.debugEnabled) {
             log.debug "Getting Groovy script class for $absURI"
@@ -1477,6 +1481,27 @@ order by year(publicationDate) desc, month(publicationDate) desc""", [parent:par
             return cls
         }
         cls.newInstance()
+    }
+    
+    /**
+     * Look for any content pending publication, and move statys to published
+     */
+    def publishPendingContent() {
+        def now = new Date()
+        // Find all content with publication date less than now
+        def pendingContent = Content.withCriteria {
+            lt('publicationDate', now)
+            status {
+                eq('publicContent', false)
+            }
+        }
+        def count = 0
+        pendingContent?.each { content ->
+            // Find the next status (in code order) that is public content, after the content's current status
+            content.status = Status.findByPublicContentAndCodeGreaterThan(true, content.status.code)
+            count++
+        }
+        return count
     }
 }
 
