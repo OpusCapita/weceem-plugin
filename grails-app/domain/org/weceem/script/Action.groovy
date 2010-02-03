@@ -26,6 +26,7 @@ class Action extends Content {
         def code = getScriptInstance(content.script)
         def controller = delegate
         code.metaClass.methodMissing = { String name, Object args ->
+            // Have to call invoke method here as we have a single args object
             controller.invokeMethod("$name", args)   
         }
 
@@ -34,7 +35,6 @@ class Action extends Content {
         }
 
         def r = code.run()
-        println "Result is $r"
         return r
     }
 }
