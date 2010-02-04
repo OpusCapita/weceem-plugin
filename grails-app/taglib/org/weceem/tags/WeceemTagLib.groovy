@@ -40,6 +40,7 @@ class WeceemTagLib {
     static ATTR_SUCCESS = "success"
     static ATTR_STATUS = "status"
     static ATTR_SPACE = "space"
+    static ATTR_COUNTER = "counter"
     static ATTR_VAR = "var"
     static ATTR_VALUE = "value"
     static ATTR_SIBLINGS = "siblings"
@@ -140,8 +141,17 @@ class WeceemTagLib {
         def children = contentRepositoryService.findChildren(baseNode, [type:attrs[ATTR_TYPE], status:status, params:params])
         if (attrs[ATTR_FILTER]) children = children?.findAll(attrs[ATTR_FILTER])
         def var = attrs[ATTR_VAR] ?: null
-        children?.each { child ->
-            out << body(var ? [(var):child] : child)
+        def counter = attrs[ATTR_COUNTER] ?: null
+        children?.eachWithIndex { child, idx ->
+            def args = child
+            if (counter || var) {
+                args = [:]
+                args[var ?: 'it'] = child
+                if (counter) {
+                    args[counter] = idx
+                }
+            }
+            out << body(args)
         }
     }
     
@@ -170,8 +180,17 @@ class WeceemTagLib {
             [type:attrs[ATTR_TYPE], status:status, params:params])
         if (attrs[ATTR_FILTER]) parents = parents?.findAll(attrs[ATTR_FILTER])
         def var = attrs[ATTR_VAR] ?: null
-        parents?.each { parent ->
-            out << body(var ? [(var):parent] : parent)
+        def counter = attrs[ATTR_COUNTER] ?: null
+        parents?.eachWithIndex { parent, idx ->
+            def args = parent
+            if (counter || var) {
+                args = [:]
+                args[var ?: 'it'] = parent
+                if (counter) {
+                    args[counter] = idx
+                }
+            }
+            out << body(args)
         }
     }
    
@@ -190,8 +209,17 @@ class WeceemTagLib {
         }
         if (attrs[ATTR_FILTER]) siblings = siblings?.findAll(attrs[ATTR_FILTER])
         def var = attrs[ATTR_VAR] ?: null
-        siblings?.each { sibling ->
-            out << body(var ? [(var):sibling] : sibling)
+        def counter = attrs[ATTR_COUNTER] ?: null
+        siblings?.eachWithIndex { sibling, idx ->
+            def args = sibling
+            if (counter || var) {
+                args = [:]
+                args[var ?: 'it'] = sibling
+                if (counter) {
+                    args[counter] = idx
+                }
+            }
+            out << body(args)
         }
     }
     
@@ -325,7 +353,10 @@ class WeceemTagLib {
     }
 
     /**
-    * output a recursive treemenu based either on a node or the root
+     * @todo This code is not officially announced yet. I don't think it is necessary, it should be possible to do
+     * this with the menu tag - if not we need to find out why. Scott, what was the rationale behind this?
+     *
+     * output a recursive treemenu based either on a node or the root
      * attributes:
      * node - the node to base the menu on
      * levels - the number of levels
