@@ -43,6 +43,9 @@ class ArchiveController {
         def info = contentRepositoryService.resolveSpaceAndURI(contentURI)
         def space = info.space
         def uri = info.uri
+        if (log.debugEnabled) {
+            log.debug "Archive parent node is at: ${uri}"
+        }
         def node = contentRepositoryService.findContentForPath(uri, space)?.content
         if (node) {
             def dates = day != null ?
@@ -55,7 +58,8 @@ class ArchiveController {
                 dates.start,
                 dates.end,
                 [status:ContentRepositoryService.STATUS_ANY_PUBLISHED, max:Math.min(max, 100)])
-            return [parent: node, nodes: nodes, space:space, startDate:dates.start, endDate:dates.end]
+            return [parent: node, nodes: nodes, space:space, startDate:dates.start, 
+                endDate:dates.end, month:month, year:year, day:day]
         }
     }
 
@@ -66,6 +70,20 @@ class ArchiveController {
             return
         }
 
-        render text:data.nodes.collect({it.content}).join('-----------------\n')
+        request[ContentController.REQUEST_ATTRIBUTE_PREPARED_MODEL] = [
+            archiveEntries:data.nodes,
+            year:data.year,
+            month:data.month,
+            day:data.day,
+        ]
+        def uri = params.resultsPath ?: 'views/archive-results'
+        params.clear()
+        params.uri = uri
+
+        if (log.debugEnabled) {
+            log.debug "Archive rendering results page with params: ${params}"
+        }
+        
+        forward(controller:'content', action:'show')
     }
 }

@@ -31,7 +31,9 @@ class WcmSearchController {
         }
 
         request[ContentController.REQUEST_ATTRIBUTE_PREPARED_MODEL] = [searchResults:data]
-        def newparams = [uri:params.resultsPath ?: 'views/search-results']
-        forward(controller:'content', action:'show', params:newparams)
+        def uri = params.resultsPath ?: 'views/search-results'
+        params.clear()
+        params.uri = uri
+        forward(controller:'content', action:'show')
     }
 }
