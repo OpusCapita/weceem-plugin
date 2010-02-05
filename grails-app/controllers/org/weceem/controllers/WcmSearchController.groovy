@@ -1,6 +1,7 @@
 package org.weceem.controllers
 
 import org.weceem.services.ContentRepositoryService
+import org.weceem.controllers.ContentController
 import org.weceem.tags.WeceemTagLib
 
 /**
@@ -29,6 +30,8 @@ class WcmSearchController {
             return
         }
 
-        render text:data.collect({it}).join('-----------------\n')
+        request[ContentController.REQUEST_ATTRIBUTE_PREPARED_MODEL] = [searchResults:data]
+        def newparams = [uri:params.resultsPath ?: 'views/search-results']
+        forward(controller:'content', action:'show', params:newparams)
     }
 }

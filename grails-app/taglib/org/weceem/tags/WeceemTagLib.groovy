@@ -671,4 +671,21 @@ class WeceemTagLib {
             action:attrs[ATTR_TYPE], 
             params:[uri:WeceemTagLib.makeFullContentURI(path)] )
     }
+    
+    def search = { attrs ->
+        def p = attrs.resultsPath ? [resultsPath:attrs.resultsPath] : null
+        out << g.form(controller:'wcmSearch', action:'search', params:p) {
+            out << wcm.searchField()
+            out << g.submitButton(name:'submit', value:'Search')
+        }
+    }
+    
+    def searchLink = { attrs ->
+        def p = attrs.resultsPath ? [resultsPath:attrs.resultsPath] : null
+        out << g.createLink(mapping:'search', params:p) 
+    }
+
+    def searchField = { attrs ->
+        out << g.textField(name:'query', 'class':'searchField')
+    }
 }
