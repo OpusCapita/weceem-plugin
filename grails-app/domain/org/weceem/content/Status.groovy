@@ -11,6 +11,10 @@ class Status {
     String description // This should be an i18n message code
     Boolean publicContent // Indicates if content in this status can be viewed by unauthenticated users
     
+    static searchable = {
+        only = ['publicContent', 'code']
+    }
+    
     static mapping = {
         cache usage: 'read-write' 
     }

@@ -1,3 +1,5 @@
+package org.weceem.controllers
+
 import org.weceem.services.ContentRepositoryService
 import org.weceem.tags.WeceemTagLib
 

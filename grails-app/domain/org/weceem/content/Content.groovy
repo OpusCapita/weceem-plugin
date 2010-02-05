@@ -35,9 +35,10 @@ class Content implements Comparable {
     
     // we only index title and space
     static searchable = {
-         only = ['title', 'space']
+         only = ['title', 'space', 'status']
          
          space(component: true)
+         status(component: true)
     }
     
     public static icon = [plugin: "weceem", dir: "_weceem/images/weceem", file: "virtual-page.png"]

@@ -57,6 +57,11 @@ class WeceemPluginUrlMappings {
             action = "list"
         }
         
+        name search: delegate.(toolFunctionsPrefix+"/search") {
+            controller = "wcmSearch"
+            action = "search"
+        }
+        
         // This is tricky
         def contentURI = (WeceemPluginUrlMappings.CONTENT_PREFIX ? '/' : '')+"${WeceemPluginUrlMappings.CONTENT_PREFIX}/$uri**"
         

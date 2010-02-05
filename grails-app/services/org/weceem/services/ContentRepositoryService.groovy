@@ -1503,5 +1503,14 @@ order by year(publicationDate) desc, month(publicationDate) desc""", [parent:par
         }
         return count
     }
+    
+    def searchForContent(String query, Space space, boolean publicOnly = true, contentOrPath = null) {
+        Content.search(query) {
+            if (publicOnly) {
+                must(eq('status.publicContent', true))
+            }
+            must(eq('space', space))
+        }
+    }
 }
 
