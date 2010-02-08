@@ -15,6 +15,7 @@ package org.weceem.tags
 
 import java.text.SimpleDateFormat
 import java.text.DateFormatSymbols
+import java.text.BreakIterator
 import org.weceem.controllers.ContentController
 import org.codehaus.groovy.grails.commons.ApplicationHolder as AH
 import org.codehaus.groovy.grails.commons.ConfigurationHolder as CH
@@ -687,5 +688,35 @@ class WeceemTagLib {
 
     def searchField = { attrs ->
         out << g.textField(name:'query', 'class':'searchField')
+    }
+    
+    def summarize = { attrs, body ->
+        int maxLen = attrs.length.toInteger()
+        def codec = attrs.encodeAs
+        def ellipsis = attrs.ellipsis ?: '...'
+        def s = body()
+        maxLen -= ellipsis.size()
+        if (s.size() < maxLen) {
+            out << (codec ? s : s."encodeAs$codec"())
+        } else {
+            def bi = BreakIterator.getWordInstance()
+            bi.text = s
+            int first_after = bi.following(maxLen)
+            def result = new StringBuilder()
+            result << s[0..first_after]
+            if (first_after < s.size()) {
+                result << ellipsis
+            }
+            out << (codec ? result : result."encodeAs$codec"())
+        }
+    }
+    
+    /**
+     * Remove markup from HTML but leave escaped entities, so result can
+     * be output without encodeAsHTML()
+     */
+    def htmlToText = { attrs, body ->
+        def s = body().replaceAll("\\<.*?>", '')
+        out << s.decodeHTML()
     }
 }
