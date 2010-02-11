@@ -14,6 +14,8 @@
 
 package org.weceem.content
 
+import org.weceem.util.ContentUtils
+
 /**
  * Template class describes the content node of type 'template'.
  * Template node unlike other types of nodes has a page (template) that is stored as file,
@@ -24,9 +26,6 @@ package org.weceem.content
  * @author Sergei Shushkevich
  */
 class Template extends Content {
-    static searchable = {
-        only = ['content']
-    }
     
     static standaloneContent = false
 
@@ -35,8 +34,18 @@ class Template extends Content {
     // 64Kb Unicode text with HTML/GSP Markup
     String content
 
-    String getVersioningContent() { content }
+    /**
+     * Must be overriden by content types that can represent their content as text.
+     * Used for search results and versioning
+     */
+    public String getContentAsText() { ContentUtils.htmlToText(content) }
 
+    /**
+     * Should be overriden by content types that can represent their content as HTML.
+     * Used for wcm:content tag (content rendering)
+     */
+    public String getContentAsHTML() { content }
+    
     static constraints = {
         content(nullable: false, maxSize: 65536)
     }

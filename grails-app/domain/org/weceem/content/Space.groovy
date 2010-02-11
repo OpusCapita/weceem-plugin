@@ -29,7 +29,9 @@ class Space {
     String aliasURI = '' // Default to blank eg / uri namespace
     
     static searchable = {
-        only = ['name']
+        root false // We con't want to search for Space instances
+
+        only = ['id'] // used for finding content by space
     }
     
     static mapping = {

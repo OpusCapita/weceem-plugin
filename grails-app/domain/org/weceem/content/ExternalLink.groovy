@@ -12,12 +12,22 @@ class ExternalLink extends Content {
     String url
     String description
 
-    String getVersioningContent() { url }
-    
     static handleRequest = { content ->
         redirect(url:content.url)
     }
 
+    /**
+     * Must be overriden by content types that can represent their content as text.
+     * Used for search results and versioning
+     */
+    public String getContentAsText() { url }
+
+    /**
+     * Should be overriden by content types that can represent their content as HTML.
+     * Used for wcm:content tag (content rendering)
+     */
+    public String getContentAsHTML() { contentAsText }
+    
     Map getVersioningProperties() { 
         def r = super.getVersioningProperties() + [ 
             description:description

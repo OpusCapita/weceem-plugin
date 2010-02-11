@@ -98,8 +98,7 @@ class SimpleSpaceExporter implements SpaceExporter {
         def grailsApp = ApplicationHolder.application
         def props = grailsApp.getDomainClass(obj.class.name).
             getPersistentProperties().findAll{prop -> 
-            !(prop.name in ["language", "space", "versioningContent", 
-            "mimeType", "versioningProperties"])}
+                !(prop.name in ["language", "space"])}
         return props
     }
     

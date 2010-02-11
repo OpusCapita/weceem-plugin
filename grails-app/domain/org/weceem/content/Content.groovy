@@ -35,10 +35,10 @@ class Content implements Comparable {
     
     // we only index title and space
     static searchable = {
-         only = ['title', 'space', 'status']
+         only = ['title', 'status']
          
-         space(component: true)
-         status(component: true)
+         space component: [prefix:'space_'] 
+         status component: [prefix:'status_']
     }
     
     public static icon = [plugin: "weceem", dir: "_weceem/images/weceem", file: "virtual-page.png"]
@@ -65,7 +65,16 @@ class Content implements Comparable {
     Status status
     
     static belongsTo = [space: Space, parent: Content]
-    static transients = [ 'titleForHTML', 'titleForMenu', 'versioningProperties', 'versioningContent', 'mimeType', 'weceemSecurityService', 'absoluteURI']
+    static transients = [ 
+        'titleForHTML', 
+        'titleForMenu', 
+        'versioningProperties', 
+        'contentAsText', 
+        'contentAsHTML', 
+        'mimeType', 
+        'weceemSecurityService', 
+        'absoluteURI'
+    ]
     static hasMany = [children: Content]
     static hasOne = [parent: Content]
 
@@ -139,9 +148,15 @@ class Content implements Comparable {
 
     /**
      * Must be overriden by content types that can represent their content as text.
-     * Used for debugging and versioning
+     * Used for search results and versioning
      */
-    public String getVersioningContent() { "" }
+    public String getContentAsText() { "" }
+
+    /**
+     * Should be overriden by content types that can represent their content as HTML.
+     * Used for wcm:content tag (content rendering)
+     */
+    public String getContentAsHTML() { contentAsText ? contentAsText.encodeAsHTML() : '' }
 
     /** 
      * Descendents must override and call super and add their own properties
@@ -224,7 +239,7 @@ class Content implements Comparable {
             }
         }
         
-        output << "<content>${getVersioningContent().encodeAsHTML()}</content>"
+        output << "<content>${getContentAsText().encodeAsHTML()}</content>"
         output << "</revision>"
 
         def xml = output.toString()

@@ -16,15 +16,17 @@ package org.weceem.tags
 import java.text.SimpleDateFormat
 import java.text.DateFormatSymbols
 import java.text.BreakIterator
-import org.weceem.controllers.ContentController
+
+import grails.util.GrailsUtil
 import org.codehaus.groovy.grails.commons.ApplicationHolder as AH
 import org.codehaus.groovy.grails.commons.ConfigurationHolder as CH
+
+import org.weceem.controllers.ContentController
 import org.weceem.content.Content
 import org.weceem.files.ContentFile
 import org.weceem.services.ContentRepositoryService
-
+import org.weceem.util.ContentUtils
 import org.weceem.content.Template
-import grails.util.GrailsUtil
 import org.weceem.content.Space
 
 class WeceemTagLib {
@@ -472,13 +474,22 @@ class WeceemTagLib {
         out << body(var ? [(var):c] : c)
     }
     
-    def content = { attrs, body ->
+    def content = { attrs ->
+        println "In content tag"
+        println "node is ${attrs.node}"
         def codec = attrs.codec
+        def node = attrs.node ?: request[ContentController.REQUEST_ATTRIBUTE_NODE]
+        if (!node) {
+            throwTagError "The wcm:content tag requires a node. There is no node associated with this request, and no node attribute specified"
+        }
+        println "Getting node content..."
         // See if there is pre-rendered content, if so use that
-        def text = request[ContentController.REQUEST_PRERENDERED_CONTENT] ?: 
-            request[ContentController.REQUEST_ATTRIBUTE_NODE]?.content
-        def content = codec ? text."encodeAs$codec"() : text 
-        out << content
+        def text = request[ContentController.REQUEST_PRERENDERED_CONTENT]
+        if (text == null) {
+            text = node.getContentAsHTML()
+        }
+        println "Outputting node content..."
+        out << (codec ? text."encodeAs$codec"() : text)
     }
     
     def createLinkToFile = { attrs ->
@@ -690,33 +701,24 @@ class WeceemTagLib {
         out << g.textField(name:'query', 'class':'searchField')
     }
     
+    def paginateSearch = { attrs ->
+        def t = pageScope.searchResults?.total
+        out << g.paginate(controller:'wcmSearch', action:'search', total:t ?: 0)
+    }
+    
     def summarize = { attrs, body ->
-        int maxLen = attrs.length.toInteger()
+        int maxLen = (attrs.length ?: 100).toInteger()
         def codec = attrs.encodeAs
         def ellipsis = attrs.ellipsis ?: '...'
-        def s = body()
-        maxLen -= ellipsis.size()
-        if (s.size() < maxLen) {
-            out << (codec ? s : s."encodeAs$codec"())
-        } else {
-            def bi = BreakIterator.getWordInstance()
-            bi.text = s
-            int first_after = bi.following(maxLen)
-            def result = new StringBuilder()
-            result << s[0..first_after]
-            if (first_after < s.size()) {
-                result << ellipsis
-            }
-            out << (codec ? result : result."encodeAs$codec"())
-        }
+        def s = ContentUtils.summarize(body().toString(), maxLen, ellipsis)
+        out << (codec ? s : s."encodeAs$codec"())
     }
     
     /**
      * Remove markup from HTML but leave escaped entities, so result can
-     * be output without encodeAsHTML()
+     * be output with encodeAsHTML() or not as the case may be
      */
     def htmlToText = { attrs, body ->
-        def s = body().replaceAll("\\<.*?>", '')
-        out << s.decodeHTML()
+        out << ContentUtils.htmlToText(body())
     }
 }

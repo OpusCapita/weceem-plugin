@@ -33,8 +33,13 @@ class WikiItem extends Content {
     // 64Kb Unicode text with HTML/Wiki Markup
     String content
 
-    String getVersioningContent() { content }
+    /**
+     * Must be overriden by content types that can represent their content as text.
+     * Used for search results and versioning
+     */
+    public String getContentAsText() { content }
 
+    
     Map getVersioningProperties() { 
         super.getVersioningProperties() + [ 
             keywords:keywords,

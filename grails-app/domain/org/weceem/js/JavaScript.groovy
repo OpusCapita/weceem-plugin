@@ -25,8 +25,12 @@ class JavaScript extends Content {
 
     String content
 
-    String getVersioningContent() { content }
-
+    /**
+     * Must be overriden by content types that can represent their content as text.
+     * Used for search results and versioning
+     */
+    public String getContentAsText() { content }
+    
     String getMimeType() { "text/javascript" }
 
     static constraints = {

@@ -2,6 +2,8 @@ package org.weceem.html
 
 import org.weceem.content.*
 
+import org.weceem.util.ContentUtils
+
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +42,18 @@ class HTMLContent extends Content {
     String menuTitle
     String htmlTitle
 
-    String getVersioningContent() { content }
+    /**
+     * Must be overriden by content types that can represent their content as text.
+     * Used for search results and versioning
+     */
+    public String getContentAsText() { ContentUtils.htmlToText(content) }
 
+    /**
+     * Should be overriden by content types that can represent their content as HTML.
+     * Used for wcm:content tag (content rendering)
+     */
+    public String getContentAsHTML() { content }
+    
     Map getVersioningProperties() { 
         def r = super.getVersioningProperties() + [ 
             menuTitle:menuTitle,

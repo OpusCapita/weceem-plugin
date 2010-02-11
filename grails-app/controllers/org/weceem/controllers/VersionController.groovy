@@ -93,7 +93,7 @@ class VersionController {
             }
         }
 
-        ['content': DiffUtils.diffString(oldContent.content.text().toString(), currentContent.versioningContent),
+        ['content': DiffUtils.diffString(oldContent.content.text().toString(), currentContent.contentAsText),
         'oVersion': contentVersion.revision, 'cVersion': latestRevision + 1,
         'oCreatedBy': contentVersion.createdBy, 'cChangedBy': currentContent.changedBy,
         'oCreatedOn': contentVersion.createdOn, 'cChangedOn': currentContent.changedOn]

@@ -16,6 +16,8 @@ package org.weceem.content
 
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 
+import org.weceem.util.ContentUtils
+
 /**
  * Comment class encapsulates comments on any content node, where the submitting person 
  * may not be a user of the system - eg comments need to be spam checked and IP address tracked
@@ -28,6 +30,10 @@ class Comment extends Content {
     String ipAddress
     String websiteUrl
     String content
+    
+    static searchable = {
+        only = ['content']
+    }
     
     static standaloneContent = false
     
@@ -52,6 +58,7 @@ class Comment extends Content {
     
     @Override
     public void createAliasURI(parent) {
+        // Create an aliasURI that is sequential and unique under the parent, using the highest orderIndex
         Content.withNewSession {
             def kidList = ApplicationHolder.application.mainContext.contentRepositoryService.findChildren(parent, [
                  type:'org.weceem.content.Comment', 
@@ -62,5 +69,15 @@ class Comment extends Content {
         }    
     }
     
-    String getVersioningContent() { content }
+    /**
+     * Must be overriden by content types that can represent their content as text.
+     * Used for search results and versioning
+     */
+    public String getContentAsText() { ContentUtils.htmlToText(content) }
+
+    /**
+     * Should be overriden by content types that can represent their content as HTML.
+     * Used for wcm:content tag (content rendering)
+     */
+    public String getContentAsHTML() { content }
 }

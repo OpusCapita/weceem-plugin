@@ -30,7 +30,7 @@ class VirtualContent extends Content {
     }
     
     Boolean canHaveChildren() { false }
-        
+
     static constraints = {
         target(nullable: false)
     }

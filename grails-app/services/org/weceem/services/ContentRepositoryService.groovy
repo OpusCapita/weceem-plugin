@@ -1504,13 +1504,18 @@ order by year(publicationDate) desc, month(publicationDate) desc""", [parent:par
         return count
     }
     
-    def searchForContent(String query, Space space, boolean publicOnly = true, contentOrPath = null) {
-        Content.search([reload:true]){
+    def searchForContent(String query, Space space,  contentOrPath = null, args = null) {
+        Content.search([reload:true, offset:args?.offset ?:0, max:args?.max ?: 25]){
             queryString(query)
-            /*if (publicOnly) {
-                must(term('status.publicContent', true))
-            }*/
-            //must(term('space', space))
+        }
+    }
+
+    def searchForPublicContent(String query, Space space, contentOrPath = null, args = null) {
+        Content.search([reload:true, offset:args?.offset ?:0, max:args?.max ?: 25]){
+            must(queryString(query))
+            //must(term('status:publicContent', true))
+            // @todo this needs to change to include any standalone type
+            must(term('$/HTMLContent/space/id', space.id))
         }
     }
 }

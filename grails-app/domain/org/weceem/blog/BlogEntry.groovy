@@ -15,6 +15,7 @@
 package org.weceem.blog
 
 import org.weceem.content.*
+import org.weceem.util.ContentUtils
 
 /**
  * BlogContentNode class describes the content node of type 'blog'.
@@ -57,8 +58,18 @@ class BlogEntry extends Content {
 
     String getMimeType() { "text/html" }
 
-    String getVersioningContent() { content }
+    /**
+     * Must be overriden by content types that can represent their content as text.
+     * Used for search results and versioning
+     */
+    public String getContentAsText() { ContentUtils.htmlToText(content) }
 
+    /**
+     * Should be overriden by content types that can represent their content as HTML.
+     * Used for wcm:content tag (content rendering)
+     */
+    public String getContentAsHTML() { content }
+    
     Map getVersioningProperties() { 
        def r = super.getVersioningProperties() + [ 
            keywords:keywords,

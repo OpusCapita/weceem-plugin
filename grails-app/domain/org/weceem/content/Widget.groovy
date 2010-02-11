@@ -1,5 +1,3 @@
-package org.weceem.content
-
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,6 +11,10 @@ package org.weceem.content
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package org.weceem.content
+
+import org.weceem.util.ContentUtils
 
 /**
  * Widget class presents a piece of information on the screen with special
@@ -39,9 +41,18 @@ class Widget extends Content {
     // 64Kb Unicode text with HTML/Wiki Markup
     String content
     
-    public String getVersioningContent() { content }
-    
-    
+    /**
+     * Must be overriden by content types that can represent their content as text.
+     * Used for search results and versioning
+     */
+    public String getContentAsText() { ContentUtils.htmlToText(content) }
+
+    /**
+     * Should be overriden by content types that can represent their content as HTML.
+     * Used for wcm:content tag (content rendering)
+     */
+    public String getContentAsHTML() { content }
+        
     static mapping = {
         cache usage: 'nonstrict-read-write' 
     }

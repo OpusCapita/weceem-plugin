@@ -9,8 +9,12 @@ class WcmScript extends Content {
     String content
     String description // Human explanation of it
     
-    public String getVersioningContent() { content }
-    
+    /**
+     * Must be overriden by content types that can represent their content as text.
+     * Used for search results and versioning
+     */
+    public String getContentAsText() { content }
+
     static mapping = {
         cache usage: 'nonstrict-read-write' 
     }
