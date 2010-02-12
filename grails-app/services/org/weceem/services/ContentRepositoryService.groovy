@@ -278,23 +278,18 @@ class ContentRepositoryService implements InitializingBean {
         }
     }
 
-    List listContentClassNames() {
-        def results = []
-        grailsApplication.domainClasses.each { dc ->
-            def cls = dc.clazz
-            if (Content.isAssignableFrom(cls) && (cls != Content)) {
-                results << cls.name
-            }
-        }
-        return results
+    List listContentClassNames(Closure precondition = null) {
+        return listContentClasses(precondition).collect { it.name }
     }
     
-    List listContentClasses() {
+    List listContentClasses(Closure precondition = null) {
         def results = []
         grailsApplication.domainClasses.each { dc ->
             def cls = dc.clazz
             if (Content.isAssignableFrom(cls) && (cls != Content)) {
-                results << cls
+                if ((precondition == null) || precondition(cls)) {
+                    results << cls
+                }
             }
         }
         return results
@@ -1510,18 +1505,25 @@ order by year(publicationDate) desc, month(publicationDate) desc""", [parent:par
     def searchForContent(String query, Space space,  contentOrPath = null, args = null) {
         Content.search([reload:true, offset:args?.offset ?:0, max:args?.max ?: 25]){
             queryString(query)
+            // Restrict to space
+            must {
+                listContentClassNames().each { n ->
+                    def t = '$/'+n.replaceAll('\\.', '_')+'/space/id'
+                    term(t, space.id)
+                }
+            }
         }
     }
 
     def searchForPublicContent(String query, Space space, contentOrPath = null, args = null) {
         Content.search([reload:true, offset:args?.offset ?:0, max:args?.max ?: 25]){
             must(queryString(query))
-            //must(term('status:publicContent', true))
-            // @todo this needs to change to include any standalone type
+            // Restrict to space
             must {
-                listContentClassNames().each { n ->
+                listContentClassNames( { 
+                    !it.metaClass.hasProperty(it, 'standaloneContent') || !it.standaloneContent
+                } ).each { n ->
                     def t = '$/'+n.replaceAll('\\.', '_')+'/space/id'
-                    println "Adding search term [$t]"
                     term(t, space.id)
                 }
             }
