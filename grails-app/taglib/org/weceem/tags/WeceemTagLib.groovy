@@ -470,8 +470,10 @@ class WeceemTagLib {
                 request[ContentController.REQUEST_ATTRIBUTE_SPACE])?.content
         } else throwTagError("One of [id], [title] or [path] must be specified")
         def var = attrs[ATTR_VAR] ?: null
-
-        out << body(var ? [(var):c] : c)
+        
+        if (c) {
+            out << body(var ? [(var):c] : c)
+        }
     }
     
     def content = { attrs ->
