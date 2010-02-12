@@ -477,20 +477,16 @@ class WeceemTagLib {
     }
     
     def content = { attrs ->
-        println "In content tag"
-        println "node is ${attrs.node}"
         def codec = attrs.codec
         def node = attrs.node ?: request[ContentController.REQUEST_ATTRIBUTE_NODE]
         if (!node) {
             throwTagError "The wcm:content tag requires a node. There is no node associated with this request, and no node attribute specified"
         }
-        println "Getting node content..."
         // See if there is pre-rendered content, if so use that
         def text = request[ContentController.REQUEST_PRERENDERED_CONTENT]
         if (text == null) {
             text = node.getContentAsHTML()
         }
-        println "Outputting node content..."
         out << (codec ? text."encodeAs$codec"() : text)
     }
     
@@ -679,7 +675,6 @@ class WeceemTagLib {
 
     def feedLink = { attrs ->
         def path = attributeToContent(attrs[ATTR_PATH])
-        System.out.println "Content for path ${attrs[ATTR_PATH]} was [$path]"
         out << feed.meta( kind:attrs[ATTR_TYPE], version:attrs[ATTR_VERSION] ?: '',
             mapping:'feed', 
             action:attrs[ATTR_TYPE], 
