@@ -27,6 +27,8 @@ import org.weceem.util.ContentUtils
 class BlogEntry extends Content {
 
     static searchable = {
+        alias BlogEntry.name.replaceAll("\\.", '_')
+        
         only = ['content', 'keywords', 'summary', 'title']
     }
     

@@ -23,6 +23,12 @@ package org.weceem.content
 class VirtualContent extends Content {
     Content target
     
+    static searchable = {
+        alias VirtualContent.name.replaceAll("\\.", '_')
+        
+        only = ['title', 'status']
+    }
+
     Map getVersioningProperties() { 
         super.getVersioningProperties() + [ 
             target:target?.ident()

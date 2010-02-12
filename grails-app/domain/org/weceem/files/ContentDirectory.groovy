@@ -12,6 +12,11 @@ import org.weceem.content.*
  */
 class ContentDirectory extends ContentFile {
 
+    static searchable = {
+        alias ContentDirectory.name.replaceAll("\\.", '_')
+        only = ['title', 'status']
+    }
+
     Integer filesCount = 0
 
     Boolean canHaveChildren() { true }

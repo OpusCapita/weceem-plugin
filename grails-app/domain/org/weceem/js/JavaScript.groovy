@@ -25,6 +25,11 @@ class JavaScript extends Content {
 
     String content
 
+    static searchable = {
+        alias JavaScript.name.replaceAll("\\.", '_')
+        only = ['content', 'title', 'status']
+    }
+
     /**
      * Must be overriden by content types that can represent their content as text.
      * Used for search results and versioning

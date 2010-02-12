@@ -12,6 +12,12 @@ class ExternalLink extends Content {
     String url
     String description
 
+    static searchable = {
+        alias ExternalLink.name.replaceAll("\\.", '_')
+        
+        only = ["description", 'title', 'status']
+    }
+    
     static handleRequest = { content ->
         redirect(url:content.url)
     }

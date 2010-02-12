@@ -143,9 +143,12 @@ class ContentRepositoryService implements InitializingBean {
             }
         }        
 
-        if (!uri) {
+        println "Found space ${space} with uri [$uri]"
+        // If the URI is just for the space uri with no doc, default to "index" node in root of spacer
+        if ((uri == null) || (uri == space?.aliasURI) || (uri == space?.aliasURI+'/')) { 
             uri = 'index'
         }
+        println "Final space ${space} and uri [$uri]"
 
         [space:space, uri:uri]
     }
@@ -1515,7 +1518,13 @@ order by year(publicationDate) desc, month(publicationDate) desc""", [parent:par
             must(queryString(query))
             //must(term('status:publicContent', true))
             // @todo this needs to change to include any standalone type
-            must(term('$/HTMLContent/space/id', space.id))
+            must {
+                listContentClassNames().each { n ->
+                    def t = '$/'+n.replaceAll('\\.', '_')+'/space/id'
+                    println "Adding search term [$t]"
+                    term(t, space.id)
+                }
+            }
         }
     }
 }

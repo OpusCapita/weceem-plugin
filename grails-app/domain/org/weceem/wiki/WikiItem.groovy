@@ -24,7 +24,8 @@ import org.weceem.content.*
 class WikiItem extends Content {
 
     static searchable = {
-        only = ['content', 'keywords', 'title']
+        alias WikiItem.name.replaceAll("\\.", '_')
+        only = ['content', 'keywords', 'title', 'status']
     }
     
     String keywords

@@ -34,6 +34,12 @@ class Widget extends Content {
 
     static standaloneContent = false
 
+    static searchable = {
+        alias Widget.name.replaceAll("\\.", '_')
+        
+        only = ['content', 'title', 'status']
+    }
+
     Integer width
     Integer height
     Integer color

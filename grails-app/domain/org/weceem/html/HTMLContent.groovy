@@ -29,7 +29,8 @@ import org.weceem.util.ContentUtils
 class HTMLContent extends Content {
 
     static searchable = {
-        only = ['content', 'keywords', 'title']
+        alias HTMLContent.name.replaceAll("\\.", '_')
+        only = ['content', 'keywords', 'htmlTitle', 'menuTitle', 'title', 'status']
     }
     
     Boolean allowGSP = false

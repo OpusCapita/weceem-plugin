@@ -32,7 +32,9 @@ class Comment extends Content {
     String content
     
     static searchable = {
-        only = ['content']
+        alias Comment.name.replaceAll("\\.", '_')
+
+        only = ['content', 'email', 'author', 'title', 'status']
     }
     
     static standaloneContent = false

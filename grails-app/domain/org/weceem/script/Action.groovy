@@ -8,6 +8,11 @@ class Action extends Content {
     String description // Human explanation of it
     String allowedMethods
     
+    static searchable = {
+        alias Action.name.replaceAll("\\.", '_')
+        only = ['description', 'title', 'status']
+    }
+
     static mapping = {
         cache usage: 'nonstrict-read-write' 
     }

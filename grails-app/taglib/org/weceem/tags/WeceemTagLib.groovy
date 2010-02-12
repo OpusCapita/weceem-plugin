@@ -685,7 +685,15 @@ class WeceemTagLib {
     }
     
     def search = { attrs ->
-        def p = attrs.resultsPath ? [resultsPath:attrs.resultsPath] : null
+        def spaceAlias = request[ContentController.REQUEST_ATTRIBUTE_SPACE].aliasURI
+        def p = attrs.resultsPath ? [resultsPath:spaceAlias+'/'+attrs.resultsPath] : [:]
+        // Search the current space
+        p.uri = spaceAlias+'/'
+        def base = attrs.remove('baseURI')
+        if (base) {
+            p.uri += base
+        }
+        
         out << g.form(controller:'wcmSearch', action:'search', params:p) {
             out << wcm.searchField()
             out << g.submitButton(name:'submit', value:'Search')

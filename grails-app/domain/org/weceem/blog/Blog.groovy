@@ -11,6 +11,11 @@ class Blog extends Content {
     Integer maxEntriesToDisplay
     String commentMarkup = ""
     
+    static searchable = {
+        alias Blog.name.replaceAll("\\.", '_')
+        only = ['title', 'status']
+    }
+    
     static constraints = {
         template(nullable: true)
         maxEntriesToDisplay(inList:[3, 5, 10, 20])

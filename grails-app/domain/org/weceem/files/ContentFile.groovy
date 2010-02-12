@@ -14,6 +14,11 @@ import org.weceem.content.*
  */
 class ContentFile extends Content {
 
+    static searchable = {
+        alias ContentFile.name.replaceAll("\\.", '_')
+        only = ['title', 'status']
+    }
+
     static final String EMPTY_ALIAS_URI = "_ROOT"
     
     static final String DEFAULT_UPLOAD_DIR = 'WeceemFiles'

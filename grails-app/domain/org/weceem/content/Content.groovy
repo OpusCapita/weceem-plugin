@@ -25,6 +25,7 @@ import groovy.xml.*
  * @author Sergei Shushkevich
  * @author Marc Palmer
  */
+// @todo this SHOULD be abstract, but will it work?
 class Content implements Comparable {
     
     static VALID_ALIAS_URI_CHARS = 'A-Za-z0-9_\\-\\.'
@@ -35,10 +36,12 @@ class Content implements Comparable {
     
     // we only index title and space
     static searchable = {
+         alias Content.name.replaceAll("\\.", '_')
+         
          only = ['title', 'status']
          
-         space component: [prefix:'space_'] 
-         status component: [prefix:'status_']
+         space component: true 
+         status component: true
     }
     
     public static icon = [plugin: "weceem", dir: "_weceem/images/weceem", file: "virtual-page.png"]

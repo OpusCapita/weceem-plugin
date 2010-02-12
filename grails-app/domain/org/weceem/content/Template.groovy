@@ -34,6 +34,12 @@ class Template extends Content {
     // 64Kb Unicode text with HTML/GSP Markup
     String content
 
+    static searchable = {
+        alias Template.name.replaceAll("\\.", '_')
+
+        only = ['content', 'title', 'status']
+    }
+
     /**
      * Must be overriden by content types that can represent their content as text.
      * Used for search results and versioning

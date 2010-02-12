@@ -4,6 +4,11 @@ import org.weceem.content.Content
 
 class WcmScript extends Content {
 
+    static searchable = {
+        alias WcmScript.name.replaceAll("\\.", '_')
+        only = ['content', 'description', 'title', 'status']
+    }
+
     static standaloneContent = false
 
     String content

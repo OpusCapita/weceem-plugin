@@ -12,6 +12,11 @@ class StyleSheet extends Content {
     // 64Kb Unicode text with HTML/Wiki Markup
     String content
 
+    static searchable = {
+        alias StyleSheet.name.replaceAll("\\.", '_')
+        only = ['content', 'title', 'status']
+    }
+
     /**
      * Must be overriden by content types that can represent their content as text.
      * Used for search results and versioning

@@ -19,9 +19,15 @@ class WcmSearchController {
         def info = contentRepositoryService.resolveSpaceAndURI(params.uri)
         def space = info.space
         def uri = info.uri
+        if (log.debugEnabled) {
+            log.debug "Searching in space [$space] under URI [$uri]"
+        }
         if (space) {
-            return contentRepositoryService.searchForPublicContent(params.query, space, uri, 
-                [offset:params.int('offset'), max: Math.min(100, params.int('max') ?: DEFAULT_RESULTS_PER_PAGE)])
+            return [
+                space:space, 
+                results:contentRepositoryService.searchForPublicContent(params.query, space, uri, 
+                    [offset:params.int('offset'), max: Math.min(100, params.int('max') ?: DEFAULT_RESULTS_PER_PAGE)])
+            ]
         }
     }
 
@@ -33,8 +39,8 @@ class WcmSearchController {
             return
         }
 
-        request[ContentController.REQUEST_ATTRIBUTE_PREPARED_MODEL] = [searchResults:data]
-        def uri = params.resultsPath ?: 'views/search-results'
+        request[ContentController.REQUEST_ATTRIBUTE_PREPARED_MODEL] = [searchResults:data.results]
+        def uri = params.resultsPath ?: data.space.aliasURI+'/views/search-results'
         params.clear()
         params.uri = uri
         forward(controller:'content', action:'show')
