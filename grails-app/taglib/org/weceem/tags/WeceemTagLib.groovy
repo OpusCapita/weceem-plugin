@@ -483,13 +483,16 @@ class WeceemTagLib {
         }
     }
     
+    /**
+     * Get the current or specified node's content AS HTML
+     */
     def content = { attrs ->
         def codec = attrs.codec
         def node = attrs.node ?: request[ContentController.REQUEST_ATTRIBUTE_NODE]
         if (!node) {
             throwTagError "The wcm:content tag requires a node. There is no node associated with this request, and no node attribute specified"
         }
-        // See if there is pre-rendered content, if so use that
+        // See if there is pre-rendered content (eg evaluated GSP content), if so use that
         def text = request[ContentController.REQUEST_PRERENDERED_CONTENT]
         if (text == null) {
             text = node.getContentAsHTML()

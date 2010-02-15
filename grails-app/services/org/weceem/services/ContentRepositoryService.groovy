@@ -1353,7 +1353,7 @@ class ContentRepositoryService implements InitializingBean {
 ${type.name} where $parentClause and status.publicContent = true and publicationDate < current_timestamp() 
 order by year(publicationDate) desc, month(publicationDate) desc""", [parent:parentOrSpace])
         return monthsYears?.collect() {
-            [month: it[0]+1, year: it[1]]
+            [month: it[0], year: it[1]]
         }      
     }
         

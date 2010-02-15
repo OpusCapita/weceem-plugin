@@ -191,7 +191,9 @@ class ContentController {
                 response.setContentType(content.mimeType)
             }
         } else {
-            request[REQUEST_PRERENDERED_CONTENT] = evaluateGSPContent(contentRepositoryService, content, model)
+            StringWriter evaluatedContent = new StringWriter()
+            evaluatedContent << evaluateGSPContent(contentRepositoryService, content, model)
+            request[REQUEST_PRERENDERED_CONTENT] = evaluatedContent.toString()
             request[REQUEST_ATTRIBUTE_NODE] = content
             model.node = content
         }

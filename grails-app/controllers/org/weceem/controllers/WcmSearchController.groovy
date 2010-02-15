@@ -43,6 +43,6 @@ class WcmSearchController {
         def uri = params.resultsPath ?: data.space.aliasURI+'/views/search-results'
         params.clear()
         params.uri = uri
-        forward(controller:'content', action:'show')
+        forward(controller:'content', action:'show', params:params)
     }
 }

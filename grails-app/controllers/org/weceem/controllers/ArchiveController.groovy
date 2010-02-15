@@ -84,6 +84,6 @@ class ArchiveController {
             log.debug "Archive rendering results page with params: ${params}"
         }
         
-        forward(controller:'content', action:'show')
+        forward(controller:'content', action:'show', params:params)
     }
 }
