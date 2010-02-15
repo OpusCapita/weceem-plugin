@@ -401,7 +401,6 @@ class WeceemTagLib {
     def link = { attrs, body -> 
         def o = out
         o << "<a href=\"${createLink(attrs)}\""
-        attrs.remove('path')
         o << attrs.collect {k, v -> " $k=\"$v\"" }.join('')
         o << '>'
         o << body()
@@ -409,19 +408,27 @@ class WeceemTagLib {
     }
     
     def createLink = { attrs, body -> 
-        def space = request[ContentController.REQUEST_ATTRIBUTE_SPACE]
-        if (attrs[ATTR_SPACE]) {
-            space = Space.findByAliasURI(attrs[ATTR_SPACE])
+        def space = attrs.remove(ATTR_SPACE)
+        def path = attrs.remove(ATTR_PATH)
+        
+        if (space != null) {
+            space = Space.findByAliasURI(space)
             if (!space) {
                 throwTagError "Tag invoked with space attribute value [${attrs[ATTR_SPACE]}] but no space could be found with that aliasURI"
             }
+        } else {
+            space = request[ContentController.REQUEST_ATTRIBUTE_SPACE] 
+            if (!space) {
+                throwTagError "Tag [createLink] invoked from outside a Weceem request requires the [${ATTR_SPACE}] attribute to be set to the aliasURI of the space"
+            }
         }
+
         def content = attrs[ATTR_NODE]
         if (content && !(content instanceof Content)) {
             throwTagError "Tag invoked with [$ATTR_NODE] attribute but the value is not a Content instance"
         }
         if (!content) {
-            def contentInfo = contentRepositoryService.findContentForPath(attrs[ATTR_PATH], space)
+            def contentInfo = contentRepositoryService.findContentForPath(path, space)
             if (!contentInfo?.content) {
                 log.error ("Tag [wcm:createLink] cannot create a link to the content at path ${attrs[ATTR_PATH]} as "+
                     "there is no content node at that URI")

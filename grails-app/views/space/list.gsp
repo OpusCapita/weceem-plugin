@@ -1,4 +1,4 @@
-<html>
+\<html>
   <head>
     <meta name="layout" content="${wcm.adminLayout().toString()}"/>
     <title><g:message code="space.title.list"/></title>
