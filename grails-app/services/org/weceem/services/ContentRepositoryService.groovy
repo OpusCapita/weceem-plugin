@@ -1488,6 +1488,7 @@ order by year(publicationDate) desc, month(publicationDate) desc""", [parent:par
         def now = new Date()
         // Find all content with publication date less than now
         def pendingContent = Content.withCriteria {
+            isNotNull('publicationDate')
             lt('publicationDate', now)
             status {
                 eq('publicContent', false)
