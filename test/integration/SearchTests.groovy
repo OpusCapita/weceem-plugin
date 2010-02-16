@@ -59,6 +59,18 @@ class SearchTests extends AbstractWeceemIntegrationTest {
         
     }
     
+    void testSearchForContentAsInRepository() {
+        def resultData = contentRepositoryService.searchForContent('content', spaceA, null, [max:20])
+        
+        assertEquals 10, resultData.results.size()
+        assertTrue resultData.results.every { it.space.id == spaceA.id }
+
+        resultData = contentRepositoryService.searchForContent('content', spaceB, null, [max:20])
+        
+        assertEquals 10, resultData.results.size()
+        assertTrue resultData.results.every { it.space.id == spaceB.id }
+    }
+    
     void testSearchForPublicContentExcludesUnpublishedContent() {
         def resultData = contentRepositoryService.searchForPublicContent('content', spaceA, null, [max:20])
         
