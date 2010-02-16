@@ -1519,6 +1519,10 @@ order by year(publicationDate) desc, month(publicationDate) desc""", [parent:par
     def searchForPublicContent(String query, Space space, contentOrPath = null, args = null) {
         Content.search([reload:true, offset:args?.offset ?:0, max:args?.max ?: 25]){
             must(queryString(query))
+
+            // Restrict to public
+            must(term('status_publicContent', true))
+
             // Restrict to space
             must {
                 listContentClassNames( { 

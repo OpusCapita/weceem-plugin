@@ -6,11 +6,10 @@ import org.weceem.files.*
 import org.weceem.services.*
 
 
-class ContentRepositoryServiceTests extends GroovyTestCase {
+class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     
     static transactional = true
     
-    def contentRepositoryService
     def nodeA
     def nodeB
     def nodeC
@@ -24,27 +23,6 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
 
     void setUp() {
         super.setUp()
-        
-        contentRepositoryService = new ContentRepositoryService()
-        contentRepositoryService.cacheService = new CacheService()
-        contentRepositoryService.cacheService.cacheManager = new net.sf.ehcache.CacheManager()
-        contentRepositoryService.weceemSecurityService = new WeceemSecurityService()
-        contentRepositoryService.weceemSecurityService.with {
-            grailsApplication = [
-                config: [
-                    weceem: [
-                        security: [
-                            policy: [
-                                path: ''
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-            afterPropertiesSet()
-        }
-        contentRepositoryService.grailsApplication = ApplicationHolder.application
-        contentRepositoryService.afterPropertiesSet()
         
         defStatus = new Status(code: 400, description: "published", publicContent: true)
         assert defStatus.save(flush:true)

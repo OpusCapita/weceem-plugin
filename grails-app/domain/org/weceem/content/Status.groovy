@@ -13,8 +13,8 @@ class Status {
     
     static searchable = {
         root false // Don't want to get search hits for Status
-        only = ['id']
-    }
+        only = ['id', 'publicContent']
+    }    
     
     static mapping = {
         cache usage: 'read-write' 

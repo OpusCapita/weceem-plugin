@@ -41,7 +41,7 @@ class Content implements Comparable {
          only = ['title', 'status']
          
          space component: true 
-         status component: true
+         status component: [prefix:'status_', cascade:'all']
     }
     
     public static icon = [plugin: "weceem", dir: "_weceem/images/weceem", file: "virtual-page.png"]
