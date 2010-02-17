@@ -1,3 +1,4 @@
+
 import org.weceem.controllers.*
 import org.weceem.services.*
 import org.weceem.content.*
@@ -35,7 +36,7 @@ class SearchTests extends AbstractWeceemIntegrationTest {
         spaceB = new Space(name: 'b', aliasURI: 'b')
         assert spaceB.save(flush: true)
 
-        10.times {
+        50.times {
             assert new HTMLContent(title: 'Acontent-$it', aliasURI: 'content-$it',
             content: 'content number #$it', status: it % 2 == 0 ? statusA : statusB,
             createdBy: 'admin', createdOn: new Date(),
@@ -60,29 +61,48 @@ class SearchTests extends AbstractWeceemIntegrationTest {
     }
     
     void testSearchForContentAsInRepository() {
-        def resultData = contentRepositoryService.searchForContent('content', spaceA, null, [max:20])
+        def pageSize = 20
         
-        assertEquals 10, resultData.results.size()
+        def resultData = contentRepositoryService.searchForContent('content', spaceA, null, [max:pageSize])
+        
+        assertEquals pageSize, resultData.results.size()
         assertTrue resultData.results.every { it.space.id == spaceA.id }
 
-        resultData = contentRepositoryService.searchForContent('content', spaceB, null, [max:20])
+        resultData = contentRepositoryService.searchForContent('content', spaceB, null, [max:pageSize])
         
         assertEquals 10, resultData.results.size()
         assertTrue resultData.results.every { it.space.id == spaceB.id }
     }
     
+    void testSearchForPublicContentPaging() {
+        def pagesize = 10
+        def resultData = contentRepositoryService.searchForPublicContent('content', spaceA, null, [max:pagesize])
+
+        assertEquals pagesize, resultData.results.size()
+        assertTrue resultData.results.every { n -> n.status.publicContent == true }
+
+        def resultData2 = contentRepositoryService.searchForPublicContent('content', spaceA, null, [max:pagesize, offset:pagesize])
+
+        assertEquals pagesize, resultData2.results.size()
+        assertTrue resultData2.results.every { r ->
+            r.status.publicContent && !resultData.results.find { n -> n.id == r.id }
+        }
+    }
+
     void testSearchForPublicContentExcludesUnpublishedContent() {
-        def resultData = contentRepositoryService.searchForPublicContent('content', spaceA, null, [max:20])
+        def pageSize = 50
+        def resultData = contentRepositoryService.searchForPublicContent('content', spaceA, null, [max:pageSize])
         
-        assertEquals 5, resultData.results.size()
-        assertTrue resultData.results.every { it.status.publicContent = true }
+        assertEquals pageSize / 2, resultData.results.size()
+        assertTrue resultData.results.every { it.status.publicContent == true }
     }
 
     void testSearchCascadesChangesToStatusPublicContentProperty() {
-        def resultData = contentRepositoryService.searchForPublicContent('content', spaceA, null, [max:20])
+        def pageSize = 50
+        def resultData = contentRepositoryService.searchForPublicContent('content', spaceA, null, [max:pageSize])
         
-        assertEquals 5, resultData.results.size()
-        assertTrue resultData.results.every { it.status.publicContent = true }
+        assertEquals pageSize/2, resultData.results.size()
+        assertTrue resultData.results.every { it.status.publicContent == true }
  
         def status = Status.findByCode(100)
         status.publicContent = true
@@ -92,9 +112,10 @@ class SearchTests extends AbstractWeceemIntegrationTest {
         searchableService.reindex()
         searchableService.startMirroring()
         
-        resultData = contentRepositoryService.searchForPublicContent('content', spaceA, null, [max:20])
+        resultData = contentRepositoryService.searchForPublicContent('content', spaceA, null, [max:pageSize])
         
-        assertEquals 10, resultData.results.size()
-        assertTrue resultData.results.every { it.status.publicContent = true }
+        assertEquals pageSize, resultData.results.size()
+        assertTrue resultData.results.every { it.status.publicContent == true }
     }
+
 }
