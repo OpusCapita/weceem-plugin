@@ -382,7 +382,7 @@ class WeceemTagLib {
             out << link(node:aNode, {aNode.titleForMenu.encodeAsHTML()})
             if (level < levels) {
                 contentRepositoryService.findChildren(aNode, args).each {child ->
-                    owner.call(child, ++level)
+                    owner.call(child, level + 1)
                 }
             }
             out << "</li></ul>"
