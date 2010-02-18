@@ -365,35 +365,37 @@ class WeceemTagLib {
      * levels - the number of levels
      * id - id of the menu
      */
-    def treeMenu = { attrs ->
+    def treeMenu = {attrs ->
         def node = attrs.node
         int levels = attrs.levels ? attrs.levels.toInteger() : 2
         def id = attrs.id
 
         def args = [
-            status:ContentRepositoryService.STATUS_ANY_PUBLISHED,
-            type: org.weceem.html.HTMLContent,
-            params:[sort:'orderIndex']
+                status: ContentRepositoryService.STATUS_ANY_PUBLISHED,
+                type: org.weceem.html.HTMLContent,
+                params: [sort: 'orderIndex']
         ]
 
-        def tmenu = { aNode, level=1 ->
-            out << "<ul ${id ? 'id=${id}' : ''} class='menu menu-level-${level}'>"
-            out << "<li class='menu-item'>"
-            out << link(node:aNode, {aNode.titleForMenu.encodeAsHTML()})
-            if (level < levels) {
-                contentRepositoryService.findChildren(aNode, args).each {child ->
-                    owner.call(child, level + 1)
+        def tmenu = {items, level = 1 ->
+            if (items) {
+                out << "<ul ${id && level == 1 ? 'id=${id}' : ''} class='menu menu-level-${level}'>"
+                items.each {item ->
+                    def children = contentRepositoryService.findChildren(item, args)
+                    out << "<li class='menu-item ${children ? 'has-children' : ''}'>"
+                    out << link(node: item, {item.titleForMenu.encodeAsHTML()})
+                    if (level < levels) {
+                        owner.call(children, level + 1)
+                    }
+                    out << "</li>"
                 }
+                out << "</ul>"
             }
-            out << "</li></ul>"
         }
 
-        if(node) {
-            tmenu(node)
+        if (node) {
+            tmenu([node])
         } else {
-            contentRepositoryService.findAllRootContent(request[ContentController.REQUEST_ATTRIBUTE_SPACE], args).each {
-                tmenu(it)
-            }
+            tmenu(contentRepositoryService.findAllRootContent(request[ContentController.REQUEST_ATTRIBUTE_SPACE], args))
         }
     }
 
