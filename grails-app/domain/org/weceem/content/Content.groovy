@@ -38,10 +38,11 @@ class Content implements Comparable {
     static searchable = {
          alias Content.name.replaceAll("\\.", '_')
          
-         only = ['title', 'status']
+         only = ['title', 'status', 'absoluteURI']
          
+         absoluteURI excludeFromAll: true
          space component: true 
-         status component: [prefix:'status_', cascade:'all']
+         status component: [prefix:'status_']
     }
     
     public static icon = [plugin: "weceem", dir: "_weceem/images/weceem", file: "virtual-page.png"]

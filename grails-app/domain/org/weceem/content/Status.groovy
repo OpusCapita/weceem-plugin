@@ -14,6 +14,8 @@ class Status {
     static searchable = {
         root false // Don't want to get search hits for Status
         only = ['id', 'publicContent']
+
+        publicContent excludeFromAll: true
     }    
     
     static mapping = {

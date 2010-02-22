@@ -1504,8 +1504,26 @@ order by year(publicationDate) desc, month(publicationDate) desc""", [parent:par
     }
     
     def searchForContent(String query, Space space,  contentOrPath = null, args = null) {
+        def baseURI
+        if (contentOrPath) {
+            if (contentOrPath instanceof Content) {
+                baseURI = contentOrPath.absoluteURI
+            } else {
+                baseURI = contentOrPath.toString()
+            }
+        }
         Content.search([reload:true, offset:args?.offset ?:0, max:args?.max ?: 25]){
             queryString(query)
+
+/* This doesn't work yet
+            // Restrict to base URI
+            if (baseURI) {
+                must {
+                    term('absoluteURI', baseURI+'/')
+                }
+            }
+*/
+            
             // Restrict to space
             must {
                 listContentClassNames().each { n ->
@@ -1526,7 +1544,8 @@ order by year(publicationDate) desc, month(publicationDate) desc""", [parent:par
             // Restrict to space
             must {
                 listContentClassNames( { 
-                    !it.metaClass.hasProperty(it, 'standaloneContent') || !it.standaloneContent
+                    def hasSCProp = it.metaClass.hasProperty(it.class, 'standaloneContent')
+                    !hasSCProp || it.standaloneContent
                 } ).each { n ->
                     def t = '$/'+n.replaceAll('\\.', '_')+'/space/id'
                     term(t, space.id)

@@ -36,20 +36,35 @@ class SearchTests extends AbstractWeceemIntegrationTest {
         spaceB = new Space(name: 'b', aliasURI: 'b')
         assert spaceB.save(flush: true)
 
+        def folder = new Folder(title:'folder', aliasURI:'folder1', space:spaceA, status:statusA)
+        assert folder.save()
+        
         50.times {
-            assert new HTMLContent(title: 'Acontent-$it', aliasURI: 'content-$it',
-            content: 'content number #$it', status: it % 2 == 0 ? statusA : statusB,
-            createdBy: 'admin', createdOn: new Date(),
-            space: spaceA,
-            orderIndex: 1+it).save(flush:true)
+            assert new HTMLContent(title: "Acontent-$it", aliasURI: "acontent-$it",
+                content: 'content number #$it', status: it % 2 == 0 ? statusA : statusB,
+                createdBy: 'admin', createdOn: new Date(),
+                space: spaceA,
+                orderIndex: 1+it).save()
         }
 
         10.times {
-            assert new HTMLContent(title: 'Bcontent-$it', aliasURI: 'content-$it',
-            content: 'content number #$it', status: statusA,
-            createdBy: 'admin', createdOn: new Date(),
-            space: spaceB,
-            orderIndex: 1+it).save(flush:true)
+            def n = new HTMLContent(title: "Child-$it", aliasURI: "child-$it",
+                content: 'child number #$it', status: statusA,
+                createdBy: 'admin', createdOn: new Date(),
+                space: spaceA,
+                orderIndex: 1+it)
+            folder.addToChildren(n)
+            n.validate()
+            println "Errors: ${n.errors}"
+            assert n.save() 
+        }
+
+        10.times {
+            assert new HTMLContent(title: "Bcontent-$it", aliasURI: "bcontent-$it",
+                content: 'content number #$it', status: statusA,
+                createdBy: 'admin', createdOn: new Date(),
+                space: spaceB,
+                orderIndex: 1+it).save(flush:true)
         }
 
         searchableService.reindex()
@@ -72,6 +87,20 @@ class SearchTests extends AbstractWeceemIntegrationTest {
         
         assertEquals 10, resultData.results.size()
         assertTrue resultData.results.every { it.space.id == spaceB.id }
+    }
+    
+    void testSearchForContentUnderURI() {
+        def pageSize = 20
+        
+        def resultData = contentRepositoryService.searchForContent('content', spaceA, 'folder1', [max:pageSize])
+        
+        println "Results: ${resultData.results}" 
+        assertEquals 10, resultData.results.size()
+        def f = Folder.findByAliasURI('folder1')
+        
+        assertTrue resultData.results.every { n->
+            (n.space.id == spaceA.id) && (n.parent.id == f.id)
+        }
     }
     
     void testSearchForPublicContentPaging() {
