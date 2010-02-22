@@ -90,6 +90,14 @@ class EditorFieldTagLib {
             model:[name:attrs.property, value:pageScope.content[attrs.property]])
     }
     
+    def editorFieldHTMLContent = { attrs ->
+        if (pageScope.content.allowGSP) {
+            out << editorFieldHtmlCode(attrs)
+        } else {
+            out << editorFieldRichHTML(attrs)
+        }
+    }
+    
     def editorFieldWikiCode = { attrs ->
         // Workaround for Grails 1.1.x bug invoking tags with body as method - have to use a template instead
         out << g.render(template:'/editors/wikieditor', plugin:'weceem', 
@@ -126,6 +134,12 @@ class EditorFieldTagLib {
           });
         </script> 
         """
+    }
+    
+    def editorResourcesHTMLContent = { attrs ->
+        if (pageScope.content.allowGSP) {
+            out << editorResourcesHtmlCode(attrs)
+        }
     }
     
     def editorResourcesJSCode = { attrs ->

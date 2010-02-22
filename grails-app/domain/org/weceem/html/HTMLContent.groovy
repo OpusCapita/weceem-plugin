@@ -98,7 +98,7 @@ class HTMLContent extends Content {
         template(group:'extra')
         menuTitle(group:'extra')
         htmlTitle(group:'extra')
-        content(editor:'RichHTML')
+        content(editor:'HTMLContent')
         keywords()
     }
 
