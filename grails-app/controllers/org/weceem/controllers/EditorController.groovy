@@ -49,7 +49,7 @@ class EditorController {
     }
 
     def saveContinue = {
-        params.continue = 'y'
+        params['continue'] = 'y'
         save()
     }
 
@@ -65,7 +65,7 @@ class EditorController {
             eventService.afterContentAdded(content, params)
             flash.message = message(code:'message.content.saved', args:[content.title, message(code:'content.item.name.'+content.class.name)])
             log.debug "Saved content: ${content}"
-            if (!params.continue) {
+            if (!params['continue']) {
                 redirect(controller:'repository')
             } else {
                 redirect(action:edit, params:[id:content.id])
@@ -84,7 +84,7 @@ class EditorController {
     }
 
     def updateContinue = {
-        params.continue = 'y'
+        params['continue'] = 'y'
         update()
     }
 
@@ -101,7 +101,7 @@ class EditorController {
             flash.message = message(code:'message.content.updated', args:[
                 result.content.title, 
                 message(code:'content.item.name.'+result.content.class.name)] )
-            if (!params.continue) {
+            if (!params['continue']) {
                 redirect(controller:'repository', action:'treeTable')
             } else {
                 redirect(action:'edit', params:[id:result.content.id])
