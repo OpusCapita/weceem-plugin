@@ -73,11 +73,11 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     <resolvers>
       <resolver type='grailsPlugins' name='grailsPlugins' />
     </resolvers>
-    <dependency group='net.java.textilej' name='net.java.textilej' version='2.2.854' conf='compile' transitive='true' />
-    <dependency group='com.lowagie' name='iText' version='2.1.3' conf='compile' transitive='true' />
     <dependency group='org.apache.ant' name='ant-launcher' version='1.7.1' conf='compile' transitive='true' />
-    <dependency group='org.apache.ant' name='ant' version='1.7.1' conf='compile' transitive='true' />
+    <dependency group='net.java.textilej' name='net.java.textilej' version='2.2.854' conf='compile' transitive='true' />
     <dependency group='xstream' name='xstream' version='1.2.1' conf='compile' transitive='true' />
+    <dependency group='org.apache.ant' name='ant' version='1.7.1' conf='compile' transitive='true' />
+    <dependency group='com.lowagie' name='iText' version='2.1.3' conf='compile' transitive='true' />
   </dependencies>
   <behavior />
 </plugin>

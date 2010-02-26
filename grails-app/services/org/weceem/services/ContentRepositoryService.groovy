@@ -143,12 +143,10 @@ class ContentRepositoryService implements InitializingBean {
             }
         }        
 
-        println "Found space ${space} with uri [$uri]"
         // If the URI is just for the space uri with no doc, default to "index" node in root of spacer
         if ((uri == null) || (uri == space?.aliasURI) || (uri == space?.aliasURI+'/')) { 
             uri = 'index'
         }
-        println "Final space ${space} and uri [$uri]"
 
         [space:space, uri:uri]
     }
