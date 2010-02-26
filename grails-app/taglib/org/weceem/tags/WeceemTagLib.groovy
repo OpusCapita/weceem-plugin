@@ -556,6 +556,15 @@ class WeceemTagLib {
         }
     }
     
+    def ifUserCanView = { attrs, body ->
+        def node = attrs[ATTR_NODE]
+        if (!node) node = request[ContentController.REQUEST_ATTRIBUTE_NODE]
+
+        if (weceemSecurityService.isUserAllowedToViewContent(node)) {
+            out << body()
+        }
+    }
+    
     def ifContentIs = { attrs, body ->
         def node = request[ContentController.REQUEST_ATTRIBUTE_NODE]
         def targetType = attrs[ATTR_TYPE]
