@@ -157,6 +157,13 @@ class ContentRepositoryService implements InitializingBean {
         Content.withTransaction { txn ->
             s = new Space(params)
             if (s.save()) {
+                // Create the filesystem folder for the space
+                def spaceDir = grailsApplication.parentContext.getResource(
+                    "${ContentFile.DEFAULT_UPLOAD_DIR}/${s.makeUploadName()}").file
+                if (!spaceDir.exists()) {
+                    spaceDir.mkdirs()
+                }
+
                 if (templateName) {
                     importSpaceTemplate('default', s)
                 }
@@ -391,13 +398,13 @@ class ContentRepositoryService implements InitializingBean {
         def result 
         if (content.metaClass.respondsTo(content, 'create', Content)) {
             if (log.debugEnabled) {
-                log.debug "Creating node, type ${content.class} supports 'create' event, calling"
+                log.debug "Creating node, type ${content.class} support 'create' event, calling"
             }
             // Call the event so that nodes can perform post-creation tasks
             result = content.create(parentContent)
         } else {
             if (log.debugEnabled) {
-                log.debug "Creating node, type ${content.class} does not supports 'create' event, skipping"
+                log.debug "Creating node, type ${content.class} does not support 'create' event, skipping"
             }
             result = true
         }
@@ -739,9 +746,11 @@ class ContentRepositoryService implements InitializingBean {
             if (!space.hasErrors() && space.save()) {
                 def oldFile = new File(SCH.servletContext.getRealPath(
                         "/${ContentFile.DEFAULT_UPLOAD_DIR}/${oldAliasURI}"))
-                def newFile = new File(SCH.servletContext.getRealPath(
+                if (oldFile.exists()) {
+                    def newFile = new File(SCH.servletContext.getRealPath(
                         "/${ContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}"))
-                oldFile.renameTo(newFile)
+                    oldFile.renameTo(newFile)
+                }
                 return [space: space]
             } else {
                 return [errors:space.errors, space:space]
