@@ -23,33 +23,33 @@ class EventServiceTests extends grails.test.GrailsUnitTestCase {
 
   void testAfterContentAddedEvent() {
     // first test without a listener
-    eventService.afterContentAdded(new Content(), [])
+    eventService.afterContentAdded(new Content())
 
     // then test with a listener
     eventService.registerListener(Events.AFTER_CONTENT_ADDED, this)
-    eventService.afterContentAdded(new Content(), [])
+    eventService.afterContentAdded(new Content())
     assertTrue listenerCalled
 
     // remove listener and test again
     eventService.unregisterListener(Events.AFTER_CONTENT_ADDED, this)
     listenerCalled = false
-    eventService.afterContentAdded(new Content(), [])
+    eventService.afterContentAdded(new Content())
     assertFalse listenerCalled
   }
 
   void testAfterContentUpdatedEvent() {
     // first test without a listener
-    eventService.afterContentUpdated(new Content(), [])
+    eventService.afterContentUpdated(new Content())
 
     // then test with a listener
     eventService.registerListener(Events.AFTER_CONTENT_UPDATED, this)
-    eventService.afterContentUpdated(new Content(), [])
+    eventService.afterContentUpdated(new Content())
     assertTrue listenerCalled
 
     // remove listener and test again
     eventService.unregisterListener(Events.AFTER_CONTENT_UPDATED, this)
     listenerCalled = false
-    eventService.afterContentUpdated(new Content(), [])
+    eventService.afterContentUpdated(new Content())
     assertFalse listenerCalled
   }
 
@@ -69,16 +69,16 @@ class EventServiceTests extends grails.test.GrailsUnitTestCase {
     assertFalse listenerCalled
   }
 
-  void afterWeceemContentUpdated(Content content, params) {
-    listenerCalled = content instanceof Content && params.size == 0
+  void afterWeceemContentUpdated(Content content) {
+    listenerCalled = true
   }
 
-  void afterWeceemContentAdded(Content content, params) {
-    listenerCalled = content instanceof Content && params.size == 0
+  void afterWeceemContentAdded(Content content) {
+    listenerCalled = true
   }
 
   void afterWeceemContentRemoved(Content content) {
-    listenerCalled = content instanceof Content 
+    listenerCalled = true
   }
 }
 

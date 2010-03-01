@@ -699,7 +699,7 @@ class ContentRepositoryService implements InitializingBean {
 
         sourceContent.delete(flush: true)
 
-        eventService.afterContentRemoved(content)
+        eventService.afterContentRemoved(sourceContent)
 
         return true
     }
@@ -825,7 +825,7 @@ class ContentRepositoryService implements InitializingBean {
             
             invalidateCachingForURI(content.space, oldAbsURI)
 
-            eventService.afterContentUpdated(result.content)
+            eventService.afterContentUpdated(content)
 
             return [content:content]
         } else {
@@ -1068,6 +1068,20 @@ class ContentRepositoryService implements InitializingBean {
         }
         doCriteria(getContentClassForType(args.type), args.status, args.params) {
             isNull('parent')
+            eq('space', space)
+            cache true
+        }
+    }
+    
+    /**
+     * find all nodes by type and space
+     */ 
+    def findAllContent(Space space, Map args = Collections.EMPTY_MAP) {
+        requirePermissions(space, [WeceemSecurityPolicy.PERMISSION_VIEW])        
+        if (log.debugEnabled) {
+            log.debug "findAllContent $space, $args"
+        }
+        doCriteria(getContentClassForType(args.type), args.status, args.params) {
             eq('space', space)
             cache true
         }
