@@ -43,6 +43,7 @@ class ContentRepositoryService implements InitializingBean {
     def cacheService
     def groovyPagesTemplateEngine
     def weceemSecurityService
+    def eventService
     
     static DEFAULT_STATUSES = [
         [code:100, description:'draft', publicContent:false],
@@ -452,6 +453,10 @@ class ContentRepositoryService implements InitializingBean {
                 parent.discard() // revert the changes we made to parent
             }
         }
+        
+        if (result) {
+            eventService.afterContentAdded(content)
+        }
         return result
     }
 
@@ -681,6 +686,8 @@ class ContentRepositoryService implements InitializingBean {
 
         sourceContent.delete(flush: true)
 
+        eventService.afterContentRemoved(content)
+
         return true
     }
 
@@ -802,6 +809,9 @@ class ContentRepositoryService implements InitializingBean {
             }
             
             invalidateCachingForURI(content.space, oldAbsURI)
+
+            eventService.afterContentUpdated(result.content)
+
             return [content:content]
         } else {
             if (log.debugEnabled) {

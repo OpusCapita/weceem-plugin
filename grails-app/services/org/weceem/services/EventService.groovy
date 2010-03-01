@@ -41,15 +41,15 @@ class EventService {
     /*
      * Called after new content is added
     */
-    void afterContentAdded(Content content, params) {
-      getListeners(Events.AFTER_CONTENT_ADDED)*.afterWeceemContentAdded(content, params)
+    void afterContentAdded(Content content) {
+      getListeners(Events.AFTER_CONTENT_ADDED)*.afterWeceemContentAdded(content)
     }
 
     /*
      * Called after conent is updated
      */
-    void afterContentUpdated(Content content, params) {
-      getListeners(Events.AFTER_CONTENT_UPDATED)*.afterWeceemContentUpdated(content, params)
+    void afterContentUpdated(Content content) {
+      getListeners(Events.AFTER_CONTENT_UPDATED)*.afterWeceemContentUpdated(content)
     }
 
     void afterContentRemoved(Content content) {
