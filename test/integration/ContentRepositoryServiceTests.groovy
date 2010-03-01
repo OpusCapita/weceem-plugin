@@ -18,6 +18,8 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     def spaceB
     def template
     def defStatus
+    def virtContent1
+    def virtContent2
     
     def extraNode
 
@@ -70,7 +72,7 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         nodeA.children << nodeWiki
         nodeA.save(flush: true)
 
-        def virtContent1 = new VirtualContent(title: 'virtContent1', aliasURI: 'virtContent1',
+        virtContent1 = new VirtualContent(title: 'virtContent1', aliasURI: 'virtContent1',
                            parent: nodeC, target: nodeB, status: defStatus,
                            content: 'VirtualContent B for nodeC',
                            space: spaceA, orderIndex: 5)
@@ -79,7 +81,7 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         nodeC.children << virtContent1
         nodeC.save()
 
-        def virtContent2 = new VirtualContent(title: 'virtContent2', aliasURI: 'virtContent2',
+        virtContent2 = new VirtualContent(title: 'virtContent2', aliasURI: 'virtContent2',
                            parent: nodeWiki, target: nodeB, status: defStatus,
                            content: 'VirtualContent B for nodeWiki',
                            space: spaceA, orderIndex: 6)
@@ -544,6 +546,67 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         assertTrue nodes.contains(nodeA)
         assertTrue nodes.contains(template)
     }
+    
+    void testFindAllContent() {
+        def nodes = contentRepositoryService.findAllContent(spaceA)
+        println "nodes: $nodes"
+        assertEquals 7, nodes.size()
+        assertTrue nodes.contains(nodeA)
+        assertTrue nodes.contains(nodeB)
+        assertTrue nodes.contains(nodeC)
+        assertTrue nodes.contains(nodeWiki)
+        assertTrue nodes.contains(template)
+        assertTrue nodes.contains(virtContent1)
+        assertTrue nodes.contains(virtContent2)
+    }
+    
+    void testFindAllContentWithType() {
+        def nodes = contentRepositoryService.findAllContent(spaceA, [type: 'org.weceem.html.HTMLContent'])
+        println "nodes: $nodes"
+        assertEquals 3, nodes.size()
+        assertTrue nodes.contains(nodeA)
+        assertTrue nodes.contains(nodeB)
+        assertTrue nodes.contains(nodeC)
+    }
+    
+    void testFindAllContentWithStatus() {
+        def status100 = new Status(code: 100, description: "draft", publicContent: false)
+        assert status100.save(flush:true)
+        def status200 = new Status(code: 200, description: "review", publicContent: true)
+        assert status200.save(flush:true)
+        nodeA.status = status100
+        assert nodeA.save(flush: true)
+        nodeC.status = status200
+        assert nodeC.save(flush: true)
+        
+        def nodes = contentRepositoryService.findAllContent(spaceA, [status: [100, 200]])
+        println "nodes: $nodes"
+        assertEquals 2, nodes.size()
+        assertTrue nodes.contains(nodeA)
+        assertTrue nodes.contains(nodeC)
+    }
+    
+    void testCountAllContent() {
+        assertEquals(7, contentRepositoryService.countAllContent(spaceA))
+    }
+    
+    void testCountAllContentWithType() {
+        assertEquals(3, contentRepositoryService.countAllContent(spaceA, [type: 'org.weceem.html.HTMLContent']))
+    }
+    
+    void testCountAllContentWithStatus() {
+        def status100 = new Status(code: 100, description: "draft", publicContent: false)
+        assert status100.save(flush:true)
+        def status200 = new Status(code: 200, description: "review", publicContent: true)
+        assert status200.save(flush:true)
+        nodeA.status = status100
+        assert nodeA.save(flush: true)
+        nodeC.status = status200
+        assert nodeC.save(flush: true)
+        
+        assertEquals(2, contentRepositoryService.countAllContent(spaceA, [status: [100, 200]]))
+    }
+
 
     void testFindReferencesTo(){
         def contentC = Content.findByAliasURI("contentC")

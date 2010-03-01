@@ -848,8 +848,8 @@ class ContentRepositoryService implements InitializingBean {
             sourceNode = sourceNode.target
         }
         
-        def clz = args.type ? getContentClassForType(args.type) : Content
-        return (doCriteria(clz, args.status, args.params) {
+        def clz = args?.type ? getContentClassForType(args.type) : Content
+        return (doCriteria(clz, args?.status, args?.params) {
             projections {
                 count('id')
             }
@@ -858,6 +858,23 @@ class ContentRepositoryService implements InitializingBean {
             } else {
                 isNull('parent')
             }
+        })[0]
+    }
+    
+    /**
+     * Returns the number of content nodes in the given space and matching the indicated parameters.
+     * @param space The space to search for content in
+     * @param args A map of query parameters (type, status)
+     */
+    def countAllContent(Space space, Map args = null) {
+        requirePermissions(space, [WeceemSecurityPolicy.PERMISSION_VIEW])        
+        
+        def clz = args?.type ? getContentClassForType(args.type) : Content
+        return (doCriteria(clz, args?.status, args?.params) {
+            projections {
+                count('id')
+            }
+            eq('space', space)
         })[0]
     }
     

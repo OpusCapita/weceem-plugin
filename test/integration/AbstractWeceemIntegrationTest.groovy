@@ -28,6 +28,8 @@ class AbstractWeceemIntegrationTest extends GroovyTestCase {
             afterPropertiesSet()
         }
         application = ApplicationHolder.application
+        contentRepositoryService.eventService = new EventService()
+        
         contentRepositoryService.grailsApplication = application
         contentRepositoryService.afterPropertiesSet()
     }

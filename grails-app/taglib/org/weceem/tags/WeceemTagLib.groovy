@@ -230,21 +230,35 @@ class WeceemTagLib {
         throwTagError("eachDescendent not implemented yet")
     }
     
-    // @todo this is meant to go through the entire content database, filtering using the args supplied
-    // expensive and unnecessary?
+    /**
+     * Executes the body for each content in the given/current space. 
+     */
     def eachContent = { attrs, body -> 
-        throwTagError("eachContent not implemented yet")
-        /*
-        def params = makeFindParams(attrs)
-        def content = contentRepositoryService.findContent(attrs[ATTR_TYPE], params)
-        if (attrs[ATTR_FILTER]) content = content?.findAll(attrs[ATTR_FILTER])
-        def var = attrs[ATTR_VAR] ?: null
-        content?.each { node ->
-            out << body(var ? [(var):node] : node)
+        def space = request[ContentController.REQUEST_ATTRIBUTE_SPACE]
+        if (attrs[ATTR_SPACE] != null) {
+            space = Space.findByAliasURI(attrs[ATTR_SPACE])
+            if (!space) {
+                throwTagError "Tag invoked with space attribute value [${attrs[ATTR_SPACE]}] but no space could be found with that aliasURI"
+            }
         }
-        */
+        def shuffle = attrs[ATTR_SHUFFLE] ? Boolean.parseBoolean(attrs[ATTR_SHUFFLE].toString()) : false
+        def params = makeFindParams(attrs)
+        def status = attrs[ATTR_STATUS] ?: ContentRepositoryService.STATUS_ANY_PUBLISHED
+        if (shuffle && attrs[ATTR_MAX] && attrs[ATTR_OFFSET] == null) {
+            def countParams = [ATTR_CHANGEDSINCE:params.changedSince, ATTR_CHANGEDBEFORE:params.changedBefore, ATTR_CREATEDSINCE:params.createdSince, ATTR_CREATEDBEFORE:params.createdBefore]
+            def count = contentRepositoryService.countAllContent(space, [type:attrs[ATTR_TYPE], status:status, params:countParams]) 
+            params.offset = (int) Math.round(Math.random() * (count - params.max))
+        }
+        
+        def contentList = contentRepositoryService.findAllContent(space, [type:attrs[ATTR_TYPE], status:status, params:params])
+        if (attrs[ATTR_FILTER]) contentList = contentList?.findAll(attrs[ATTR_FILTER])
+        if (shuffle) Collections.shuffle(contentList)
+        def var = attrs[ATTR_VAR] ?: null
+        contentList?.each { content ->
+            out << body(var ? [(var):content] : content)
+        }
     }
-    
+         
     /**
      * Renders a breadcrumb trail. Renders up to but not including the current page, from the root of
      * the space. 
