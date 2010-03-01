@@ -866,7 +866,7 @@ class ContentRepositoryService implements InitializingBean {
      * @param space The space to search for content in
      * @param args A map of query parameters (type, status)
      */
-    def countAllContent(Space space, Map args = null) {
+    def countContent(Space space, Map args = null) {
         requirePermissions(space, [WeceemSecurityPolicy.PERMISSION_VIEW])        
         
         def clz = args?.type ? getContentClassForType(args.type) : Content

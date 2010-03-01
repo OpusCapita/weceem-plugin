@@ -586,15 +586,15 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         assertTrue nodes.contains(nodeC)
     }
     
-    void testCountAllContent() {
-        assertEquals(7, contentRepositoryService.countAllContent(spaceA))
+    void testCountContent() {
+        assertEquals(7, contentRepositoryService.countContent(spaceA))
     }
     
-    void testCountAllContentWithType() {
-        assertEquals(3, contentRepositoryService.countAllContent(spaceA, [type: 'org.weceem.html.HTMLContent']))
+    void testCountContentWithType() {
+        assertEquals(3, contentRepositoryService.countContent(spaceA, [type: 'org.weceem.html.HTMLContent']))
     }
     
-    void testCountAllContentWithStatus() {
+    void testCountContentWithStatus() {
         def status100 = new Status(code: 100, description: "draft", publicContent: false)
         assert status100.save(flush:true)
         def status200 = new Status(code: 200, description: "review", publicContent: true)
@@ -604,7 +604,7 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         nodeC.status = status200
         assert nodeC.save(flush: true)
         
-        assertEquals(2, contentRepositoryService.countAllContent(spaceA, [status: [100, 200]]))
+        assertEquals(2, contentRepositoryService.countContent(spaceA, [status: [100, 200]]))
     }
 
 
