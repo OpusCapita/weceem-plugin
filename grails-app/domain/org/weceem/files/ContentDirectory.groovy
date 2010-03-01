@@ -36,6 +36,7 @@ class ContentDirectory extends ContentFile {
             log.debug "Creating directory path [$p]"
             f = new File(p)
             def r = f.mkdirs()
+            assert r
         }
         return f.exists() && f.isDirectory()
     }

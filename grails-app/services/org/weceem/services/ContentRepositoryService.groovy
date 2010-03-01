@@ -390,9 +390,15 @@ class ContentRepositoryService implements InitializingBean {
         
         def result 
         if (content.metaClass.respondsTo(content, 'create', Content)) {
+            if (log.debugEnabled) {
+                log.debug "Creating node, type ${content.class} supports 'create' event, calling"
+            }
             // Call the event so that nodes can perform post-creation tasks
             result = content.create(parentContent)
         } else {
+            if (log.debugEnabled) {
+                log.debug "Creating node, type ${content.class} does not supports 'create' event, skipping"
+            }
             result = true
         }
 
