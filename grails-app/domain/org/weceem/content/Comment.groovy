@@ -57,6 +57,15 @@ class Comment extends Content {
     }
     
     static transients = Content.transients
+
+    static editors = {
+        content editor: 'RichHTML'
+        author()
+        email()
+        websiteUrl()
+        ipAddress editor: 'ReadOnly'
+        aliasURI hidden:true
+    }
     
     @Override
     public void createAliasURI(parent) {

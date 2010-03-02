@@ -14,8 +14,9 @@
 
 package org.weceem.content
 
-
 import groovy.xml.*
+
+import org.grails.taggable.*
 
 /**
  * Content class describes the content information.
@@ -26,7 +27,7 @@ import groovy.xml.*
  * @author Marc Palmer
  */
 // @todo this SHOULD be abstract, but will it work?
-class Content implements Comparable {
+class Content implements Comparable, Taggable {
     
     static VALID_ALIAS_URI_CHARS = 'A-Za-z0-9_\\-\\.'
     static INVALID_ALIAS_URI_CHARS_PATTERN = "[^"+VALID_ALIAS_URI_CHARS+"]"

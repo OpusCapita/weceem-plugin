@@ -51,7 +51,7 @@ class BlogEntry extends Content {
     }
     
     static editors = {
-        summary()
+        summary(editor:'LongString')
         content(editor:'RichHTML')
         keywords()
     }
