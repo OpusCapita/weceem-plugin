@@ -24,7 +24,6 @@
 	<script type="text/javascript" src="${g.resource(dir: '_weceem/js/jquery-ui-1.7.1/js', file:'jquery-1.3.2.min.js')}"></script>
 	<script type="text/javascript" src="${g.resource(dir: '_weceem/js/jquery-ui-1.7.1/js', file:'jquery-ui-1.7.1.custom.min.js')}"></script>
 	<link href="${resource(dir:'_weceem/js/fg-menu', file:'fg.menu.css')}" rel="stylesheet" type="text/css" />
-	<link rel="stylesheet" href="${resource(dir: '_weceem/css',file:'weceem.css')}"/>
 	<script type="text/javascript" src="${g.resource(dir: '_weceem/js/fg-menu', file:'fg.menu.js')}"></script>
 
 	<!-- Blueprint CSS -->
@@ -36,6 +35,7 @@
 
     <link rel="stylesheet" href="${resource(dir: '_weceem/css',file:'admin.css')}"/>
     <link rel="stylesheet" href="${resource(dir: '_weceem/css',file:'admin-theme.css')}"/>
+	<link rel="stylesheet" href="${resource(dir: '_weceem/css',file:'weceem.css')}"/>
 
     <g:layoutHead/>
   </head>
