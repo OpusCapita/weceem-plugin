@@ -96,3 +96,22 @@ textarea {
     width: auto;
     height: auto;
 }
+
+button.removeTag {
+    float: none;
+    display: inline;
+}
+
+div.existingTag {
+    display: inline;
+}
+
+#editor-extras {
+    padding: 0;
+}
+
+label {
+    padding-top: 10px;
+    display: block;
+}
+

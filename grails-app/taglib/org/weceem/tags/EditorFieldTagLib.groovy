@@ -29,6 +29,16 @@ class EditorFieldTagLib {
         out << bean.input(beanName:'content', property:attrs.property, noLabel:true, 'class':"big")
     }
 
+    def editorFieldTags = { attrs ->
+        out << g.render(template:'/editors/tags', plugin:'weceem', 
+            model:[name:attrs.property, value:pageScope.content[attrs.property]])
+    }
+
+    def editorResourcesTags = { attrs ->
+        out << g.render(template:'/editors/tags_resources', plugin:'weceem', 
+            model:[name:attrs.property, value:pageScope.content[attrs.property]])
+    }
+
     def editorFieldReadOnly = { attrs ->
         def v = pageScope.content[attrs.property]
         if (v) v = v.encodeAsHTML()

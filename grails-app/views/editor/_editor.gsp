@@ -12,12 +12,12 @@
         </g:else>
         
         <div class="span-24 last">
-            <div class="container">
+            <div>
         <g:grep in="${editableProperties}" var="prop" filter="${ { p -> p.group == null }}">
                 <div class="clear span-4">
                     <bean:label beanName="content" property="${prop.property}" labelKey="${'content.label.'+prop.property}"/>
                 </div>
-                <div class="field prepend-1 span-19 last">
+                <div class="field prepend-1 span-18 last">
                     <% println wcm."editorField${prop.editor}"(bean:content, property:prop.property) %>
                 </div>
         </g:grep>
@@ -34,13 +34,13 @@
         
         <div class="span-24 last" id="panels">
             <h2><a href="#">Extra</a></h2>
-            <div id="editor-extras" class="container">
+            <div id="editor-extras">
                 <g:grep in="${editableProperties}" var="prop" filter="${ { p -> p.group == 'extra'} }">
                 
-                    <div class="clear span-4">
+                    <div class="clear prepend-1 span-4">
                         <bean:label beanName="content" property="${prop.property}" labelKey="${'content.label.'+prop.property}"/>
                     </div>
-                    <div class="field prepend-1 span-19 last">
+                    <div class="field prepend-1 span-17 last">
                         <% println wcm."editorField${prop.editor}"(bean:content, property:prop.property) %>
                     </div>
                 </g:grep>
@@ -48,10 +48,10 @@
 
             <h2><a href="#">Parent &amp; Children</a></h2>
             <div id="editor-family">
-                <div class="clear span-2">
+                <div class="clear prepend-1 span-2">
                     <label>Parent:</label>
                 </div>
-                <div class="prepend-1 span-21 last">
+                <div class="prepend-1 span-20 last">
                     <g:if test="${content.parent}">
                         ${content.parent.title.encodeAsHTML()} (${message(code:'content.item.name.'+content.parent.class.name, encodeAs:'HTML')})
                         <input type="hidden" name="parent.id" value="${content.parent.id}" ></input>

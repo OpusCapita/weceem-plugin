@@ -122,6 +122,7 @@ class Content implements Comparable, Taggable {
         changedBy editor:'ReadOnly', group:'extra'
         changedOn editor:'ReadOnlyDate', group:'extra'
         publicationDate group:'extra'
+        tags editor:'Tags', group:'extra'
         parent hidden:true
         children hidden:true
     }

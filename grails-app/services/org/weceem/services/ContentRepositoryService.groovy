@@ -373,6 +373,9 @@ class ContentRepositoryService implements InitializingBean {
     def createNode(String type, def params, Closure postInit = null) {
         def content = newContentInstance(type)
         hackedBindData(content, params)
+        if (params.tags != null) {
+            content.setTags(params.tags.tokenize(',').collect { it.trim().toLowerCase()} )
+        }
         if (postInit) {
             postInit(content)
         }
@@ -805,6 +808,11 @@ class ContentRepositoryService implements InitializingBean {
         def oldTitle = content.title
         // map in new values
         hackedBindData(content, params)
+
+        if (params.tags != null) {
+            content.setTags(params.tags.tokenize(',').collect { it.trim().toLowerCase()} )
+        }
+
         if (content instanceof ContentFile){
             content.rename(oldTitle)
         }
