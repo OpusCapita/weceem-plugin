@@ -5,16 +5,26 @@ $(function() {
         event.preventDefault();
         
         var dataElem = $("input[name='${name}']");
+        var existingTags = dataElem.val().split(',');
         var displayTagsParent = $("#tagsfield_${name} .existingTagList");
         var newTagsElem = $("input[name='newTags_${name}']");
         var newTags = newTagsElem.val().split(',');
-        var newValue = dataElem.val();
+        var exists = false;
         $.each(newTags, function(index, t) {
             t = $.trim(t).toLowerCase();
-            newValue += t + ',';
-            $('<div class="existingTag"><span class="tagtext">'+t+'</span><button class="removeTag">x</button></div>').appendTo(displayTagsParent);
+            var exists = false
+            for (i = 0; i < existingTags.length; i++) {
+                if (existingTags[i] == t) {
+                    exists = true;
+                    break;
+                }
+            }
+            if (!exists) {
+                existingTags[existingTags.length] = t;
+                $('<div class="existingTag"><span class="tagtext">'+t+'</span><button class="removeTag">x</button></div>').appendTo(displayTagsParent);
+            }
         })
-        dataElem.val(newValue);
+        dataElem.val(existingTags.join(','));
         newTagsElem.val('');
     });
     $('#tagsfield_${name} .removeTag').live('click', function(event) {
