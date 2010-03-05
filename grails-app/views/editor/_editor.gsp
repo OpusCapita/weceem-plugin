@@ -54,7 +54,7 @@
                 <div class="prepend-1 span-20 last">
                     <g:if test="${content.parent}">
                         ${content.parent.title.encodeAsHTML()} (${message(code:'content.item.name.'+content.parent.class.name, encodeAs:'HTML')})
-                        <input type="hidden" name="parent.id" value="${content.parent.id}" ></input>
+                        <input type="hidden" name="parent.id" value="${content.parent.id}"/>
                     </g:if><br/>
                 </div>
                 <%-- Only show children if we are editing --%>
