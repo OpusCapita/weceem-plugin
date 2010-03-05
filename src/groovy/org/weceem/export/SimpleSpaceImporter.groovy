@@ -141,7 +141,7 @@ class SimpleSpaceImporter implements SpaceImporter {
             return backrefMap[id]
         }
         def params = [:]
-        params += ["space": (space)]
+
         //Getting element's properties
         element.children().each{child->
             if (child.name() != "id"){
@@ -179,8 +179,13 @@ class SimpleSpaceImporter implements SpaceImporter {
             content = getClass(element.name()).newInstance()    
         }
         params.remove "id"
+        params.remove "space"
+        params.remove "space.id"
+        
         // @todo remove this and revert to x.properties = y after Grails 1.2-RC1
         grailsApp.mainContext.contentRepositoryService.hackedBindData(content, params)
+        
+        content.space = space
         
         if (content.orderIndex == null) content.orderIndex = 0
         backrefMap += [(id): content]
@@ -199,13 +204,11 @@ class SimpleSpaceImporter implements SpaceImporter {
         } 
         //If id != null , then element has been already saved
         if (content.id == null){
-            def props = grailsApp.
-                getDomainClass(content.class.name).
-                getPersistentProperties().findAll{p->
-                    p.isAssociation()
-                }
+            def props = grailsApp.getDomainClass(content.class.name).persistentProperties.findAll { p ->
+                p.isAssociation()
+            }
             //If property wasn't saved then save it
-            for (prop in props){
+            for (prop in props) {
                 if ((content."${prop.name}" != null) && 
                     (prop.name != "children") &&
                     (content."${prop.name}".id != null)) 
@@ -213,6 +216,8 @@ class SimpleSpaceImporter implements SpaceImporter {
                     saveContent(content."${prop.name}")
                 }
             }
+            
+            println "Saving content: ${content.aliasURI} in space ${content.space.name}"
             if (!content.save()){
                 log.error("Can't save content: ${content.aliasURI}, error: ${content.errors}")
             }

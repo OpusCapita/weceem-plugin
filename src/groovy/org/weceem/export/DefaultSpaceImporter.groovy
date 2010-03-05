@@ -53,7 +53,7 @@ class DefaultSpaceImporter implements SpaceImporter {
             xstream.setClassLoader(getClass().getClassLoader())            
             xstream.registerConverter(new ImportExportConverter(child.name()))
             def deserialized = xstream.fromXML(baos.toString())
-
+            
             switch (deserialized.class) {
                 case Space.class:
                     if (!Space.findByName(deserialized.name)) {
@@ -77,6 +77,7 @@ class DefaultSpaceImporter implements SpaceImporter {
                     if (template.status == null){
                         template.status = defStatus
                     }
+                    template.space = space
                     if (!template.save()) {
                         log.error( "Failed to import content node: ${template.dump()}")
                         throw new ImportException("Cannot save node ${template} - ${template.errors}")
@@ -92,6 +93,7 @@ class DefaultSpaceImporter implements SpaceImporter {
                     // @todo remove this and revert to x.properties = y after Grails 1.2-RC1
                     grailsApp.mainContext.contentRepositoryService.hackedBindData(content, getRestoredProperties(deserialized))
                     content.status = defStatus
+                    content.space = space
                     if (content instanceof ContentFile) content.syncStatus = 0
                     if (!content.orderIndex) content.orderIndex = 0
                     if (content instanceof VirtualContent){
@@ -138,7 +140,7 @@ class DefaultSpaceImporter implements SpaceImporter {
     private def getRestoredProperties(obj) {
         // @todo change this to use DefaultGrailsDomainClass.declaredProperties or equivalent
         obj.properties.findAll {key, value ->
-            !['id', 'beforeInsert', 'beforeUpdate', 'beforeDelete', 'version', 'summary', 'versioningProperties'].contains(key)
+            !['id', 'beforeInsert', 'beforeUpdate', 'beforeDelete', 'version', 'summary', 'space', 'versioningProperties'].contains(key)
         }
     }
 }

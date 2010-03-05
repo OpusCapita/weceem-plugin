@@ -4,6 +4,9 @@ import java.text.BreakIterator
 
 class ContentUtils {
     static summarize(String s, maxLen, ellipsis) { 
+        if (!s) {
+            return s;
+        }
         maxLen -= ellipsis.size()
         if (s.size() < maxLen) {
             return s
@@ -25,6 +28,8 @@ class ContentUtils {
     * be output with encodeAsHTML() or not as the case may be
     */
     static htmlToText(s) {
-        s.replaceAll("\\<.*?>", '').decodeHTML()
+        if (s) {
+            s.replaceAll("\\<.*?>", '').decodeHTML()
+        } else return s;
     }
 }

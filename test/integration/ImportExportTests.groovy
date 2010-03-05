@@ -42,53 +42,59 @@ class ImportExportTests extends GroovyTestCase
         def servletContext = ServletContextHolder.servletContext
         def importFile = new File(
                 servletContext.getRealPath('/test_default_import.zip'))
-        def space = new Space(name: 'testSpaceImport', aliasURI:'test')
+        def spaceName = 'testSpaceImport'+System.currentTimeMillis()
+        def space = new Space(name: spaceName, aliasURI:'test')
         space.save(flush: true)
         
+        println "Importing into space: ${space.dump()}"
         importExportService.importSpace(space, 'defaultSpaceImporter', importFile)
     
-        Content.findAllBySpace(Space.findByName('testSpace')).each() {
-            println "Content node: ${it.dump()}"
+        space = Space.findByName(spaceName)
+        Content.findAllBySpace(space).each() {
+            println "Content node: ${it.dump()} - space is ${it.space.name}"
         }
         // check content
-        assert Template.findByAliasURIAndSpace('testTemplate', Space.findByName('testSpace'))
-        def htmlContent = HTMLContent.findByAliasURIAndSpace('testHtmlContent', Space.findByName('testSpace'))
+        assert Template.findByAliasURIAndSpace('testTemplate', space)
+        def htmlContent = HTMLContent.findByAliasURIAndSpace('testHtmlContent', space)
         assertNotNull htmlContent
     
-        assertNotNull ContentDirectory.findByAliasURIAndSpace('test_dir', Space.findByName('testSpace'))
-        assertNotNull ContentFile.findByAliasURIAndSpace('test_file', Space.findByName('testSpace'))
-        assertTrue ContentDirectory.findByAliasURIAndSpace('test_dir', Space.findByName('testSpace')).children.size() != 0
+        assertNotNull ContentDirectory.findByAliasURIAndSpace('test_dir',space)
+        assertNotNull ContentFile.findByAliasURIAndSpace('test_file', space)
+        assertTrue ContentDirectory.findByAliasURIAndSpace('test_dir', space).children.size() != 0
 
         // check unpacked files
         assertTrue new File(servletContext.getRealPath(
-                "/${ContentFile.DEFAULT_UPLOAD_DIR}/test/test_dir")).exists()
+                "/${ContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/test_dir")).exists()
         assertTrue new File(servletContext.getRealPath(
-                "/${ContentFile.DEFAULT_UPLOAD_DIR}/test/test_dir/test_file.txt")).exists()
+                "/${ContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/test_dir/test_file.txt")).exists()
 
         def ant = new AntBuilder()
-        ant.delete(dir: servletContext.getRealPath("/${ContentFile.DEFAULT_UPLOAD_DIR}/testSpaceImport"))
+        ant.delete(dir: servletContext.getRealPath("/${ContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}"))
     }
     
     void testSimpleImport() {
         def servletContext = ServletContextHolder.servletContext
         def importFile = new File(
                 servletContext.getRealPath('/test_simple_import.zip'))
-        def space = new Space(name: 'testSpaceImport', aliasURI:'test')
+        def spaceName = 'testSpaceImport'+System.currentTimeMillis()
+        def space = new Space(name: spaceName, aliasURI:'test')
         space.save(flush: true)
         
         importExportService.importSpace(space, 'simpleSpaceImporter', importFile)
     
-        Content.findAllBySpace(Space.findByName('testSpaceImport')).each() {
+        space = Space.findByName(spaceName)
+        Content.findAllBySpace(space).each() {
             println "Content node: ${it.dump()}"
         }
+        
         // check content
-        assert Template.findByAliasURIAndSpace('testTemplate', Space.findByName('testSpaceImport'))
-        def htmlContent = HTMLContent.findByAliasURIAndSpace('testHtmlContent', Space.findByName('testSpaceImport'))
+        assert Template.findByAliasURIAndSpace('testTemplate', space)
+        def htmlContent = HTMLContent.findByAliasURIAndSpace('testHtmlContent', space)
         assertNotNull htmlContent
     
-        assertNotNull ContentDirectory.findByAliasURIAndSpace('test_dir', Space.findByName('testSpaceImport'))
-        assertNotNull ContentFile.findByAliasURIAndSpace('test_file', Space.findByName('testSpaceImport'))
-        assertTrue ContentDirectory.findByAliasURIAndSpace('test_dir', Space.findByName('testSpaceImport')).children.size() != 0
+        assertNotNull ContentDirectory.findByAliasURIAndSpace('test_dir', space)
+        assertNotNull ContentFile.findByAliasURIAndSpace('test_file', space)
+        assertTrue ContentDirectory.findByAliasURIAndSpace('test_dir', space).children.size() != 0
 
         // check unpacked files
         assertTrue new File(servletContext.getRealPath(
