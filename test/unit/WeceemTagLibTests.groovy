@@ -1,3 +1,4 @@
+import groovy.mock.interceptor.MockFor
 
 import org.weceem.controllers.WcmContentController
 import org.weceem.content.*
@@ -6,6 +7,7 @@ import org.weceem.wiki.*
 import org.weceem.tags.*
 
 import org.weceem.services.*
+import org.codehaus.groovy.grails.plugins.web.taglib.ApplicationTagLib
 
 class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
     

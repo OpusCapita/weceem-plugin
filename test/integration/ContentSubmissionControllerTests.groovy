@@ -2,6 +2,12 @@ import org.weceem.controllers.*
 import org.weceem.services.*
 import org.weceem.content.*
 import org.weceem.html.*
+import org.springframework.context.ApplicationContext
+import org.codehaus.groovy.grails.commons.ApplicationHolder
+import org.springframework.mock.web.MockServletContext
+import org.springframework.core.io.FileSystemResourceLoader
+import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
+import org.codehaus.groovy.grails.web.context.ServletContextHolder
 
 /**
  * ContentRepositoryTests class contains tests for tree operations from
