@@ -10,7 +10,7 @@ import org.weceem.versioning.*
 /**
  * @author Sergei Shushkevich
  */
-class VersionController {
+class WcmVersionController {
 
     def pagingService
     def xstreamConfigurer

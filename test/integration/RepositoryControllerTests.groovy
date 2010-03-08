@@ -1,11 +1,3 @@
-import org.springframework.context.ApplicationContext
-import org.springframework.core.io.FileSystemResourceLoader
-import org.springframework.mock.web.MockServletContext
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
-import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
-import org.springframework.mock.web.MockMultipartFile
-import org.springframework.mock.web.MockMultipartHttpServletRequest
-
 import org.weceem.controllers.*
 import org.weceem.content.*
 import org.weceem.html.*
@@ -111,7 +103,7 @@ class RepositoryControllerTests extends GroovyTestCase {
     }
 /*    
     void testInsertNode() {
-        def controller = new RepositoryController()
+        def controller = new WcmRepositoryController()
         controller.grailsApplication = grailsApplication
         // @todo mock the service?
         controller.contentRepositoryService = contentRepositoryService
@@ -204,7 +196,7 @@ class RepositoryControllerTests extends GroovyTestCase {
     }
 
     private void createDirectory(params) {
-        def controller = new RepositoryController()
+        def controller = new WcmRepositoryController()
         controller.contentRepositoryService = contentRepositoryService
         controller.grailsApplication = grailsApplication
         controller.params.putAll(params)
@@ -218,8 +210,8 @@ class RepositoryControllerTests extends GroovyTestCase {
         def multipartRequest = new MockMultipartHttpServletRequest()
         multipartRequest.addFile multipartFile
 
-        def controller = new RepositoryController()
-        RepositoryController.metaClass.getRequest = { -> multipartRequest }
+        def controller = new WcmRepositoryController()
+        WcmRepositoryController.metaClass.getRequest = { -> multipartRequest }
         controller.contentRepositoryService = contentRepositoryService
         controller.grailsApplication = grailsApplication
         controller.params.putAll(params)

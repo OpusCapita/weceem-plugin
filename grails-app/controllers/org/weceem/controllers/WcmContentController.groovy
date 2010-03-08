@@ -13,19 +13,15 @@
  */
 package org.weceem.controllers
 
-
-import org.codehaus.groovy.grails.web.pages.GSPResponseWriter
-import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
-import org.springframework.web.context.request.RequestContextHolder
-
-import grails.util.GrailsUtil
-
 import org.weceem.content.*
 import org.weceem.script.WcmScript
-import org.weceem.security.WeceemSecurityPolicy
-import org.weceem.security.AccessDeniedException
 
-class ContentController {
+import org.weceem.security.AccessDeniedException
+import org.springframework.web.context.request.RequestContextHolder
+import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
+import org.codehaus.groovy.grails.web.pages.GSPResponseWriter
+
+class WcmContentController {
     static String REQUEST_ATTRIBUTE_PAGE = "weceem.page"
     static String REQUEST_ATTRIBUTE_USER = "weceem.user"
     static String REQUEST_ATTRIBUTE_NODE = "weceem.node"
@@ -151,7 +147,7 @@ class ContentController {
     
     
     void renderGSPContent(Content content, model = null) {
-        ContentController.renderGSPContent( contentRepositoryService, request, response, content, model)
+        WcmContentController.renderGSPContent( contentRepositoryService, request, response, content, model)
     }
     
     /**

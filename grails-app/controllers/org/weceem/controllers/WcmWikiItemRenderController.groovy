@@ -18,7 +18,7 @@ import net.java.textilej.parser.MarkupParser
 import org.codehaus.groovy.grails.commons.TagLibArtefactHandler
 import com.jcatalog.wiki.WeceemDialect
 
-class WikiItemRenderController {
+class WcmWikiItemRenderController {
     def show = {
         def wikiWriter = new StringWriter()
         def builder = new HtmlDocumentBuilder(wikiWriter)

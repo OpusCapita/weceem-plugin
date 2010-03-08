@@ -1,11 +1,10 @@
 
-import org.weceem.controllers.ContentController
+import org.weceem.controllers.WcmContentController
 import org.weceem.content.*
 import org.weceem.html.*
 import org.weceem.wiki.*
 import org.weceem.tags.*
-import org.codehaus.groovy.grails.plugins.web.taglib.ApplicationTagLib
-import groovy.mock.interceptor.*
+
 import org.weceem.services.*
 
 class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
@@ -16,7 +15,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         
         def spc = new Space()
         spc.name = 'testing'
-        taglib.request.setAttribute(ContentController.REQUEST_ATTRIBUTE_SPACE, spc)
+        taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_SPACE, spc)
         
         String.metaClass.encodeAsHTML = { return delegate }
         
@@ -40,7 +39,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
 
         def node = new HTMLContent(aliasURI:'someNode', space: new Space(name:'default', aliasURI:'default'))
         taglib.contentRepositoryService = [findContentForPath : { path, space -> [content: node]}]
-        taglib.request.setAttribute(ContentController.REQUEST_ATTRIBUTE_SPACE, node.space)
+        taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_SPACE, node.space)
         taglib.createLink(path: 'someNode', null)
     }
 
@@ -56,7 +55,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
     }
 
     taglib.contentRepositoryService = mockCRService.proxyInstance()
-    taglib.request.setAttribute(ContentController.REQUEST_ATTRIBUTE_NODE, parent)
+    taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, parent)
 
     try {
       taglib.countChildren([path:"some/path", node: parent])
@@ -83,7 +82,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
 
     taglib.contentRepositoryService = mockCRService.proxyInstance()
 
-    taglib.request.setAttribute(ContentController.REQUEST_ATTRIBUTE_NODE, anotherNode)
+    taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, anotherNode)
 
     try {
       taglib.eachChild([path:"some/path", node: parent], {})
@@ -115,7 +114,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
             }
         ]
 
-        taglib.request.setAttribute(ContentController.REQUEST_ATTRIBUTE_NODE, parent)
+        taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, parent)
         
         taglib.contentRepositoryService = mockCRService
         
@@ -142,7 +141,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
             }
         ]
 
-        taglib.request.setAttribute(ContentController.REQUEST_ATTRIBUTE_NODE, parent)
+        taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, parent)
         
         taglib.contentRepositoryService = mockCRService
         
@@ -170,7 +169,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
             }
         ]
 
-        taglib.request.setAttribute(ContentController.REQUEST_ATTRIBUTE_NODE, parent)
+        taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, parent)
         
         taglib.contentRepositoryService = mockCRService
         
@@ -199,7 +198,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
             }
         ]
 
-        taglib.request.setAttribute(ContentController.REQUEST_ATTRIBUTE_NODE, nodeA)
+        taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, nodeA)
         
         taglib.contentRepositoryService = mockCRService
         
@@ -227,7 +226,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
             }
         ]
 
-        taglib.request.setAttribute(ContentController.REQUEST_ATTRIBUTE_NODE, nodeA)
+        taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, nodeA)
         
         taglib.contentRepositoryService = mockCRService
         

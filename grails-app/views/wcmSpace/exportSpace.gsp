@@ -13,7 +13,7 @@
       </g:if>
 
       <p>Please select a space to export</p>
-      <g:form controller="space" method="post" action="startExport">
+      <g:form controller="wcmSpace" method="post" action="startExport">
         <div class="dialog">
           <table>
             <tbody>

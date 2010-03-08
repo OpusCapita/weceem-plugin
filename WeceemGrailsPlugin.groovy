@@ -61,15 +61,15 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         _log.info "Weceem plugin running with grails configuration ${applicationContext.grailsApplication.config}"
         
         applicationContext.navigationService.registerItem( 'weceem', 
-            [controller:'repository', action:'treeTable', title:'content', path:'contentrepo', order:0])
+            [controller:'wcmRepository', action:'treeTable', title:'content', path:'contentrepo', order:0])
         applicationContext.navigationService.registerItem( 'weceem', 
-            [controller:'portal', action:'administration', title:'administration', path:'admin',order:2])
+            [controller:'wcmPortal', action:'administration', title:'administration', path:'admin',order:2])
         [
-            [controller:'space', action:'list', title:'spaces', path:'admin/spaces', order: 0],
-            [controller:'synchronization', action:'list', title:'synchronize', path:'admin/files/synchronize', order: 1],
-            [controller:'portal', action:'comingsoon', title:'plugins', path:'admin/plugins', order: 2],
-            [controller:'portal', action:'licenses', title:'licenses', path:'admin/licenses', order: 3],
-            [controller:'portal', action:'comingsoon', title:'linkcheck', path:'admin/linkchecker', order: 4] ].each { item ->
+            [controller:'wcmSpace', action:'list', title:'spaces', path:'admin/spaces', order: 0],
+            [controller:'wcmSynchronization', action:'list', title:'synchronize', path:'admin/files/synchronize', order: 1],
+            [controller:'wcmPortal', action:'comingsoon', title:'plugins', path:'admin/plugins', order: 2],
+            [controller:'wcmPortal', action:'licenses', title:'licenses', path:'admin/licenses', order: 3],
+            [controller:'wcmPortal', action:'comingsoon', title:'linkcheck', path:'admin/linkchecker', order: 4] ].each { item ->
                 applicationContext.navigationService.registerItem( 'weceem.plugin.admin', item)
         }
 

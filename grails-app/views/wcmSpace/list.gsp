@@ -8,7 +8,7 @@
     <div class="body">
       <b class="header"><g:message code="space.title.list"/></b>
 
-      <g:form controller="space">
+      <g:form controller="wcmSpace">
         <div class="nav">
           <br/>
           <span class="menuButton" style="padding-left:3px; margin-bottom:8px;">

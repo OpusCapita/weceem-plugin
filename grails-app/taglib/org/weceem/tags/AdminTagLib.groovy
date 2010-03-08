@@ -7,13 +7,13 @@ class AdminTagLib {
  
     def userProfileEditUrl = { attrs ->
         def appUrl = grailsApplication.config.weceem.profile.url
-        if (!appUrl) appUrl = [controller:'repository']
+        if (!appUrl) appUrl = [controller:'wcmRepository']
         out << g.createLink(url:appUrl)
     }
 
     def userLogOutUrl = { attrs ->
         def appUrl = grailsApplication.config.weceem.logout.url
-        if (!appUrl) appUrl = [controller:'repository']
+        if (!appUrl) appUrl = [controller:'wcmRepository']
         out << g.createLink(url:appUrl)
     }
     

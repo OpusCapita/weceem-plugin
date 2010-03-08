@@ -7,7 +7,7 @@
 	  <div class="item">
             <wcm:renderContentItemIcon type="${c}" id="content-node-${c.id}" />
 			<h2 orderindex="${c.orderIndex == null ? 0 : c.orderIndex}" type="${c.class.name}" class="title">
-			    <g:link controller="editor" action="edit" id="${c.id}">
+			    <g:link controller="wcmEditor" action="edit" id="${c.id}">
 			     ${c.title.encodeAsHTML()}        <span class="type">( /${c.aliasURI.encodeAsHTML()} - <g:message code="content.item.name.${c.class.name}"/>)</span>
 			    </g:link>
 			</h2>
@@ -29,7 +29,7 @@
 	</td>
 	<td>
 		<div id="infoDialog${c.id}" class="nodeinfoDialog" title="${c.title.encodeAsHTML()}">
-			URI: <g:link controller="weceem" action="show" id="${c.id}"><span class="uri">${c.aliasURI.encodeAsHTML()}</span></g:link> 
+			URI: <g:link controller="wcmContent" action="show" id="${c.id}"><span class="uri">${c.aliasURI.encodeAsHTML()}</span></g:link> 
 			<br/>Created <wcm:humanDate date="${c.createdOn}"/> by <g:link action="viewChangesByAuthor" class="author">${c.createdBy.encodeAsHTML()}</g:link>
 			<g:if test="${c.changedBy}">, changed <wcm:humanDate date="${c.changedOn}"/> by <g:link action="viewChangesByAuthor" class="author">${c.changedBy.encodeAsHTML()}</g:link></g:if>
 		</div>
@@ -42,6 +42,6 @@
 
 <g:if test="${c.children.size()}">
 	<g:each in="${c.children}" var="child">
-		<g:render  plugin="weceem" template="newtreeTableNode" model="[c:child]"/>
+		<g:render plugin="weceem" template="newtreeTableNode" model="[c:child]"/>
 	</g:each>
 </g:if>

@@ -34,12 +34,12 @@ function init(){
     resources["haveChildren"] = haveChildren;
     resources["content.button.create"] = "${message(code:'content.button.create', encodeAs:'JavaScript')}";
     resources["content.button.cancel"] = "${message(code:'content.button.cancel', encodeAs:'JavaScript')}";
-    resources["link.movenode"] = "${createLink(action: 'moveNode', controller: 'repository')}";
-    resources["link.copynode"] = "${createLink(action: 'copyNode', controller: 'repository')}";
-    resources["link.deletenode"] = "${createLink(action: 'deleteNode', controller: 'repository')}";
-    resources["link.treetable"] = "${createLink(action: 'treeTable', controller: 'repository')}";
-    resources["link.preview"] = "${createLink(action: 'preview', controller: 'repository')}";
-    resources["search.request"] = "${createLink(action: 'searchRequest', controller: 'repository')}";
+    resources["link.movenode"] = "${createLink(action: 'moveNode', controller: 'wcmRepository')}";
+    resources["link.copynode"] = "${createLink(action: 'copyNode', controller: 'wcmRepository')}";
+    resources["link.deletenode"] = "${createLink(action: 'deleteNode', controller: 'wcmRepository')}";
+    resources["link.treetable"] = "${createLink(action: 'treeTable', controller: 'wcmRepository')}";
+    resources["link.preview"] = "${createLink(action: 'preview', controller: 'wcmRepository')}";
+    resources["search.request"] = "${createLink(action: 'searchRequest', controller: 'wcmRepository')}";
     <g:each var="status" in="${org.weceem.content.Status.list()}">
       resources["${status.description}"] = "${message(code: 'content.status.' + status.description, encodeAs:'JavaScript')}"
     </g:each>
@@ -74,7 +74,7 @@ $(function(){
     		   </td>
     		  </tr>
     		</table>
-            <form controller="repository">
+            <form controller="wcmRepository">
             	<div id="advSearch" style="display:none" class="span-24 last"> 
             			You can filter results by type: <select id="classFilter">
                                                     	    <option value="none">All</option>
@@ -129,7 +129,7 @@ $(function(){
             <div class="span-24 last prepend-top"><g:render plugin="weceem" template="repository-buttons"/></div>
 
 <div id="createNewDialog" class="ui-helper-hidden" title="${message(code:'content.title.create')}">
-    <g:form controller="editor" action="create" method="GET">
+    <g:form controller="wcmEditor" action="create" method="GET">
         <input id="parentid" name="parent.id" type="hidden"></input>
         <label for="createNewType"><g:message code="content.label.type" encodeAs="HTML"/></label><br/>
         <g:select id="createNewType" name="type" from="${contentTypes.sort { message(code:'content.type.name.'+it) } }" optionValue="${ { message(code:'content.type.name.'+it) } }"/>

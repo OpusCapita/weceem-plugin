@@ -1,17 +1,15 @@
 package org.weceem.controllers
 
-import org.apache.commons.io.FileUtils
-import grails.converters.JSON
-
 import org.weceem.content.*
 import org.weceem.files.*
+import grails.converters.JSON
 
 /**
- * SynchronizationController.
+ * WcmSynchronizationController.
  *
  * @author Sergei Shushkevich
  */
-class SynchronizationController {
+class WcmSynchronizationController {
 
     def contentRepositoryService
 
@@ -49,11 +47,11 @@ class SynchronizationController {
                 contentRepositoryService.deleteNode(ContentFile.get(id))
             }
         }
-        redirect(controller: "repository")
+        redirect(controller: "wcmRepository")
      }
 
     def done = {
-        redirect(controller: "repository")
+        redirect(controller: "wcmRepository")
     }
     
     /**

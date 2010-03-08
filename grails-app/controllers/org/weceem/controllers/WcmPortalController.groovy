@@ -3,12 +3,12 @@ package org.weceem.controllers
 /**
  * @author Sergei Shushkevich
  */
-class PortalController {
+class WcmPortalController {
 
     static defaultAction = 'content'
 
     def content = { 
-        redirect(controller:'repository', action:'treeTable')
+        redirect(controller:'wcmRepository', action:'treeTable')
     }
     
     def design = {

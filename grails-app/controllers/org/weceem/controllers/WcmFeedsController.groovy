@@ -6,7 +6,7 @@ import org.weceem.tags.WeceemTagLib
 /**
  * Controller for rendering RSS/Atom feeds for child nodes of content
  */
-class FeedsController {
+class WcmFeedsController {
 
     static defaultAction = 'rss'
     
@@ -34,13 +34,13 @@ class FeedsController {
             println "Data: ${data}"
             title = data.parent.title
             description = data.parent.title
-            link = g.createLink(controller:'content', action:'show', params:[uri: WeceemTagLib.makeFullContentURI(data.parent)], absolute:true)
+            link = g.createLink(controller:'wcmContent', action:'show', params:[uri: WeceemTagLib.makeFullContentURI(data.parent)], absolute:true)
             
             data.nodes.each { n ->
                 entry {
                     title = n.title
                     publishedDate = n.publicationDate
-                    link = g.createLink(controller:'content', action:'show', params:[uri: WeceemTagLib.makeFullContentURI(n)], absolute:true)
+                    link = g.createLink(controller:'wcmContent', action:'show', params:[uri: WeceemTagLib.makeFullContentURI(n)], absolute:true)
                     content(type:n.mimeType, value: n.summary ?: n.content)
                 }
             }

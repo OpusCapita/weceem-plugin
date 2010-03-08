@@ -24,36 +24,34 @@ class WeceemPluginUrlMappings {
 
         def adminURI = "/${WeceemPluginUrlMappings.ADMIN_PREFIX}"
         
-        delegate.(adminURI+"/$action?")(controller: 'portal')
-
-        delegate.(adminURI+"/view/$action?/$id?")(controller: 'preview')
+        delegate.(adminURI+"/$action?")(controller: 'wcmPortal')
                 
-        delegate.(adminURI+"/repository/$action?")(controller: 'repository')
+        delegate.(adminURI+"/repository/$action?")(controller: 'wcmRepository')
 
-        delegate.(adminURI+"/repository/preview/$id")(controller: 'repository', action:'preview')
+        delegate.(adminURI+"/repository/preview/$id")(controller: 'wcmRepository', action:'preview')
 
-        delegate.(adminURI+"/repository/$space/$action?/$id?")(controller: 'repository')
+        delegate.(adminURI+"/repository/$space/$action?/$id?")(controller: 'wcmRepository')
                 
-        delegate.(adminURI+"/editor/$action?/$id?")(controller: 'editor')
+        delegate.(adminURI+"/editor/$action?/$id?")(controller: 'wcmEditor')
         
-        delegate.(adminURI+"/administration/synchronization/$action?/$id?")(controller: 'synchronization')
+        delegate.(adminURI+"/administration/synchronization/$action?/$id?")(controller: 'wcmSynchronization')
 
-        delegate.(adminURI+"/versions/$action?/$id?")(controller: 'version')
+        delegate.(adminURI+"/versions/$action?/$id?")(controller: 'wcmVersion')
 
-        delegate.(adminURI+"/space/$action?/$id?")(controller: 'space')
+        delegate.(adminURI+"/space/$action?/$id?")(controller: 'wcmSpace')
 
         def toolFunctionsPrefix = (WeceemPluginUrlMappings.TOOLS_PREFIX ? '/' : '')+"${WeceemPluginUrlMappings.TOOLS_PREFIX}"
 
         name contentSubmission: delegate.(toolFunctionsPrefix+"/submit/$action?") {
-            controller = "contentSubmission"
+            controller = "wcmContentSubmission"
         }
         
         name feed: delegate.(toolFunctionsPrefix+"/feed/$action/$uri**") {
-            controller = "feeds"
+            controller = "wcmFeeds"
         }
         
         name archive: delegate.(toolFunctionsPrefix+"/archive/$uri**") {
-            controller = "archive"
+            controller = "wcmArchive"
             action = "list"
         }
         
@@ -66,7 +64,7 @@ class WeceemPluginUrlMappings {
         def contentURI = (WeceemPluginUrlMappings.CONTENT_PREFIX ? '/' : '')+"${WeceemPluginUrlMappings.CONTENT_PREFIX}/$uri**"
         
         invokeMethod(contentURI, {
-            controller = "content"
+            controller = "wcmContent"
             action = "show"
             constraints {
                 // @todo this is very ugly, clean up
@@ -80,7 +78,7 @@ class WeceemPluginUrlMappings {
         
         def rootURI = "/${WeceemPluginUrlMappings.CONTENT_PREFIX}"
         invokeMethod(rootURI, {
-            controller = "content"
+            controller = "wcmContent"
             action = "show"
         })
 

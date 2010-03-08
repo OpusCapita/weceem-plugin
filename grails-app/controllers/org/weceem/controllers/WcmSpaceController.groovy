@@ -8,7 +8,7 @@ import org.weceem.services.*
 import org.weceem.export.*
 import org.weceem.files.ContentFile
 
-class SpaceController {
+class WcmSpaceController {
 
     def importExportService
     def contentRepositoryService
@@ -107,7 +107,7 @@ class SpaceController {
                 log.error("Unable to import space", e)
                 flash.message = e instanceof ImportException ? e.message : e.toString()
             } finally {
-                redirect(controller: 'repository', action: 'treeTable', params: ["space": space.name])
+                redirect(controller: 'wcmRepository', action: 'treeTable', params: ["space": space.name])
             }
         } else {
             flash.message = message(code: 'error.import.emptyFile')

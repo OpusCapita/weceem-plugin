@@ -9,7 +9,7 @@
         <h1>File Synchronization of space ${space.name.encodeAsHTML()} complete.</h1>
       </div>
 
-    <g:form controller="synchronization">
+    <g:form controller="wcmSynchronization">
         <g:if test="${createdContent.size() != 0}">
             <div class="message span-22 prepend-1 append-1 prepent-top append-bottom last ui-state-highlight ui-corner-all">
                 ${dirnum} directories and ${filenum} files were added to the space ${space.name}
@@ -61,14 +61,14 @@
                     </tbody>
                 </table>
                 <div class="span-24 last">
-                    <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="Delete selected" controller="synchronization" action="delete"/>
-                    <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="Don't delete anything" controller="synchronization" action="done"/>
+                    <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="Delete selected" controller="wcmSynchronization" action="delete"/>
+                    <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="Don't delete anything" controller="wcmSynchronization" action="done"/>
                 </div>
             </div>
         </g:if>
         <g:else>
             Good news! Your repository has no content nodes referencing non-existent server files.<br/>
-            <g:link controller="repository" class="button">OK</g:link>
+            <g:link controller="wcmRepository" class="button">OK</g:link>
         </g:else>
     </g:form>
   

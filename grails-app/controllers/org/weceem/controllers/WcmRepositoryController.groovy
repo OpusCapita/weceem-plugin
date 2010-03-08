@@ -53,7 +53,7 @@ import org.weceem.html.*
  * Root contents are all content nodes that are not used as a childs in the content
  * hierarchy.
  */
-class RepositoryController {
+class WcmRepositoryController {
     
     /**
      * Defines instance of contentRepositoryService class.
@@ -79,7 +79,7 @@ class RepositoryController {
             // Find the default space(if there is any) and redirect so url has space in
             if (Space.count() == 0){
                 flash.message = message(code: 'message.there.are.no.spaces')
-                redirect(controller:'space')
+                redirect(controller:'wcmSpace')
                 return false
             }
             def space = contentRepositoryService.findDefaultSpace()
@@ -138,7 +138,7 @@ class RepositoryController {
                 'haveChildren':haveChildren, space: params.space, spaces: Space.listOrderByName() ]
         } else {
             flash.message = 'message.there.are.no.spaces'
-            redirect(controller:'space')
+            redirect(controller:'wcmSpace')
         }
     }
     
@@ -774,7 +774,7 @@ class RepositoryController {
     def preview = {
         // todo: 'id' param for WeceemController simply hardcoded
         def content = Content.get(params.id)
-        redirect(controller: 'content', action: 'show', params:[uri:content.space.aliasURI+'/'+content.absoluteURI])
+        redirect(controller: 'wcmContent', action: 'show', params:[uri:content.space.aliasURI+'/'+content.absoluteURI])
     }
     
     def searchRequest = {
@@ -825,13 +825,15 @@ class RepositoryController {
             }
             flag && ((it.status.code == statusFilter) || (statusFilter == 0))
         }
-        def result = searchResult.collect{["id": it.id, "title": it.title, 
-        "aliasURI": it.aliasURI, "status": it.status?.description, 
-        "createdBy": it.createdBy.toString(), 
-        "changedOn": wcm.humanDate(date: it.changedOn).toString(), 
-        "href": createLink(controller: "editor", action: "edit", id: it.id),
-        "parentURI": (it.parent == null ? "": "/${it.parent.absoluteURI}"), 
-        "type": message(code: "content.item.name.${it.class.name}")]} 
+        def result = searchResult.collect { 
+            ["id": it.id, "title": it.title, 
+            "aliasURI": it.aliasURI, "status": it.status?.description, 
+            "createdBy": it.createdBy.toString(), 
+            "changedOn": wcm.humanDate(date: it.changedOn).toString(), 
+            "href": createLink(controller: "wcmEditor", action: "edit", id: it.id),
+            "parentURI": (it.parent == null ? "": "/${it.parent.absoluteURI}"), 
+            "type": message(code: "content.item.name.${it.class.name}")]
+        } 
 
         render ([result: result] as JSON)
     }

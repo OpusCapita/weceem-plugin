@@ -1,12 +1,11 @@
 package org.weceem.controllers
 
 import org.weceem.services.ContentRepositoryService
-import org.weceem.tags.WeceemTagLib
 
 /**
  * Controller for rendering archive of year/month/day of given content URI
  */
-class ArchiveController {
+class WcmArchiveController {
 
     static defaultAction = 'list'
     
@@ -70,7 +69,7 @@ class ArchiveController {
             return
         }
 
-        request[ContentController.REQUEST_ATTRIBUTE_PREPARED_MODEL] = [
+        request[WcmContentController.REQUEST_ATTRIBUTE_PREPARED_MODEL] = [
             archiveEntries:data.nodes,
             year:data.year,
             month:data.month,
@@ -84,6 +83,6 @@ class ArchiveController {
             log.debug "Archive rendering results page with params: ${params}"
         }
         
-        forward(controller:'content', action:'show', params:params)
+        forward(controller:'wcmContent', action:'show', params:params)
     }
 }

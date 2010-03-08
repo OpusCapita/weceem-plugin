@@ -16,12 +16,12 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     <resource>WeceemPluginUrlMappings</resource>
     <resource>spring.resources</resource>
     <resource>org.weceem.controllers.ArchiveController</resource>
-    <resource>org.weceem.controllers.ContentController</resource>
+    <resource>org.weceem.controllers.WcmContentController</resource>
     <resource>org.weceem.controllers.ContentSubmissionController</resource>
     <resource>org.weceem.controllers.EditorController</resource>
-    <resource>org.weceem.controllers.FeedsController</resource>
+    <resource>org.weceem.controllers.WcmFeedsController</resource>
     <resource>org.weceem.controllers.PortalController</resource>
-    <resource>org.weceem.controllers.RepositoryController</resource>
+    <resource>org.weceem.controllers.WcmRepositoryController</resource>
     <resource>org.weceem.controllers.SpaceController</resource>
     <resource>org.weceem.controllers.SynchronizationController</resource>
     <resource>org.weceem.controllers.VersionController</resource>

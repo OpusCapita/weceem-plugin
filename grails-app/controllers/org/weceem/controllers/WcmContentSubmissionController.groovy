@@ -2,7 +2,7 @@ package org.weceem.controllers
 
 import org.weceem.content.Space
 
-class ContentSubmissionController {
+class WcmContentSubmissionController {
 
     static allowedMethods = [submit:'POST' /*, update:'POST', delete:'POST'*/]
     
@@ -24,19 +24,19 @@ class ContentSubmissionController {
                 log.debug "Rendering original content form at [$formPath] in space [${space.name}] due to form errors: ${content.errors}"
             }
             // The rendering functions expect a space
-            request[ContentController.REQUEST_ATTRIBUTE_PREPARED_MODEL] = [submittedContent:content]
+            request[WcmContentController.REQUEST_ATTRIBUTE_PREPARED_MODEL] = [submittedContent:content]
             def newparams = [uri:formPath]
             content.discard()
-            flash[ContentController.FLASH_MESSAGE] = "contentSubmission.content.has.errors"
-            forward(controller:'content', action:'show', params:newparams)
+            flash[WcmContentController.FLASH_MESSAGE] = "contentSubmission.content.has.errors"
+            forward(controller:'wcmContent', action:'show', params:newparams)
         } else {
             if (log.debugEnabled) {
                 log.debug "Redirecting to [$successPath] after successful content submission"
             }
-            flash[ContentController.FLASH_MESSAGE] = content.status.publicContent ? 
+            flash[WcmContentController.FLASH_MESSAGE] = content.status.publicContent ?
                 "contentSubmission.content.accepted.published" : 
                 "contentSubmission.content.accepted.not.published"
-            redirect(controller:'content', action:'show', params:[uri:space.aliasURI+'/'+successPath])
+            redirect(controller:'wcmContent', action:'show', params:[uri:space.aliasURI+'/'+successPath])
         }
     }
 }

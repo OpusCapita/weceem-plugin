@@ -217,7 +217,6 @@ class SimpleSpaceImporter implements SpaceImporter {
                 }
             }
             
-            println "Saving content: ${content.aliasURI} in space ${content.space.name}"
             if (!content.save()){
                 log.error("Can't save content: ${content.aliasURI}, error: ${content.errors}")
             }

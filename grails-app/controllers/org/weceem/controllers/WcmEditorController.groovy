@@ -9,7 +9,7 @@ import com.jcatalog.wiki.WeceemDialect
 import grails.converters.JSON
 import org.weceem.content.*
 
-class EditorController {
+class WcmEditorController {
     def contentRepositoryService
     def editorService
 
@@ -30,7 +30,7 @@ class EditorController {
         def content = Content.get(params.id)
         if (!content) {
             flash.message = "Content not found with id ${params.id}"
-            redirect(controller:'repository')
+            redirect(controller:'wcmRepository')
         } else {
             return [content: content, editableProperties: editorService.getEditorInfo(content.class)]
         }
@@ -63,7 +63,7 @@ class EditorController {
             flash.message = message(code:'message.content.saved', args:[content.title, message(code:'content.item.name.'+content.class.name)])
             log.debug "Saved content: ${content}"
             if (!params['continue']) {
-                redirect(controller:'repository')
+                redirect(controller:'wcmRepository')
             } else {
                 redirect(action:edit, params:[id:content.id])
             }
@@ -77,7 +77,7 @@ class EditorController {
     
     def cancel = {
         flash.message = "Editing of content cancelled"
-        redirect(controller:'repository')
+        redirect(controller:'wcmRepository')
     }
 
     def updateContinue = {
@@ -98,7 +98,7 @@ class EditorController {
                 result.content.title, 
                 message(code:'content.item.name.'+result.content.class.name)] )
             if (!params['continue']) {
-                redirect(controller:'repository', action:'treeTable')
+                redirect(controller:'wcmRepository', action:'treeTable')
             } else {
                 redirect(action:'edit', params:[id:result.content.id])
             }

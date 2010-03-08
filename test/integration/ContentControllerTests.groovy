@@ -1,16 +1,7 @@
-import org.springframework.context.ApplicationContext
-import org.springframework.core.io.FileSystemResourceLoader
-import org.springframework.mock.web.MockServletContext
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
-import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
-import org.springframework.mock.web.MockMultipartFile
-import org.springframework.mock.web.MockMultipartHttpServletRequest
-
 import org.weceem.controllers.*
 import org.weceem.content.*
 import org.weceem.html.*
-import org.weceem.wiki.*
-import org.weceem.files.*
+
 import org.weceem.services.*
 
 /**
@@ -25,8 +16,8 @@ class ContentControllerTests extends GroovyTestCase {
     def nodeB
     def applicationContext
     
-    ContentController mockedController() {
-        def con = new ContentController()
+    WcmContentController mockedController() {
+        def con = new WcmContentController()
 
         def secSvc = new WeceemSecurityService()
         secSvc.with {

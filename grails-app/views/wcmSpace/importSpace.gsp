@@ -14,7 +14,7 @@
 
       <p>Please select the space you wish to import into</P>
           
-      <g:form controller="space" method="post" action="startImport"
+      <g:form controller="wcmSpace" method="post" action="startImport"
             enctype="multipart/form-data">
         <div class="dialog">
           <table>
