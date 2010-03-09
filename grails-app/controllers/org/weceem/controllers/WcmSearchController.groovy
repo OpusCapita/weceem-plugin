@@ -7,12 +7,12 @@ class WcmSearchController {
 
     static defaultAction = 'search'
     
-    def contentRepositoryService
+    def wcmContentRepositoryService
 
     static DEFAULT_RESULTS_PER_PAGE = 25
     
     private getSearchData() {
-        def info = contentRepositoryService.resolveSpaceAndURI(params.uri)
+        def info = wcmContentRepositoryService.resolveSpaceAndURI(params.uri)
         def space = info.space
         def uri = info.uri
         if (log.debugEnabled) {
@@ -21,7 +21,7 @@ class WcmSearchController {
         if (space) {
             return [
                 space:space, 
-                results:contentRepositoryService.searchForPublicContent(params.query, space, uri, 
+                results:wcmContentRepositoryService.searchForPublicContent(params.query, space, uri, 
                     [offset:params.int('offset'), max: Math.min(100, params.int('max') ?: DEFAULT_RESULTS_PER_PAGE)])
             ]
         }

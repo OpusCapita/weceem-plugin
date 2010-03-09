@@ -1,6 +1,6 @@
 package org.weceem.controllers
 
-import org.weceem.services.ContentRepositoryService
+import org.weceem.services.WcmContentRepositoryService
 import org.weceem.tags.WeceemTagLib
 
 /**
@@ -10,15 +10,15 @@ class WcmFeedsController {
 
     static defaultAction = 'rss'
     
-    def contentRepositoryService
+    def wcmContentRepositoryService
     
     private getFeedData() {
-        def info = contentRepositoryService.resolveSpaceAndURI(params.uri)
+        def info = wcmContentRepositoryService.resolveSpaceAndURI(params.uri)
         def space = info.space
         def uri = info.uri
-        def node = contentRepositoryService.findContentForPath(uri, space)?.content
+        def node = wcmContentRepositoryService.findContentForPath(uri, space)?.content
         if (node) {
-            def nodes = contentRepositoryService.findChildren(node, [status:ContentRepositoryService.STATUS_ANY_PUBLISHED, max:25])
+            def nodes = wcmContentRepositoryService.findChildren(node, [status:WcmContentRepositoryService.STATUS_ANY_PUBLISHED, max:25])
             return [parent: node, nodes: nodes, space:space]
         }
     }

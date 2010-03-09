@@ -4,15 +4,14 @@ import org.apache.commons.io.FilenameUtils
 
 import org.weceem.content.*
 import org.weceem.security.WeceemSecurityPolicy
-import org.weceem.services.*
+
 import org.weceem.export.*
-import org.weceem.files.ContentFile
 
 class WcmSpaceController {
 
-    def importExportService
-    def contentRepositoryService
-    def weceemSecurityService
+    def wcmImportExportService
+    def wcmContentRepositoryService
+    def wcmSecurityService
     
     static allowedMethods = [delete: ['GET', 'POST'], save: 'POST', update: 'POST']
 
@@ -20,18 +19,18 @@ class WcmSpaceController {
     
     def list = {
         if (!params.max) params.max = 10
-        [spaceList: Space.list(params)]
+        [spaceList: WcmSpace.list(params)]
     }
 
     def create = {
-        def space = new Space()
+        def space = new WcmSpace()
         // Using bindData to work around Grails 1.2m2 bugs, change to .properties when 1.2-RC1 is live
         bindData(space, params)
         return ['space': space]
     }
 
     def edit = {
-        def space = Space.get(params.id)
+        def space = WcmSpace.get(params.id)
 
         if (!space) {
             flash.message = "Space not found with id ${params.id}"
@@ -42,7 +41,7 @@ class WcmSpaceController {
     }
 
     def save = {
-        def space = contentRepositoryService.createSpace(params)
+        def space = wcmContentRepositoryService.createSpace(params)
         if (!space.hasErrors()) {
             flash.message = "Space '${space.name}' created"
             redirect(action: list, id: space.id)
@@ -52,7 +51,7 @@ class WcmSpaceController {
     }
 
     def update = {
-        def result = contentRepositoryService.updateSpace(params.id, params)
+        def result = wcmContentRepositoryService.updateSpace(params.id, params)
         if (!result.notFound) {
             if (!result.errors) {
                 flash.message = "Space '${result.space.name}' updated"
@@ -67,9 +66,9 @@ class WcmSpaceController {
     }
 
     def delete = {
-        def space = Space.get(params.id)
+        def space = WcmSpace.get(params.id)
         if (space) {
-            contentRepositoryService.deleteSpace(space)
+            wcmContentRepositoryService.deleteSpace(space)
 
             flash.message = "Space '${space.name}' deleted"
             redirect(action: list)
@@ -80,7 +79,7 @@ class WcmSpaceController {
     }
 
     def importSpace = {
-        return [importers: importExportService.importers]
+        return [importers: wcmImportExportService.importers]
     }
 
     /**
@@ -90,9 +89,9 @@ class WcmSpaceController {
      * @param file
      */
     def startImport = {
-        def space = Space.get(params.space)
+        def space = WcmSpace.get(params.space)
 
-        assert weceemSecurityService.hasPermissions(space, [WeceemSecurityPolicy.PERMISSION_ADMIN])
+        assert wcmSecurityService.hasPermissions(space, [WeceemSecurityPolicy.PERMISSION_ADMIN])
         
         def file = request.getFile('file')
 
@@ -101,7 +100,7 @@ class WcmSpaceController {
                     ".${FilenameUtils.getExtension(file.originalFilename)}")
             file.transferTo(tmp)
             try {
-                importExportService.importSpace(space, params.importer, tmp)
+                wcmImportExportService.importSpace(space, params.importer, tmp)
                 flash.message = message(code: 'message.import.finished')
             } catch (Throwable e) {
                 log.error("Unable to import space", e)
@@ -116,7 +115,7 @@ class WcmSpaceController {
     }
 
     def exportSpace = {
-        return [exporters: importExportService.exporters]
+        return [exporters: wcmImportExportService.exporters]
     }
 
     def startExport = {
@@ -129,17 +128,17 @@ class WcmSpaceController {
      */
     def performExport = {
         log.debug "Starting export of space [${params.space}] - all params: ${params}"
-        def space = Space.get(params.space)
-        assert weceemSecurityService.hasPermissions(space, [WeceemSecurityPolicy.PERMISSION_ADMIN])
+        def space = WcmSpace.get(params.space)
+        assert wcmSecurityService.hasPermissions(space, [WeceemSecurityPolicy.PERMISSION_ADMIN])
         log.debug "Export found space [${space}]"
         try {
-            def file = importExportService.exportSpace(space, params.exporter)
+            def file = wcmImportExportService.exportSpace(space, params.exporter)
             log.debug "Exported space to temp file [${file}]"
-            response.contentType = importExportService.getExportMimeType(params.exporter)
-            response.addHeader('Content-Length', file.length().toString())
+            response.contentType = wcmImportExportService.getExportMimeType(params.exporter)
+            response.addHeader('WcmContent-Length', file.length().toString())
             def contDisp = "attachment;filename=${space.name}.${FilenameUtils.getExtension(file.name)}"
             log.debug "Returning exported space to client with content disposition: [${contDisp}]"
-            response.addHeader('Content-disposition', contDisp)
+            response.addHeader('WcmContent-disposition', contDisp)
             response.outputStream << file.readBytes()
         } catch (Exception e) {
             flash.message = e.message

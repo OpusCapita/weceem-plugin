@@ -21,9 +21,9 @@ class WcmVersionController {
     }
 
     def list = {
-        def model = [spaceList: Space.list(), contentTypeList: getAvailableContentTypes()]
+        def model = [spaceList: WcmSpace.list(), contentTypeList: getAvailableContentTypes()]
         def dateFormat = new SimpleDateFormat('yyyy-MM-dd')
-        def pagingResult = pagingService.search(ContentVersion.class, params) {c ->
+        def pagingResult = pagingService.search(WcmContentVersion.class, params) {c ->
             if (params.space) {
                 c.eq('spaceName', params.space)
             }
@@ -46,27 +46,27 @@ class WcmVersionController {
     }
 
     def restore = {
-        def contentVersion = ContentVersion.get(params.id)
+        def contentVersion = WcmContentVersion.get(params.id)
         if (contentVersion) {
             // todo:
             // handle situations when:
             // - content for restoring was deleted, but another with same contentHeader and spaceName was created
             //   (also need to handle other situations when changes were performed for title or space (i.e. unique key);
-            // - referenced domain objects was deleted (e.g. Space)
+            // - referenced domain objects was deleted (e.g. WcmSpace)
             def xstream = new XStream()
             xstream.registerConverter(new DomainConverter(contentVersion.objectClassName))
-            def content = Content.get(contentVersion.objectKey)
+            def content = WcmContent.get(contentVersion.objectKey)
             if (content) {
                 // Using bindData to work around Grails 1.2m2 bugs, change to .properties when 1.2-RC1 is live
                 bindData(content, getRestoredProperties(xstream.fromXML(contentVersion.objectContent)) )
                 content.save()
             } else {
-                // if Content was deleted
+                // if WcmContent was deleted
                 def versionedContent = xstream.fromXML(contentVersion.objectContent)
                 content = versionedContent.class.newInstance(getRestoredProperties(versionedContent))
                 content.save()
-                ContentVersion.executeUpdate(
-                        "update ContentVersion cv set cv.objectKey = ? where cv.objectKey = ?",
+                WcmContentVersion.executeUpdate(
+                        "update WcmContentVersion cv set cv.objectKey = ? where cv.objectKey = ?",
                         [content.id, contentVersion.objectKey])
             }
             flash.message = "Content with title '${content.title}' restored to ${contentVersion.revision} revision."
@@ -75,10 +75,10 @@ class WcmVersionController {
     }
 
     def changes = {
-        def contentVersion = ContentVersion.get(params.id)
-        def currentContent = Content.get(contentVersion.objectKey)
+        def contentVersion = WcmContentVersion.get(params.id)
+        def currentContent = WcmContent.get(contentVersion.objectKey)
 
-        // if Content was deleted
+        // if WcmContent was deleted
         if (!currentContent) {
             flash.message = "Content with title '${contentVersion.contentHeader}' can't be compared with current version because it was deleted."
             redirect(action: list)
@@ -86,7 +86,7 @@ class WcmVersionController {
 
         def oldContent = new XmlSlurper().parseText(contentVersion.objectContent)
 
-        def latestRevision = ContentVersion.createCriteria().get {
+        def latestRevision = WcmContentVersion.createCriteria().get {
             eq('objectKey', contentVersion.objectKey)
             projections {
                 max('revision')
@@ -100,14 +100,14 @@ class WcmVersionController {
     }
 
     /**
-     * Renders changes for specified Content versions.
+     * Renders changes for specified WcmContent versions.
      *
      * params.fromVersion
      * params.toVersion
      */
     def showVersionsChanges = {
-        def fromVersion = ContentVersion.get(params.fromVersion)
-        def toVersion = ContentVersion.get(params.toVersion)
+        def fromVersion = WcmContentVersion.get(params.fromVersion)
+        def toVersion = WcmContentVersion.get(params.toVersion)
 
         def compareResult = contentVersionService.compareVersions(fromVersion, toVersion)
 
@@ -124,7 +124,7 @@ class WcmVersionController {
     }
 
     private def getAvailableContentTypes() {
-        def contentClass = grailsAttributes.grailsApplication.getArtefact('Domain', 'Content')
+        def contentClass = grailsAttributes.grailsApplication.getArtefact('Domain', 'WcmContent')
         def result = contentClass.subClasses.collect {
             it.name
         }

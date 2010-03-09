@@ -14,12 +14,10 @@
 
 package org.weceem.content
 
-import groovy.xml.*
-
 import org.grails.taggable.*
 
 /**
- * Content class describes the content information.
+ * WcmContent class describes the content information.
  *
  * @author Stephan Albers
  * @author July Karpey
@@ -27,17 +25,17 @@ import org.grails.taggable.*
  * @author Marc Palmer
  */
 // @todo this SHOULD be abstract, but will it work?
-class Content implements Comparable, Taggable {
+class WcmContent implements Comparable, Taggable {
     
     static VALID_ALIAS_URI_CHARS = 'A-Za-z0-9_\\-\\.'
     static INVALID_ALIAS_URI_CHARS_PATTERN = "[^"+VALID_ALIAS_URI_CHARS+"]"
     static VALID_ALIAS_URI_PATTERN = "["+VALID_ALIAS_URI_CHARS+"]+"
     
-    transient def weceemSecurityService
+    transient def wcmSecurityService
     
     // we only index title and space
     static searchable = {
-         alias Content.name.replaceAll("\\.", '_')
+         alias WcmContent.name.replaceAll("\\.", '_')
          
          only = ['title', 'status', 'absoluteURI']
          
@@ -67,9 +65,9 @@ class Content implements Comparable, Taggable {
     
     Date publicationDate
 
-    Status status
+    WcmStatus status
     
-    static belongsTo = [space: Space, parent: Content]
+    static belongsTo = [space: WcmSpace, parent: WcmContent]
     static transients = [ 
         'titleForHTML', 
         'titleForMenu', 
@@ -77,11 +75,11 @@ class Content implements Comparable, Taggable {
         'contentAsText', 
         'contentAsHTML', 
         'mimeType', 
-        'weceemSecurityService', 
+        'wcmSecurityService',
         'absoluteURI'
     ]
-    static hasMany = [children: Content]
-    static hasOne = [parent: Content]
+    static hasMany = [children: WcmContent]
+    static hasOne = [parent: WcmContent]
 
     static constraints = {
         title(size:1..100, nullable: false, blank: false)
@@ -200,7 +198,7 @@ class Content implements Comparable, Taggable {
     }
     
     def beforeInsert = {
-        def by = weceemSecurityService?.userName
+        def by = wcmSecurityService?.userName
         if (by == null) by = "system"
         //assert by != null
         
@@ -213,7 +211,7 @@ class Content implements Comparable, Taggable {
         
         changedOn = new Date()
         
-        changedBy = weceemSecurityService?.userName
+        changedBy = wcmSecurityService?.userName
         if (changedBy == null) {
             changedBy = "system"
         }
@@ -224,7 +222,7 @@ class Content implements Comparable, Taggable {
         
         def t = this
         
-        def criteria = ContentVersion.createCriteria()
+        def criteria = WcmContentVersion.createCriteria()
         def lastRevision = criteria.get {
             eq('objectKey', ident())
             projections {
@@ -249,7 +247,7 @@ class Content implements Comparable, Taggable {
         output << "</revision>"
 
         def xml = output.toString()
-        def cv = new ContentVersion(objectKey: ident(),
+        def cv = new WcmContentVersion(objectKey: ident(),
                 revision: (lastRevision ? lastRevision + 1 : 1),
                 objectClassName: self.class.name,
                 objectContent: xml,

@@ -22,7 +22,7 @@
         <div class="dialog">
           <table>
             <tbody>
-              <g:render plugin="weceem" template="/space/form" model="[space: space]"/>
+              <g:render plugin="weceem" template="/wcmSpace/form" model="[space: space]"/>
               <tr class="prop">
                 <td colspan="2">
                   <g:actionSubmit class="button" value="Save" action="save"/>&nbsp;

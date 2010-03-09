@@ -6,14 +6,14 @@ import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.weceem.content.*
 
 /**
- * ContentDirectory.
+ * WcmContentDirectory.
  *
  * @author Sergei Shushkevich
  */
-class ContentDirectory extends ContentFile {
+class WcmContentDirectory extends WcmContentFile {
 
     static searchable = {
-        alias ContentDirectory.name.replaceAll("\\.", '_')
+        alias WcmContentDirectory.name.replaceAll("\\.", '_')
         only = ['title', 'status']
     }
 
@@ -21,12 +21,12 @@ class ContentDirectory extends ContentFile {
 
     Boolean canHaveChildren() { true }
 
-    Boolean create(Content parentContent) {
+    Boolean create(WcmContent parentContent) {
         def f
-        if (parentContent && (parentContent instanceof ContentDirectory)) {
+        if (parentContent && (parentContent instanceof WcmContentDirectory)) {
             def path = getPathTo(parentContent)
             def p = ServletContextHolder.servletContext.getRealPath(
-                "/${ContentFile.DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}${path}/${title}")
+                "/${WcmContentFile.DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}${path}/${title}")
             log.debug "Creating directory path [$p]"
             f = new File(p)
             def r = f.mkdirs()
@@ -69,10 +69,10 @@ class ContentDirectory extends ContentFile {
             childrenList?.each() { child ->
                 if (child) {
                     // delete all virtual copies
-                    def copies = VirtualContent.findAllWhere(target: child)
+                    def copies = WcmVirtualContent.findAllWhere(target: child)
                     copies?.each() {
                         if (it.parent) {
-                            chParent = Content.get(it.parent.id)
+                            chParent = WcmContent.get(it.parent.id)
                             chParent.children.remove(it)
                         }
                         it.delete()

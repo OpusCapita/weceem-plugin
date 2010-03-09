@@ -9,7 +9,7 @@ import org.weceem.content.*
  */
 interface SpaceExporter {
 
-    File execute(Space space)
+    File execute(WcmSpace space)
 
     String getMimeType()
 

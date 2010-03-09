@@ -24,10 +24,10 @@ import org.weceem.util.ContentUtils
  * @author Stephan Albers
  * @author July Karpey
  */
-class BlogEntry extends Content {
+class WcmBlogEntry extends WcmContent {
 
     static searchable = {
-        alias BlogEntry.name.replaceAll("\\.", '_')
+        alias WcmBlogEntry.name.replaceAll("\\.", '_')
         
         only = ['content', 'keywords', 'summary', 'title']
     }
@@ -56,7 +56,7 @@ class BlogEntry extends Content {
         keywords()
     }
 
-    static transients = Content.transients + ['summary']
+    static transients = WcmContent.transients + ['summary']
 
     String getMimeType() { "text/html" }
 

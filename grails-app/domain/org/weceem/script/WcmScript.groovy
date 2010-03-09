@@ -1,8 +1,8 @@
 package org.weceem.script
 
-import org.weceem.content.Content
+import org.weceem.content.WcmContent
 
-class WcmScript extends Content {
+class WcmScript extends WcmContent {
 
     static searchable = {
         alias WcmScript.name.replaceAll("\\.", '_')
@@ -28,7 +28,7 @@ class WcmScript extends Content {
         content(editor:'GroovyCode')
     }
 
-    static transients = Content.transients
+    static transients = WcmContent.transients
     
     static constraints = {
         content(nullable: false, maxSize: 65536)

@@ -22,7 +22,7 @@
                   <label for="space"><g:message code="space.label.space"/></label>
                 </td>
                 <td valign="top" class="value">
-                  <g:select from="${org.weceem.content.Space.list()}" name="space" optionKey="id" optionValue="name"/>
+                  <g:select from="${org.weceem.content.WcmSpace.list()}" name="space" optionKey="id" optionValue="name"/>
                 </td>
               </tr>
               <tr>

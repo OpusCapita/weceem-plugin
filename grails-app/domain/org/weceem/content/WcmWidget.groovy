@@ -17,8 +17,8 @@ package org.weceem.content
 import org.weceem.util.ContentUtils
 
 /**
- * Widget class presents a piece of information on the screen with special
- * settings. Widget also has a template node with the path to the widget
+ * WcmWidget class presents a piece of information on the screen with special
+ * settings. WcmWidget also has a template node with the path to the widget
  * template (GSP page).
  *
  * TODO: add properties fields for settings, like:
@@ -30,12 +30,12 @@ import org.weceem.util.ContentUtils
  * @author July Karpey
  * @author Sergei Shushkevich
  */
-class Widget extends Content {
+class WcmWidget extends WcmContent {
 
     static standaloneContent = false
 
     static searchable = {
-        alias Widget.name.replaceAll("\\.", '_')
+        alias WcmWidget.name.replaceAll("\\.", '_')
         
         only = ['content', 'title', 'status']
     }
@@ -70,7 +70,7 @@ class Widget extends Content {
         color()
     }
 
-    static transients = Content.transients
+    static transients = WcmContent.transients
     
     static constraints = {
         content(nullable: false, maxSize: 65536)

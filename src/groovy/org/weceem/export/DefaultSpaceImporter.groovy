@@ -1,7 +1,7 @@
 package org.weceem.export
 
 import com.thoughtworks.xstream.XStream
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
+
 import org.apache.commons.logging.LogFactory
 import org.apache.commons.logging.Log
 import org.codehaus.groovy.grails.commons.ApplicationHolder
@@ -18,7 +18,7 @@ class DefaultSpaceImporter implements SpaceImporter {
     
     Log log = LogFactory.getLog(DefaultSpaceImporter)
     
-    void execute(Space space, File file) {
+    void execute(WcmSpace space, File file) {
         def tmpDir = File.createTempFile("unzip-import-", null)
         tmpDir.delete()
         tmpDir.mkdir()
@@ -38,7 +38,7 @@ class DefaultSpaceImporter implements SpaceImporter {
         if (!contentXmlFile.exists()) {
             throw new ImportException("Uploaded file doesn't contain 'content.xml' file.")
         }
-        def defStatus = Status.findByPublicContent(true)
+        def defStatus = WcmStatus.findByPublicContent(true)
         def xml = new XmlSlurper().parseText(contentXmlFile.text)
         xml.children().each {child ->
             def builder = new groovy.xml.StreamingMarkupBuilder()
@@ -55,9 +55,9 @@ class DefaultSpaceImporter implements SpaceImporter {
             def deserialized = xstream.fromXML(baos.toString())
             
             switch (deserialized.class) {
-                case Space.class:
-                    if (!Space.findByName(deserialized.name)) {
-                        def spc = new Space(getRestoredProperties(deserialized))
+                case WcmSpace.class:
+                    if (!WcmSpace.findByName(deserialized.name)) {
+                        def spc = new WcmSpace(getRestoredProperties(deserialized))
                         if (!spc.save()) {
                             log.error( "Failed to import content node: ${spc.dump()} - ${spc.errors}")
                             throw new ImportException("Cannot save node ${spc}")
@@ -65,15 +65,15 @@ class DefaultSpaceImporter implements SpaceImporter {
                     }
                     break
 
-                case Template.class:
-                    def template = Template.findWhere(aliasURI: deserialized.aliasURI,
+                case WcmTemplate.class:
+                    def template = WcmTemplate.findWhere(aliasURI: deserialized.aliasURI,
                             space: deserialized.space)
                     if (!template) {
-                        template = new Template()
+                        template = new WcmTemplate()
                     }
                     
                     // @todo remove this and revert to x.properties = y after Grails 1.2-RC1
-                    grailsApp.mainContext.contentRepositoryService.hackedBindData(template, getRestoredProperties(deserialized))
+                    grailsApp.mainContext.wcmContentRepositoryService.hackedBindData(template, getRestoredProperties(deserialized))
                     if (template.status == null){
                         template.status = defStatus
                     }
@@ -84,27 +84,27 @@ class DefaultSpaceImporter implements SpaceImporter {
                     }
                     break
                 default:
-                    def content = Content.findWhere(aliasURI: deserialized.aliasURI,
+                    def content = WcmContent.findWhere(aliasURI: deserialized.aliasURI,
                             space: space)
                     if (!content) {
                         content = deserialized.class.newInstance()
                     }
 
                     // @todo remove this and revert to x.properties = y after Grails 1.2-RC1
-                    grailsApp.mainContext.contentRepositoryService.hackedBindData(content, getRestoredProperties(deserialized))
+                    grailsApp.mainContext.wcmContentRepositoryService.hackedBindData(content, getRestoredProperties(deserialized))
                     content.status = defStatus
                     content.space = space
-                    if (content instanceof ContentFile) content.syncStatus = 0
+                    if (content instanceof WcmContentFile) content.syncStatus = 0
                     if (!content.orderIndex) content.orderIndex = 0
-                    if (content instanceof VirtualContent){
-                        def target = Content.findByAliasURI(content.target.aliasURI)
+                    if (content instanceof WcmVirtualContent){
+                        def target = WcmContent.findByAliasURI(content.target.aliasURI)
                         content.target = target
                     }
                     log.debug "Import parent test"
                     if (content.parent) {
                         log.debug "Import has parent: ${content.parent}"
                         
-                        def parent = Content.findByAliasURI(content.parent.aliasURI)
+                        def parent = WcmContent.findByAliasURI(content.parent.aliasURI)
                         if (parent) {
                             def orderIndex = ((parent.children && !parent.children?.isEmpty())
                                               ? parent.children?.last()?.orderIndex + 1 : 0)
@@ -127,7 +127,7 @@ class DefaultSpaceImporter implements SpaceImporter {
         }
 
         def filesDir = new File(ApplicationHolder.application.mainContext.servletContext.getRealPath(
-                "/${ContentFile.DEFAULT_UPLOAD_DIR}"))
+                "/${WcmContentFile.DEFAULT_UPLOAD_DIR}"))
         ant.copy(todir: "${filesDir.absolutePath}/${space.makeUploadName()}", failonerror: false) {
             fileset(dir: "${tmpDir.absolutePath}/files")
         }

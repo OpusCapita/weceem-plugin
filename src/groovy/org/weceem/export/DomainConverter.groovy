@@ -23,7 +23,7 @@ class DomainConverter implements Converter {
     }
 
     public boolean canConvert(Class clazz) {
-        clazz.name != rootClassName && (clazz.equals(Space.class) || clazz.equals(Template.class) || clazz.equals(Language.class))
+        clazz.name != rootClassName && (clazz.equals(WcmSpace.class) || clazz.equals(WcmTemplate.class) || clazz.equals(Language.class))
     }
 
     public void marshal(Object value, HierarchicalStreamWriter writer, MarshallingContext context) {

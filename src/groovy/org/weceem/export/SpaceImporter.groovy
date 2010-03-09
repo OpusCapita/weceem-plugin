@@ -9,7 +9,7 @@ import org.weceem.content.*
  */
 interface SpaceImporter {
 
-    void execute(Space space, File file)
+    void execute(WcmSpace space, File file)
 
     String getName()
 }

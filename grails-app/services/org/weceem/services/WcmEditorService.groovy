@@ -5,15 +5,15 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 import org.weceem.content.*
 
-class EditorService {
+class WcmEditorService {
     def editorInfo = [:]
     
     def grailsApplication
-    def contentRepositoryService
+    def wcmContentRepositoryService
     
     void cacheEditorInfo() {
-        log.debug "Caching editor info for Content classes"
-        contentRepositoryService.listContentClasses().each { cls ->
+        log.debug "Caching editor info for WcmContent classes"
+        wcmContentRepositoryService.listContentClasses().each { cls ->
             log.debug "Found content class $cls"
             cacheEditorInfo(cls)
         }
@@ -24,7 +24,7 @@ class EditorService {
      */
     void cacheEditorInfo(Class cls) {
         log.debug "Caching editor info for Content class $cls"
-        assert Content.isAssignableFrom(cls)
+        assert WcmContent.isAssignableFrom(cls)
         
         cachePropertyInfo(cls)
 
@@ -41,7 +41,7 @@ class EditorService {
     void cachePropertyInfo(final Class cls) {
         if (!cls.metaClass.hasProperty(cls, 'editors')) return
         
-        assert Content.isAssignableFrom(cls)
+        assert WcmContent.isAssignableFrom(cls)
 
         def ancestorChain = [cls]
         Class currentClass = cls
@@ -88,7 +88,7 @@ class EditorService {
     protected evaluateEditors(Class cls) {
         def eds = cls.editors.clone()
         if (!(eds instanceof Closure)) {
-            log.warn "The [editors] property of Content classes must be a closure"
+            log.warn "The [editors] property of WcmContent classes must be a closure"
             return
         }
 
@@ -138,7 +138,7 @@ class EditorService {
     def configureFCKEditor(){
         def settings = ConfigurationHolder.config
         def co = new ConfigObject()
-        co.fckeditor.upload.basedir = "/${org.weceem.files.ContentFile.DEFAULT_UPLOAD_DIR}/"
+        co.fckeditor.upload.basedir = "/${org.weceem.files.WcmContentFile.DEFAULT_UPLOAD_DIR}/"
         co.fckeditor.upload.overwrite = false
         co.fckeditor.upload.image.browser = true
         co.fckeditor.upload.image.upload = true

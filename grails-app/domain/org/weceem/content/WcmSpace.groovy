@@ -17,19 +17,19 @@ package org.weceem.content
 import org.weceem.files.*
 
 /**
- * Space class describes a user space.
+ * WcmSpace class describes a user space.
  *
  * @author Stephan Albers
  * @author July Karpey
  * @author Sergei Shushkevich
  */
-class Space {
+class WcmSpace {
     String name
 
     String aliasURI = '' // Default to blank eg / uri namespace
     
     static searchable = {
-        root false // We con't want to search for Space instances
+        root false // We con't want to search for WcmSpace instances
 
         only = ['id'] // used for finding content by space
     }
@@ -46,6 +46,6 @@ class Space {
     }
     
     public String makeUploadName(){
-        return (aliasURI == "") ? ContentFile.EMPTY_ALIAS_URI : aliasURI
+        return (aliasURI == "") ? WcmContentFile.EMPTY_ALIAS_URI : aliasURI
     }
 }

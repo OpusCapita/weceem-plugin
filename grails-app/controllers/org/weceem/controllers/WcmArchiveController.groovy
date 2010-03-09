@@ -1,6 +1,6 @@
 package org.weceem.controllers
 
-import org.weceem.services.ContentRepositoryService
+import org.weceem.services.WcmContentRepositoryService
 
 /**
  * Controller for rendering archive of year/month/day of given content URI
@@ -9,7 +9,7 @@ class WcmArchiveController {
 
     static defaultAction = 'list'
     
-    def contentRepositoryService
+    def wcmContentRepositoryService
 
     private getArchiveData() {
         def fullURIParts = params.uri.tokenize('/')
@@ -39,24 +39,24 @@ class WcmArchiveController {
         assert year
         assert month
         
-        def info = contentRepositoryService.resolveSpaceAndURI(contentURI)
+        def info = wcmContentRepositoryService.resolveSpaceAndURI(contentURI)
         def space = info.space
         def uri = info.uri
         if (log.debugEnabled) {
             log.debug "Archive parent node is at: ${uri}"
         }
-        def node = contentRepositoryService.findContentForPath(uri, space)?.content
+        def node = wcmContentRepositoryService.findContentForPath(uri, space)?.content
         if (node) {
             def dates = day != null ?
-                contentRepositoryService.calculateDayStartEndDates(day, month, year) :
-                contentRepositoryService.calculateMonthStartEndDates(month, year)
+                wcmContentRepositoryService.calculateDayStartEndDates(day, month, year) :
+                wcmContentRepositoryService.calculateMonthStartEndDates(month, year)
                 
             def max = params.int('max') ?: 25
             
-            def nodes = contentRepositoryService.findContentForTimePeriod(node,
+            def nodes = wcmContentRepositoryService.findContentForTimePeriod(node,
                 dates.start,
                 dates.end,
-                [status:ContentRepositoryService.STATUS_ANY_PUBLISHED, max:Math.min(max, 100)])
+                [status:WcmContentRepositoryService.STATUS_ANY_PUBLISHED, max:Math.min(max, 100)])
             return [parent: node, nodes: nodes, space:space, startDate:dates.start, 
                 endDate:dates.end, month:month, year:year, day:day]
         }

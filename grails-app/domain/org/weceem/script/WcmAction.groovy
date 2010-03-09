@@ -1,15 +1,15 @@
 package org.weceem.script
 
-import org.weceem.content.Content
+import org.weceem.content.WcmContent
 
-class Action extends Content {
+class WcmAction extends WcmContent {
     
     WcmScript script
     String description // Human explanation of it
     String allowedMethods
     
     static searchable = {
-        alias Action.name.replaceAll("\\.", '_')
+        alias WcmAction.name.replaceAll("\\.", '_')
         only = ['description', 'title', 'status']
     }
 
@@ -17,7 +17,7 @@ class Action extends Content {
         cache usage: 'nonstrict-read-write' 
     }
     
-    static transients = Content.transients
+    static transients = WcmContent.transients
     
     static constraints = {
         description(maxSize:200)

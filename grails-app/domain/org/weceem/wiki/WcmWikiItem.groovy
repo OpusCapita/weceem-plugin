@@ -1,8 +1,6 @@
-package org.weceem.html
+package org.weceem.wiki
 
 import org.weceem.content.*
-
-import org.weceem.util.ContentUtils
 
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,100 +17,59 @@ import org.weceem.util.ContentUtils
  */
 
 /**
- * HTMLContent class describes the content node of type 'HTML'.
  *
  * @author Stephan Albers
  * @author July Karpey
- * @author Marc Palmer
- * @author Viktor Fedorov
  */
-class HTMLContent extends Content {
+class WcmWikiItem extends WcmContent {
 
     static searchable = {
-        alias HTMLContent.name.replaceAll("\\.", '_')
-        only = ['content', 'keywords', 'htmlTitle', 'menuTitle', 'title', 'status']
+        alias WcmWikiItem.name.replaceAll("\\.", '_')
+        only = ['content', 'keywords', 'title', 'status']
     }
     
-    Boolean allowGSP = false
-    
     String keywords
-    Template template
+    WcmTemplate template
 
     // 64Kb Unicode text with HTML/Wiki Markup
     String content
-    String menuTitle
-    String htmlTitle
 
     /**
      * Must be overriden by content types that can represent their content as text.
      * Used for search results and versioning
      */
-    public String getContentAsText() { ContentUtils.htmlToText(content) }
+    public String getContentAsText() { content }
 
-    /**
-     * Should be overriden by content types that can represent their content as HTML.
-     * Used for wcm:content tag (content rendering)
-     */
-    public String getContentAsHTML() { content }
     
     Map getVersioningProperties() { 
-        def r = super.getVersioningProperties() + [ 
-            menuTitle:menuTitle,
-            htmlTitle:htmlTitle,
+        super.getVersioningProperties() + [ 
             keywords:keywords,
             template:template?.ident() // Is this right?
         ] 
-        return r
-    }
-    
-    String getMimeType() { "text/html" } // @todo we probably need to allow inclusion of charset
-
-    static handleRequest = { content ->
-        if (content.allowGSP) {
-            renderGSPContent(content)
-        } else {
-            renderContent(content)
-        }
     }
     
     static constraints = {
-        content(nullable: false, maxSize: 500000)
-        keywords(nullable: true, blank: true, maxSize: 200)
-        menuTitle(nullable: true, blank: true, maxSize: 40)
-        htmlTitle(nullable: true, blank: true, maxSize: 400)
-        allowGSP(nullable: true)
+        content(nullable: false, maxSize: 65536)
+        keywords(nullable: true)
         template(nullable: true)
         status(nullable: false) // Workaround for Grails 1.1.1 constraint inheritance bug
     }
 
     static mapping = {
-        cache usage:'read-write', include: 'non-lazy'
         template cascade: 'all', lazy: false // we never want proxies for this
+        cache usage: 'read-write'
         columns {
             content type:'text'
-            htmlTitle type:'text'
         }
     }
-
+    
     static editors = {
         template(group:'extra')
-        menuTitle(group:'extra')
-        htmlTitle(group:'extra')
-        content(editor:'HTMLContent')
+        content(editor:'WikiCode')
         keywords()
     }
 
-    static transients = Content.transients + [ 'summary']
-
-    /**
-     * Overriden to return caption for menu items, if supplied
-     */
-    public String getTitleForMenu() { menuTitle ?: title }
-
-    /**
-     * Overriden to return caption for menu items, if supplied
-     */
-    public String getTitleForHTML() { htmlTitle ?: title }
+    static transients = WcmContent.transients + ['summary']
 
     public String getSummary() {
         def summaryString = ""
@@ -130,4 +87,5 @@ class HTMLContent extends Content {
         return summaryString
     }
 
+    public void setSummary(String summary) {}  
 }

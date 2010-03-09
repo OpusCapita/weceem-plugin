@@ -40,7 +40,7 @@ class ExternalLinksJob {
     
     def execute(){
 
-        RelatedContent.findAllWhere("isInternal": false).each() {
+        WcmRelatedContent.findAllWhere("isInternal": false).each() {
             // open connection to external link
             def url = new URL(it.toContent)
             def connection = url.openConnection()

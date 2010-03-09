@@ -15,18 +15,18 @@
 package org.weceem.content
 
 /**
- * RelatedContent class.
+ * WcmRelatedContent class.
  * When creating new content, parse the content, delete the old links
- * and save the new links into RelatedContent.
+ * and save the new links into WcmRelatedContent.
  *
  * @author Stephan Albers
  * @author July Karpey
  */
-class RelatedContent {
-    Content sourceContent
+class WcmRelatedContent {
+    WcmContent sourceContent
 
     // to Title (for internal links) or to URL (for external links)
-    Content targetContent
+    WcmContent targetContent
 
     Boolean isInternal
 
@@ -43,9 +43,9 @@ class RelatedContent {
         cache usage: 'nonstrict-read-write'
     }
 
-    def RelatedContent() {}
+    def WcmRelatedContent() {}
 
-    def RelatedContent(def contentNode, def contentLink, def isInternal,
+    def WcmRelatedContent(def contentNode, def contentLink, def isInternal,
                        def relationType) {
         this.sourceContent = contentNode
         this.targetContent = contentLink

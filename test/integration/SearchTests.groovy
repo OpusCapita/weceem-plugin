@@ -1,12 +1,10 @@
 
-import org.weceem.controllers.*
-import org.weceem.services.*
 import org.weceem.content.*
 import org.weceem.html.*
 
 /**
  * ContentRepositoryTests class contains tests for tree operations from
- * contentRepositoryService.
+ * wcmContentRepositoryService.
  *
  * These old tests BAD because they are not mocking the services, so they are testing the services and controller
  */
@@ -26,21 +24,21 @@ class SearchTests extends AbstractWeceemIntegrationTest {
         searchableService = application.mainContext.searchableService
         searchableService.stopMirroring()
         
-        statusA = new Status(code: 400, description: "published", publicContent: true)
+        statusA = new WcmStatus(code: 400, description: "published", publicContent: true)
         assert statusA.save(flush:true)
-        statusB = new Status(code: 100, description: "draft", publicContent: false)
+        statusB = new WcmStatus(code: 100, description: "draft", publicContent: false)
         assert statusB.save(flush:true)
 
-        spaceA = new Space(name: 'a', aliasURI: 'a')
+        spaceA = new WcmSpace(name: 'a', aliasURI: 'a')
         assert spaceA.save(flush: true)
-        spaceB = new Space(name: 'b', aliasURI: 'b')
+        spaceB = new WcmSpace(name: 'b', aliasURI: 'b')
         assert spaceB.save(flush: true)
 
-        def folder = new Folder(title:'folder', aliasURI:'folder1', space:spaceA, status:statusA)
+        def folder = new WcmFolder(title:'folder', aliasURI:'folder1', space:spaceA, status:statusA)
         assert folder.save()
         
         50.times {
-            assert new HTMLContent(title: "Acontent-$it", aliasURI: "acontent-$it",
+            assert new WcmHTMLContent(title: "Acontent-$it", aliasURI: "acontent-$it",
                 content: 'content number #$it', status: it % 2 == 0 ? statusA : statusB,
                 createdBy: 'admin', createdOn: new Date(),
                 space: spaceA,
@@ -48,7 +46,7 @@ class SearchTests extends AbstractWeceemIntegrationTest {
         }
 
         10.times {
-            def n = new HTMLContent(title: "Child-$it", aliasURI: "child-$it",
+            def n = new WcmHTMLContent(title: "Child-$it", aliasURI: "child-$it",
                 content: 'child number #$it', status: statusA,
                 createdBy: 'admin', createdOn: new Date(),
                 space: spaceA,
@@ -60,7 +58,7 @@ class SearchTests extends AbstractWeceemIntegrationTest {
         }
 
         10.times {
-            assert new HTMLContent(title: "Bcontent-$it", aliasURI: "bcontent-$it",
+            assert new WcmHTMLContent(title: "Bcontent-$it", aliasURI: "bcontent-$it",
                 content: 'content number #$it', status: statusA,
                 createdBy: 'admin', createdOn: new Date(),
                 space: spaceB,
@@ -78,12 +76,12 @@ class SearchTests extends AbstractWeceemIntegrationTest {
     void testSearchForContentAsInRepository() {
         def pageSize = 20
         
-        def resultData = contentRepositoryService.searchForContent('content', spaceA, null, [max:pageSize])
+        def resultData = wcmContentRepositoryService.searchForContent('content', spaceA, null, [max:pageSize])
         
         assertEquals pageSize, resultData.results.size()
         assertTrue resultData.results.every { it.space.id == spaceA.id }
 
-        resultData = contentRepositoryService.searchForContent('content', spaceB, null, [max:pageSize])
+        resultData = wcmContentRepositoryService.searchForContent('content', spaceB, null, [max:pageSize])
         
         assertEquals 10, resultData.results.size()
         assertTrue resultData.results.every { it.space.id == spaceB.id }
@@ -93,11 +91,11 @@ class SearchTests extends AbstractWeceemIntegrationTest {
     void testSearchForContentUnderURI() {
         def pageSize = 20
         
-        def resultData = contentRepositoryService.searchForContent('content', spaceA, 'folder1', [max:pageSize])
+        def resultData = wcmContentRepositoryService.searchForContent('content', spaceA, 'folder1', [max:pageSize])
         
         println "Results: ${resultData.results}" 
         assertEquals 10, resultData.results.size()
-        def f = Folder.findByAliasURI('folder1')
+        def f = WcmFolder.findByAliasURI('folder1')
         
         assertTrue resultData.results.every { n->
             (n.space.id == spaceA.id) && (n.parent.id == f.id)
@@ -107,12 +105,12 @@ class SearchTests extends AbstractWeceemIntegrationTest {
     
     void testSearchForPublicContentPaging() {
         def pagesize = 10
-        def resultData = contentRepositoryService.searchForPublicContent('content', spaceA, null, [max:pagesize])
+        def resultData = wcmContentRepositoryService.searchForPublicContent('content', spaceA, null, [max:pagesize])
 
         assertEquals pagesize, resultData.results.size()
         assertTrue resultData.results.every { n -> n.status.publicContent == true }
 
-        def resultData2 = contentRepositoryService.searchForPublicContent('content', spaceA, null, [max:pagesize, offset:pagesize])
+        def resultData2 = wcmContentRepositoryService.searchForPublicContent('content', spaceA, null, [max:pagesize, offset:pagesize])
 
         assertEquals pagesize, resultData2.results.size()
         assertTrue resultData2.results.every { r ->
@@ -122,7 +120,7 @@ class SearchTests extends AbstractWeceemIntegrationTest {
 
     void testSearchForPublicContentExcludesUnpublishedContent() {
         def pageSize = 50
-        def resultData = contentRepositoryService.searchForPublicContent('content', spaceA, null, [max:pageSize])
+        def resultData = wcmContentRepositoryService.searchForPublicContent('content', spaceA, null, [max:pageSize])
         
         assertEquals pageSize / 2, resultData.results.size()
         assertTrue resultData.results.every { it.status.publicContent == true }
@@ -131,12 +129,12 @@ class SearchTests extends AbstractWeceemIntegrationTest {
 /* commented out as we can't get this implementation to work at all, Searchable/Compass issues
     void testSearchCascadesChangesToStatusPublicContentProperty() {
         def pageSize = 50
-        def resultData = contentRepositoryService.searchForPublicContent('content', spaceA, null, [max:pageSize])
+        def resultData = wcmContentRepositoryService.searchForPublicContent('content', spaceA, null, [max:pageSize])
         
         assertEquals pageSize/2, resultData.results.size()
         assertTrue resultData.results.every { it.status.publicContent == true }
  
-        def status = Status.findByCode(100)
+        def status = WcmStatus.findByCode(100)
         status.publicContent = true
         status.save(flush:true)
         
@@ -144,7 +142,7 @@ class SearchTests extends AbstractWeceemIntegrationTest {
         searchableService.reindex()
         searchableService.startMirroring()
         
-        resultData = contentRepositoryService.searchForPublicContent('content', spaceA, null, [max:pageSize])
+        resultData = wcmContentRepositoryService.searchForPublicContent('content', spaceA, null, [max:pageSize])
         
         assertEquals pageSize, resultData.results.size()
         assertTrue resultData.results.every { it.status.publicContent == true }

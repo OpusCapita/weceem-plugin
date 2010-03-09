@@ -10,8 +10,8 @@ import grails.converters.JSON
 import org.weceem.content.*
 
 class WcmEditorController {
-    def contentRepositoryService
-    def editorService
+    def wcmContentRepositoryService
+    def wcmEditorService
 
     // the delete, save and update actions only accept POST requests
     static allowedMethods = [create:['GET'], delete: ['POST'], save: 'POST', update: 'POST']
@@ -19,20 +19,20 @@ class WcmEditorController {
     def create = {
         workaroundBlankAssociationBug()
         
-        def content = contentRepositoryService.newContentInstance(params.type)
+        def content = wcmContentRepositoryService.newContentInstance(params.type)
         // Using bindData to work around Grails 1.2m2 bugs, change to .properties when 1.2-RC1 is live
         bindData(content, params)
 
-        return [content: content, editableProperties: editorService.getEditorInfo(content.class)]
+        return [content: content, editableProperties: wcmEditorService.getEditorInfo(content.class)]
     }
 
     def edit = {
-        def content = Content.get(params.id)
+        def content = WcmContent.get(params.id)
         if (!content) {
             flash.message = "Content not found with id ${params.id}"
             redirect(controller:'wcmRepository')
         } else {
-            return [content: content, editableProperties: editorService.getEditorInfo(content.class)]
+            return [content: content, editableProperties: wcmEditorService.getEditorInfo(content.class)]
         }
     }
 
@@ -57,7 +57,7 @@ class WcmEditorController {
         
         log.debug "Saving new content: ${params}"
         
-        def content = contentRepositoryService.createNode(params.type, params)
+        def content = wcmContentRepositoryService.createNode(params.type, params)
 
         if (!content.hasErrors()) {
             flash.message = message(code:'message.content.saved', args:[content.title, message(code:'content.item.name.'+content.class.name)])
@@ -71,7 +71,7 @@ class WcmEditorController {
             flash.message = message(code:'message.content.save.failed')
             flash.error = renderErrors(bean: content)
             log.error "Unable to save content: ${content.errors}"
-            render(view: 'create', model: [content: content, editableProperties: editorService.getEditorInfo(content.class)])
+            render(view: 'create', model: [content: content, editableProperties: wcmEditorService.getEditorInfo(content.class)])
         }
     }
     
@@ -88,9 +88,9 @@ class WcmEditorController {
     def update = {
         workaroundBlankAssociationBug()
         
-        def result = contentRepositoryService.updateNode(params.id, params)
+        def result = wcmContentRepositoryService.updateNode(params.id, params)
         if (result?.errors) {
-            render(view: 'edit', model: [content: result.content, editableProperties: editorService.getEditorInfo(result.content.class)])
+            render(view: 'edit', model: [content: result.content, editableProperties: wcmEditorService.getEditorInfo(result.content.class)])
         } else if (result?.notFound) {
             response.sendError(404, "Cannot update node, no node found with id ${params.id}")
         } else {
@@ -106,7 +106,7 @@ class WcmEditorController {
     }
     
     def delete = {
-        def content = contentRepositoryService.getContentClassForType(params.type).get(params.id)
+        def content = wcmContentRepositoryService.getContentClassForType(params.type).get(params.id)
         if (content) {
             content.delete(flush: true)
             flash.message = "Content ${params.id} deleted"
@@ -118,8 +118,8 @@ class WcmEditorController {
     }
     
     def dochange = {
-        def selectedSpace = Space.get(params.id)
-        def templates = Template.findAllBySpace(selectedSpace)
+        def selectedSpace = WcmSpace.get(params.id)
+        def templates = WcmTemplate.findAllBySpace(selectedSpace)
         def data = []
         templates.each {
         def template = [:]

@@ -1,10 +1,7 @@
-import grails.test.*
-import org.weceem.services.EventService
+import org.weceem.services.WcmEventService
 import org.weceem.event.Events
 
-import org.weceem.content.Content
-
-import org.weceem.services.EventService
+import org.weceem.content.WcmContent
 
 class EventServiceTests extends grails.test.GrailsUnitTestCase {
 
@@ -13,7 +10,7 @@ class EventServiceTests extends grails.test.GrailsUnitTestCase {
 
   protected void setUp() {
     super.setUp()
-    eventService = new EventService()
+    eventService = new WcmEventService()
     listenerCalled = false
   }
 
@@ -23,61 +20,61 @@ class EventServiceTests extends grails.test.GrailsUnitTestCase {
 
   void testAfterContentAddedEvent() {
     // first test without a listener
-    eventService.afterContentAdded(new Content())
+    eventService.afterContentAdded(new WcmContent())
 
     // then test with a listener
     eventService.registerListener(Events.AFTER_CONTENT_ADDED, this)
-    eventService.afterContentAdded(new Content())
+    eventService.afterContentAdded(new WcmContent())
     assertTrue listenerCalled
 
     // remove listener and test again
     eventService.unregisterListener(Events.AFTER_CONTENT_ADDED, this)
     listenerCalled = false
-    eventService.afterContentAdded(new Content())
+    eventService.afterContentAdded(new WcmContent())
     assertFalse listenerCalled
   }
 
   void testAfterContentUpdatedEvent() {
     // first test without a listener
-    eventService.afterContentUpdated(new Content())
+    eventService.afterContentUpdated(new WcmContent())
 
     // then test with a listener
     eventService.registerListener(Events.AFTER_CONTENT_UPDATED, this)
-    eventService.afterContentUpdated(new Content())
+    eventService.afterContentUpdated(new WcmContent())
     assertTrue listenerCalled
 
     // remove listener and test again
     eventService.unregisterListener(Events.AFTER_CONTENT_UPDATED, this)
     listenerCalled = false
-    eventService.afterContentUpdated(new Content())
+    eventService.afterContentUpdated(new WcmContent())
     assertFalse listenerCalled
   }
 
   void testAfterContentRemovedEvent() {
     // first test without a listener
-    eventService.afterContentRemoved(new Content())
+    eventService.afterContentRemoved(new WcmContent())
 
     // then test with a listener
     eventService.registerListener(Events.AFTER_CONTENT_REMOVED, this)
-    eventService.afterContentRemoved(new Content())
+    eventService.afterContentRemoved(new WcmContent())
     assertTrue listenerCalled
 
     // remove listener and test again
     eventService.unregisterListener(Events.AFTER_CONTENT_REMOVED, this)
     listenerCalled = false
-    eventService.afterContentRemoved(new Content())
+    eventService.afterContentRemoved(new WcmContent())
     assertFalse listenerCalled
   }
 
-  void afterWeceemContentUpdated(Content content) {
+  void afterWeceemContentUpdated(WcmContent content) {
     listenerCalled = true
   }
 
-  void afterWeceemContentAdded(Content content) {
+  void afterWeceemContentAdded(WcmContent content) {
     listenerCalled = true
   }
 
-  void afterWeceemContentRemoved(Content content) {
+  void afterWeceemContentRemoved(WcmContent content) {
     listenerCalled = true
   }
 }

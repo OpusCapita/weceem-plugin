@@ -2,7 +2,7 @@ package org.weceem.jobs
 
 
 class AutoPublicationJob {
-    def contentRepositoryService
+    def wcmContentRepositoryService
 
     static triggers = {
         simple name: 'autopub', startDelay: 60000, repeatInterval: 60000  
@@ -18,7 +18,7 @@ class AutoPublicationJob {
         if (log.debugEnabled) {
             log.debug "Auto publication job running..."
         }
-        def n = contentRepositoryService.publishPendingContent()
+        def n = wcmContentRepositoryService.publishPendingContent()
         if (log.infoEnabled && n) {
             log.info "Auto-published $n content nodes"
         }

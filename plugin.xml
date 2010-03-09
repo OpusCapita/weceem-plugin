@@ -34,28 +34,28 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     <resource>org.weceem.content.ContentVersion</resource>
     <resource>org.weceem.content.ExternalLink</resource>
     <resource>org.weceem.content.Folder</resource>
-    <resource>org.weceem.content.RelatedContent</resource>
-    <resource>org.weceem.content.Space</resource>
-    <resource>org.weceem.content.Status</resource>
-    <resource>org.weceem.content.Template</resource>
+    <resource>org.weceem.content.WcmRelatedContent</resource>
+    <resource>org.weceem.content.WcmSpace</resource>
+    <resource>org.weceem.content.WcmStatus</resource>
+    <resource>org.weceem.content.WcmTemplate</resource>
     <resource>org.weceem.content.VirtualContent</resource>
-    <resource>org.weceem.content.Widget</resource>
-    <resource>org.weceem.css.StyleSheet</resource>
+    <resource>org.weceem.content.WcmWidget</resource>
+    <resource>org.weceem.css.WcmStyleSheet</resource>
     <resource>org.weceem.files.ContentDirectory</resource>
     <resource>org.weceem.files.ContentFile</resource>
     <resource>org.weceem.html.HTMLContent</resource>
-    <resource>org.weceem.js.JavaScript</resource>
-    <resource>org.weceem.script.Action</resource>
+    <resource>org.weceem.js.WcmJavaScript</resource>
+    <resource>org.weceem.script.WcmAction</resource>
     <resource>org.weceem.script.WcmScript</resource>
-    <resource>org.weceem.wiki.WikiItem</resource>
+    <resource>org.weceem.wiki.WcmWikiItem</resource>
     <resource>org.weceem.jobs.AutoPublicationJob</resource>
     <resource>org.weceem.jobs.ExternalLinksJob</resource>
-    <resource>org.weceem.services.CacheService</resource>
-    <resource>org.weceem.services.ContentRepositoryService</resource>
-    <resource>org.weceem.services.ContentVersionService</resource>
+    <resource>org.weceem.services.WcmCacheService</resource>
+    <resource>org.weceem.services.WcmContentRepositoryService</resource>
+    <resource>org.weceem.services.WcmContentVersionService</resource>
     <resource>org.weceem.services.EditorService</resource>
-    <resource>org.weceem.services.EventService</resource>
-    <resource>org.weceem.services.ImportExportService</resource>
+    <resource>org.weceem.services.WcmEventService</resource>
+    <resource>org.weceem.services.WcmImportExportService</resource>
     <resource>org.weceem.services.WeceemSecurityService</resource>
     <resource>org.weceem.tags.AdminTagLib</resource>
     <resource>org.weceem.tags.CacheTagLib</resource>

@@ -1,6 +1,6 @@
 package org.weceem.event
 /**
- * Event names for the EventService
+ * Event names for the WcmEventService
  * @author Scott Burch
  */
 

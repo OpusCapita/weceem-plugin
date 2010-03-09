@@ -11,24 +11,24 @@ import grails.converters.JSON
  */
 class WcmSynchronizationController {
 
-    def contentRepositoryService
+    def wcmContentRepositoryService
 
     def index = {}
 
     def list = {
-        def spaces = Space.list()
+        def spaces = WcmSpace.list()
         render (view: "list", model: [spaces: spaces])
     }
 
     /**
-     * Renders list of files and Content objects which need to be synchonized.
+     * Renders list of files and WcmContent objects which need to be synchonized.
      */
     def synchronizationList = {
-        def space = Space.get(params.id)
-        def result = contentRepositoryService.synchronizeSpace(space)
+        def space = WcmSpace.get(params.id)
+        def result = wcmContentRepositoryService.synchronizeSpace(space)
         def createdContent = result.created
         def missedFiles = result.missed
-        def dirnum = createdContent.findAll{c-> c instanceof ContentDirectory}.size()
+        def dirnum = createdContent.findAll{c-> c instanceof WcmContentDirectory}.size()
         def filenum = createdContent.size() - dirnum
         render (view: "fileList", model: [result: missedFiles, createdContent: createdContent, 
         space: space, dirnum: dirnum, filenum: filenum])
@@ -44,7 +44,7 @@ class WcmSynchronizationController {
         for (p in params){
             if (pattern.matcher(p.key).matches()){
                 def id = idpattern.matcher(p.key)[0]
-                contentRepositoryService.deleteNode(ContentFile.get(id))
+                contentRepositoryService.deleteNode(WcmContentFile.get(id))
             }
         }
         redirect(controller: "wcmRepository")
@@ -55,12 +55,12 @@ class WcmSynchronizationController {
     }
     
     /**
-     * Deletes ContentFile/ContentDirectory with specified <code>id</code>.
+     * Deletes WcmContentFile/WcmContentDirectory with specified <code>id</code>.
      *
      * @param id
      */
     def deleteContent = {
-        def content = ContentFile.get(params.id)
+        def content = WcmContentFile.get(params.id)
         if (content) {
             // we need to remove content from all associations
 
@@ -81,10 +81,10 @@ class WcmSynchronizationController {
                 parent.children.remove(content)
             }
 
-            def copies = VirtualContent.findAllWhere(target: content)
+            def copies = WcmVirtualContent.findAllWhere(target: content)
             copies?.each() {
                if (it.parent) {
-                   parent = Content.get(it.parent.id)
+                   parent = WcmContent.get(it.parent.id)
                    parent.children.remove(it)
                }
                it.delete()
@@ -99,23 +99,23 @@ class WcmSynchronizationController {
 
     /**
      * Links file from specified <code>path</code> on the file system
-     * with existing ContentFile/ContentDirectory.
+     * with existing WcmContentFile/WcmContentDirectory.
      *
      * @param id
      * @param path
      */
     def linkContentFile = {
-        def content = ContentFile.get(params.id)
+        def content = WcmContentFile.get(params.id)
         List tokens = params.path.replace('\\', '/').split('/')
         if (content && tokens.size() > 1) {
             if (content.space.name == tokens[0]) {
                 def file = grailsApplication.parentContext.getResource(
-                        "${ContentFile.DEFAULT_UPLOAD_DIR}/${params.path}").file
-                if (((content instanceof ContentDirectory) && file.directory)
-                        || (content.class == ContentFile && file.file)) {
+                        "${WcmContentFile.DEFAULT_UPLOAD_DIR}/${params.path}").file
+                if (((content instanceof WcmContentDirectory) && file.directory)
+                        || (content.class == WcmContentFile && file.file)) {
                     def dstPath = ''
                     def parent = content.parent
-                    if (parent && (parent instanceof ContentDirectory)) {
+                    if (parent && (parent instanceof WcmContentDirectory)) {
                         dstPath = getPath(parent)
                     }
                     if (file.directory) {
@@ -126,14 +126,14 @@ class WcmSynchronizationController {
                     def srcDir = file.absolutePath.replace('\\', '/')
                     srcDir = srcDir.substring(0, srcDir.size() - file.name.size() - 1)
                     def dstDir = grailsApplication.parentContext.getResource(
-                            "${ContentFile.DEFAULT_UPLOAD_DIR}/${content.space.name}${dstPath}").file
+                            "${WcmContentFile.DEFAULT_UPLOAD_DIR}/${content.space.name}${dstPath}").file
                     if (srcDir != dstDir.absolutePath.replace('\\', '/')) {
                         FileUtils.moveToDirectory file, dstDir, true
                     }
                     def src = grailsApplication.parentContext.getResource(
-                            "${ContentFile.DEFAULT_UPLOAD_DIR}/${content.space.name}${dstPath}/${file.name}").file
+                            "${WcmContentFile.DEFAULT_UPLOAD_DIR}/${content.space.name}${dstPath}/${file.name}").file
                     def dst = grailsApplication.parentContext.getResource(
-                            "${ContentFile.DEFAULT_UPLOAD_DIR}/${content.space.name}${dstPath}/${content.title}").file
+                            "${WcmContentFile.DEFAULT_UPLOAD_DIR}/${content.space.name}${dstPath}/${content.title}").file
                     src.renameTo(dst)
                     content.save()
                     render([success: true] as JSON)

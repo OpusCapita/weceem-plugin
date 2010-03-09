@@ -2,20 +2,20 @@ package org.weceem.files
 
 import org.springframework.web.multipart.MultipartFile
 import org.apache.commons.io.FileUtils
-import org.apache.commons.codec.digest.DigestUtils
+
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 
 import org.weceem.content.*
 
 /**
- * ContentFile.
+ * WcmContentFile.
  *
  * @author Sergei Shushkevich
  */
-class ContentFile extends Content {
+class WcmContentFile extends WcmContent {
 
     static searchable = {
-        alias ContentFile.name.replaceAll("\\.", '_')
+        alias WcmContentFile.name.replaceAll("\\.", '_')
         only = ['title', 'status']
     }
 
@@ -75,10 +75,10 @@ class ContentFile extends Content {
 
     MultipartFile uploadedFile
 
-    static transients = (Content.transients - 'mimeType') + 'uploadedFile'
+    static transients = (WcmContent.transients - 'mimeType') + 'uploadedFile'
 
     static constraints = {
-        // @todo this is ugly, ContentDirectory should never have one, and all files SHOULD
+        // @todo this is ugly, WcmContentDirectory should never have one, and all files SHOULD
         mimeType(nullable:true, blank:true)
     }
 
@@ -117,14 +117,14 @@ class ContentFile extends Content {
     
     Boolean canHaveChildren() { false }
 
-    Boolean create(Content parentContent) {
+    Boolean create(WcmContent parentContent) {
         if (!title) {
             title = uploadedFile.originalFilename
             createAliasURI(parentContent)
         }
         assert title
         def path = ''
-        if (parentContent && (parentContent instanceof ContentDirectory)) {
+        if (parentContent && (parentContent instanceof WcmContentDirectory)) {
             //@todo surely this is redundant, we can just count children?
             parentContent.filesCount += 1
             assert parentContent.save()
@@ -148,7 +148,7 @@ class ContentFile extends Content {
     Boolean rename(String oldTitle) {
         def path = ''
         def parent = this.parent
-        if (parent && (parent instanceof ContentDirectory)) {
+        if (parent && (parent instanceof WcmContentDirectory)) {
             path = getPathTo(parent)
         }
         def oldFile = new File(ServletContextHolder.servletContext.getRealPath(
@@ -158,18 +158,18 @@ class ContentFile extends Content {
         oldFile.renameTo(newFile)
     }
 
-    Boolean move(Content targetParent) {
-        if (!targetParent || (targetParent instanceof ContentDirectory)) {
+    Boolean move(WcmContent targetParent) {
+        if (!targetParent || (targetParent instanceof WcmContentDirectory)) {
 
             def srcPath = ''
             def dstPath = ''
 
-            if (targetParent && !(this instanceof ContentDirectory)) {
+            if (targetParent && !(this instanceof WcmContentDirectory)) {
                 targetParent.filesCount += 1
                 assert targetParent.save()
             }
             dstPath = getPathTo(targetParent)
-            if (this.parent instanceof ContentDirectory) {
+            if (this.parent instanceof WcmContentDirectory) {
                 this.parent.filesCount -= 1
                 assert this.parent.save()
             } 
@@ -193,8 +193,8 @@ class ContentFile extends Content {
     Boolean deleteContent() {
         def path = getPathTo(this.parent)
 
-        def parentContent = this.parent ? Content.get(this.parent.id) : this.parent
-        if (parentContent && (parentContent.class == ContentDirectory.class)) {
+        def parentContent = this.parent ? WcmContent.get(this.parent.id) : this.parent
+        if (parentContent && (parentContent.class == WcmContentDirectory.class)) {
             parentContent.filesCount -= 1
             parentContent.children.remove(this)
             assert parentContent.save()
@@ -211,10 +211,10 @@ class ContentFile extends Content {
      * This is not a filesystem-safe path - it must be processed to be platform specific
      * @see toFile
      */
-    protected String getPathTo(Content sourceContent) {
+    protected String getPathTo(WcmContent sourceContent) {
         def dirs = []
 
-        while (sourceContent && (sourceContent instanceof ContentFile)) {
+        while (sourceContent && (sourceContent instanceof WcmContentFile)) {
             dirs << sourceContent.title // @todo this should be aliasURI shouldn't it?
             sourceContent = sourceContent.parent
         }
@@ -225,7 +225,7 @@ class ContentFile extends Content {
     
     public def findBaseDirectory(){
         def baseDir = this
-        while (baseDir.parent && (baseDir.parent instanceof ContentFile)){
+        while (baseDir.parent && (baseDir.parent instanceof WcmContentFile)){
             baseDir = baseDir.parent
         }
         return baseDir

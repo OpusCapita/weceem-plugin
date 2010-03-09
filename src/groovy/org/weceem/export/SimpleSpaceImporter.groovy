@@ -1,17 +1,12 @@
 package org.weceem.export
 
-import com.thoughtworks.xstream.XStream
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.apache.commons.logging.LogFactory
 import org.apache.commons.logging.Log
 
 import org.weceem.content.*
 import org.weceem.files.*
-import org.weceem.blog.*
-import org.weceem.css.*
-import org.weceem.forum.*
-import org.weceem.html.*
-import org.weceem.wiki.*
+
 import java.text.*
 
 /**
@@ -27,7 +22,7 @@ class SimpleSpaceImporter implements SpaceImporter {
     def childrenMap = [:]
     def defStatus
 
-    void execute(Space space, File file) {
+    void execute(WcmSpace space, File file) {
         def tmpDir = File.createTempFile("unzip-import-", null)
         tmpDir.delete()
         tmpDir.mkdir()
@@ -53,8 +48,8 @@ class SimpleSpaceImporter implements SpaceImporter {
         def cont_parent = [:]
         def cont_children = [:]
         //Obtaining default status
-        defStatus = Status.findByPublicContent(true)
-        //Parse each Content element
+        defStatus = WcmStatus.findByPublicContent(true)
+        //Parse each WcmContent element
         xml.children().each{ch ->
             parse(ch, xml, space)
         }
@@ -79,7 +74,7 @@ class SimpleSpaceImporter implements SpaceImporter {
             }
         }
         def filesDir = new File(ApplicationHolder.application.mainContext.servletContext.getRealPath(
-                "/${ContentFile.DEFAULT_UPLOAD_DIR}"))
+                "/${WcmContentFile.DEFAULT_UPLOAD_DIR}"))
         ant.copy(todir: "${filesDir.absolutePath}/${space.makeUploadName()}", failonerror: false) {
             fileset(dir: "${tmpDir.absolutePath}/files")
         }
@@ -133,10 +128,9 @@ class SimpleSpaceImporter implements SpaceImporter {
     * Recursively parse content and it's references from XML to backrefMap
     */
     def parse(def element, def document, def space){
-        def grailsApp = ApplicationHolder.application
         if (element.name() == "*") return
         def id = element.id.text().toLong()
-        def props = grailsApp.getDomainClass(element.name()).getPersistantProperties()
+        def props = getDomainClassArtefact(element.name()).getPersistantProperties()
         if (backrefMap[id] != null){
             return backrefMap[id]
         }
@@ -174,16 +168,17 @@ class SimpleSpaceImporter implements SpaceImporter {
                 }
             }
         }
-        def content = Content.findWhere(aliasURI: params.aliasURI, space: space)
+        def content = WcmContent.findWhere(aliasURI: params.aliasURI, space: space)
         if (!content){
-            content = getClass(element.name()).newInstance()    
+            content = getClass(element.name()).newInstance()
         }
         params.remove "id"
         params.remove "space"
         params.remove "space.id"
         
         // @todo remove this and revert to x.properties = y after Grails 1.2-RC1
-        grailsApp.mainContext.contentRepositoryService.hackedBindData(content, params)
+        def grailsApp = ApplicationHolder.application
+        grailsApp.mainContext.wcmContentRepositoryService.hackedBindData(content, params)
         
         content.space = space
         
@@ -199,7 +194,7 @@ class SimpleSpaceImporter implements SpaceImporter {
         if (content == null) return
         def grailsApp = ApplicationHolder.application
         //if status isn't set then set default status
-        if ((content instanceof Content) && (content.status == null)){
+        if ((content instanceof WcmContent) && (content.status == null)){
             content.status = defStatus
         } 
         //If id != null , then element has been already saved
@@ -227,10 +222,38 @@ class SimpleSpaceImporter implements SpaceImporter {
         document.children().find{el ->
         el.id.text().toLong() == id}
     }
-    
+
+    String convertLegacyClassNames(def className) {
+        if (!className.startsWith('org.weceem')) {
+            return className
+        }
+        // It might be an old weceem <= 0.8 export so lets try adding Wcm to the class name
+        def classParts = className.toString().tokenize('.')
+        def convertedLegacyClassName = classParts[0..classParts.size()-2].join('.')
+        convertedLegacyClassName += '.Wcm' + classParts[-1]
+        return convertedLegacyClassName
+    }
+
     Class getClass(def className){
         def classLoader = this.class.classLoader
-        Class.forName(className, false, classLoader)
+        def c
+        try {
+            c = Class.forName(className, false, classLoader)
+        } catch (ClassNotFoundException cnfe) {
+            c = Class.forName(convertLegacyClassNames(className), false, classLoader)
+        }
+        return c
+    }
+
+    def getDomainClassArtefact(def className){
+        def grailsApp = ApplicationHolder.application
+        def c = grailsApp.getDomainClass(className)
+        if (!c) {
+            def newName = convertLegacyClassNames(className)
+            println "Trying to get artefact for legacy class: ${className} using modified name ${newName}"
+            c = grailsApp.getDomainClass(newName)
+        }
+        return c
     }
 
     String getName() {
@@ -245,7 +268,7 @@ class SimpleSpaceImporter implements SpaceImporter {
             value.toInteger()},
         (java.lang.String): {value -> value},
         (java.lang.Boolean): {value -> value.toBoolean()},
-        (org.weceem.content.Status): {value-> Status.findByCode(value)}
+        (org.weceem.content.WcmStatus): {value-> WcmStatus.findByCode(value)}
     ]
 
 }

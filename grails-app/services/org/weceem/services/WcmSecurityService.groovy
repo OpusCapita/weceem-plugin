@@ -2,15 +2,15 @@ package org.weceem.services
 
 import org.springframework.beans.factory.InitializingBean
 
-import org.weceem.content.Content
-import org.weceem.content.Status
-import org.weceem.content.Space
+import org.weceem.content.WcmContent
+import org.weceem.content.WcmStatus
+import org.weceem.content.WcmSpace
 import org.weceem.security.*
 
 /**
  * A service that hides the actual security implementation we are using
  */
-class WeceemSecurityService implements InitializingBean {
+class WcmSecurityService implements InitializingBean {
     static transactional = false
     
     WeceemSecurityPolicy policy = new WeceemSecurityPolicy()
@@ -57,7 +57,7 @@ class WeceemSecurityService implements InitializingBean {
         return roles
     }
 
-    boolean hasPermissions(Space space, permList, Class<Content> type = null) {
+    boolean hasPermissions(WcmSpace space, permList, Class<WcmContent> type = null) {
         if (log.debugEnabled) {
             log.debug "Checking if user $userName with roles $userRoles has permissions $permList on space $space"
         }
@@ -69,7 +69,7 @@ class WeceemSecurityService implements InitializingBean {
             permList)
     }
 
-    boolean hasPermissions(Content content, permList, Class<Content> type = null) {
+    boolean hasPermissions(WcmContent content, permList, Class<WcmContent> type = null) {
         if (log.debugEnabled) {
             log.debug "Checking if user $userName with roles $userRoles has permissions $permList on content at ${content.aliasURI}"
         }
@@ -81,7 +81,7 @@ class WeceemSecurityService implements InitializingBean {
             permList)
     }
 
-    boolean hasPermissions(Space space, String uri, permList, Class<Content> type = null) {
+    boolean hasPermissions(WcmSpace space, String uri, permList, Class<WcmContent> type = null) {
         if (log.debugEnabled) {
             log.debug "Checking if user $userName with roles $userRoles has permissions $permList on content at ${uri}"
         }
@@ -96,7 +96,7 @@ class WeceemSecurityService implements InitializingBean {
      * Called to find out if the current user is allowed to transition content in to the specified status
      * Allows applications to control workflow
      */
-    boolean isUserAllowedContentStatus(Status status) {
+    boolean isUserAllowedContentStatus(WcmStatus status) {
         // Temporary lame impl, need to add this to policy
         return true
     }
@@ -106,7 +106,7 @@ class WeceemSecurityService implements InitializingBean {
      * specified content node.
      * Allows applications to implement ACLs
      */
-    boolean isUserAllowedToCreateContent(Content parent, Class<Content> type) {
+    boolean isUserAllowedToCreateContent(WcmContent parent, Class<WcmContent> type) {
         hasPermissions(parent, [WeceemSecurityPolicy.PERMISSION_CREATE], type)
     }
 
@@ -114,7 +114,7 @@ class WeceemSecurityService implements InitializingBean {
      * Called to find out if the current user is allowed to edit the specified content
      * Allows applications to implement ACLs
      */
-    boolean isUserAllowedToDeleteContent(Content content) {
+    boolean isUserAllowedToDeleteContent(WcmContent content) {
         hasPermissions(content, [WeceemSecurityPolicy.PERMISSION_DELETE])
     }
     
@@ -122,7 +122,7 @@ class WeceemSecurityService implements InitializingBean {
      * Called to find out if the current user is allowed to edit the specified content
      * Allows applications to implement ACLs
      */
-    boolean isUserAllowedToEditContent(Content content) {
+    boolean isUserAllowedToEditContent(WcmContent content) {
         hasPermissions(content, [WeceemSecurityPolicy.PERMISSION_EDIT])
     }
     
@@ -130,7 +130,7 @@ class WeceemSecurityService implements InitializingBean {
      * Called to find out if the current user is allowed to view the specified content
      * IF the status is not "public" they must also have the EDIT permission
      */
-    boolean isUserAllowedToViewContent(Content content) {
+    boolean isUserAllowedToViewContent(WcmContent content) {
         // Now work out if the user is allowed to see the content
         def allowedToViewContent = false
         def permsRequired = [WeceemSecurityPolicy.PERMISSION_VIEW]

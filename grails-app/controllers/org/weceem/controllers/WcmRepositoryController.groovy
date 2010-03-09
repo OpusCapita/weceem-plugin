@@ -20,11 +20,10 @@ import com.lowagie.text.Chapter
 import com.lowagie.text.Document
 import com.lowagie.text.Font
 import com.lowagie.text.Paragraph
-import com.lowagie.text.Section
+
 import com.lowagie.text.html.HtmlParser
 import com.lowagie.text.pdf.PdfWriter
 import java.text.SimpleDateFormat
-import org.compass.core.*
 
 import org.weceem.content.*
 // Design smell
@@ -48,7 +47,7 @@ import org.weceem.html.*
  * In the repository tree each content node has unique path, it has the following structure:
  * SpaceId/contentType/rootContentId1/contentId2/.../contentIdn
  *
- * Content types are the names of all Content subclasses.
+ * WcmContent types are the names of all WcmContent subclasses.
  *
  * Root contents are all content nodes that are not used as a childs in the content
  * hierarchy.
@@ -61,7 +60,7 @@ class WcmRepositoryController {
     
     static ACTIONS_NEEDING_SPACE = ['treeTable']
     
-    def contentRepositoryService
+    def wcmContentRepositoryService
 
     def grailsApplication
 
@@ -70,19 +69,19 @@ class WcmRepositoryController {
 
         if (!params.space) {
             if (session.currentAdminSpace) {
-                params.space = Space.get(session.currentAdminSpace)
+                params.space = WcmSpace.get(session.currentAdminSpace)
                 // Be careful, the space might have been deleted
                 if (params.space) return true
                 // If it is null we fall through and resolve again
             } 
 
             // Find the default space(if there is any) and redirect so url has space in
-            if (Space.count() == 0){
+            if (WcmSpace.count() == 0){
                 flash.message = message(code: 'message.there.are.no.spaces')
                 redirect(controller:'wcmSpace')
                 return false
             }
-            def space = contentRepositoryService.findDefaultSpace()
+            def space = wcmContentRepositoryService.findDefaultSpace()
             if (log.debugEnabled) {
                 log.debug "Using default space: ${space.name}"
             }
@@ -98,7 +97,7 @@ class WcmRepositoryController {
                 // @todo in future we should default to another space if none found, with a message
                 // "The space you selected can no longer be found"
                 flash.message = message(code:'message.no.such.space', args:[params.space])
-                params.space = contentRepositoryService.findDefaultSpace()
+                params.space = wcmContentRepositoryService.findDefaultSpace()
             }
         }
         if (params.space) {
@@ -115,9 +114,9 @@ class WcmRepositoryController {
             log.debug "Resolving space from param: ${params.space}"
         }
         if (params.space) {
-            space = Space.findByName(params.space)
+            space = WcmSpace.findByName(params.space)
         } else {
-            space = contentRepositoryService.findDefaultSpace()
+            space = wcmContentRepositoryService.findDefaultSpace()
         }
         if (log.debugEnabled) {
             log.debug "Space resolved to: ${space?.dump()}"
@@ -126,16 +125,16 @@ class WcmRepositoryController {
     }
 
     def treeTable = {
-        if (params.space && (Space.count() != 0)) {
-            def nodes = contentRepositoryService.findAllRootContent( params.space, 
+        if (params.space && (WcmSpace.count() != 0)) {
+            def nodes = wcmContentRepositoryService.findAllRootContent( params.space, 
                 [params: [sort:'aliasURI', fetch:[children:'eager']] ])
             def haveChildren = [:]
-            for (domainClass in contentRepositoryService.listContentClasses()){
+            for (domainClass in wcmContentRepositoryService.listContentClasses()){
                 def dcInst = domainClass.newInstance()
                 haveChildren.put(domainClass.name, dcInst.canHaveChildren())
             }
-            return [content:nodes, contentTypes:contentRepositoryService.listContentClassNames(), 
-                'haveChildren':haveChildren, space: params.space, spaces: Space.listOrderByName() ]
+            return [content:nodes, contentTypes:wcmContentRepositoryService.listContentClassNames(), 
+                'haveChildren':haveChildren, space: params.space, spaces: WcmSpace.listOrderByName() ]
         } else {
             flash.message = 'message.there.are.no.spaces'
             redirect(controller:'wcmSpace')
@@ -144,14 +143,14 @@ class WcmRepositoryController {
     
     def list = {
         return [availableContentTypes: getAvailableContentTypes() - 
-        VirtualContent.class.name]
+        WcmVirtualContent.class.name]
     }
 
     def getList = {
         params.offset = params.offset ? new Integer(params.offset) : 0;
         params.max = params.max ? new Integer(params.max) : 20;
         def dateFormat = new SimpleDateFormat('dd-MM-yyyy')
-        def criteria = Content.createCriteria()
+        def criteria = WcmContent.createCriteria()
         def contents = criteria.list {
             listRestrictions(criteria)
             firstResult(params.offset)
@@ -174,7 +173,7 @@ class WcmRepositoryController {
     }
 
     def getListRowCount = {
-        def criteria = Content.createCriteria()
+        def criteria = WcmContent.createCriteria()
         def count = criteria.get {
             listRestrictions(criteria)
             projections {
@@ -209,9 +208,9 @@ class WcmRepositoryController {
     def newContent = {
         def space
         if (params['space.id']) {
-            space = Space.get(params['space.id']?.toLong())
+            space = WcmSpace.get(params['space.id']?.toLong())
         }
-        def content = contentRepositoryService.newContentInstance(params.contentType, space)
+        def content = wcmContentRepositoryService.newContentInstance(params.contentType, space)
         return [content: content, contentType: params.contentType, parentPath: params.parentPath,
                 editor: getEditorName(params.contentType)]
     }
@@ -232,13 +231,13 @@ class WcmRepositoryController {
     def initTree = {
         def data = [identifier: 'path', label: 'label']
         def rootItem = [path: '$root$', label: 'spaces', type: '$root$',
-                hasChildren: (Space.count() > 0)]
+                hasChildren: (WcmSpace.count() > 0)]
         def rootChildren = []
-        Space.list(sort: 'name').each {space ->
+        WcmSpace.list(sort: 'name').each {space ->
             def contentTypes = []
-            (getAvailableContentTypes() - ContentFile.class.name
-                                        - ContentDirectory.class.name
-                                        - VirtualContent.class.name).each { contentType ->
+            (getAvailableContentTypes() - WcmContentFile.class.name
+                                        - WcmContentDirectory.class.name
+                                        - WcmVirtualContent.class.name).each { contentType ->
                 def contentTypeChildren = getRootContents(space, contentType)
                 contentTypes << [path: "${space.id}/${contentType}",
                         label: message(code: "content.type.name.${contentType}"),
@@ -252,7 +251,7 @@ class WcmRepositoryController {
                     type: 'contentType',
                     hasChildren: (filesChildren.size() > 0),
                     children: filesChildren]
-            rootChildren << [path: space.id, label: space.name, type: Space.class.name,
+            rootChildren << [path: space.id, label: space.name, type: WcmSpace.class.name,
                     hasChildren: true, children: contentTypes]
         }
         rootItem.children = rootChildren
@@ -268,7 +267,7 @@ class WcmRepositoryController {
      */
     def loadNodeDetails = {
         def template = 'contentDetails'
-        def content = getContent(params.contentPath, Space.get(params['space.id']?.toLong()))
+        def content = getContent(params.contentPath, WcmSpace.get(params['space.id']?.toLong()))
 
         if (!content) {
             flash.message = """No content with path '${params.contentPath}' was found.
@@ -277,9 +276,9 @@ class WcmRepositoryController {
 
         def parentContent = getParentContent(params.contentPath)
         def model = [content: content, parentContent: parentContent]
-        if (content && (content instanceof ContentFile)) {
+        if (content && (content instanceof WcmContentFile)) {
             template = 'contentFileDetails'
-            if (!(parentContent && (parentContent instanceof ContentFile))) {
+            if (!(parentContent && (parentContent instanceof WcmContentFile))) {
                 model.reference = true
             }
         }
@@ -293,8 +292,8 @@ class WcmRepositoryController {
      */
     def loadRelatedContentDetails = {
         render(template: 'relatedContent',
-                model: contentRepositoryService.getRelatedContent(getContent(params.contentPath, 
-                    Space.get(params['space.id']?.toLong()) )))
+                model: wcmContentRepositoryService.getRelatedContent(getContent(params.contentPath, 
+                    WcmSpace.get(params['space.id']?.toLong()) )))
     }
 
     /**
@@ -304,8 +303,8 @@ class WcmRepositoryController {
      */
     def loadRecentChangesDetails = {
         render(template: 'recentChanges',
-                model: contentRepositoryService.getRecentChanges(getContent(params.contentPath, 
-                    Space.get(params['space.id']?.toLong()))))
+                model: wcmContentRepositoryService.getRecentChanges(getContent(params.contentPath, 
+                    WcmSpace.get(params['space.id']?.toLong()))))
     }
 
     /**
@@ -314,8 +313,8 @@ class WcmRepositoryController {
      * params.contentPath
      */
     def loadNodeChildren = {
-        def space = Space.get(params['space.id']?.toLong())
-        def children = contentRepositoryService.findChildren(
+        def space = WcmSpace.get(params['space.id']?.toLong())
+        def children = wcmContentRepositoryService.findChildren(
                 getContent(params.contentPath, space), space).collect {
             [path: "${params.contentPath}/${it.id}",
                 label: it.title, type: it.class.name,
@@ -333,21 +332,21 @@ class WcmRepositoryController {
 /* @todo I think this is obsolete
     def insertNode = {
 
-        def space = Space.get(params['space.id']?.toLong())
+        def space = WcmSpace.get(params['space.id']?.toLong())
         
-        def insertedContent = contentRepositoryService.newContentInstance(params.contentType, space)
+        def insertedContent = wcmContentRepositoryService.newContentInstance(params.contentType, space)
         // Using bindData to work around Grails 1.2m2 bugs, change to .properties when 1.2-RC1 is live
         bindData(insertedContent, params)
 
         def parent = params.parentPath ? getContent(params.parentPath, space) : null
-        if (parent && (!parent.canHaveChildren() || (parent instanceof ContentDirectory))) {
+        if (parent && (!parent.canHaveChildren() || (parent instanceof WcmContentDirectory))) {
             parent = null
         }
         if (!insertedContent.aliasURI && insertedContent.title) {
-            insertedContent.createAliasURI(contentRepositoryService)
+            insertedContent.createAliasURI(wcmContentRepositoryService)
         }
 
-        contentRepositoryService.createNode(insertedContent, parent)
+        wcmContentRepositoryService.createNode(insertedContent, parent)
 
         if (insertedContent.hasErrors() || !insertedContent.save()) {
             log.debug("Unable to create new content: ${insertedContent.errors}")
@@ -369,16 +368,16 @@ class WcmRepositoryController {
      * @param parentPath
      */
     def createDirectory = {
-        def space = Space.get(params['space.id']?.toLong())
+        def space = WcmSpace.get(params['space.id']?.toLong())
         def parent = params.parentPath ? getContent(params.parentPath, space) : null
 
         if (!contentFileExists(params.dirname, parent, space)) {
-            def contentDirectory = new ContentDirectory(title: params.dirname,
+            def contentDirectory = new WcmContentDirectory(title: params.dirname,
                     content: '', filesCount: 0, space: space,
-                    mimeType: '', fileSize: 0, status: Status.findByCode(params.statuscode))
-            contentDirectory.createAliasURI((parent && (parent instanceof ContentDirectory)) ? parent : null)
+                    mimeType: '', fileSize: 0, status: WcmStatus.findByCode(params.statuscode))
+            contentDirectory.createAliasURI((parent && (parent instanceof WcmContentDirectory)) ? parent : null)
             if (contentDirectory.save()) {
-                if (!contentRepositoryService.createNode(contentDirectory, parent)) {
+                if (!wcmContentRepositoryService.createNode(contentDirectory, parent)) {
                     flash.error = message(code: 'error.contentRepository.fileSystem')
                 }
             } else {
@@ -400,20 +399,20 @@ class WcmRepositoryController {
     def uploadFile = {
         assert !"This obsolete?"
         
-        def space = Space.get(params['space.id']?.toLong())
+        def space = WcmSpace.get(params['space.id']?.toLong())
         def parent = params.parentPath ? getContent(params.parentPath, space) : null
         def file = request.getFile('file')
         def title = params.filename ? params.filename : file.originalFilename
 
         if (!contentFileExists(title, parent, space)) {
             // todo: fix when "file.contentType" returns null
-            def contentFile = new ContentFile(title: title,
+            def contentFile = new WcmContentFile(title: title,
                     content: '', space: space,
-                    mimeType: file.contentType, fileSize: file.size, status: Status.findByCode(params.statuscode))
-            contentFile.createAliasURI((parent && (parent instanceof ContentDirectory)) ? parent : null)
+                    mimeType: file.contentType, fileSize: file.size, status: WcmStatus.findByCode(params.statuscode))
+            contentFile.createAliasURI((parent && (parent instanceof WcmContentDirectory)) ? parent : null)
             contentFile.uploadedFile = file
             if (contentFile.save()) {
-                if (!contentRepositoryService.createNode(contentFile, parent)) {
+                if (!wcmContentRepositoryService.createNode(contentFile, parent)) {
                     flash.error = message(code: 'error.contentRepository.fileSystem')
                 }
             } else {
@@ -432,13 +431,13 @@ class WcmRepositoryController {
      */
     def renameNode = {
         assert !"This obsolete?"
-        def content = getContent(params.contentPath, Space.get(params['space.id']?.toLong()))
+        def content = getContent(params.contentPath, WcmSpace.get(params['space.id']?.toLong()))
         def parent = content.parent
         if (!contentFileExists(content.title, parent, content.space)) {
             def oldTitle = content.title
             content.title = params.title
             if (content.save()) {
-                if (!contentRepositoryService.renameNode(content, oldTitle)) {
+                if (!wcmContentRepositoryService.renameNode(content, oldTitle)) {
                     flash.error = message(code: 'error.contentRepository.fileSystem')
                 }
             } else {
@@ -479,15 +478,15 @@ class WcmRepositoryController {
      * params.targetPath
      */
     def copyNode = {
-        def sourceContent = Content.get(params.sourceId)
-        def targetContent = Content.get(params.targetId)
-        def vcont = contentRepositoryService.linkNode(sourceContent,
+        def sourceContent = WcmContent.get(params.sourceId)
+        def targetContent = WcmContent.get(params.targetId)
+        def vcont = wcmContentRepositoryService.linkNode(sourceContent,
             targetContent, params.index.toInteger())
         if (vcont == null){
             render([result: 'failure', error: message(code: 'error.contentRepository.linkNode')] as JSON)
         }else{
             def indexes = [:]
-            contentRepositoryService.findChildren(targetContent)?.collect{indexes.put(it.id, it.orderIndex)}
+            wcmContentRepositoryService.findChildren(targetContent)?.collect{indexes.put(it.id, it.orderIndex)}
             render ([result: 'success', id: vcont.id, indexes: indexes, ctype: vcont.class.name] as JSON)
         }
     }
@@ -499,12 +498,12 @@ class WcmRepositoryController {
      * params.targetPath
      */
     def moveNode = {
-        def sourceContent = Content.get(params.sourceId)
-        def targetContent = Content.get(params.targetId)
-        if (contentRepositoryService.moveNode(sourceContent, targetContent, params.index.toInteger())) {
+        def sourceContent = WcmContent.get(params.sourceId)
+        def targetContent = WcmContent.get(params.targetId)
+        if (wcmContentRepositoryService.moveNode(sourceContent, targetContent, params.index.toInteger())) {
             def indexes = [:]
             if (targetContent) {
-                contentRepositoryService.findChildren(targetContent)?.collect{indexes.put(it.id, it.orderIndex)}
+                wcmContentRepositoryService.findChildren(targetContent)?.collect{indexes.put(it.id, it.orderIndex)}
             }
             render([result: 'success', indexes: indexes] as JSON)
         } else {
@@ -520,11 +519,11 @@ class WcmRepositoryController {
     def deleteNode = {
         log.debug "deleteNode called with id: ${params.id}"
         
-        def node = Content.get(params.id)
+        def node = WcmContent.get(params.id)
         if (!node) {
             render ([result:'error', error: message(code: 'error.content.repository.node.not.found')]) as JSON
         } else {
-            def success = contentRepositoryService.deleteNode(node)
+            def success = wcmContentRepositoryService.deleteNode(node)
             def resp = [result: (success ? 'success' : 'error')]
             if (!success) {
                 resp.error = message(code: 'error.content.repository.node.not.found')
@@ -538,11 +537,11 @@ class WcmRepositoryController {
      * params.contentPath
      */
     def deleteNodeInfo = {
-        def content = getContent(params.contentPath, Space.get(params['space.id']?.toLong()))
+        def content = getContent(params.contentPath, WcmSpace.get(params['space.id']?.toLong()))
         def templateName = ''
         def model = [:]
 
-        if (content && (content instanceof ContentFile)) {
+        if (content && (content instanceof WcmContentFile)) {
             templateName = 'deleteFileInfo'
         } else {
             templateName = 'deleteNodeInfo'
@@ -550,8 +549,8 @@ class WcmRepositoryController {
 
         if (content) {
             model.childContentCount = content.children.size()
-            model.parentContentCount = VirtualContent.countByTarget(content)
-            model.relatedContentCount = RelatedContent.countByTargetContent(content)
+            model.parentContentCount = WcmVirtualContent.countByTarget(content)
+            model.relatedContentCount = WcmRelatedContent.countByTargetContent(content)
         }
 
         render(template: templateName, model: model)
@@ -563,19 +562,19 @@ class WcmRepositoryController {
      * params.contentPath
      */
     def deleteReference = {
-        contentRepositoryService.deleteLink(getContent(params.contentPath, Space.get(params['space.id']?.toLong())),
+        wcmContentRepositoryService.deleteLink(getContent(params.contentPath, WcmSpace.get(params['space.id']?.toLong())),
                 getParentContent(params.contentPath))
         render ([result: 'success'] as JSON)
     }
 
     /**
-     * Renders Content as PDF document.
+     * Renders WcmContent as PDF document.
      *
      * params.path
      * params.isHierarchy
      */
     def pdfView = {
-        def content = getContent(params.path, Space.get(params['space.id']?.toLong() ))
+        def content = getContent(params.path, WcmSpace.get(params['space.id']?.toLong() ))
         Document document = new Document()
         ByteArrayOutputStream baos = new ByteArrayOutputStream()
         try {
@@ -604,7 +603,7 @@ class WcmRepositoryController {
         }
 
         response.setContentType("application/pdf")
-        response.setHeader("Content-disposition", "attachment; filename=content.pdf")
+        response.setHeader("WcmContent-disposition", "attachment; filename=content.pdf")
         response.setContentLength(baos.size())
         response.getOutputStream().write(baos.toByteArray())
     }
@@ -616,7 +615,7 @@ class WcmRepositoryController {
      * @param contentType
      */
     private List getRootContents(space, contentType) {
-        def rootNodes = contentRepositoryService.findAllRootContent(space, [type:contentType])
+        def rootNodes = wcmContentRepositoryService.findAllRootContent(space, [type:contentType])
         def result = rootNodes.collect { content ->
             [path: generateContentName(space.id, contentType, content.id),
                 label: content.title, type: content.class.name,
@@ -628,7 +627,7 @@ class WcmRepositoryController {
     }
 
     private List getRootFilesAndDirectories(space) {
-        def items = contentRepositoryService.findAllRootContent(space, [type:ContentFile])
+        def items = wcmContentRepositoryService.findAllRootContent(space, [type:WcmContentFile])
         def result = items.collect {
              [path: generateContentName(space.id, 'Files', it.id),
                     label: it.title, type: it.class.name,
@@ -653,7 +652,7 @@ class WcmRepositoryController {
     }
 
     /**
-     * Returns Content object from full content path eg <spaceid>/<type>/<id1>/..<idN>
+     * Returns WcmContent object from full content path eg <spaceid>/<type>/<id1>/..<idN>
      *
      * @param contentPath
      */
@@ -662,14 +661,14 @@ class WcmRepositoryController {
          
          def tokens = contentPath.split('/')
          if (tokens.size() >= 3) {
-             return Content.get(contentPath.substring(contentPath.lastIndexOf('/') + 1))
+             return WcmContent.get(contentPath.substring(contentPath.lastIndexOf('/') + 1))
          } else {
              return null
          }
      }
      
     /**
-     * Returns parent Content object from content path.
+     * Returns parent WcmContent object from content path.
      * @todo This is broken, cannot assume this about the URL tokens
      * @param contentPath
      */
@@ -679,7 +678,7 @@ class WcmRepositoryController {
         def tokens = contentPath.split('/')
         if (tokens.size() >= 4) {
             def parentId = tokens[tokens.size() - 2]
-            return Content.get(parentId)
+            return WcmContent.get(parentId)
         } else {
             return null
         }
@@ -702,13 +701,13 @@ class WcmRepositoryController {
     }
 
     /**
-     * Returns all names of Content subclasses, they are used as content types.
+     * Returns all names of WcmContent subclasses, they are used as content types.
      *
      * @param contentPath
      */
     private def getAvailableContentTypes() {
         grailsApplication.domainClasses.findAll( { 
-            (it.clazz != Content) && Content.isAssignableFrom(it.clazz) 
+            (it.clazz != WcmContent) && WcmContent.isAssignableFrom(it.clazz)
         }).collect({ it.clazz.name}).sort()
     }
 
@@ -739,32 +738,32 @@ class WcmRepositoryController {
     }
 */
     /**
-     * Returns 'true' if Content has HTML markup.
+     * Returns 'true' if WcmContent has HTML markup.
      *
      * @param content
      */
     private Boolean isHtmlContent(content) {
-        return (content && (content instanceof HTMLContent))
+        return (content && (content instanceof WcmHTMLContent))
     }
 
     /**
-     * Checks if the ContentFile/ContentDirectory with <code>title</code>
+     * Checks if the WcmContentFile/WcmContentDirectory with <code>title</code>
      * already contained in <code>content</code>.
      *
      * @param title
      * @param content
      */
-    protected Boolean contentFileExists(String title, Content content, Space space) {
+    protected Boolean contentFileExists(String title, WcmContent content, WcmSpace space) {
         if (!content) return Boolean.FALSE
 
-        if ((content instanceof ContentDirectory)
+        if ((content instanceof WcmContentDirectory)
                 && content.children.find { it.title == title }) {
             return Boolean.TRUE
-        } else if (!(content instanceof ContentDirectory)
-                && ContentFile.find("""from ContentFile cf \
+        } else if (!(content instanceof WcmContentDirectory)
+                && WcmContentFile.find("""from WcmContentFile cf \
                         where cf.parent.class = ? \
                         and cf.space = ? and cf.title = ?""",
-                        [ContentDirectory.class.name, space, title])) {
+                        [WcmContentDirectory.class.name, space, title])) {
             return Boolean.TRUE
         }
 
@@ -773,7 +772,7 @@ class WcmRepositoryController {
     
     def preview = {
         // todo: 'id' param for WeceemController simply hardcoded
-        def content = Content.get(params.id)
+        def content = WcmContent.get(params.id)
         redirect(controller: 'wcmContent', action: 'show', params:[uri:content.space.aliasURI+'/'+content.absoluteURI])
     }
     
@@ -782,7 +781,7 @@ class WcmRepositoryController {
         def searchStr = params.data
         def space = null
         if (params.space) space = params.space
-        def filterClass = Content
+        def filterClass = WcmContent
         if (params.classFilter != "none") 
             filterClass = Class.forName("${params.classFilter}", true, this.class.classLoader)
         def searchResult = filterClass.searchEvery("*$searchStr* +name:$space".toString(), [reload: true])

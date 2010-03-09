@@ -1,19 +1,17 @@
 package org.weceem.content
 
-import org.weceem.content.*
-
 /**
  * A node representing a link to an external URL
  *
  * @author Marc Palmer
  */
-class ExternalLink extends Content {
+class WcmExternalLink extends WcmContent {
 
     String url
     String description
 
     static searchable = {
-        alias ExternalLink.name.replaceAll("\\.", '_')
+        alias WcmExternalLink.name.replaceAll("\\.", '_')
         
         only = ["description", 'title', 'status']
     }
@@ -46,7 +44,7 @@ class ExternalLink extends Content {
         description(nullable: true, blank: true, maxSize: 200)
     }
     
-    static transients = Content.transients
+    static transients = WcmContent.transients
 
     static mapping = {
         cache usage: 'read-write'

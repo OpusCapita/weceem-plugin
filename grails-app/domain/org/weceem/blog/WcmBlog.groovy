@@ -3,16 +3,16 @@ package org.weceem.blog
 import org.weceem.content.*
 
 /**
- * Placeholder for blog settings etc, has BlogEntry children
+ * Placeholder for blog settings etc, has WcmBlogEntry children
  */
-class Blog extends Content {
+class WcmBlog extends WcmContent {
 
-    Template template
+    WcmTemplate template
     Integer maxEntriesToDisplay
     String commentMarkup = ""
     
     static searchable = {
-        alias Blog.name.replaceAll("\\.", '_')
+        alias WcmBlog.name.replaceAll("\\.", '_')
         only = ['title', 'status']
     }
     
@@ -26,7 +26,7 @@ class Blog extends Content {
         template cascade: 'all', lazy: false // we never want proxies for this
     }
 
-    static transients = Content.transients
+    static transients = WcmContent.transients
 
     static editors = {
         template(group:'extra')

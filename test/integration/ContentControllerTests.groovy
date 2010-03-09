@@ -25,7 +25,7 @@ class ContentControllerTests extends GroovyTestCase {
     WcmContentController mockedController() {
         def con = new WcmContentController()
 
-        def secSvc = new WeceemSecurityService()
+        def secSvc = new WcmSecurityService()
         secSvc.with {
             grailsApplication = [
                 config: [
@@ -40,13 +40,13 @@ class ContentControllerTests extends GroovyTestCase {
             ]
             afterPropertiesSet()
         }
-        con.contentRepositoryService = new ContentRepositoryService()
-        con.contentRepositoryService.cacheService = new CacheService()
-        con.contentRepositoryService.cacheService.cacheManager = new net.sf.ehcache.CacheManager()
-        con.contentRepositoryService.weceemSecurityService = secSvc
-        con.contentRepositoryService.afterPropertiesSet()
+        con.wcmContentRepositoryService = new WcmContentRepositoryService()
+        con.wcmContentRepositoryService.wcmCacheService = new WcmCacheService()
+        con.wcmContentRepositoryService.wcmCacheService.cacheManager = new net.sf.ehcache.CacheManager()
+        con.wcmContentRepositoryService.wcmSecurityService = secSvc
+        con.wcmContentRepositoryService.afterPropertiesSet()
 
-        con.weceemSecurityService = secSvc
+        con.wcmSecurityService = secSvc
         return con
     }
 
@@ -61,20 +61,20 @@ class ContentControllerTests extends GroovyTestCase {
                 GrailsApplicationAttributes.APPLICATION_CONTEXT,
                 applicationContext)
         ServletContextHolder.servletContext = servletContext
-        def defStatus = new Status(code: 400, description: "published", publicContent: true)
+        def defStatus = new WcmStatus(code: 400, description: "published", publicContent: true)
         assert defStatus.save(flush:true)
 
-        def spaceA = new Space(name: 'jcatalog', aliasURI: 'jcatalog').save(flush: true)
+        def spaceA = new WcmSpace(name: 'jcatalog', aliasURI: 'jcatalog').save(flush: true)
         assert spaceA
         
-        template = new Template(title: 'template', aliasURI: 'template',
+        template = new WcmTemplate(title: 'template', aliasURI: 'template',
                     space: spaceA, status: defStatus,
                     createdBy: 'admin', createdOn: new Date(),
                     changedBy: 'admin', changedOn: new Date(),
                     content: 'TEMPLATE START[<wcm:content/>]TEMPLATE END', orderIndex: 0).save(flush: true)
         assert template
         
-        nodeA = new HTMLContent(title: 'contentA', aliasURI: 'contentA',
+        nodeA = new WcmHTMLContent(title: 'contentA', aliasURI: 'contentA',
                 content: 'sample A content', status: defStatus,
                 createdBy: 'admin', createdOn: new Date(),
                 changedBy: 'admin', changedOn: new Date(),
@@ -82,7 +82,7 @@ class ContentControllerTests extends GroovyTestCase {
                 template: template, orderIndex: 1)
         assert nodeA.save(flush: true)
 
-        nodeB = new HTMLContent(title: 'contentB', aliasURI: 'contentB',
+        nodeB = new WcmHTMLContent(title: 'contentB', aliasURI: 'contentB',
                 parent: nodeA, status: defStatus,
                 content: 'sample B content',
                 createdBy: 'admin', createdOn: new Date(),
@@ -94,7 +94,7 @@ class ContentControllerTests extends GroovyTestCase {
         nodeA.addToChildren(nodeB)
         nodeA.save(flush: true)
 
-        def nodeLang = new HTMLContent(title: 'Translations', aliasURI: 'lang',
+        def nodeLang = new WcmHTMLContent(title: 'Translations', aliasURI: 'lang',
                 parent: null, status: defStatus,
                 content: 'Language list',
                 createdBy: 'admin', createdOn: new Date(),
@@ -103,7 +103,7 @@ class ContentControllerTests extends GroovyTestCase {
                 template: template, orderIndex: 2)
         assert nodeLang.save(flush:true)
 
-        def nodeLangDE = new HTMLContent(title: 'Deutsch', aliasURI: 'de',
+        def nodeLangDE = new WcmHTMLContent(title: 'Deutsch', aliasURI: 'de',
                 parent: nodeLang, status: defStatus,
                 content: 'Deutsch Home',
                 createdBy: 'admin', createdOn: new Date(),
@@ -114,12 +114,12 @@ class ContentControllerTests extends GroovyTestCase {
         nodeLang.addToChildren(nodeLangDE)
         nodeLang.save(flush: true)
 
-        def virtContent1 = new VirtualContent(title: 'virtContent1', aliasURI: 'virtContent1',
+        def virtContent1 = new WcmVirtualContent(title: 'virtContent1', aliasURI: 'virtContent1',
                                               parent: null, target: nodeA, status: defStatus,
                                               space: spaceA, orderIndex: 3)
         assert virtContent1.save(flush:true)
 
-        def virtContent2 = new VirtualContent(title: 'virtContent2', aliasURI: 'haus',
+        def virtContent2 = new WcmVirtualContent(title: 'virtContent2', aliasURI: 'haus',
                                               parent: nodeLangDE, target: nodeB, status: defStatus,
                                               space: spaceA, orderIndex: 3)
         assert virtContent2.save(flush:true)
@@ -136,7 +136,7 @@ class ContentControllerTests extends GroovyTestCase {
         
         println "${con.response.errorMessage}"
         assertEquals 200, con.response.status
-        println "Content was: ${con.response.contentAsString}"
+        println "WcmContent was: ${con.response.contentAsString}"
         assertTrue con.response.contentAsString.contains(nodeA.content)
         */
     }
@@ -153,7 +153,7 @@ class ContentControllerTests extends GroovyTestCase {
         
         println "${con.response.errorMessage}"
         assertEquals 200, con.response.status
-        println "Content was: ${con.response.contentAsString}"
+        println "WcmContent was: ${con.response.contentAsString}"
         assertTrue con.response.contentAsString.contains(nodeB.content)
         */
     }

@@ -1,5 +1,3 @@
-import grails.test.*
-
 import org.weceem.services.*
 import org.weceem.content.*
 import org.weceem.html.*
@@ -12,9 +10,9 @@ class SecurityServiceTests extends grails.test.GrailsUnitTestCase {
     void setUp() {
         super.setUp()
         
-        mockLogging(WeceemSecurityService, true)
+        mockLogging(WcmSecurityService, true)
 
-        service = new WeceemSecurityService()
+        service = new WcmSecurityService()
         
         service.with {
             grailsApplication = [
@@ -31,13 +29,13 @@ class SecurityServiceTests extends grails.test.GrailsUnitTestCase {
             afterPropertiesSet()
         }
         
-        mockSpace = new Space(name:'Test', aliasURI:'test')
+        mockSpace = new WcmSpace(name:'Test', aliasURI:'test')
     }
 
     void testPublicContent() {
-        def publishedStatus = new Status(code:500, description:"published", publicContent:true)
+        def publishedStatus = new WcmStatus(code:500, description:"published", publicContent:true)
         
-        def mockContent = new HTMLContent(status:publishedStatus, aliasURI:'index')
+        def mockContent = new WcmHTMLContent(status:publishedStatus, aliasURI:'index')
         mockContent.space = mockSpace
         
         service.securityDelegate = [
@@ -52,9 +50,9 @@ class SecurityServiceTests extends grails.test.GrailsUnitTestCase {
 
 
     void testDraftContent() {
-        def draftStatus = new Status(code:100, description:"draft", publicContent:false)
+        def draftStatus = new WcmStatus(code:100, description:"draft", publicContent:false)
         
-        def mockContent = new HTMLContent(status:draftStatus, aliasURI:'index')
+        def mockContent = new WcmHTMLContent(status:draftStatus, aliasURI:'index')
         mockContent.space = mockSpace
         
         service.securityDelegate = [

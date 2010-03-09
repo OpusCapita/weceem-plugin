@@ -1,9 +1,9 @@
 package org.weceem.tags
 
-import org.weceem.content.Content
-import org.weceem.content.Space
-import org.weceem.content.Status
-import org.weceem.content.Template
+import org.weceem.content.WcmContent
+
+import org.weceem.content.WcmStatus
+import org.weceem.content.WcmTemplate
 import org.weceem.script.WcmScript
 import org.codehaus.groovy.grails.web.pages.TagLibraryLookup
 
@@ -53,8 +53,8 @@ class EditorFieldTagLib {
         out << bean.date(beanName:'content', property:attrs.property, noLabel:true)
     }
 
-    def editorFieldTemplate = { attrs ->
-        def templates = Template.findAllBySpace( pageScope.content.space, [sort:'title'])
+    def editorFieldWcmTemplate = { attrs ->
+        def templates = WcmTemplate.findAllBySpace( pageScope.content.space, [sort:'title'])
         out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
             noSelection: ['':'- No template -'],
             from: templates, optionValue:'title', optionKey:'id')
@@ -67,20 +67,20 @@ class EditorFieldTagLib {
             from: templates, optionValue:{ it.title + " (${it.absoluteURI})"}, optionKey:'id')
     }
 
-    def editorFieldStatus = { attrs ->
-        def statuses = Status.listOrderByCode() 
+    def editorFieldWcmStatus = { attrs ->
+        def statuses = WcmStatus.listOrderByCode()
         out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
             from: statuses, optionValue: { v -> g.message(code:'content.status.'+v.description) }, optionKey:'id')
     }
 
-    def editorFieldSpace = { attrs ->
+    def editorFieldWcmSpace = { attrs ->
         // Workaround for Grails 1.1.x bug invoking tags with body as method - have to use a template instead
         out << g.render(template:'/editors/space', plugin:'weceem', 
             model:[name:attrs.property, value:pageScope.content[attrs.property]])
     }
 
     def editorFieldContent = { attrs ->
-        def contents =  Content.findAllBySpace( pageScope.content.space, [sort:'title']).findAll( { c -> !c.is(pageScope.content) }) 
+        def contents =  WcmContent.findAllBySpace( pageScope.content.space, [sort:'title']).findAll( { c -> !c.is(pageScope.content) })
         out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
             noSelection: ['':'- No content -'],
             from: contents, optionValue:'title', optionKey:'id')

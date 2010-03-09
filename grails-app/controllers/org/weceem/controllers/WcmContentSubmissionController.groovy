@@ -1,13 +1,12 @@
 package org.weceem.controllers
 
-import org.weceem.content.Space
+import org.weceem.content.WcmSpace
 
 class WcmContentSubmissionController {
 
     static allowedMethods = [submit:'POST' /*, update:'POST', delete:'POST'*/]
     
-    def weceemSecurityService
-    def contentRepositoryService
+    def wcmContentRepositoryService
     
     def submit = { 
         def formPath = params.remove('formPath')
@@ -15,9 +14,9 @@ class WcmContentSubmissionController {
         def spaceId = params.remove('spaceId')
         def parentId = params.remove('parentId')
         def type = params.remove('type')
-        def space = Space.get(spaceId.toString().toLong())
+        def space = WcmSpace.get(spaceId.toString().toLong())
         
-        def content = contentRepositoryService.createUserSubmittedContent(space, parentId, type, params, request)
+        def content = wcmContentRepositoryService.createUserSubmittedContent(space, parentId, type, params, request)
         // redirect to/render content with model populated, and link to new content included
         if (content.hasErrors()) {
             if (log.debugEnabled) {

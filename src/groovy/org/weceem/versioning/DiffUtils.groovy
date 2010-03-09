@@ -5,7 +5,7 @@ import org.apache.commons.lang.StringEscapeUtils
 /**
  * Diff utils to compare two strings.
  *
- * Code was originally written in JavaScript by John Resig (http://ejohn.org/files/jsdiff.js)
+ * Code was originally written in WcmJavaScript by John Resig (http://ejohn.org/files/jsdiff.js)
  *
  * @author Sergei Shushkevich
  */

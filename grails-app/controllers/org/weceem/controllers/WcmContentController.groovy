@@ -32,9 +32,9 @@ class WcmContentController {
     
     static CACHE_NAME_TEMPLATE_CACHE = "gspCache"
     
-    def contentRepositoryService
-    def weceemSecurityService
-    def cacheService
+    def wcmContentRepositoryService
+    def wcmSecurityService
+    def wcmCacheService
     
     def show = { 
         try {
@@ -42,7 +42,7 @@ class WcmContentController {
                 log.debug "Content request for uri: ${params.uri}"
             }
 
-            def info = contentRepositoryService.resolveSpaceAndURI(params.uri)
+            def info = wcmContentRepositoryService.resolveSpaceAndURI(params.uri)
             def space = info.space
             def uri = info.uri
 
@@ -54,7 +54,7 @@ class WcmContentController {
                 if (log.debugEnabled) {
                     log.debug "Loading content from for uri: ${uri}"
                 }
-                def contentInfo = contentRepositoryService.findContentForPath(uri,space)
+                def contentInfo = wcmContentRepositoryService.findContentForPath(uri,space)
                 def content = contentInfo?.content
             
                 // Resolve virtual content refs
@@ -65,7 +65,7 @@ class WcmContentController {
                     }
                 }
                 if (content) {
-                    if (content instanceof VirtualContent) {
+                    if (content instanceof WcmVirtualContent) {
                         content = content.target
                     }
                 }
@@ -74,7 +74,7 @@ class WcmContentController {
                     log.debug "Content after resolving virtual content for uri: ${uri} is: ${content?.dump()}"
                 }
             
-                def activeUser = weceemSecurityService.userName
+                def activeUser = wcmSecurityService.userName
             
                 if (content) {
         			def pageInfo = [ URI:uri, 
@@ -87,12 +87,12 @@ class WcmContentController {
 
                     def contentClass = content.class
 
-                    // See if it is renderable directly - eg Widget and Template are not renderable on their own
+                    // See if it is renderable directly - eg WcmWidget and WcmTemplate are not renderable on their own
                     if (contentClass.metaClass.hasProperty(contentClass, 'standaloneContent')) {
                         def canRender = contentClass.standaloneContent
                         if (!canRender) {
                             log.warn "Request for [${params.uri}] resulted in content node that is not standalone and cannot be rendered directly"
-                            response.sendError(406 /* Not acceptable */, "Content is not intended for rendering")
+                            response.sendError(406 /* Not acceptable */, "WcmContent is not intended for rendering")
                             return null
                         }
                     }
@@ -140,14 +140,14 @@ class WcmContentController {
         }        
     }
     
-    static evaluateGSPContent(contentRepositoryService, Content content, model) {
-        def groovyTemplate = contentRepositoryService.getGSPTemplate(content)
+    static evaluateGSPContent(wcmContentRepositoryService, WcmContent content, model) {
+        def groovyTemplate = wcmContentRepositoryService.getGSPTemplate(content)
         return groovyTemplate?.make(model)
     }
     
     
-    void renderGSPContent(Content content, model = null) {
-        WcmContentController.renderGSPContent( contentRepositoryService, request, response, content, model)
+    void renderGSPContent(WcmContent content, model = null) {
+        WcmContentController.renderGSPContent( wcmContentRepositoryService, request, response, content, model)
     }
     
     /**
@@ -158,7 +158,7 @@ class WcmContentController {
      * 2. If content node is not a template, evaluats the content as a GSP, then passes it as pre-rendered body content
      * to the template of "content" if there is one.
      */
-    static renderGSPContent(contentRepositoryService, request, response, Content content, model = null) {
+    static renderGSPContent(wcmContentRepositoryService, request, response, WcmContent content, model = null) {
         if (model == null) {
             model = [:]
         }
@@ -177,7 +177,7 @@ class WcmContentController {
         GrailsWebRequest webRequest = (GrailsWebRequest) RequestContextHolder.currentRequestAttributes()
         webRequest.setOut(out)
 
-        boolean isTemplate = content instanceof Template
+        boolean isTemplate = content instanceof WcmTemplate
         
         if (isTemplate) {
             // Pass in the content so it can be rendered in the template by wcm:content
@@ -188,7 +188,7 @@ class WcmContentController {
             }
         } else {
             StringWriter evaluatedContent = new StringWriter()
-            evaluatedContent << evaluateGSPContent(contentRepositoryService, content, model)
+            evaluatedContent << evaluateGSPContent(wcmContentRepositoryService, content, model)
             request[REQUEST_PRERENDERED_CONTENT] = evaluatedContent.toString()
             request[REQUEST_ATTRIBUTE_NODE] = content
             model.node = content
@@ -196,9 +196,9 @@ class WcmContentController {
         
 
         // See if there is a template for the content
-        def template = isTemplate ? content : contentRepositoryService.getTemplateForContent(content)
+        def template = isTemplate ? content : wcmContentRepositoryService.getTemplateForContent(content)
         if (template) {
-            def templatedContent = evaluateGSPContent(contentRepositoryService, template, model)
+            def templatedContent = evaluateGSPContent(wcmContentRepositoryService, template, model)
             templatedContent.writeTo(out)
         } else {
             out << request[REQUEST_PRERENDERED_CONTENT]
@@ -213,7 +213,7 @@ class WcmContentController {
      * Get a new instance of a script content's Groovy code
      */
     def getScriptInstance(WcmScript s) {
-        contentRepositoryService.getScriptInstance(s)
+        wcmContentRepositoryService.getScriptInstance(s)
     }
 
     /** 
@@ -221,7 +221,7 @@ class WcmContentController {
      * If the content has a template, it is passed to the template for rendering as the "node" variable in the model
      * If the content has no template, if it has a content property it will be rendered verbatim to the client
      */     
-    def renderContent(Content content) {
+    def renderContent(WcmContent content) {
         
         def pageInfo = request[REQUEST_ATTRIBUTE_PAGE]
         def contentText
@@ -232,14 +232,14 @@ class WcmContentController {
             log.debug "Content is: $contentText"
         }
     
-        def template = contentRepositoryService.getTemplateForContent(content)
+        def template = wcmContentRepositoryService.getTemplateForContent(content)
         log.debug "Content's template is: $template"
 
         if (!template) {
             if (contentText != null) {
                 // todo: what need to be rendered?
                 log.debug "Rendering content of type [${content.mimeType}] without template: $contentText"
-                // @todo This needs to handle ContentFile/ContentDirectory requests and pipe them through request dispatcher
+                // @todo This needs to handle WcmContentFile/WcmContentDirectory requests and pipe them through request dispatcher
                 render(text:contentText, contentType:content.mimeType)
             } else {
                 response.sendError(500, "Unable to render content at ${uri}, no content property and no template defined")

@@ -19,12 +19,12 @@ import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.weceem.util.ContentUtils
 
 /**
- * Comment class encapsulates comments on any content node, where the submitting person 
+ * WcmComment class encapsulates comments on any content node, where the submitting person
  * may not be a user of the system - eg comments need to be spam checked and IP address tracked
  *
  * @author Marc Palmer
  */
-class Comment extends Content {
+class WcmComment extends WcmContent {
     String author
     String email
     String ipAddress
@@ -32,7 +32,7 @@ class Comment extends Content {
     String content
     
     static searchable = {
-        alias Comment.name.replaceAll("\\.", '_')
+        alias WcmComment.name.replaceAll("\\.", '_')
 
         only = ['content', 'email', 'author', 'title', 'status']
     }
@@ -56,7 +56,7 @@ class Comment extends Content {
         ipAddress(maxSize:50, nullable: false, blank: false)
     }
     
-    static transients = Content.transients
+    static transients = WcmContent.transients
 
     static editors = {
         content editor: 'RichHTML'
@@ -70,9 +70,9 @@ class Comment extends Content {
     @Override
     public void createAliasURI(parent) {
         // Create an aliasURI that is sequential and unique under the parent, using the highest orderIndex
-        Content.withNewSession {
-            def kidList = ApplicationHolder.application.mainContext.contentRepositoryService.findChildren(parent, [
-                 type:'org.weceem.content.Comment', 
+        WcmContent.withNewSession {
+            def kidList = ApplicationHolder.application.mainContext.wcmContentRepositoryService.findChildren(parent, [
+                 type:'org.weceem.content.WcmComment',
                  params:[max:1, sort:'orderIndex', order:'desc']
             ])
             def lastIdx = kidList ? kidList[0].orderIndex : 0

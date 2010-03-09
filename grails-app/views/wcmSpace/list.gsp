@@ -42,7 +42,7 @@
         </table>
       </div>
       <div class="paginateButtons">
-        <g:paginate total="${org.weceem.content.Space.count()}"/>
+        <g:paginate total="${org.weceem.content.WcmSpace.count()}"/>
       </div>
       <br/>
       <div>

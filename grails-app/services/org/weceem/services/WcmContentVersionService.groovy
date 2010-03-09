@@ -1,13 +1,11 @@
 package org.weceem.services
 
-import com.thoughtworks.xstream.XStream
-
 /**
- * Provides methods for Content versions manipulations.
+ * Provides methods for WcmContent versions manipulations.
  *
  * @author Sergei Shushkevich
  */
-class ContentVersionService {
+class WcmContentVersionService {
 
     /**
      * Compares two versions of content.

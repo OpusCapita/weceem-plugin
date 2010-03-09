@@ -11,7 +11,7 @@ import org.codehaus.groovy.grails.web.context.ServletContextHolder
 
 /**
  * ContentRepositoryTests class contains tests for tree operations from
- * contentRepositoryService.
+ * wcmContentRepositoryService.
  *
  * These old tests BAD because they are not mocking the services, so they are testing the services and controller
  */
@@ -24,7 +24,7 @@ class ContentSubmissionControllerTests extends GroovyTestCase {
     WcmContentSubmissionController mockedController() {
         def con = new WcmContentSubmissionController()
 
-        def secSvc = new WeceemSecurityService()
+        def secSvc = new WcmSecurityService()
         secSvc.with {
             grailsApplication = [
                 config: [
@@ -39,13 +39,13 @@ class ContentSubmissionControllerTests extends GroovyTestCase {
             ]
             afterPropertiesSet()
         }
-        con.contentRepositoryService = new ContentRepositoryService()
-        con.contentRepositoryService.cacheService = new CacheService()
-        con.contentRepositoryService.cacheService.cacheManager = new net.sf.ehcache.CacheManager()
-        con.contentRepositoryService.weceemSecurityService = secSvc
-        con.contentRepositoryService.afterPropertiesSet()
+        con.wcmContentRepositoryService = new WcmContentRepositoryService()
+        con.wcmContentRepositoryService.wcmCacheService = new WcmCacheService()
+        con.wcmContentRepositoryService.wcmCacheService.cacheManager = new net.sf.ehcache.CacheManager()
+        con.wcmContentRepositoryService.wcmSecurityService = secSvc
+        con.wcmContentRepositoryService.afterPropertiesSet()
 
-        con.weceemSecurityService = secSvc
+        con.wcmSecurityService = secSvc
         con.grailsApplication = ApplicationHolder.application
         return con
     }
@@ -62,15 +62,15 @@ class ContentSubmissionControllerTests extends GroovyTestCase {
             applicationContext)
         ServletContextHolder.servletContext = servletContext
 
-        def draftStatus = new Status(code: 100, description: "draft", publicContent: false)
+        def draftStatus = new WcmStatus(code: 100, description: "draft", publicContent: false)
         assert draftStatus.save(flush:true)
-        def defStatus = new Status(code: 400, description: "published", publicContent: true)
+        def defStatus = new WcmStatus(code: 400, description: "published", publicContent: true)
         assert defStatus.save(flush:true)
 
-        def spaceA = new Space(name: 'jcatalog', aliasURI: 'jcatalog').save(flush: true)
+        def spaceA = new WcmSpace(name: 'jcatalog', aliasURI: 'jcatalog').save(flush: true)
         assert spaceA
 
-        nodeA = new HTMLContent(title: 'contentA', aliasURI: 'contentA',
+        nodeA = new WcmHTMLContent(title: 'contentA', aliasURI: 'contentA',
             content: 'sample A content', status: defStatus,
             createdBy: 'admin', createdOn: new Date(),
             changedBy: 'admin', changedOn: new Date(),
@@ -81,7 +81,7 @@ class ContentSubmissionControllerTests extends GroovyTestCase {
    
     void testSubmitCommentAsGuest() {
        /* Can't get it to work as can't give grailsApplication to controller
-        assertTrue Comment.count() == 0
+        assertTrue WcmComment.count() == 0
 
         def con = mockedController()
 
@@ -89,11 +89,11 @@ class ContentSubmissionControllerTests extends GroovyTestCase {
         con.params.successPath = "/contentA"
         con.params.spaceId = "1"
         con.params.parentId = nodeA.id
-        con.params.type = "org.weceem.content.Comment"
+        con.params.type = "org.weceem.content.WcmComment"
         
         con.params.author = "Marc Palmer"
         con.params.email = "test@somewhere.com"
-        def title = "Comment number 1"
+        def title = "WcmComment number 1"
         con.params.title = title
         con.params.content = "This is my firs comment"
 
@@ -102,8 +102,8 @@ class ContentSubmissionControllerTests extends GroovyTestCase {
         assertEquals 200, con.response.status
         assertEquals "/successful", con.response.redirectedUrl
         
-        assertTrue Comment.count() == 1
-        assertTrue Comment.get(1).title = title
+        assertTrue WcmComment.count() == 1
+        assertTrue WcmComment.get(1).title = title
         */
     }
 

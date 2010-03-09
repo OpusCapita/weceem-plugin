@@ -1,6 +1,6 @@
 package org.weceem.services
 
-import org.weceem.content.Content
+import org.weceem.content.WcmContent
 import org.weceem.event.Events
 
 /*
@@ -8,7 +8,7 @@ import org.weceem.event.Events
  * @author Scott Burch
 */
 
-class EventService {
+class WcmEventService {
 
     boolean transactional = false
 
@@ -41,18 +41,18 @@ class EventService {
     /*
      * Called after new content is added
     */
-    void afterContentAdded(Content content) {
+    void afterContentAdded(WcmContent content) {
       getListeners(Events.AFTER_CONTENT_ADDED)*.afterWeceemContentAdded(content)
     }
 
     /*
      * Called after conent is updated
      */
-    void afterContentUpdated(Content content) {
+    void afterContentUpdated(WcmContent content) {
       getListeners(Events.AFTER_CONTENT_UPDATED)*.afterWeceemContentUpdated(content)
     }
 
-    void afterContentRemoved(Content content) {
+    void afterContentRemoved(WcmContent content) {
       getListeners(Events.AFTER_CONTENT_REMOVED)*.afterWeceemContentRemoved(content)
     }
 }

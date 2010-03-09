@@ -3,17 +3,17 @@ package org.weceem.css
 import org.weceem.content.*
 
 /**
- * StyleSheet class describes the content node of type 'CSS'.
+ * WcmStyleSheet class describes the content node of type 'CSS'.
  *
  * @author Sergei Shushkevich
  */
-class StyleSheet extends Content {
+class WcmStyleSheet extends WcmContent {
 
     // 64Kb Unicode text with HTML/Wiki Markup
     String content
 
     static searchable = {
-        alias StyleSheet.name.replaceAll("\\.", '_')
+        alias WcmStyleSheet.name.replaceAll("\\.", '_')
         only = ['content', 'title', 'status']
     }
 
@@ -34,7 +34,7 @@ class StyleSheet extends Content {
         content(editor:'CssCode')
     }
 
-    static transients = Content.transients
+    static transients = WcmContent.transients
 
     static mapping = {
         cache usage: 'read-write'

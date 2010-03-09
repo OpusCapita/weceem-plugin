@@ -15,7 +15,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         mockTagLib(WeceemTagLib)
         def taglib = new WeceemTagLib()
         
-        def spc = new Space()
+        def spc = new WcmSpace()
         spc.name = 'testing'
         taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_SPACE, spc)
         
@@ -33,14 +33,14 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
 
         def g = new MockFor(ApplicationTagLib)
         g.demand.createLink {hash ->
-        assertEquals "content", hash.controller
-        assertEquals "show", hash.action
+          assertEquals "wcmContent", hash.controller
+          assertEquals "show", hash.action
         }
 
         taglib.metaClass.g = g.proxyInstance()
 
-        def node = new HTMLContent(aliasURI:'someNode', space: new Space(name:'default', aliasURI:'default'))
-        taglib.contentRepositoryService = [findContentForPath : { path, space -> [content: node]}]
+        def node = new WcmHTMLContent(aliasURI:'someNode', space: new WcmSpace(name:'default', aliasURI:'default'))
+        taglib.wcmContentRepositoryService = [findContentForPath : { path, space -> [content: node]}]
         taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_SPACE, node.space)
         taglib.createLink(path: 'someNode', null)
     }
@@ -49,14 +49,14 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
     mockTagLib(WeceemTagLib)
     def taglib = new WeceemTagLib()
 
-    def parent = new HTMLContent()
+    def parent = new WcmHTMLContent()
 
-    def mockCRService = new MockFor(ContentRepositoryService)
+    def mockCRService = new MockFor(WcmContentRepositoryService)
     mockCRService.demand.countChildren {node, args ->
       assertEquals parent, node
     }
 
-    taglib.contentRepositoryService = mockCRService.proxyInstance()
+    taglib.wcmContentRepositoryService = mockCRService.proxyInstance()
     taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, parent)
 
     try {
@@ -73,16 +73,16 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
     mockTagLib(WeceemTagLib)
     def taglib = new WeceemTagLib()
 
-    def parent = new HTMLContent(title: 'parent')
+    def parent = new WcmHTMLContent(title: 'parent')
 
-    def anotherNode = new HTMLContent(title: 'another')
+    def anotherNode = new WcmHTMLContent(title: 'another')
 
-    def mockCRService = new MockFor(ContentRepositoryService)
+    def mockCRService = new MockFor(WcmContentRepositoryService)
     mockCRService.demand.findChildren { node, args ->
       assertEquals parent, node
     }
 
-    taglib.contentRepositoryService = mockCRService.proxyInstance()
+    taglib.wcmContentRepositoryService = mockCRService.proxyInstance()
 
     taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, anotherNode)
 
@@ -101,13 +101,13 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         mockTagLib(WeceemTagLib)
         def taglib = new WeceemTagLib()
         
-        def parent = new HTMLContent()
+        def parent = new WcmHTMLContent()
         parent.title = 'Parent'
 
-        def nodeA = new HTMLContent()
+        def nodeA = new WcmHTMLContent()
         nodeA.title = 'Node A'
         
-        def nodeB = new HTMLContent()
+        def nodeB = new WcmHTMLContent()
         nodeB.title = 'Node B'
 
         def mockCRService = [
@@ -118,7 +118,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
 
         taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, parent)
         
-        taglib.contentRepositoryService = mockCRService
+        taglib.wcmContentRepositoryService = mockCRService
         
         taglib.eachChild([var:"c"], { params -> return params.c.title + "|"})
         
@@ -130,24 +130,24 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         mockTagLib(WeceemTagLib)
         def taglib = new WeceemTagLib()
         
-        def parent = new HTMLContent()
+        def parent = new WcmHTMLContent()
         parent.title = 'Parent'
 
-        def nodeA = new HTMLContent()
+        def nodeA = new WcmHTMLContent()
         nodeA.title = 'Node A'
         
         def mockCRService = [
             findChildren : { node, args ->
-                assertEquals HTMLContent, args.type
+                assertEquals WcmHTMLContent, args.type
                 [nodeA]
             }
         ]
 
         taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, parent)
         
-        taglib.contentRepositoryService = mockCRService
+        taglib.wcmContentRepositoryService = mockCRService
         
-        taglib.eachChild([var:"c", type:HTMLContent], { params -> return params.c.title + "|"})
+        taglib.eachChild([var:"c", type:WcmHTMLContent], { params -> return params.c.title + "|"})
         
         assertEquals "Node A|", taglib.out.toString()
     }
@@ -156,13 +156,13 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         mockTagLib(WeceemTagLib)
         def taglib = new WeceemTagLib()
         
-        def parent = new HTMLContent()
+        def parent = new WcmHTMLContent()
         parent.title = 'Parent'
 
-        def nodeA = new HTMLContent()
+        def nodeA = new WcmHTMLContent()
         nodeA.title = 'Node A'
 
-        def nodeB = new WikiItem()
+        def nodeB = new WcmWikiItem()
         nodeB.title = 'Wiki B'
 
         def mockCRService = [
@@ -173,7 +173,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
 
         taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, parent)
         
-        taglib.contentRepositoryService = mockCRService
+        taglib.wcmContentRepositoryService = mockCRService
         
         taglib.eachChild([var:"c", filter:{ it.title.contains('Wiki')}], { params -> return params.c.title + "|"})
         
@@ -184,27 +184,27 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         mockTagLib(WeceemTagLib)
         def taglib = new WeceemTagLib()
         
-        def parent = new WikiItem()
+        def parent = new WcmWikiItem()
         parent.title = 'Parent A'
 
-        def parentB = new HTMLContent()
+        def parentB = new WcmHTMLContent()
         parentB.title = 'Parent B'
 
-        def nodeA = new HTMLContent()
+        def nodeA = new WcmHTMLContent()
         nodeA.title = 'Node A'
         
         def mockCRService = [
             findParents : { node, args ->
-                assertEquals HTMLContent, args.type
+                assertEquals WcmHTMLContent, args.type
                 [parentB]
             }
         ]
 
         taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, nodeA)
         
-        taglib.contentRepositoryService = mockCRService
+        taglib.wcmContentRepositoryService = mockCRService
         
-        taglib.eachParent([var:"c", type:HTMLContent], { params -> return params.c.title + "|"})
+        taglib.eachParent([var:"c", type:WcmHTMLContent], { params -> return params.c.title + "|"})
         
         assertEquals "Parent B|", taglib.out.toString()
     }
@@ -213,13 +213,13 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         mockTagLib(WeceemTagLib)
         def taglib = new WeceemTagLib()
         
-        def parent = new WikiItem()
+        def parent = new WcmWikiItem()
         parent.title = 'Parent A'
 
-        def parentB = new HTMLContent()
+        def parentB = new WcmHTMLContent()
         parentB.title = 'Parent B'
     
-        def nodeA = new HTMLContent()
+        def nodeA = new WcmHTMLContent()
         nodeA.title = 'Node A'
 
         def mockCRService = [
@@ -230,7 +230,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
 
         taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, nodeA)
         
-        taglib.contentRepositoryService = mockCRService
+        taglib.wcmContentRepositoryService = mockCRService
         
         taglib.eachParent([var:"c", filter:{ it.title.contains('A')}], { params -> return params.c.title + "|"})
         

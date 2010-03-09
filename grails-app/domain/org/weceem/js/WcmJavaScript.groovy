@@ -17,16 +17,16 @@ package org.weceem.js
 import org.weceem.content.*
 
 /**
- * JavaScript representins JS source code in the content repository.
+ * WcmJavaScript representins JS source code in the content repository.
  *
  * @author Marc Palmer
  */
-class JavaScript extends Content {
+class WcmJavaScript extends WcmContent {
 
     String content
 
     static searchable = {
-        alias JavaScript.name.replaceAll("\\.", '_')
+        alias WcmJavaScript.name.replaceAll("\\.", '_')
         only = ['content', 'title', 'status']
     }
 
@@ -53,6 +53,6 @@ class JavaScript extends Content {
         content(editor:'JSCode')
     }
 
-    static transients = Content.transients
+    static transients = WcmContent.transients
 
 }

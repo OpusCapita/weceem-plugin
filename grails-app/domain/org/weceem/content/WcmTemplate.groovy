@@ -17,15 +17,15 @@ package org.weceem.content
 import org.weceem.util.ContentUtils
 
 /**
- * Template class describes the content node of type 'template'.
- * Template node unlike other types of nodes has a page (template) that is stored as file,
+ * WcmTemplate class describes the content node of type 'template'.
+ * WcmTemplate node unlike other types of nodes has a page (template) that is stored as file,
  * 'templatePath' field contains a path to this file.
  *
  * @author Stephan Albers
  * @author July Karpey
  * @author Sergei Shushkevich
  */
-class Template extends Content {
+class WcmTemplate extends WcmContent {
     
     static standaloneContent = false
 
@@ -35,7 +35,7 @@ class Template extends Content {
     String content
 
     static searchable = {
-        alias Template.name.replaceAll("\\.", '_')
+        alias WcmTemplate.name.replaceAll("\\.", '_')
 
         only = ['content', 'title', 'status']
     }
@@ -60,7 +60,7 @@ class Template extends Content {
         content(editor:'HtmlCode')
     }
 
-    static transients = (Content.transients - 'mimeType')
+    static transients = (WcmContent.transients - 'mimeType')
 
     static mapping = {
         cache usage: 'nonstrict-read-write'

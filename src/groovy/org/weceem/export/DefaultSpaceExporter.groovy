@@ -1,7 +1,7 @@
 package org.weceem.export
 
 import java.text.SimpleDateFormat
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
+
 import com.thoughtworks.xstream.XStream
 
 import org.weceem.content.*
@@ -14,10 +14,10 @@ import org.weceem.files.*
  */
 class DefaultSpaceExporter implements SpaceExporter {
 
-    File execute(Space space) {
+    File execute(WcmSpace space) {
         def ts = new SimpleDateFormat('yyMMddHHmmssSSS').format(new Date())
         def filesDir = new File(ApplicationHolder.application.mainContext.servletContext.getRealPath(
-                "/${ContentFile.DEFAULT_UPLOAD_DIR}"))
+                "/${WcmContentFile.DEFAULT_UPLOAD_DIR}"))
 
         def baseDir = new File("${filesDir.absolutePath}/export-${ts}")
         baseDir.mkdir()
@@ -27,9 +27,9 @@ class DefaultSpaceExporter implements SpaceExporter {
         def xstream = new XStream()
         omitFields xstream
 
-        def contentList = Content.findAll(
-                "from Content c where c.space = ? and c.class != ?",
-                [space, Template.class.name])
+        def contentList = WcmContent.findAll(
+                "from WcmContent c where c.space = ? and c.class != ?",
+                [space, WcmTemplate.class.name])
         def templateList = []
         def parentsList = []
         contentList.each {content ->
@@ -45,8 +45,8 @@ class DefaultSpaceExporter implements SpaceExporter {
         file << '<content>'
         if (templateList) {
             // 1. export spaces (required for templates)
-            xstream.registerConverter(new ImportExportConverter(Space.class.name))
-            Space.findAll("from Space s where s.id in (${(templateList.collect {it.space.id}).join(',')})")
+            xstream.registerConverter(new ImportExportConverter(WcmSpace.class.name))
+            WcmSpace.findAll("from Space s where s.id in (${(templateList.collect {it.space.id}).join(',')})")
                     .each {sp ->
                 file << xstream.toXML(sp)
             }
@@ -54,7 +54,7 @@ class DefaultSpaceExporter implements SpaceExporter {
             // 2. export templates (required for content)
             xstream = new XStream()
             omitFields xstream
-            xstream.registerConverter(new ImportExportConverter(Template.class.name))
+            xstream.registerConverter(new ImportExportConverter(WcmTemplate.class.name))
             templateList.each {template ->
                 file << xstream.toXML(template)
             }
@@ -98,9 +98,9 @@ class DefaultSpaceExporter implements SpaceExporter {
     }
 
     protected void omitFields(xstream) {
-        xstream.omitField(Content.class, 'children')
-        xstream.omitField(Content.class, 'beforeInsert')
-        xstream.omitField(Content.class, 'beforeUpdate')
-        xstream.omitField(Content.class, 'beforeDelete')
+        xstream.omitField(WcmContent.class, 'children')
+        xstream.omitField(WcmContent.class, 'beforeInsert')
+        xstream.omitField(WcmContent.class, 'beforeUpdate')
+        xstream.omitField(WcmContent.class, 'beforeDelete')
     }
 }

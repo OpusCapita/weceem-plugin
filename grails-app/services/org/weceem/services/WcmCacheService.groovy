@@ -5,9 +5,9 @@ import net.sf.ehcache.Element
 import net.sf.ehcache.Cache
 import org.apache.commons.logging.LogFactory
 
-class CacheService implements InitializingBean {
+class WcmCacheService implements InitializingBean {
 
-    static log = LogFactory.getLog("grails.app.service."+CacheService.class.name)
+    static log = LogFactory.getLog("grails.app.service."+WcmCacheService.class.name)
     
     static transactional = false
     

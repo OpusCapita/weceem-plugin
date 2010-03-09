@@ -1,7 +1,5 @@
 package org.weceem.services
 
-import org.codehaus.groovy.grails.commons.ApplicationHolder
-
 import org.weceem.content.*
 import org.weceem.export.*
 
@@ -10,20 +8,20 @@ import org.weceem.export.*
  *
  * @author Sergei Shushkevich
  */
-class ImportExportService {
+class WcmImportExportService {
 
     def grailsApplication
     
     def searchableService
     
-    def importSpace(Space space, String importerName, File file) throws ImportException {
+    def importSpace(WcmSpace space, String importerName, File file) throws ImportException {
         // @todo couldn't inject this service, circular dependency problem. Investigate
         searchableService.stopMirroring()
         
         try {
-            Content.withTransaction { txn ->
+            WcmContent.withTransaction { txn ->
                 try {
-                    grailsApplication.mainContext.contentRepositoryService.deleteSpaceContent(space)
+                    grailsApplication.mainContext.wcmContentRepositoryService.deleteSpaceContent(space)
                     getImporters()."${importerName}"?.execute(space, file)
                 } catch (Throwable t) {
                     txn.setRollbackOnly()
@@ -37,7 +35,7 @@ class ImportExportService {
         searchableService.reindex()
     }
 
-    def exportSpace(Space space, String exporterName) {
+    def exportSpace(WcmSpace space, String exporterName) {
         getExporters()."${exporterName}"?.execute(space)
     }
 

@@ -40,7 +40,7 @@ function init(){
     resources["link.treetable"] = "${createLink(action: 'treeTable', controller: 'wcmRepository')}";
     resources["link.preview"] = "${createLink(action: 'preview', controller: 'wcmRepository')}";
     resources["search.request"] = "${createLink(action: 'searchRequest', controller: 'wcmRepository')}";
-    <g:each var="status" in="${org.weceem.content.Status.list()}">
+    <g:each var="status" in="${org.weceem.content.WcmStatus.list()}">
       resources["${status.description}"] = "${message(code: 'content.status.' + status.description, encodeAs:'JavaScript')}"
     </g:each>
     
@@ -78,11 +78,11 @@ $(function(){
             	<div id="advSearch" style="display:none" class="span-24 last"> 
             			You can filter results by type: <select id="classFilter">
                                                     	    <option value="none">All</option>
-                                                    	    <g:each in="${grailsApplication.domainClasses.findAll{org.weceem.content.Content.isAssignableFrom(it.clazz) && (it.clazz != org.weceem.content.Content)}.sort({a,b->a.name.compareTo(b.name)})}">
+                                                    	    <g:each in="${grailsApplication.domainClasses.findAll{org.weceem.content.WcmContent.isAssignableFrom(it.clazz) && (it.clazz != org.weceem.content.WcmContent)}.sort({a,b->a.name.compareTo(b.name)})}">
                                                     	        <option value="${it.fullName}"><g:message code="content.item.name.${it.fullName}"/></option>
                                                     	    </g:each>
                                                     	</select>,
-            			status: <g:select id="statusFilter" from="${[['description': 'all', 'code': 0]] + org.weceem.content.Status.list()}" optionKey="code" optionValue="description" />
+            			status: <g:select id="statusFilter" from="${[['description': 'all', 'code': 0]] + org.weceem.content.WcmStatus.list()}" optionKey="code" optionValue="description" />
             			and date <g:select id="fieldFilter" from="[[id:'createdOn', value:'created'], [id:'changedOn', value:'changed']]"  optionKey="id" optionValue="value"/> from <input id="fromDate" type="text"/> to <input id="toDate" type="text"/>
             	</div>
             </form>

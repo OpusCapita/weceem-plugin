@@ -1,9 +1,4 @@
 import org.apache.commons.logging.LogFactory
-import org.codehaus.groovy.grails.commons.GrailsDomainClass
-import org.codehaus.groovy.grails.commons.GrailsServiceClass
-import grails.util.Environment
-
-import org.weceem.content.*
 
 class WeceemGrailsPlugin {
     def _log = LogFactory.getLog('org.weceem.WeceemGrailsPlugin')
@@ -29,7 +24,7 @@ class WeceemGrailsPlugin {
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
         "grails-app/views/error.gsp",
-        "web-app/${org.weceem.files.ContentFile.DEFAULT_UPLOAD_DIR}/**/*"
+        "web-app/${org.weceem.files.WcmContentFile.DEFAULT_UPLOAD_DIR}/**/*"
     ]
 
     // TODO Fill in these fields
@@ -73,11 +68,11 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
                 applicationContext.navigationService.registerItem( 'weceem.plugin.admin', item)
         }
 
-        applicationContext.editorService.cacheEditorInfo()
-        applicationContext.editorService.configureFCKEditor()
+        applicationContext.wcmEditorService.cacheEditorInfo()
+        applicationContext.wcmEditorService.configureFCKEditor()
 
-        applicationContext.contentRepositoryService.createDefaultStatuses()
-        applicationContext.contentRepositoryService.createDefaultSpace()
+        applicationContext.wcmContentRepositoryService.createDefaultStatuses()
+        applicationContext.wcmContentRepositoryService.createDefaultSpace()
     }
 
     def doWithWebDescriptor = { xml ->
@@ -89,7 +84,7 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
 
     def onChange = { event ->
         // Reload all if service / whole app reloaded
-        applicationContext.editorService.cacheEditorInfo()
+        applicationContext.wcmEditorService.cacheEditorInfo()
     }
 
     def onConfigChange = { event ->

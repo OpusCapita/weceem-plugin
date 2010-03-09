@@ -15,34 +15,33 @@
 package org.weceem.content
 
 /**
- * Class for storing versioning information and versioned object data.
+ *  WcmVirtualContent class.
  *
- * @author Sergei Shushkevich
+ * @author Stephan Albers
+ * @author July Karpey
  */
-class ContentVersion {
-
-    Integer revision
-    Long objectKey
-    String objectClassName
-    String objectContent
-    String contentTitle
-    String spaceName
-    String createdBy
-    Date createdOn
-
-    def updateRevisions() {
-        ContentVersion.executeUpdate(
-                "update ContentVersion cv set cv.contentTitle = ?, cv.spaceName = ? where cv.objectKey = ?",
-                [contentTitle, spaceName, objectKey])
+class WcmVirtualContent extends WcmContent {
+    WcmContent target
+    
+    static searchable = {
+        alias WcmVirtualContent.name.replaceAll("\\.", '_')
+        
+        only = ['title', 'status']
     }
+
+    Map getVersioningProperties() { 
+        super.getVersioningProperties() + [ 
+            target:target?.ident()
+        ] 
+    }
+    
+    Boolean canHaveChildren() { false }
 
     static constraints = {
-        revision(nullable: true)
-        createdBy(nullable: true)
-        createdOn(nullable: true)
+        target(nullable: false)
     }
-
+    
     static mapping = {
-        objectContent type: 'text'
+        //target lazy:false // we never want proxies for this, but in Grails < 1.2 final, this gives us bad proxies
     }
 }

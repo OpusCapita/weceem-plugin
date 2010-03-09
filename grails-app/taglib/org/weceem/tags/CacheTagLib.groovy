@@ -11,7 +11,7 @@ class CacheTagLib {
     
     static transactional = false
     
-    def cacheService
+    def wcmCacheService
     
     def cache = { attrs, body ->
         def cacheName = attrs.name ?: 'contentCache'
