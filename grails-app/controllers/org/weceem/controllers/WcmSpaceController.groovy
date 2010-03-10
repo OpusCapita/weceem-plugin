@@ -138,7 +138,7 @@ class WcmSpaceController {
             response.addHeader('WcmContent-Length', file.length().toString())
             def contDisp = "attachment;filename=${space.name}.${FilenameUtils.getExtension(file.name)}"
             log.debug "Returning exported space to client with content disposition: [${contDisp}]"
-            response.addHeader('WcmContent-disposition', contDisp)
+            response.addHeader('Content-disposition', contDisp)
             response.outputStream << file.readBytes()
         } catch (Exception e) {
             flash.message = e.message
