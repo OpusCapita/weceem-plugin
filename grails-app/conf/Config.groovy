@@ -40,7 +40,7 @@ environments {
 
             warn  'org.codehaus.groovy.grails.web.servlet',  //  controllers
         	       'org.codehaus.groovy.grails.web.pages' //  GSP
-            debug   'grails.app'
+            debug   'grails.app', 'org.weceem'
 
         }
     }

@@ -1,6 +1,8 @@
 import grails.test.*
 
 import org.weceem.security.*
+import org.weceem.blog.*
+import org.weceem.content.*
 
 class SecurityPolicyTests extends grails.test.GrailsUnitTestCase {
 
@@ -120,6 +122,72 @@ class SecurityPolicyTests extends grails.test.GrailsUnitTestCase {
             ['spaceA_guest'], [WeceemSecurityPolicy.PERMISSION_VIEW])
         assertFalse policy.hasPermission('spaceA', '/extranet', 
             ['spaceA_guest'], [WeceemSecurityPolicy.PERMISSION_VIEW])
+    }
+    
+    void testTypeSpecificAccessControl() {
+        policy.setURIPermissionForSpaceAndRole("/", WeceemSecurityPolicy.PERMISSION_ADMIN, true, 'spaceA', "spaceA_admin")
+        policy.setURIPermissionForSpaceAndRole("/", WeceemSecurityPolicy.PERMISSION_EDIT, true, 'spaceA', "spaceA_admin")
+        policy.setURIPermissionForSpaceAndRole("/", WeceemSecurityPolicy.PERMISSION_VIEW, true, 'spaceA', "spaceA_admin")
+        policy.setURIPermissionForSpaceAndRole("/", WeceemSecurityPolicy.PERMISSION_CREATE, true, 'spaceA', "spaceA_admin")
+        policy.setURIPermissionForSpaceAndRole("/", WeceemSecurityPolicy.PERMISSION_DELETE, true, 'spaceA', "spaceA_admin")
+
+        policy.setURIPermissionForSpaceAndRole("/", WeceemSecurityPolicy.PERMISSION_VIEW, true, 'spaceA', "spaceA_guest")
+        policy.setURIPermissionForSpaceAndRole("/blog/comments", WeceemSecurityPolicy.PERMISSION_CREATE, 
+            [types:[WcmComment]], 'spaceA', "spaceA_guest")
+        policy.setURIPermissionForSpaceAndRole("/blog", WeceemSecurityPolicy.PERMISSION_EDIT, true, 'spaceA', "spaceA_user")
+        policy.setURIPermissionForSpaceAndRole("/blog", WeceemSecurityPolicy.PERMISSION_CREATE, 
+            [types:[WcmBlogEntry, WcmComment]], 'spaceA', "spaceA_user")
+        policy.setURIPermissionForSpaceAndRole("/extranet", WeceemSecurityPolicy.PERMISSION_VIEW, false, 'spaceA', "spaceA_guest")
+
+        policy.setURIPermissionForSpaceAndRole("/", WeceemSecurityPolicy.PERMISSION_ADMIN, true, 'spaceB', "spaceB_admin")
+        policy.setURIPermissionForSpaceAndRole("/", WeceemSecurityPolicy.PERMISSION_EDIT, true, 'spaceB', "spaceB_admin")
+        policy.setURIPermissionForSpaceAndRole("/", WeceemSecurityPolicy.PERMISSION_VIEW, true, 'spaceB', "spaceB_admin")
+        policy.setURIPermissionForSpaceAndRole("/", WeceemSecurityPolicy.PERMISSION_CREATE, true, 'spaceB', "spaceB_admin")
+        policy.setURIPermissionForSpaceAndRole("/", WeceemSecurityPolicy.PERMISSION_DELETE, true, 'spaceB', "spaceB_admin")
+
+        policy.setURIPermissionForSpaceAndRole("/", WeceemSecurityPolicy.PERMISSION_VIEW, true, 'spaceB', "spaceB_guest")
+        policy.setURIPermissionForSpaceAndRole("/blog/comments", WeceemSecurityPolicy.PERMISSION_CREATE, [types:[WcmComment]], 'spaceB', "spaceB_guest")
+        policy.setURIPermissionForSpaceAndRole("/blog/comments", WeceemSecurityPolicy.PERMISSION_CREATE, false, 'spaceB', "spaceB_user")
+        policy.setURIPermissionForSpaceAndRole("/blog", WeceemSecurityPolicy.PERMISSION_EDIT, [types:[WcmBlog, WcmComment]], 'spaceB', "spaceB_user")
+        policy.setURIPermissionForSpaceAndRole("/blog", WeceemSecurityPolicy.PERMISSION_CREATE, true, 'spaceB', "spaceB_user")
+
+        policy.dumpPermissions()
+        
+        // Check that per-URI rights working for blog access
+        assertFalse policy.hasPermission('spaceA', '/blog', 
+            ['spaceA_guest'], [WeceemSecurityPolicy.PERMISSION_CREATE])
+        assertFalse policy.hasPermission('spaceA', '/blog', 
+            ['spaceA_user'], [WeceemSecurityPolicy.PERMISSION_CREATE])
+        assertTrue policy.hasPermission('spaceA', '/blog', 
+            ['spaceA_user'], [WeceemSecurityPolicy.PERMISSION_CREATE], [type:WcmBlogEntry])
+
+        assertFalse policy.hasPermission('spaceA', '/blog/comments', 
+            ['spaceA_guest'], [WeceemSecurityPolicy.PERMISSION_CREATE])
+        assertTrue policy.hasPermission('spaceA', '/blog/comments', 
+            ['spaceA_guest'], [WeceemSecurityPolicy.PERMISSION_CREATE], [type:WcmComment])
+        assertTrue policy.hasPermission('spaceA', '/blog/comments', 
+            ['spaceA_user'], [WeceemSecurityPolicy.PERMISSION_EDIT], [type:WcmComment])
+
+        // URI Inheritance - users can also create in comments, even though granted only on the parent 'blogs'
+        assertFalse policy.hasPermission('spaceA', '/blog/comments', 
+            ['spaceA_user'], [WeceemSecurityPolicy.PERMISSION_CREATE])
+        assertTrue policy.hasPermission('spaceA', '/blog/comments', 
+            ['spaceA_user'], [WeceemSecurityPolicy.PERMISSION_CREATE], [type:WcmBlogEntry])
+
+        // Here the guest IS allowed to create only WcmComment so checking without a type must return false
+        assertFalse policy.hasPermission('spaceB', '/blog/comments', 
+            ['spaceB_guest'], [WeceemSecurityPolicy.PERMISSION_CREATE])
+        // But checking WITH a permitted type returns true
+        assertTrue policy.hasPermission('spaceB', '/blog/comments', 
+            ['spaceB_guest'], [WeceemSecurityPolicy.PERMISSION_CREATE], [type:WcmComment])
+        assertFalse policy.hasPermission('spaceB', '/blog/comments', 
+            ['spaceB_user'], [WeceemSecurityPolicy.PERMISSION_CREATE])
+        assertFalse policy.hasPermission('spaceB', '/blog/comments', 
+            ['spaceB_user'], [WeceemSecurityPolicy.PERMISSION_CREATE], [type:WcmComment])
+        assertFalse policy.hasPermission('spaceB', '/blog/comments', 
+            ['spaceB_user'], [WeceemSecurityPolicy.PERMISSION_EDIT])
+        assertTrue policy.hasPermission('spaceB', '/blog/comments', 
+            ['spaceB_user'], [WeceemSecurityPolicy.PERMISSION_EDIT], [type:WcmComment])
     }
     
     void testMissingPolicyCausesException() {

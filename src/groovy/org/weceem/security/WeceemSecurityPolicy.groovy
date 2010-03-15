@@ -66,33 +66,76 @@ class WeceemSecurityPolicy {
         setDefaultPermissionForSpaceAndRole(PERMISSION_CREATE, false, ANY_SPACE_ALIAS, ROLE_GUEST)
     }
 
-    void setDefaultPermissionForSpaceAndRole(String perm, boolean permGranted, String alias, String role) {
+    void setDefaultPermissionForSpaceAndRole(String perm, def permGranted, String alias, String role) {
         setPermissionForSpaceAndRole(DEFAULT_POLICY_URI, perm, permGranted, alias, role)
     }
     
-    void setPermissionForSpaceAndRole(String key, String perm, boolean permGranted, String alias, String role) {
-        if (log.debugEnabled) {
-            log.debug "Adding permission to policy for space: ${alias}, uri: ${key}, permission: $perm = $permGranted for role $role"
+    void dumpPermissions(Closure outputLine = { println it }) {
+        entriesBySpace.each { spaceAlias, spaceURIEntries ->
+            outputLine("Space: ${spaceAlias}")
+            spaceURIEntries.each { uri, perms ->
+                outputLine("       |--- URI: ${uri}")
+                perms.each { role, permissions ->
+                    outputLine("                     |-- ROLE: ${role}")
+                    permissions.each { permission, grant ->
+                        outputLine("                               |-- Permission: ${permission} - granted?: "+grant.settings)
+                    }
+                }
+            }
         }
-        def spaceEntries = entriesBySpace.get(alias, new TreeMap({ a, b -> b.compareTo(a) } as Comparator))
+    }
+    
+    void setPermissionForSpaceAndRole(String key, String perm, def permGranted, String spaceAlias, String role) {
+        if (log.debugEnabled) {
+            log.debug "Adding permission to policy for space: ${spaceAlias}, uri: ${key}, permission: $perm = $permGranted for role $role"
+        }
+        // The data is stored as a graph of maps:
+        //
+        //   spaceAlias ====> uri1       ====> ROLE_USER  ====> create ====> [types:[WcmComment, WcmBlog]]
+        //                                                      edit   ====> true
+        //                                                      admin  ====> false
+        //                    uri2/xxx   ====> ROLE_GUEST ====> create ====> [types:[WcmComment]]
+        //                    uri3/xxx   ====> ROLE_ADMIN ====> admin  ====> true
+        //
+        def spaceEntries = entriesBySpace.get(spaceAlias, new TreeMap({ a, b -> b.compareTo(a) } as Comparator))
         def uriPerms = spaceEntries.get(key, [:])
         def permsForRole = uriPerms.get(role, [:])
         
-        permsForRole[perm] = permGranted
+        def permEvaluatingClosure
+        switch (permGranted) {
+            case Boolean: permEvaluatingClosure = { args -> permGranted }; break; 
+            case Map: if (permGranted.types) {
+                    permEvaluatingClosure = { args -> args?.type ? permGranted.types?.contains(args.type) : false } 
+                }
+                break
+            default:
+                throw new IllegalArgumentException("I don't understand the permission granted [$permGranted] - I only understand Maps and Booleans")
+        }
+        permsForRole[perm] = [granted:permEvaluatingClosure, settings:permGranted]
     }
     
-    void setURIPermissionForSpaceAndRole(String uri, String perm, boolean permGranted, String alias, String role) {
+    void setURIPermissionForSpaceAndRole(String uri, String perm, def permGranted, String spaceAlias, String role) {
         // Force trailing slash so a simple startsWith search works correctly
         if (!uri.endsWith('/')) {
             uri += '/'
         }
-        setPermissionForSpaceAndRole(uri, perm, permGranted, alias, role)
+        setPermissionForSpaceAndRole(uri, perm, permGranted, spaceAlias, role)
     }
-    
+
     /**
      * Find out if the permission name supplied is granted for the role, spaceAlias and uri
+     * @param spaceAlias The url alias of the space you are checking
+     * permissions for. If no permissions are found for this space, the "any"
+     * permissions will be used
+     * @param uri The uri the user needs permission to access. Will look up
+     * the url path to find nearest ancestor with permissions, or default to
+     * space's default permissions if no uri-specific permissions set for
+     * ancestors of this uri
+     * @param roleList The list of roles the user has
+     * @param permissionList The list of permissions required to perform the action
+     * @param args Optional map of arguments used for more detailed permissions access etc restriction by type
      */
-    boolean hasPermission(String spaceAlias, String uri, List roleList, List permissionList ) {
+    boolean hasPermission(String spaceAlias, String uri, List roleList, List permissionList, Map args = null ) {
         def spaceEntries = entriesBySpace[spaceAlias]
         if (log.debugEnabled) {
             log.debug "Found policy entries for space [$spaceAlias]: $spaceEntries"
@@ -130,6 +173,8 @@ class WeceemSecurityPolicy {
         def explicitMatch
         uriPermCandidates*.value.find { uriPerms ->
             roleList.find { role ->
+                // Get the permissions associated with this role for this URI candidate
+                // These may be booleans or maps of args eg types list
                 def permsForRole = uriPerms?.get(role)
                 
                 def explicitGrant
@@ -137,9 +182,9 @@ class WeceemSecurityPolicy {
                     def grant = permsForRole?.get(permission)
                     if (grant != null) {
                         if ( explicitGrant != null) { 
-                            explicitGrant &= grant
+                            explicitGrant &= grant.granted(args)
                         } else {
-                            explicitGrant = grant
+                            explicitGrant = grant.granted(args)
                         }
                     }
                 }
