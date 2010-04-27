@@ -15,7 +15,8 @@ class WeceemGrailsPlugin {
         navigation:'1.1.1 > *',
         fckeditor:'0.9.2 > *',
         feeds:'1.5 > *',
-        beanFields:'0.5 > *'
+        beanFields:'0.5 > *',
+        taggable:'0.6.1 > *'
     ]
     def observe = ["hibernate", 'services']
     
