@@ -1412,9 +1412,9 @@ class WcmContentRepositoryService implements InitializingBean {
     def findMonthsWithContent(parentOrSpace, contentType) {
         def type = getContentClassForType(contentType)
         def parentClause = parentOrSpace instanceof WcmContent ? "parent = :parent" : "space = :parent"
-        def monthsYears = type.executeQuery("""select distinct month(publicationDate), year(publicationDate) from 
-${type.name} where $parentClause and status.publicContent = true and publicationDate < current_timestamp() 
-order by year(publicationDate) desc, month(publicationDate) desc""", [parent:parentOrSpace])
+        def monthsYears = type.executeQuery("""select distinct month(publishFrom), year(publishFrom) from 
+${type.name} where $parentClause and status.publicContent = true and publishFrom < current_timestamp() 
+order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpace])
         return monthsYears?.collect() {
             [month: it[0], year: it[1]]
         }      
@@ -1451,9 +1451,17 @@ order by year(publicationDate) desc, month(publicationDate) desc""", [parent:par
                 eq('parent', parentOrSpace)
             }
 
-            ge('publicationDate', startDate)
-            le('publicationDate', endDate)
-            order('publicationDate', 'desc')
+            or {
+                isNull('publishFrom')
+                ge('publishFrom', startDate)
+            }
+            
+            or {
+                isNull('publishUntil')
+                le('publishUtil', endDate)
+            }
+
+            order('publishFrom', 'desc')
             cache true
         }
         
@@ -1551,8 +1559,8 @@ order by year(publicationDate) desc, month(publicationDate) desc""", [parent:par
         def now = new Date()
         // Find all content with publication date less than now
         def pendingContent = WcmContent.withCriteria {
-            isNotNull('publicationDate')
-            lt('publicationDate', now)
+            isNotNull('publishFrom')
+            lt('publishFrom', now)
             status {
                 eq('publicContent', false)
             }

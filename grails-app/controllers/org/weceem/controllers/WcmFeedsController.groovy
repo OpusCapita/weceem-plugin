@@ -39,7 +39,7 @@ class WcmFeedsController {
             data.nodes.each { n ->
                 entry {
                     title = n.title
-                    publishedDate = n.publicationDate
+                    publishedDate = n.publishFrom
                     link = g.createLink(controller:'wcmContent', action:'show', params:[uri: WeceemTagLib.makeFullContentURI(n)], absolute:true)
                     content(type:n.mimeType, value: n.summary ?: n.content)
                 }

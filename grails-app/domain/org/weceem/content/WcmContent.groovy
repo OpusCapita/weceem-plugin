@@ -63,8 +63,9 @@ class WcmContent implements Comparable, Taggable {
     String changedBy
     Date changedOn
     
-    Date publicationDate
-
+    Date publishFrom
+    Date publishUntil
+    
     WcmStatus status
     
     static belongsTo = [space: WcmSpace, parent: WcmContent]
@@ -92,7 +93,11 @@ class WcmContent implements Comparable, Taggable {
         createdOn(nullable: true)
         changedBy(nullable: true)
         changedOn(nullable: true)
-        publicationDate(nullable: true)
+        publishFrom(nullable: true)
+        publishUntil(nullable: true, validator: { value, obj -> 
+            // Allow it to be null or greater than publishFrom
+            (value == null) || (value.time > (obj.publishFrom ? obj.publishFrom.time : value.time-1))
+        })
         language(nullable: true, size:0..3)
     }
 
@@ -119,7 +124,8 @@ class WcmContent implements Comparable, Taggable {
         createdOn editor:'ReadOnlyDate', group:'extra'
         changedBy editor:'ReadOnly', group:'extra'
         changedOn editor:'ReadOnlyDate', group:'extra'
-        publicationDate group:'extra'
+        publishFrom group:'extra'
+        publishUntil group:'extra'
         tags editor:'Tags', group:'extra'
         parent hidden:true
         children hidden:true

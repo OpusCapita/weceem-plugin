@@ -6,16 +6,16 @@ class WeceemGrailsPlugin {
     // the plugin version
     def version = "0.9-SNAPSHOT"
     // the version or versions of Grails the plugin is designed for
-    def grailsVersion = "1.2.0 > *"
+    def grailsVersion = "1.2.2 > *"
     
     // the other plugins this plugin depends on
     def dependsOn = [
-        searchable:'0.5.4 > *', 
-        quartz:'0.4.1 > *', 
+        searchable:'0.5.5 > *', 
+        quartz:'0.4.2 > *', 
         navigation:'1.1.1 > *',
         fckeditor:'0.9.2 > *',
         feeds:'1.5 > *',
-        beanFields:'0.5 > *',
+        beanFields:'1.0-RC3 > *',
         taggable:'0.6.1 > *'
     ]
     def observe = ["hibernate", 'services']
