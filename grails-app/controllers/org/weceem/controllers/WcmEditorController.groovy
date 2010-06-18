@@ -57,21 +57,24 @@ class WcmEditorController {
         
         log.debug "Saving new content: ${params}"
         
-        def content = wcmContentRepositoryService.createNode(params.type, params)
+        WcmContent.withTransaction { txn -> 
+            def content = wcmContentRepositoryService.createNode(params.type, params)
 
-        if (!content.hasErrors()) {
-            flash.message = message(code:'message.content.saved', args:[content.title, message(code:'content.item.name.'+content.class.name)])
-            log.debug "Saved content: ${content}"
-            if (!params['continue']) {
-                redirect(controller:'wcmRepository')
+            if (!content.hasErrors()) {
+                flash.message = message(code:'message.content.saved', args:[content.title, message(code:'content.item.name.'+content.class.name)])
+                log.debug "Saved content: ${content}"
+                if (!params['continue']) {
+                    redirect(controller:'wcmRepository')
+                } else {
+                    redirect(action:edit, params:[id:content.id])
+                }
             } else {
-                redirect(action:edit, params:[id:content.id])
+                flash.message =  message(code:'message.content.has.errors')
+                flash.error = renderErrors(bean: content)
+                txn.setRollbackOnly()
+                log.error "Unable to save content: ${content.errors}"
+                render(view: 'create', model: [content: content, editableProperties: wcmEditorService.getEditorInfo(content.class)])
             }
-        } else {
-            flash.message = message(code:'message.content.save.failed')
-            flash.error = renderErrors(bean: content)
-            log.error "Unable to save content: ${content.errors}"
-            render(view: 'create', model: [content: content, editableProperties: wcmEditorService.getEditorInfo(content.class)])
         }
     }
     
@@ -88,21 +91,25 @@ class WcmEditorController {
     def update = {
         workaroundBlankAssociationBug()
         
-        def result = wcmContentRepositoryService.updateNode(params.id, params)
-        if (result?.errors) {
-            render(view: 'edit', model: [content: result.content, editableProperties: wcmEditorService.getEditorInfo(result.content.class)])
-        } else if (result?.notFound) {
-            response.sendError(404, "Cannot update node, no node found with id ${params.id}")
-        } else {
-            flash.message = message(code:'message.content.updated', args:[
-                result.content.title, 
-                message(code:'content.item.name.'+result.content.class.name)] )
-            if (!params['continue']) {
-                redirect(controller:'wcmRepository', action:'treeTable')
+        WcmContent.withTransaction { txn -> 
+            def result = wcmContentRepositoryService.updateNode(params.id, params)
+            if (result?.errors) {
+                txn.setRollbackOnly()
+                flash.message =  message(code:'message.content.has.errors')
+                render(view: 'edit', model: [content: result.content, editableProperties: wcmEditorService.getEditorInfo(result.content.class)])
+            } else if (result?.notFound) {
+                response.sendError(404, "Cannot update node, no node found with id ${params.id}")
             } else {
-                redirect(action:'edit', params:[id:result.content.id])
-            }
-        }        
+                flash.message = message(code:'message.content.updated', args:[
+                    result.content.title, 
+                    message(code:'content.item.name.'+result.content.class.name)] )
+                if (!params['continue']) {
+                    redirect(controller:'wcmRepository', action:'treeTable')
+                } else {
+                    redirect(action:'edit', params:[id:result.content.id])
+                }
+            }        
+        }
     }
     
     def delete = {

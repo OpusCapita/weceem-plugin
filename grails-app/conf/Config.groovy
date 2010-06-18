@@ -5,9 +5,9 @@ grails.views.gsp.encoding="UTF-8"
 
 org.weceem.plugin.standalone="true"
 
-weceem.content.prefix="content"
-weceem.admin.prefix="cms/admin"
-weceem.tools.prefix="cms/tools"
+//weceem.content.prefix="content"
+//weceem.admin.prefix="cms/admin"
+//weceem.tools.prefix="cms/tools"
 //weceem.admin.layout="weceemadmin-alt"
 
 log4j = {

@@ -1,5 +1,12 @@
 <div class="container">
-    
+<g:javascript>
+<%-- I don't want to do this here but have no choice until we can include resources in header --%>
+<%-- Highlight any accordion headers that have errors inside them --%>
+$( function() {
+    $('div .ui-state-error', $('#panels')).parentsUntil('#panels').prev('.ui-accordion-header').addClass('ui-state-error');
+});
+</g:javascript>
+
     <bean:errorClass>ui-state-error</bean:errorClass>
 
     <g:uploadForm method="post">
