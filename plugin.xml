@@ -13,7 +13,6 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     <resource>DataSource</resource>
     <resource>QuartzConfig</resource>
     <resource>Searchable</resource>
-    <resource>UrlMappings</resource>
     <resource>WeceemPluginUrlMappings</resource>
     <resource>spring.resources</resource>
     <resource>org.weceem.controllers.WcmArchiveController</resource>
@@ -72,7 +71,7 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     <plugin name='feeds' version='1.5 &gt; *' />
     <plugin name='beanFields' version='1.0-RC3 &gt; *' />
     <plugin name='blueprint' version='0.9.1.1 &gt; *' />
-    <plugin name='jqueryUi' version='1.8.2.2 &gt; *' />
+    <plugin name='jqueryUi' version='1.8.2.1 &gt; *' />
     <plugin name='taggable' version='0.6.1 &gt; *' />
   </dependencies>
   <behavior />

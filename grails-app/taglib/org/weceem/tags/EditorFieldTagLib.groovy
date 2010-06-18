@@ -50,7 +50,12 @@ class EditorFieldTagLib {
     }
     
     def editorFieldDate = { attrs ->
-        out << bean.date(beanName:'content', property:attrs.property, noLabel:true)
+        out << bean.input(beanName:'content', property:attrs.property, noLabel:true)
+        out << g.javascript([:]) {
+"""
+\$(function(){ \$('#${attrs.property.encodeAsJavaScript()}').datepicker() })
+"""
+        }
     }
 
     def editorFieldWcmTemplate = { attrs ->

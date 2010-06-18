@@ -1,5 +1,16 @@
 <script language="javascript" type="text/javascript">
+function styleButtons() {
+    $('button.removeTag').button({
+        icons: {
+            primary: 'ui-icon-closethick'
+        },
+        text: false
+    });
+}
+
 $(function() {
+    
+    styleButtons();
     
     $('#tagsfield_${name} .addTag').click( function(event) {
         event.preventDefault();
@@ -21,7 +32,8 @@ $(function() {
             }
             if (!exists) {
                 existingTags[existingTags.length] = t;
-                $('<div class="existingTag"><span class="tagtext">'+t+'</span><button class="removeTag">x</button></div>').appendTo(displayTagsParent);
+                $('<div class="existingTag"><span class="tagtext">'+t+'</span><button class="removeTag">Remove</button></div>').appendTo(displayTagsParent);
+                styleButtons();
             }
         })
         dataElem.val(existingTags.join(','));
@@ -29,7 +41,7 @@ $(function() {
     });
     $('#tagsfield_${name} .removeTag').live('click', function(event) {
         event.preventDefault();
-        var tagParentDiv = $(event.target).parent();
+        var tagParentDiv = $(event.target).parentsUntil('.existingTagList');
         var tagToRemove = $('.tagtext', tagParentDiv).text();
         $(tagParentDiv).fadeOut(500, function() {
             $(this).remove();
