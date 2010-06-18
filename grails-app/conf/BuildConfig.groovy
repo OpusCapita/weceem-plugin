@@ -1,7 +1,7 @@
 grails.project.dependency.resolution = {
     inherits "global" // inherit Grails default dependencies
 
-	log "debug" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
+	log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
 
 	repositories {        
 		grailsPlugins()
@@ -27,8 +27,8 @@ grails.project.dependency.resolution = {
 		runtime ':searchable:0.5.5'
 		runtime ':navigation:1.1.1'
 		runtime ':bean-fields:1.0-RC3'
-		runtime ':jquery:1.4.2.1'
-		runtime ':jquery-ui:1.8.2.1'
+		runtime ':jquery:1.4.2.2'
+		runtime ':jquery-ui:1.8.2.2'
 		runtime ':quartz:0.4.2'
 		runtime ':feeds:1.5'
 		runtime ':taggable:0.6.1'
