@@ -63,7 +63,7 @@ class WcmContent implements Comparable, Taggable {
     String changedBy
     Date changedOn
     
-    Date publishFrom
+    Date publishFrom = new Date() // default to now
     Date publishUntil
     
     WcmStatus status
@@ -93,7 +93,7 @@ class WcmContent implements Comparable, Taggable {
         createdOn(nullable: true)
         changedBy(nullable: true)
         changedOn(nullable: true)
-        publishFrom(nullable: true)
+        publishFrom(nullable: false)
         publishUntil(nullable: true, validator: { value, obj -> 
             // Allow it to be null or greater than publishFrom
             (value == null) || (value.time > (obj.publishFrom ? obj.publishFrom.time : value.time-1))

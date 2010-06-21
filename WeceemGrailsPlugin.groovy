@@ -47,6 +47,9 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         simpleSpaceImporter(org.weceem.export.SimpleSpaceImporter)
         defaultSpaceImporter(org.weceem.export.DefaultSpaceImporter)
         confluenceSpaceImporter(org.weceem.export.ConfluenceSpaceImporter)
+
+        // Register our custom binding beans
+        customPropertyEditorRegistrar(org.weceem.binding.CustomPropertyEditorRegistrar) 
         
         cacheManager(net.sf.ehcache.CacheManager) { bean -> 
             bean.destroyMethod = 'shutdown'

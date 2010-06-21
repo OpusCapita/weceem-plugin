@@ -50,6 +50,29 @@ class EditorFieldTagLib {
     }
     
     def editorFieldDate = { attrs ->
+        StringBuilder sb = new StringBuilder()
+        def d = pageScope.content[attrs.property]
+        def dval = d?.format('yyyy/MM/dd')
+        sb << g.textField(name:attrs.property+'_date', size:10, maxLength:10, value:dval)
+        sb << " @ "
+        def hr = d?.format('HH')
+        def min = d?.format('mm')
+        sb << g.textField(name:attrs.property+'_hour', size:2, maxLength:2, value:hr ?: '00')
+        sb << " : "
+        sb << g.textField(name:attrs.property+'_min', size:2, maxLength:2, value:min ?: '00')
+
+        out << bean.customField(beanName:'content', property:attrs.property, noLabel:true) {
+            out << sb
+        }
+
+        out << g.javascript([:]) {
+"""
+\$(function(){ \$('#${attrs.property.encodeAsJavaScript()}').datepicker({ dateFormat: 'yy/mm/dd' }) })
+"""
+        }
+    }
+/*
+    def editorFieldDateTime = { attrs ->
         out << bean.input(beanName:'content', property:attrs.property, noLabel:true)
         out << g.javascript([:]) {
 """
@@ -57,7 +80,7 @@ class EditorFieldTagLib {
 """
         }
     }
-
+*/
     def editorFieldWcmTemplate = { attrs ->
         def templates = WcmTemplate.findAllBySpace( pageScope.content.space, [sort:'title'])
         out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
