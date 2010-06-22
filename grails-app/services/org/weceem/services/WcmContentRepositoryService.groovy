@@ -809,40 +809,42 @@ class WcmContentRepositoryService implements InitializingBean {
         def oldTitle = content.title
         // map in new values
         hackedBindData(content, params)
+        
+        if (!content.hasErrors()) {
+        
+            if (params.tags != null) {
+                content.setTags(params.tags.tokenize(',').collect { it.trim().toLowerCase()} )
+            }
 
-        if (params.tags != null) {
-            content.setTags(params.tags.tokenize(',').collect { it.trim().toLowerCase()} )
-        }
+            if (content instanceof WcmContentFile){
+                content.rename(oldTitle)
+            }
+            if (log.debugEnabled) {
+                log.debug("Updated node with id ${content.id}, properties are now: ${content.dump()}")
+            }
+            if (content instanceof WcmContentFile){
+                content.createAliasURI(content.parent)
+            }else
+            if (!content.aliasURI && content.title) {
+                content.createAliasURI(content.parent)
+            }
+            def ok = content.validate()
+            if (content.save()) {
+                if (log.debugEnabled) {
+                    log.debug("Update node with id ${content.id} saved OK")
+                }
+            
+                invalidateCachingForURI(content.space, oldAbsURI)
 
-        if (content instanceof WcmContentFile){
-            content.rename(oldTitle)
+                wcmEventService.afterContentUpdated(content)
+
+                return [content:content]
+            }
         }
         if (log.debugEnabled) {
-            log.debug("Updated node with id ${content.id}, properties are now: ${content.dump()}")
+            log.debug("Update node with id ${content.id} failed with errors: ${content.errors}")
         }
-        if (content instanceof WcmContentFile){
-            content.createAliasURI(content.parent)
-        }else
-        if (!content.aliasURI && content.title) {
-            content.createAliasURI(content.parent)
-        }
-        def ok = content.validate()
-        if (content.save()) {
-            if (log.debugEnabled) {
-                log.debug("Update node with id ${content.id} saved OK")
-            }
-            
-            invalidateCachingForURI(content.space, oldAbsURI)
-
-            wcmEventService.afterContentUpdated(content)
-
-            return [content:content]
-        } else {
-            if (log.debugEnabled) {
-                log.debug("Update node with id ${content.id} failed with errors: ${content.errors}")
-            }
-            return [errors:content.errors, content:content]
-        }
+        return [errors:content.errors, content:content]
     }
     
     /**

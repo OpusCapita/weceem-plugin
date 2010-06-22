@@ -32,31 +32,41 @@ public class DateAndTimeDateEditor extends CustomDateEditor implements Structure
     }
 
     public Object assemble(Class type, Map fieldValues) throws IllegalArgumentException {
-        if (!fieldValues.containsKey("date") && (fieldValues.containsKey("hour") || fieldValues.containsKey("minute")) ) {
-            throw new IllegalArgumentException("Can't populate a date and time without a date string");
-        }
-
         def d = fieldValues.date
 
         int hour = getIntegerValue(fieldValues, "hour", 0);
         int minute = getIntegerValue(fieldValues, "minute", 0);
 
-        // Get the date part
-        def dateDate = Date.parse(d, 'yyyy/MM/dd')
-        Calendar dateCal = new GregorianCalendar()
-        dateCal.time = dateDate
-        Calendar c = new GregorianCalendar(dateCal[Calendar.YEAR],dateCal[Calendar.MONTH],dateCal[Calendar.DAY_OF_MONTH],hour,minute);
-        if(type == Date.class) {
-            return c.getTime();
-        } else if(type == java.sql.Date.class) {
-            return new java.sql.Date(c.getTime().getTime());
+        if (d?.trim() && (minute != null) && (hour != null)) {
+            // Get the date part
+            def dateDate = Date.parse('yyyy/MM/dd', d)
+            Calendar dateCal = new GregorianCalendar()
+            dateCal.time = dateDate
+            Calendar c = new GregorianCalendar(
+                dateCal.get(Calendar.YEAR), 
+                dateCal.get(Calendar.MONTH), 
+                dateCal.get(Calendar.DAY_OF_MONTH),
+                hour,minute);
+            if(type == Date.class) {
+                return c.getTime();
+            } else if(type == java.sql.Date.class) {
+                return new java.sql.Date(c.getTime().getTime());
+            }
+            return c;
+        } else {
+            throw new IllegalArgumentException("You must provide values for all parts of the date and time or none at all");
         }
-        return c;
+        
     }
 
-    private int getIntegerValue(Map values, String name, int defaultValue) throws NumberFormatException {
-        if (values.get(name) != null) {
-            return Integer.parseInt((String) values.get(name));
+    private getIntegerValue(Map values, String name, int defaultValue) throws NumberFormatException {
+        def v = values.get(name)
+        if (v != null) {
+            if (v.trim()) {
+                return Integer.parseInt((String) values.get(name));
+            } else {
+                return null
+            }
         }
         return defaultValue;
     }

@@ -57,9 +57,9 @@ class EditorFieldTagLib {
         sb << " @ "
         def hr = d?.format('HH')
         def min = d?.format('mm')
-        sb << g.textField(name:attrs.property+'_hour', size:2, maxLength:2, value:hr ?: '00')
+        sb << g.textField(name:attrs.property+'_hour', size:2, maxLength:2, value:hr, 'class':'date-editor-hour')
         sb << " : "
-        sb << g.textField(name:attrs.property+'_min', size:2, maxLength:2, value:min ?: '00')
+        sb << g.textField(name:attrs.property+'_minute', size:2, maxLength:2, value:min, 'class':'date-editor-minute')
 
         out << bean.customField(beanName:'content', property:attrs.property, noLabel:true) {
             out << sb
@@ -67,7 +67,15 @@ class EditorFieldTagLib {
 
         out << g.javascript([:]) {
 """
-\$(function(){ \$('#${attrs.property.encodeAsJavaScript()}').datepicker({ dateFormat: 'yy/mm/dd' }) })
+\$(function(){ 
+    \$('#${attrs.property.encodeAsJavaScript()}_date').datepicker({ 
+        dateFormat: 'yy/mm/dd',
+        onSelect: function(dateText, inst) {
+            \$(this).siblings('.date-editor-hour').val('00');
+            \$(this).siblings('.date-editor-minute').val('00');
+        }
+    })
+})
 """
         }
     }

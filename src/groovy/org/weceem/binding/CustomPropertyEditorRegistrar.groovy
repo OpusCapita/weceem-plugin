@@ -8,8 +8,11 @@ import org.springframework.beans.PropertyEditorRegistry
 import org.weceem.content.*
 
 class CustomPropertyEditorRegistrar implements PropertyEditorRegistrar {
+
     public void registerCustomEditors(PropertyEditorRegistry registry) { 
-        registry.registerCustomEditor(null, 'publishFrom', new DateAndTimeDateEditor(new SimpleDateFormat("yyyy/MM/dd HH:mm"), true)); 
-        registry.registerCustomEditor(null, 'publishUntil', new DateAndTimeDateEditor(new SimpleDateFormat("yyyy/MM/dd HH:mm"), true)); 
+        // Register the special date/time editor for publishFrom/publishUntil only on our classes otherwise
+        // user's own application will get our editor
+        registry.registerCustomEditor(Date, 'publishFrom', new DateAndTimeDateEditor(new SimpleDateFormat("yyyy/MM/dd HH:mm"), true)); 
+        registry.registerCustomEditor(Date, 'publishUntil', new DateAndTimeDateEditor(new SimpleDateFormat("yyyy/MM/dd HH:mm"), true)); 
     } 
 }

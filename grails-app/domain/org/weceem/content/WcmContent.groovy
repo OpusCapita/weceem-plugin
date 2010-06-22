@@ -96,7 +96,12 @@ class WcmContent implements Comparable, Taggable {
         publishFrom(nullable: false)
         publishUntil(nullable: true, validator: { value, obj -> 
             // Allow it to be null or greater than publishFrom
-            (value == null) || (value.time > (obj.publishFrom ? obj.publishFrom.time : value.time-1))
+            if (value != null) {
+                if (value.time <= (obj.publishFrom ? obj.publishFrom.time : value.time-1)) {
+                    return "content.publish.until.must.be.in.future"
+                }
+            }
+            return null
         })
         language(nullable: true, size:0..3)
     }
