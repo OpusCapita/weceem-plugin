@@ -22,5 +22,10 @@ class AutoPublicationJob {
         if (log.infoEnabled && n) {
             log.info "Auto-published $n content nodes"
         }
+
+        n = wcmContentRepositoryService.archiveStaleContent()
+        if (log.infoEnabled && n) {
+            log.info "Auto-archived $n content nodes"
+        }
     }
 }

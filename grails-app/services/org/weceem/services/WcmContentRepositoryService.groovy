@@ -4,9 +4,12 @@ import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 import org.springframework.beans.factory.InitializingBean
 import grails.util.Environment
+
 // This is for a hack, remove later
 import org.codehaus.groovy.grails.web.metaclass.BindDynamicMethod
 import org.hibernate.exception.ConstraintViolationException
+
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 import org.weceem.content.*
 
@@ -46,18 +49,27 @@ class WcmContentRepositoryService implements InitializingBean {
     def wcmSecurityService
     def wcmEventService
     
+    def archivedStatusCode
+    
+    static DEFAULT_ARCHIVED_STATUS_CODE = 500
+    
     static DEFAULT_STATUSES = [
         [code:100, description:'draft', publicContent:false],
         [code:200, description:'reviewed', publicContent:false],
         [code:300, description:'approved', publicContent:false],
-        [code:400, description:'published', publicContent:true]
+        [code:400, description:'published', publicContent:true],
+        [code:DEFAULT_ARCHIVED_STATUS_CODE, description:'archived', publicContent:false]
     ]
     
     void afterPropertiesSet() {
         uriToIdCache = wcmCacheService.getCache(CACHE_NAME_URI_TO_CONTENT_ID)
         assert uriToIdCache
+
         gspClassCache = wcmCacheService.getCache(CACHE_NAME_GSP_CACHE)
         assert gspClassCache
+
+        archivedStatusCode = ConfigurationHolder.config.weceem.archived.status instanceof Number ? 
+            ConfigurationHolder.config.weceem.archived.status : DEFAULT_ARCHIVED_STATUS_CODE
     }
     
     void createDefaultSpace() {
@@ -73,6 +85,13 @@ class WcmContentRepositoryService implements InitializingBean {
             DEFAULT_STATUSES.each {
                 assert new WcmStatus(it).save()
             }
+        }
+
+        // Make sure archived status exists
+        if (!WcmStatus.findByCode(archivedStatusCode)) {
+            def defArchStatus = [:] + DEFAULT_STATUSES.find { it.code == DEFAULT_ARCHIVED_STATUS_CODE } 
+            defArchStatus.code = archivedStatusCode // In case user has overriden it but deleted the row
+            assert new WcmStatus(defArchStatus).save()
         }
     }
     
@@ -1571,6 +1590,25 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
         pendingContent?.each { content ->
             // Find the next status (in code order) that is public content, after the content's current status
             content.status = WcmStatus.findByPublicContentAndCodeGreaterThan(true, content.status.code)
+            count++
+        }
+        return count
+    }
+    
+    /**
+     * Look for any content that has gone past its publishUntil date, and move status to archived
+     */
+    def archiveStaleContent() {
+        def now = new Date()
+        // Find all content with publication date less than now
+        def staleContent = WcmContent.withCriteria {
+            isNotNull('publishUntil')
+            le('publishUntil', now)
+        }
+        def count = 0
+        staleContent?.each { content ->
+            // Find the next status (in code order) that is public content, after the content's current status
+            content.status = WcmStatus.findByCode(archivedStatusCode, [cache: true])
             count++
         }
         return count
