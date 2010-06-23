@@ -54,12 +54,12 @@ class WcmContentRepositoryService implements InitializingBean {
     static DEFAULT_ARCHIVED_STATUS_CODE = 500
     
     static DEFAULT_STATUSES = [
-        [code:100, description:'draft', publicContent:false],
-        [code:200, description:'reviewed', publicContent:false],
-        [code:300, description:'approved', publicContent:false],
-        [code:400, description:'published', publicContent:true],
-        [code:DEFAULT_ARCHIVED_STATUS_CODE, description:'archived', publicContent:false]
-    ]
+        [code:100, description:'draft', publicContent:false].asImmutable(),
+        [code:200, description:'reviewed', publicContent:false].asImmutable(),
+        [code:300, description:'approved', publicContent:false].asImmutable(),
+        [code:400, description:'published', publicContent:true].asImmutable(),
+        [code:DEFAULT_ARCHIVED_STATUS_CODE, description:'archived', publicContent:false].asImmutable()
+    ].asImmutable()
     
     void afterPropertiesSet() {
         uriToIdCache = wcmCacheService.getCache(CACHE_NAME_URI_TO_CONTENT_ID)
