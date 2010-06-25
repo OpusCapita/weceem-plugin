@@ -105,7 +105,7 @@ class WcmContentController {
 
                     // Set mime type if there is one
                     if (content.mimeType) {
-                        response.setContentType(content.mimeType)
+                        response.contentType = content.mimeType
                     }
 
                     // See if the content will handle rendering itself
@@ -117,9 +117,16 @@ class WcmContentController {
                         }
                         
                         def handler = contentClass.handleRequest.clone()
-                        handler.delegate = this
+                        handler.delegate = this // The controller
                         handler.resolveStrategy = Closure.DELEGATE_FIRST
-                        return handler.call(content)
+                        log.debug "Calling handler with delegate: ${handler.delegate}"
+                        try {
+                            return handler.call(content)
+                        } catch (Throwable t) {
+                            // Make sure error page is served as HTML 
+                            response.contentType = "text/html"
+                            throw t
+                        }
                     } else {
 
                         // Fall back to standard rendering
@@ -212,8 +219,8 @@ class WcmContentController {
     /** 
      * Get a new instance of a script content's Groovy code
      */
-    def getScriptInstance(WcmScript s) {
-        wcmContentRepositoryService.getScriptInstance(s)
+    def getWcmScriptInstance(WcmScript s) {
+        wcmContentRepositoryService.getWcmScriptInstance(s)
     }
 
     /** 

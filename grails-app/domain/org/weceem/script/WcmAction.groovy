@@ -27,19 +27,14 @@ class WcmAction extends WcmContent {
     static handleRequest = { content ->
         // @todo enforceAllowedMethods here
         
-        // Now call the codo
-        def code = getScriptInstance(content.script)
-        def controller = delegate
-        code.metaClass.methodMissing = { String name, Object args ->
-            // Have to call invoke method here as we have a single args object
-            controller.invokeMethod("$name", args)   
-        }
-
-        code.metaClass.getProperty = { String name ->
-            controller[name]
-        }
-
-        def r = code.run()
-        return r
+        // Now call the code
+        println "In handleRequest, delegate is: ${delegate}"
+        
+        Closure code = getWcmScriptInstance(content.script)
+        code.delegate = delegate
+        code.resolveStrategy = Closure.DELEGATE_FIRST
+        return code()
+        
+        
     }
 }

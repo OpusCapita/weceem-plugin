@@ -1552,10 +1552,10 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
     }
     
     /**
-     * Get an instace of the Groovy Script object defined by the WcmScript content node.
+     * Get a new instance of the Groovy Closure object defined by the WcmScript content node.
      * Uses caching of compiled classes to prevent permgen explosion, and unique classloaders
      */ 
-    Script getScriptInstance(WcmScript s) {
+    Closure getWcmScriptInstance(WcmScript s) {
         def absURI = s.absoluteURI
         if (log.debugEnabled) {
             log.debug "Getting Groovy script class for $absURI"
@@ -1566,11 +1566,12 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
                 log.debug "Compiling Groovy script class for $absURI"
             }
             def code = s.content
-            def cls = new GroovyClassLoader().parseClass(code)
-            assert Script.isAssignableFrom(cls)
-            return cls
+            def cls = new GroovyClassLoader().parseClass("""codeClosure = { $code }""")
+            def script = cls.newInstance()
+            script.run()
+            return script.binding.codeClosure
         }
-        cls.newInstance()
+        cls.clone()
     }
     
     /**

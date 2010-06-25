@@ -18,7 +18,7 @@ class WcmScript extends WcmContent {
      * Must be overriden by content types that can represent their content as text.
      * Used for search results and versioning
      */
-    public String getContentAsText() { content }
+    public String getContentAsText() { '' /* don't return script contents for search */ }
 
     static mapping = {
         cache usage: 'nonstrict-read-write' 

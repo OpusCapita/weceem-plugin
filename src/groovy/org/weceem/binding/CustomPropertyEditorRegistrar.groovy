@@ -5,8 +5,6 @@ import java.text.SimpleDateFormat
 import org.springframework.beans.PropertyEditorRegistrar 
 import org.springframework.beans.PropertyEditorRegistry
 
-import org.weceem.content.*
-
 class CustomPropertyEditorRegistrar implements PropertyEditorRegistrar {
 
     public void registerCustomEditors(PropertyEditorRegistry registry) { 

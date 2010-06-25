@@ -1,3 +1,4 @@
+<%@ page contentType="text/html" %>
 <html>
   <head>
 	  <title>Grails Runtime Exception</title>
