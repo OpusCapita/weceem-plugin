@@ -28,13 +28,9 @@ class WcmAction extends WcmContent {
         // @todo enforceAllowedMethods here
         
         // Now call the code
-        println "In handleRequest, delegate is: ${delegate}"
-        
         Closure code = getWcmScriptInstance(content.script)
         code.delegate = delegate
         code.resolveStrategy = Closure.DELEGATE_FIRST
         return code()
-        
-        
     }
 }
