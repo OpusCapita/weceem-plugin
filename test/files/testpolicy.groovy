@@ -22,6 +22,13 @@ policy = {
     }
 
 
+    "ROLE_TEST_GUEST" {
+        space '', 'test'
+        
+        view true
+        create types:[org.weceem.content.WcmComment]
+    }
+
     "ROLE_GUEST" {
         space ''
         

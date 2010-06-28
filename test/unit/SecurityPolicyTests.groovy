@@ -200,34 +200,46 @@ class SecurityPolicyTests extends grails.test.GrailsUnitTestCase {
     void testLoadPolicyScript() {
         policy.load('test/files/testpolicy.groovy')
         /*
-        "ROLE_ADMIN" {
-            space '', 'test'
+        // This is a test security policy
+        policy = {
+            "ROLE_ADMIN" {
+                space '', 'test'
 
-            admin true
-            view true
-            edit true
-            delete true
-            create true
-        }
-
-        "ROLE_USER" {
-            space '', 'test'
-
-            view true
-
-            "/blog" {
+                admin true
+                view true
                 edit true
+                delete true
                 create true
             }
-        }
+
+            "ROLE_USER" {
+                space '', 'test'
+
+                view true
+
+                "/blog" {
+                    edit true
+                    create true
+                }
+            }
 
 
-        "ROLE_GUEST" {
-            space ''
+            "ROLE_TEST_GUEST" {
+                space '', 'test'
 
-            view true
+                view true
+                create types:[org.weceem.content.WcmComment]
+            }
+
+            "ROLE_GUEST" {
+                space ''
+
+                view true
+            }
         }
         */
+
+        policy.dumpPermissions()
 
         ['', 'test'].each { spc ->
             assertTrue policy.hasPermission(spc, '/anything', ['ROLE_ADMIN'], 
@@ -244,6 +256,11 @@ class SecurityPolicyTests extends grails.test.GrailsUnitTestCase {
             assertTrue policy.hasPermission(spc, '/blog/anything', ['ROLE_USER'], [WeceemSecurityPolicy.PERMISSION_EDIT])
             assertTrue policy.hasPermission(spc, '/blog/anything', ['ROLE_USER'], [WeceemSecurityPolicy.PERMISSION_CREATE])
             assertFalse policy.hasPermission(spc, '/blog/anything', ['ROLE_USER'], [WeceemSecurityPolicy.PERMISSION_DELETE])
+
+            assertFalse policy.hasPermission(spc, '/blog/anything', ['ROLE_TEST_GUEST'], [WeceemSecurityPolicy.PERMISSION_CREATE], [type:WcmBlogEntry])
+            assertFalse policy.hasPermission(spc, '/blog/anything', ['ROLE_TEST_GUEST'], [WeceemSecurityPolicy.PERMISSION_EDIT], [type:WcmBlogEntry])
+            assertTrue policy.hasPermission(spc, '/blog/anything', ['ROLE_TEST_GUEST'], [WeceemSecurityPolicy.PERMISSION_CREATE], [type:WcmComment])
+            assertTrue policy.hasPermission(spc, '/blog', ['ROLE_TEST_GUEST'], [WeceemSecurityPolicy.PERMISSION_CREATE], [type:WcmComment])
         }
 
         def spc = ''
@@ -252,6 +269,7 @@ class SecurityPolicyTests extends grails.test.GrailsUnitTestCase {
         assertFalse policy.hasPermission(spc, '/anything', ['ROLE_GUEST'], [WeceemSecurityPolicy.PERMISSION_CREATE])
         assertFalse policy.hasPermission(spc, '/anything', ['ROLE_GUEST'], [WeceemSecurityPolicy.PERMISSION_EDIT])
         assertFalse policy.hasPermission(spc, '/anything', ['ROLE_GUEST'], [WeceemSecurityPolicy.PERMISSION_DELETE])
+
         spc = 'test'
         assertFalse policy.hasPermission(spc, '/anything', ['ROLE_GUEST'], [WeceemSecurityPolicy.PERMISSION_VIEW])
         assertFalse policy.hasPermission(spc, '/anything', ['ROLE_GUEST'], [WeceemSecurityPolicy.PERMISSION_ADMIN])

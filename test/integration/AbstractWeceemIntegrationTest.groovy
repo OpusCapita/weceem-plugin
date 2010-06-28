@@ -2,7 +2,7 @@ import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 import org.weceem.services.*
 
-class AbstractWeceemIntegrationTest extends GroovyTestCase {
+abstract class AbstractWeceemIntegrationTest extends GroovyTestCase {
     def wcmContentRepositoryService
     def application
     
