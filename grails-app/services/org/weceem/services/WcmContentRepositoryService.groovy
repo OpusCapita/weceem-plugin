@@ -671,6 +671,10 @@ class WcmContentRepositoryService implements InitializingBean {
         return results as ContentReference[]
     }
     
+    void removeAllTagsFrom(WcmContent content) {
+        content.tags.collect({it}).each { t -> content.removeTag(t) }
+    }
+    
     /**
      * Deletes content node and all it's references.
      * All children of sourceContent will be assigned to all its parents.
@@ -707,6 +711,7 @@ class WcmContentRepositoryService implements InitializingBean {
                parent = WcmContent.get(it.parent.id)
                parent.children.remove(it)
            }
+           removeAllTagsFrom(it)
            it.delete()
         }
 
@@ -720,6 +725,7 @@ class WcmContentRepositoryService implements InitializingBean {
             sourceContent.target = null
         }
 
+        removeAllTagsFrom(sourceContent)
         sourceContent.delete(flush: true)
 
         wcmEventService.afterContentRemoved(sourceContent)
