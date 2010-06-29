@@ -63,6 +63,8 @@ class SimpleSpaceExporter implements SpaceExporter {
                             }
                         }
                     }
+                    // Write out the tags
+                    tags(cnt.tags.join(','))
                 }
             }
         }
@@ -94,7 +96,7 @@ class SimpleSpaceExporter implements SpaceExporter {
         def grailsApp = ApplicationHolder.application
         def props = grailsApp.getDomainClass(obj.class.name).
             getPersistentProperties().findAll{prop -> 
-                !(prop.name in ["language", "space"])}
+                !(prop.name in ["space"])}
         return props
     }
     

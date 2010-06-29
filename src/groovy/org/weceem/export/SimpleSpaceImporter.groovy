@@ -56,17 +56,22 @@ class SimpleSpaceImporter implements SpaceImporter {
         // if orderIndexes are duplicated than fix it
         fixBrokenIndexes()
         //Recursively save each element
-        for (cnt in backrefMap.values()){
-            saveContent(cnt)
+        for (cntInfo in backrefMap.values()){
+            def savedContent = saveContent(cntInfo.content)
+            
+            // Reinstate tags
+            if (cntInfo.tags) {
+                savedContent.parseTags(cntInfo.tags)
+            }
         }
         //Update element's children
         for (entry in backrefMap.entrySet()){
-            def cnt = entry.value
+            def cnt = entry.value.content
             if (cnt){
                 def sid = entry.key
                 def childrenList = childrenMap[(sid)]
                 for (chid in childrenList){
-                    cnt.addToChildren(backrefMap[(chid)])
+                    cnt.addToChildren(backrefMap[(chid)].content)
                 }
                 if (!cnt.save()){
                     log.error("Can't save content: ${cnt.aliasURI}, error: ${cnt.errors}")
@@ -92,7 +97,7 @@ class SimpleSpaceImporter implements SpaceImporter {
                 }
             }
             return true
-        }.collect{it -> it.value}
+        }.collect{it -> it.value.content }
         // update orderIndex for root nodes 
         def prevIndex = 0
         if (rootNodes*.orderIndex.unique().size() != rootNodes.size()){
@@ -108,8 +113,8 @@ class SimpleSpaceImporter implements SpaceImporter {
         // update orderIndex for all children
         childrenMap.each{parent, children->
             prevIndex = 0
-            def chdr = children.collect{it -> 
-                backrefMap[it]
+            def chdr = children.collect{ it -> 
+                backrefMap[it]?.content
             }.findAll{it-> it != null}
             if (chdr*.orderIndex.unique().size() != chdr.size()){
                 chdr.sort().eachWithIndex(){it, i->
@@ -135,10 +140,11 @@ class SimpleSpaceImporter implements SpaceImporter {
             return backrefMap[id]
         }
         def params = [:]
-
+        def tags
+                
         //Getting element's properties
         element.children().each{child->
-            if (child.name() != "id"){
+            if (!["id", 'tags'].contains(child.name()) ){
                 def currProp = props.find{prop -> prop.name == child.name()}
                 //Check element's type: association or not
                 if (currProp?.isAssociation() && (currProp.name != "status")){
@@ -153,11 +159,11 @@ class SimpleSpaceImporter implements SpaceImporter {
                         def association
                         //If element was proccessed before, retrieve it from backrefMap
                         if (backrefMap[chldid] != null){
-                            association = backrefMap[chldid]
+                            association = backrefMap[chldid].content
                         }else{
                             def newElement = findByID(document, chldid)
-                            association = parse(newElement, document, space)
-                            backrefMap += [(chldid) : (association)]
+                            association = parse(newElement, document, space).content
+                            //backrefMap += [(chldid) : [content:association]
                         }
                         params += [(child.name()) : association]
                     }    
@@ -166,6 +172,8 @@ class SimpleSpaceImporter implements SpaceImporter {
                         k.isAssignableFrom(getClass(child.@class.text()))}.value
                     params += [(child.name()) : conv(child.text())]
                 }
+            } else if ('tags' == child.name()) {
+                tags = child.text()
             }
         }
         def content = WcmContent.findWhere(aliasURI: params.aliasURI, space: space)
@@ -183,7 +191,7 @@ class SimpleSpaceImporter implements SpaceImporter {
         content.space = space
         
         if (content.orderIndex == null) content.orderIndex = 0
-        backrefMap += [(id): content]
+        backrefMap += [(id): [content:content, tags:tags] ]
         return content
     }
     
@@ -212,10 +220,12 @@ class SimpleSpaceImporter implements SpaceImporter {
                 }
             }
             
-            if (!content.save()){
+            def result = content.save()
+            if (!result){
                 log.error("Can't save content: ${content.aliasURI}, error: ${content.errors}")
             }
-        }
+            return result
+        } else return content
     }
     
     def findByID(def document, Long id){
