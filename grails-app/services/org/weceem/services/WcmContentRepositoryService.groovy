@@ -1624,6 +1624,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
                 baseURI = contentOrPath.toString()
             }
         }
+
         WcmContent.search([reload:true, offset:args?.offset ?:0, max:args?.max ?: 25]){
             queryString(query)
 
@@ -1646,9 +1647,47 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
         }
     }
 
+    def searchForPublicContentByTag(String tag, WcmSpace space, contentOrPath = null, args = null) {
+        if (log.debugEnabled) {
+            log.debug "Searching for content by tag $tag"
+        }
+        def baseURI
+        if (contentOrPath) {
+            if (contentOrPath instanceof WcmContent) {
+                baseURI = contentOrPath.absoluteURI
+            } else {
+                baseURI = contentOrPath.toString()
+            }
+        }
+
+        def hits = WcmContent.findAllByTag(tag)
+        /*WithCriteria(tag) {
+            eq('space', space)
+
+            // @todo apply baseURI
+            
+            firstResult(args?.offset ?:0)
+            maxResults(args?.max ?: 25) 
+            // Default to newest content first
+            order(args.sort ?: 'createdOn', args.order ?: 'desc')
+        }*/
+        [results:hits, total:hits.size()]
+    }
+
     def searchForPublicContent(String query, WcmSpace space, contentOrPath = null, args = null) {
+        def baseURI
+        if (contentOrPath) {
+            if (contentOrPath instanceof WcmContent) {
+                baseURI = contentOrPath.absoluteURI
+            } else {
+                baseURI = contentOrPath.toString()
+            }
+        }
+        
         WcmContent.search([reload:true, offset:args?.offset ?:0, max:args?.max ?: 25]){
             must(queryString(query))
+
+            // @todo apply baseURI
 
             // Restrict to public
             must(term('status_publicContent', true))

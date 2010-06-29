@@ -30,7 +30,7 @@ grails.project.dependency.resolution = {
 		runtime ':jquery-ui:1.8.2.1'
 		runtime ':quartz:0.4.2'
 		runtime ':feeds:1.5'
-		runtime ':taggable:0.6.1'
+		runtime ':taggable:0.6.2'
 		runtime ':fckeditor:0.9.5'
 	}
 }

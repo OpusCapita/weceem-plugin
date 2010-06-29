@@ -709,6 +709,16 @@ class WeceemTagLib {
             action:attrs[ATTR_TYPE], 
             params:[uri:WeceemTagLib.makeFullContentURI(path)] )
     }
+
+    def join = { attrs, body ->
+        def items = attrs.in?.collect { item ->
+            def vars = attrs.var ? [(attrs.var):item] : item
+            return body(vars).trim()
+        } 
+        if (items) {
+            out << g.join(in:items, delimiter:attrs.delimiter)
+        }
+    }
     
     def search = { attrs ->
         def spaceAlias = request[WcmContentController.REQUEST_ATTRIBUTE_SPACE].aliasURI

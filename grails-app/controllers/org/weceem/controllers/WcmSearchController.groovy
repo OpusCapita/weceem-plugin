@@ -19,16 +19,31 @@ class WcmSearchController {
             log.debug "Searching in space [$space] under URI [$uri]"
         }
         if (space) {
+            def searchHits
+            def searchType = params.mode ?: 'text'
+            switch (searchType) {
+                case 'tag':
+                    searchHits = wcmContentRepositoryService.searchForPublicContentByTag(params.query, space, uri, 
+                        [offset:params.int('offset'), max: Math.min(100, params.int('max') ?: DEFAULT_RESULTS_PER_PAGE)])
+                    if (log.debugEnabled) {
+                        log.debug "Seach by tag ${params.query} results: ${searchHits}"
+                    }
+                    break
+                case 'text':
+                default:
+                    searchHits = wcmContentRepositoryService.searchForPublicContent(params.query, space, uri, 
+                        [offset:params.int('offset'), max: Math.min(100, params.int('max') ?: DEFAULT_RESULTS_PER_PAGE)])
+                    break
+            }
             return [
                 space:space, 
-                results:wcmContentRepositoryService.searchForPublicContent(params.query, space, uri, 
-                    [offset:params.int('offset'), max: Math.min(100, params.int('max') ?: DEFAULT_RESULTS_PER_PAGE)])
+                results:searchHits
             ]
         }
     }
 
     def search = {
-        def data = searchData
+        def data = searchData // Get the search results
         if (!data) {
             log.warn "There were no search results for [${params.query}]"
             render(status:404, text:"No search results available - no content at ${params.uri}")
