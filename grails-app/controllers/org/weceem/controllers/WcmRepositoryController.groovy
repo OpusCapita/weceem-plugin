@@ -31,26 +31,6 @@ import org.weceem.files.*
 import org.weceem.html.*
 
 /**
- * The ContentRepositoryController class works with UI representation, checks
- * parameters and call necessary service functions, show pages and prepare result
- * information for representation on GSP page.
- *
- * After each repository tree manupulation (except open(expand/collapse) and select) whole
- * tree has been reloaded (it means that tree send requests again for each node and its
- * children to the server), so in this case we always see updated information in the tree.
- *
- * State of the tree for collapsed/expanded nodes saves automatically by Dojo in browser
- * Cookie object. If we expand or collapse some node, then Cookies will be updated
- * automatically and when tree has been reloaded, it's nodes will be expanded to the state
- * which existed in browser cookies.
- *
- * In the repository tree each content node has unique path, it has the following structure:
- * SpaceId/contentType/rootContentId1/contentId2/.../contentIdn
- *
- * WcmContent types are the names of all WcmContent subclasses.
- *
- * Root contents are all content nodes that are not used as a childs in the content
- * hierarchy.
  */
 class WcmRepositoryController {
     
