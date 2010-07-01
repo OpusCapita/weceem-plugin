@@ -541,7 +541,7 @@ class WcmContentRepositoryService implements InitializingBean {
                                           space: sourceContent.space)
         WcmContent inPoint = WcmContent.findByOrderIndexAndParent(orderIndex, targetContent)
         if (inPoint != null){
-            shiftNodeChildrenOrderIndex(targetContent, orderIndex)
+            shiftNodeChildrenOrderIndex(targetContent.space ?: sourceContent.space, targetContent, orderIndex)
         }
         vcont.orderIndex = orderIndex
         if (targetContent) {
@@ -570,6 +570,9 @@ class WcmContentRepositoryService implements InitializingBean {
      * @param targetContent
      */
     Boolean moveNode(WcmContent sourceContent, WcmContent targetContent, orderIndex) {
+        if (log.debugEnabled) {
+            log.debug "Moving content ${sourceContent} to ${targetContent} at order index $orderIndex"
+        }
         if (targetContent) {
             requirePermissions(targetContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
         }
@@ -605,7 +608,7 @@ class WcmContentRepositoryService implements InitializingBean {
         }
         WcmContent inPoint = WcmContent.findByOrderIndexAndParent(orderIndex, targetContent)
         if (inPoint != null){
-            shiftNodeChildrenOrderIndex(targetContent, orderIndex)
+            shiftNodeChildrenOrderIndex(sourceContent.space, targetContent, orderIndex)
         }
         sourceContent.orderIndex = orderIndex
         if (targetContent) {
@@ -616,12 +619,16 @@ class WcmContentRepositoryService implements InitializingBean {
         return sourceContent.save(flush: true)
      }
      
-    def shiftNodeChildrenOrderIndex(parent = null, shiftedOrderIndex){
+    def shiftNodeChildrenOrderIndex(WcmSpace space, parent, shiftedOrderIndex){
+        if (log.debugEnabled) {
+            log.debug "Updating node order indexes in space ${space} for parent ${parent}"
+        }
         // Can't do this until space is supplied
         //requirePermissions(parent, [WeceemSecurityPolicy.PERMISSION_EDIT])        
         // @todo this is probably flushing the session with incomplete changes - use withNewSession?
         def criteria = WcmContent.createCriteria()
         def nodes = criteria {
+            eq('space', space)
             if (parent){
                 eq("parent.id", parent.id)
             }else{

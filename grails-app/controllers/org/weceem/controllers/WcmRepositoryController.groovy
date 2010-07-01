@@ -478,6 +478,7 @@ class WcmRepositoryController {
      * params.targetPath
      */
     def moveNode = {
+        log.debug "Move node action: ${params}"
         def sourceContent = WcmContent.get(params.sourceId)
         def targetContent = WcmContent.get(params.targetId)
         if (wcmContentRepositoryService.moveNode(sourceContent, targetContent, params.index.toInteger())) {

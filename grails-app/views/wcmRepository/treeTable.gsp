@@ -130,7 +130,7 @@ $(function(){
 
 <div id="createNewDialog" class="ui-helper-hidden" title="${message(code:'content.title.create')}">
     <g:form controller="wcmEditor" action="create" method="GET">
-        <input id="parentid" name="parent.id" type="hidden"></input>
+        <input id="parentid" name="parent.id" type="hidden"/>
         <label for="createNewType"><g:message code="content.label.type" encodeAs="HTML"/></label><br/>
         <g:select id="createNewType" name="type" from="${contentTypes.sort { message(code:'content.type.name.'+it) } }" optionValue="${ { message(code:'content.type.name.'+it) } }"/>
         <input id="spaceField" type="hidden" name="space.id" value="${params.space.id}">

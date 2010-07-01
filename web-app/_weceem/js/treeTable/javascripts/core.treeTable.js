@@ -46,7 +46,7 @@ function sendSearchRequest(searchParams){
     $.post(resources["search.request"],
         searchParams,
         function(data){
-            var response = eval('(' + data + ')');
+            var response = data;
             var tr = $("<tr>");
             var td = $("<td>");
             for (i in response.result){
@@ -188,8 +188,10 @@ function toggleStyle(element, neighbour){
 
 function getParentId(element){
     var reg = new RegExp("child-of-content-node-\\d+");
-    if ($(element).attr('class').match(reg) != null){
-        return /\d+/.exec($(element).attr('class').match(reg)[0]);
+    var elem = $(element).first();
+    var matcher = $(elem).attr('class').match(reg)
+    if (matcher != null){
+        return /\d+/.exec(matcher[0])[0];
     }else{
         return null;
     }
@@ -267,7 +269,7 @@ var droppableConf = {
                     // @todo clean this up - slow to keep getting the node!
                     $('#confirmDialog').dialog('option', 'switch', pos);
                     $('#confirmDialog').dialog('option', 'source', movable);
-                    $('#confirmDialog').dialog('option', 'target', el);
+                    $('#confirmDialog').dialog('option', 'target', el.first());
                     $('#confirmDialog').dialog('open');
                 }else{
                     var type = $("#" + this.id + ">td:first>div>h2.title").attr("type");
@@ -503,7 +505,7 @@ function initTreeTable() {
                 $.post(resources["link.movenode"],
                     {sourceId: getDecId($(src).attr('id')), targetId: tid, index: index},
                     function (data){
-                        var response = eval('(' + data + ')');
+                        var response = data;
                         if (response['status'] == 403){
     	                    $('#expiredDialog').dialog('open');
     	                    return ;
@@ -539,7 +541,7 @@ function initTreeTable() {
                 $.post(resources["link.copynode"],
         	            {sourceId: getDecId($(src).attr('id')), targetId: tid, index: index},
         	            function (data){
-        	                var response = eval('(' + data + ')');
+        	                var response = data;
         	                if (response['status'] == 403){
         	                    $('#expiredDialog').dialog('open');
         	                    return ;
