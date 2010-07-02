@@ -1591,6 +1591,9 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
      * Look for any content pending publication, and move statys to published
      */
     def publishPendingContent() {
+        if (log.debugEnabled) {
+            log.debug "Looking for content that needs to become published now"
+        }
         def now = new Date()
         // Find all content with publication date less than now
         def pendingContent = WcmContent.withCriteria {
@@ -1603,7 +1606,13 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
         def count = 0
         pendingContent?.each { content ->
             // Find the next status (in code order) that is public content, after the content's current status
-            content.status = WcmStatus.findByPublicContentAndCodeGreaterThan(true, content.status.code)
+            def status = WcmStatus.findByPublicContentAndCodeGreaterThan(true, content.status.code)
+            if (!status) {
+                log.error "Tried to publish content ${content} with status [${content.status.dump()}] but found no public status with a code higher than it"
+            } else if (log.debugEnabled) {
+                log.debug "Transitioning content ${content} from status [${content.status.code}] to [${status.code}]"
+            }
+            content.status = status
             count++
         }
         return count
