@@ -15,12 +15,13 @@ package org.weceem.tags
 
 import java.text.DateFormatSymbols
 
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
+
 import org.weceem.controllers.WcmContentController
 import org.weceem.content.WcmContent
 import org.weceem.files.WcmContentFile
 import org.weceem.services.WcmContentRepositoryService
 import org.weceem.util.ContentUtils
-
 import org.weceem.content.WcmSpace
 
 class WeceemTagLib {
@@ -755,7 +756,7 @@ class WeceemTagLib {
         def codec = attrs.encodeAs
         def ellipsis = attrs.ellipsis ?: '...'
         def s = ContentUtils.summarize(body().toString(), maxLen, ellipsis)
-        out << (codec ? s : s."encodeAs$codec"())
+        out << (codec ? s."encodeAs$codec"() : s    )
     }
     
     /**
@@ -764,5 +765,14 @@ class WeceemTagLib {
      */
     def htmlToText = { attrs, body ->
         out << ContentUtils.htmlToText(body())
+    }
+    
+    /**
+     * Return configuration values (from Config.groovy / external properties file)
+     */
+    def config = { attrs ->
+        def codec = attrs.encodeAs
+        def s = ConfigurationHolder.config.flatten()[attrs.property]
+        out << (codec ? s."encodeAs$codec"() : s)
     }
 }
