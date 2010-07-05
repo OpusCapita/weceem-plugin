@@ -20,7 +20,7 @@ function sortByField(fieldname){
 
 function performSearch(){
     cacheParams["data"] = $("#data")[0].value;
-    cacheParams["space"] = $('#spaceSelector')[0].options[$('#spaceSelector')[0].selectedIndex].text;
+    cacheParams["space"] = $('#spaceSelector').val();
     cacheParams["classFilter"] = ($("#advSearch").css("display") == "none" ? "none" : $("#classFilter")[0].value);
     cacheParams["fieldFilter"] = $("#fieldFilter")[0].value;
     cacheParams["fromDateFilter"] = $("#fromDate")[0].value;

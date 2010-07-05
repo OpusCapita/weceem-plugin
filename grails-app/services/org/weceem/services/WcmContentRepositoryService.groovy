@@ -1637,7 +1637,10 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
         return count
     }
     
-    def searchForContent(String query, WcmSpace space,  contentOrPath = null, args = null) {
+    def searchForContent(String query, WcmSpace space,contentOrPath = null, args = null) {
+        if (log.debugEnabled) {
+            log.debug "Searching for content with query [$query] in space [$space] under path [$contentOrPath] with args [$args]"
+        }
         def baseURI
         if (contentOrPath) {
             if (contentOrPath instanceof WcmContent) {
@@ -1647,8 +1650,10 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
             }
         }
 
-        WcmContent.search([reload:true, offset:args?.offset ?:0, max:args?.max ?: 25]){
-            queryString(query)
+        def domCls = args.type ?: WcmContent
+        
+        domCls.search([reload:true, offset:args?.offset ?:0, max:args?.max ?: 25]){
+            must(queryString(query))
 
 /* This doesn't work yet
             // Restrict to base URI
@@ -1658,8 +1663,8 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
                 }
             }
 */
-            
-            // Restrict to space
+         
+                // Restrict to space
             must {
                 listContentClassNames().each { n ->
                     def t = '$/'+n.replaceAll('\\.', '_')+'/space/id'

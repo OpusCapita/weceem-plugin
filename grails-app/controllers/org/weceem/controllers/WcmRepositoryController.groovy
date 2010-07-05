@@ -758,14 +758,26 @@ class WcmRepositoryController {
     }
     
     def searchRequest = {
+        if (log.debugEnabled) {
+            log.debug "Searching repository: ${params}"
+        }
         // define search parameters
         def searchStr = params.data
         def space = null
-        if (params.space) space = params.space
+        if (params.space) space = WcmSpace.get(params.long('space'))
+        
         def filterClass = WcmContent
         if (params.classFilter != "none") 
             filterClass = Class.forName("${params.classFilter}", true, this.class.classLoader)
-        def searchResult = filterClass.searchEvery("*$searchStr* +name:$space".toString(), [reload: true])
+//        def searchResults = filterClass.search("*$searchStr* +name:$space".toString(), [reload: true])
+        def searchResults = wcmContentRepositoryService.searchForContent("*$searchStr*", space, null, [type:filterClass])
+        def searchResult = []
+        searchResult.addAll(searchResults.results)
+        
+        if (log.debugEnabled) {
+            log.debug "Searching repository resulted in: ${searchResults}"
+        }
+
         def fromDateFilter = null
         def toDateFilter = null
         if (params.fromDateFilter != "") fromDateFilter = new Date(params.fromDateFilter)
@@ -774,7 +786,7 @@ class WcmRepositoryController {
         def ascOrder = Boolean.valueOf(params.isAsc)
         def statusFilter = Integer.valueOf(params.statusFilter)
         //performing search
-        searchResult.sort({a,b ->
+        searchResult = searchResult.sort({a,b ->
             def fieldPath = sortField.tokenize('.')
             def valA = a
             for (field in fieldPath){
@@ -795,7 +807,7 @@ class WcmRepositoryController {
                 return valB.compareTo(valA)
             }
         })
-        searchResult = searchResult.findAll{
+        searchResult = searchResult.findAll {
             def flag = true
             if (fromDateFilter){
                 flag = flag && (it."${params.fieldFilter}" > fromDateFilter)
