@@ -822,6 +822,7 @@ class WcmRepositoryController {
             "aliasURI": it.aliasURI, "status": it.status?.description, 
             "createdBy": it.createdBy.toString(), 
             "changedOn": wcm.humanDate(date: it.changedOn).toString(), 
+            "iconHref": wcm.contentIconURL(type:it.class),
             "href": createLink(controller: "wcmEditor", action: "edit", id: it.id),
             "parentURI": (it.parent == null ? "": "/${it.parent.absoluteURI}"), 
             "type": message(code: "content.item.name.${it.class.name}")]

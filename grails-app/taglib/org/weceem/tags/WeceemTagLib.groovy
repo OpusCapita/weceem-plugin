@@ -606,6 +606,13 @@ class WeceemTagLib {
         out << "<div id='${id}' class='ui-content-icon'><img src='${g.resource(plugin:plugin, dir: iconconf.dir, file: iconconf.file)}'/></div>"
     }    
 
+    def contentIconURL = { attrs ->
+        def type = attrs[ATTR_TYPE]
+        def iconconf = type.icon
+        def plugin = iconconf.plugin
+        out << g.resource(plugin:plugin, dir: iconconf.dir, file: iconconf.file)
+    }    
+
     /**
      * Utility function to get a content node from an attribute value that can be any of:
      * 
