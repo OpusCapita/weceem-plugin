@@ -731,6 +731,9 @@ class WeceemTagLib {
     def search = { attrs ->
         def spaceAlias = request[WcmContentController.REQUEST_ATTRIBUTE_SPACE].aliasURI
         def p = attrs.resultsPath ? [resultsPath:spaceAlias+'/'+attrs.resultsPath] : [:]
+        if (attrs.types) {
+            p.types = attrs.types
+        }
         // Search the current space
         p.uri = spaceAlias+'/'
         def base = attrs.remove('baseURI')
@@ -746,6 +749,9 @@ class WeceemTagLib {
     
     def searchLink = { attrs ->
         def p = attrs.resultsPath ? [resultsPath:attrs.resultsPath] : null
+        if (attrs.types) {
+            p.types = attrs.types
+        }
         out << g.createLink(mapping:'search', params:p) 
     }
 

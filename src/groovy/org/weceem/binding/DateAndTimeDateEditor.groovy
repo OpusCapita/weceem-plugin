@@ -3,6 +3,7 @@ package org.weceem.binding
 import org.apache.commons.lang.StringUtils
 import org.springframework.beans.propertyeditors.CustomDateEditor
 import org.codehaus.groovy.grails.web.binding.StructuredPropertyEditor
+import org.springframework.beans.PropertyAccessException
 
 import java.text.DateFormat
 import java.util.*
@@ -31,7 +32,7 @@ public class DateAndTimeDateEditor extends CustomDateEditor implements Structure
         ['date', 'hour', 'minute']
     }
 
-    public Object assemble(Class type, Map fieldValues) throws IllegalArgumentException {
+    public Object assemble(Class type, Map fieldValues) {
         def d = fieldValues.date
 
         int hour = getIntegerValue(fieldValues, "hour", 0);
@@ -53,21 +54,28 @@ public class DateAndTimeDateEditor extends CustomDateEditor implements Structure
                 return new java.sql.Date(c.getTime().getTime());
             }
             return c;
-        } else {
-            throw new IllegalArgumentException("You must provide values for all parts of the date and time or none at all");
+        } else if (d?.trim()) {
+            throw new StructuredBindingException("You must provide values for all parts of the date and time or none at all")
         }
         
     }
 
-    private getIntegerValue(Map values, String name, int defaultValue) throws NumberFormatException {
+    private getIntegerValue(Map values, String name, int defaultValue) {
         def v = values.get(name)
         if (v != null) {
-            if (v.trim()) {
-                return Integer.parseInt((String) values.get(name));
+            v = v.toString().trim()
+            if (v.isInteger()) {
+                return Integer.parseInt(v);
             } else {
                 return null
             }
         }
         return defaultValue;
+    }
+}
+
+class StructuredBindingException extends RuntimeException {
+    StructuredBindingException(str) {
+        super(str)
     }
 }

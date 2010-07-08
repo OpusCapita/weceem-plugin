@@ -805,7 +805,7 @@ class WcmContentRepositoryService implements InitializingBean {
         requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_EDIT])        
 
         if (content) {
-            updateNode(content, params)
+            return updateNode(content, params)
         } else {
             return [notFound:true]
         }        
@@ -1674,6 +1674,12 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
         }
     }
 
+    def filterToTypes(listOfContent, String typeNames) {
+        def types = typeNames.tokenize(',').collect { n -> grailsApplication.getClassForName(n.trim()) }
+        println "Types are $types"
+        listOfContent.findAll { c -> types.any { t -> t.isAssignableFrom(c.class) } }
+    }
+
     def searchForPublicContentByTag(String tag, WcmSpace space, contentOrPath = null, args = null) {
         if (log.debugEnabled) {
             log.debug "Searching for content by tag $tag"
@@ -1688,6 +1694,11 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
         }
 
         def hits = WcmContent.findAllByTag(tag)
+        // Filter by type if required
+        if (args.types) {
+            hits = filterToTypes(hits, args.types)
+        }
+
         /*WithCriteria(tag) {
             eq('space', space)
 
@@ -1711,7 +1722,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
             }
         }
         
-        WcmContent.search([reload:true, offset:args?.offset ?:0, max:args?.max ?: 25]){
+        def results = WcmContent.search([reload:true, offset:args?.offset ?:0, max:args?.max ?: 25]){
             must(queryString(query))
 
             // @todo apply baseURI
@@ -1730,6 +1741,14 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
                 }
             }
         }
+
+        // Filter by type if required
+        if (args.types) {
+            println "Result types are: ${results.results*.class}"
+            results.results = filterToTypes(results.results, args.types)
+        }
+        
+        return results
     }
 }
 

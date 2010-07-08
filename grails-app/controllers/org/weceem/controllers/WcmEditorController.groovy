@@ -93,6 +93,8 @@ class WcmEditorController {
         
         WcmContent.withTransaction { txn -> 
             def result = wcmContentRepositoryService.updateNode(params.id, params)
+            println "Update result was: ${result}"
+            println "Updated content errors: ${result.content.errors}"
             if (result?.errors) {
                 txn.setRollbackOnly()
                 flash.message =  message(code:'message.content.has.errors')
