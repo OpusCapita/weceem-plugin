@@ -52,7 +52,7 @@ class WcmComment extends WcmContent {
         email(email:true, maxSize:80, blank: false, nullable: false)
         content(maxSize:4000, blank: false, nullable: false)
         status(nullable: false)
-        websiteUrl(url:true, maxSize:100, nullable: true, blank: false)
+        websiteUrl(url:true, maxSize:100, nullable: true, blank: true)
         ipAddress(maxSize:50, nullable: false, blank: false)
     }
     
