@@ -73,10 +73,12 @@ class WcmComment extends WcmContent {
         WcmContent.withNewSession {
             def kidList = ApplicationHolder.application.mainContext.wcmContentRepositoryService.findChildren(parent, [
                  type:'org.weceem.content.WcmComment',
-                 params:[max:1, sort:'orderIndex', order:'desc']
+                 params:[sort:'aliasURI']
             ])
-            def lastIdx = kidList ? kidList[0].orderIndex : 0
-            aliasURI = "comment-"+(lastIdx+1)
+            def highestCommentNumber = kidList.inject(0) { number, comment -> 
+                Math.max(number, (comment.aliasURI - "comment-").toInteger())
+            }
+            aliasURI = "comment-"+(highestCommentNumber+1)
         }    
     }
     
