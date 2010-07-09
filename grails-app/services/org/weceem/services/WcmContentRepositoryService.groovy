@@ -50,11 +50,14 @@ class WcmContentRepositoryService implements InitializingBean {
     def wcmEventService
     
     def archivedStatusCode
+    def unmoderatedStatusCode
     
     static DEFAULT_ARCHIVED_STATUS_CODE = 500
+    static DEFAULT_UNMODERATED_STATUS_CODE = 150
     
     static DEFAULT_STATUSES = [
         [code:100, description:'draft', publicContent:false].asImmutable(),
+        [code:DEFAULT_UNMODERATED_STATUS_CODE, description:'unmoderated', publicContent:false].asImmutable(),
         [code:200, description:'reviewed', publicContent:false].asImmutable(),
         [code:300, description:'approved', publicContent:false].asImmutable(),
         [code:400, description:'published', publicContent:true].asImmutable(),
@@ -70,6 +73,8 @@ class WcmContentRepositoryService implements InitializingBean {
 
         archivedStatusCode = ConfigurationHolder.config.weceem.archived.status instanceof Number ? 
             ConfigurationHolder.config.weceem.archived.status : DEFAULT_ARCHIVED_STATUS_CODE
+        unmoderatedStatusCode = ConfigurationHolder.config.weceem.unmoderated.status instanceof Number ? 
+            ConfigurationHolder.config.weceem.unmoderated.status : DEFAULT_UNMODERATED_STATUS_CODE
     }
     
     void createDefaultSpace() {
@@ -87,11 +92,20 @@ class WcmContentRepositoryService implements InitializingBean {
             }
         }
 
-        // Make sure archived status exists
-        if (!WcmStatus.findByCode(archivedStatusCode)) {
-            def defArchStatus = [:] + DEFAULT_STATUSES.find { it.code == DEFAULT_ARCHIVED_STATUS_CODE } 
-            defArchStatus.code = archivedStatusCode // In case user has overriden it but deleted the row
-            assert new WcmStatus(defArchStatus).save()
+        // Make sure unmoderated and archived status codes, as defined by user config, exist
+        [ 
+            ['archivedStatusCode', DEFAULT_ARCHIVED_STATUS_CODE], 
+            ['unmoderatedStatusCode', DEFAULT_UNMODERATED_STATUS_CODE]
+        ].each { info -> 
+            def defaultStatusPropertyName = info[0]
+            if (!WcmStatus.findByCode(this[defaultStatusPropertyName])) {
+                // The default info for this status
+                def newStatus = [:] + DEFAULT_STATUSES.find { it.code == info[1] } 
+
+                // Write it out as user-supplied status code, or default...
+                newStatus.code = info[0] // In case user has overriden it but deleted the row
+                assert new WcmStatus(newStatus).save()
+            }
         }
     }
     
@@ -1392,6 +1406,9 @@ class WcmContentRepositoryService implements InitializingBean {
         return null
     }
     
+    /**
+     * Create new content supplied by site visitors
+     */
     WcmContent createUserSubmittedContent(space, parent, type, data, request) throws AccessDeniedException {
         if (!(space instanceof WcmSpace)) {
             space = WcmSpace.get(space.toLong())
@@ -1405,8 +1422,8 @@ class WcmContentRepositoryService implements InitializingBean {
             parent = null
         }
 
-        // Need to get the status before we query!
-        def stat = WcmStatus.listOrderByCode(max:1, order:'asc')[0]
+        // Need to get the status before we query, or we may force flush
+        def unmoderatedStat = getStatusByCode(unmoderatedStatusCode)
         
         Class contentClass = getContentClassForType(type)
         // check CREATE permission on the uri & user
@@ -1430,7 +1447,7 @@ class WcmContentRepositoryService implements InitializingBean {
         def newContent = createNode(type, data) { c ->
             c.space = space
             c.parent = parent
-            c.status = stat
+            c.status = unmoderatedStat
             // We should convention-ize this so they can have different fields
             c.ipAddress = request.remoteAddr
         }
@@ -1596,11 +1613,17 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
         }
         def now = new Date()
         // Find all content with publication date less than now
+        
+        // @todo this can be improved by flattening the query, using inList criteria to specify only the list
+        // of possible statuses we can process (i.e. all - unmoderated - archived)
         def pendingContent = WcmContent.withCriteria {
             isNotNull('publishFrom')
             lt('publishFrom', now)
             status {
-                eq('publicContent', false)
+                and {
+                    eq('publicContent', false)
+                    ne('code', unmoderatedStatusCode)
+                }
             }
         }
         def count = 0
@@ -1618,6 +1641,10 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
         return count
     }
     
+    WcmStatus getStatusByCode(code) {
+        WcmStatus.findByCode(code.toInteger(), [cache: true])
+    }
+    
     /**
      * Look for any content that has gone past its publishUntil date, and move status to archived
      */
@@ -1631,7 +1658,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
         def count = 0
         staleContent?.each { content ->
             // Find the next status (in code order) that is public content, after the content's current status
-            content.status = WcmStatus.findByCode(archivedStatusCode, [cache: true])
+            content.status = getStatusByCode(archivedStatusCode)
             count++
         }
         return count

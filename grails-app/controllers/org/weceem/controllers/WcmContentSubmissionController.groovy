@@ -26,13 +26,13 @@ class WcmContentSubmissionController {
             request[WcmContentController.REQUEST_ATTRIBUTE_PREPARED_MODEL] = [submittedContent:content]
             def newparams = [uri:formPath]
             content.discard()
-            flash[WcmContentController.FLASH_MESSAGE] = "contentSubmission.content.has.errors"
+            flash[WcmContentController.UI_MESSAGE] = "contentSubmission.content.has.errors"
             forward(controller:'wcmContent', action:'show', params:newparams)
         } else {
             if (log.debugEnabled) {
                 log.debug "Redirecting to [$successPath] after successful content submission"
             }
-            flash[WcmContentController.FLASH_MESSAGE] = content.status.publicContent ?
+            flash[WcmContentController.UI_MESSAGE] = content.status.publicContent ?
                 "contentSubmission.content.accepted.published" : 
                 "contentSubmission.content.accepted.not.published"
             redirect(controller:'wcmContent', action:'show', params:[uri:space.aliasURI+'/'+successPath])

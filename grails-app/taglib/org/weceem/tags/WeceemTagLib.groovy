@@ -788,4 +788,11 @@ class WeceemTagLib {
         def s = ConfigurationHolder.config.flatten()[attrs.property]
         out << (codec ? s."encodeAs$codec"() : s)
     }
+    
+    def uiMessage = { attrs, body ->
+        def s = pageScope.variables[WcmContentController.UI_MESSAGE] ?: flash[WcmContentController.UI_MESSAGE]
+        if (s) {
+            out << body(message:s)
+        }
+    }
 }

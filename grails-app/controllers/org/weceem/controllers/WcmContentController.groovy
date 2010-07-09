@@ -28,7 +28,7 @@ class WcmContentController {
     static String REQUEST_ATTRIBUTE_SPACE = "weceem.space"
     static String REQUEST_ATTRIBUTE_PREPARED_MODEL = "weceem.prepared.model"
     static String REQUEST_PRERENDERED_CONTENT = "weceem.prerendered.content"
-    static String FLASH_MESSAGE = 'weceem.message'
+    static String UI_MESSAGE = 'weceem.message'
     
     static CACHE_NAME_TEMPLATE_CACHE = "gspCache"
     
