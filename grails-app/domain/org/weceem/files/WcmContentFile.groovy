@@ -1,4 +1,4 @@
-package org.weceem.files
+    package org.weceem.files
 
 import org.springframework.web.multipart.MultipartFile
 import org.apache.commons.io.FileUtils
@@ -94,7 +94,7 @@ class WcmContentFile extends WcmContent {
 
     public void createAliasURI(parent) {
         if (aliasURI != title){
-            aliasURI = title
+            aliasURI = title.enco
         }
     }
 

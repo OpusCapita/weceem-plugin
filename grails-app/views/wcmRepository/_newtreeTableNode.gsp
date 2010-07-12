@@ -8,7 +8,7 @@
             <wcm:renderContentItemIcon type="${c}" id="content-node-${c.id}" />
 			<h2 orderindex="${c.orderIndex == null ? 0 : c.orderIndex}" type="${c.class.name}" class="title">
 			    <g:link controller="wcmEditor" action="edit" id="${c.id}">
-			     ${c.title.encodeAsHTML()}        <span class="type">( /${c.aliasURI.encodeAsHTML()} - <g:message code="content.item.name.${c.class.name}"/>)</span>
+			     ${c.title.encodeAsHTML()}        <span class="type">( /${c.aliasURI.encodeAsURL().encodeAsHTML()} - <g:message code="content.item.name.${c.class.name}"/>)</span>
 			    </g:link>
 			</h2>
 		</div>		
