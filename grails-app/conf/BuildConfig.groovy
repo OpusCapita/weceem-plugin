@@ -27,7 +27,7 @@ grails.project.dependency.resolution = {
 		runtime ':searchable:0.5.5'
 		runtime ':navigation:1.1.1'
 		runtime ':bean-fields:1.0-RC3'
-		runtime ':jquery-ui:1.8.2.3'
+		runtime ':jquery-ui:1.8.2.4'
 		runtime ':quartz:0.4.2'
 		runtime ':feeds:1.5'
 		runtime ':taggable:0.6.2'

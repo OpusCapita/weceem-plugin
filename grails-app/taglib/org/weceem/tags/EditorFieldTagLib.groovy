@@ -45,6 +45,12 @@ class EditorFieldTagLib {
         out << "<span class=\"field-readonly\">${ v ?: '' }</span>"
     }
     
+    def editorFieldReadOnlyURI = { attrs ->
+        def v = pageScope.content[attrs.property]
+        if (v) v = v.encodeAsURL().encodeAsHTML()
+        out << "<span class=\"field-readonly\">${ v ?: '' }</span>"
+    }
+    
     def editorFieldReadOnlyDate = { attrs ->
         out << "<span class=\"field-readonly\">${g.formatDate(date:pageScope.content[attrs.property], format:'d MMM yyyy HH:mm:ss')}</span>"
     }

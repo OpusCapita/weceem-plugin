@@ -862,18 +862,16 @@ class WcmContentRepositoryService implements InitializingBean {
                 content.setTags(params.tags.tokenize(',').collect { it.trim().toLowerCase()} )
             }
 
-            if (content instanceof WcmContentFile){
+            if (content.metaClass.respondsTo(content, 'rename', String)) {
                 content.rename(oldTitle)
             }
             if (log.debugEnabled) {
                 log.debug("Updated node with id ${content.id}, properties are now: ${content.dump()}")
             }
-            if (content instanceof WcmContentFile){
-                content.createAliasURI(content.parent)
-            }else
             if (!content.aliasURI && content.title) {
                 content.createAliasURI(content.parent)
             }
+
             def ok = content.validate()
             if (content.save()) {
                 if (log.debugEnabled) {

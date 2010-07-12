@@ -84,7 +84,7 @@ class WcmContentFile extends WcmContent {
 
     static editors = {
         title()
-        aliasURI( editor: 'ReadOnly', group: 'extra')
+        aliasURI( editor: 'ReadOnlyURI', group: 'extra')
         uploadedFile(editor:'ContentFileUpload')
         mimeType(group:'extra')
         fileSize(group:'extra', editor: 'ReadOnly')
@@ -93,8 +93,8 @@ class WcmContentFile extends WcmContent {
     }
 
     public void createAliasURI(parent) {
-        if (aliasURI != title){
-            aliasURI = title.enco
+        if (!aliasURI && (aliasURI != title)) {
+            aliasURI = title
         }
     }
 
@@ -117,10 +117,14 @@ class WcmContentFile extends WcmContent {
     
     Boolean canHaveChildren() { false }
 
+    /**
+     * Handle the create event to copy the file from the upload form into the filesystem
+     * Files are *not* stored in the repository database
+     */
     Boolean create(WcmContent parentContent) {
         if (!title) {
             title = uploadedFile.originalFilename
-            createAliasURI(parentContent)
+//            createAliasURI(parentContent)
         }
         assert title
         def path = ''
@@ -156,6 +160,7 @@ class WcmContentFile extends WcmContent {
         def newFile = new File(ServletContextHolder.servletContext.getRealPath(
                 "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}${path}/${title}"))
         oldFile.renameTo(newFile)
+        createAliasURI(this.parent)
     }
 
     Boolean move(WcmContent targetParent) {
