@@ -162,7 +162,7 @@ class SimpleSpaceImporter implements SpaceImporter {
                             association = backrefMap[chldid].content
                         }else{
                             def newElement = findByID(document, chldid)
-                            association = parse(newElement, document, space).content
+                            association = parse(newElement, document, space)
                             //backrefMap += [(chldid) : [content:association]
                         }
                         params += [(child.name()) : association]
