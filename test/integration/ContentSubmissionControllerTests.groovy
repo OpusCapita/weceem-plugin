@@ -41,7 +41,7 @@ class ContentSubmissionControllerTests extends GroovyTestCase {
         }
         con.wcmContentRepositoryService = new WcmContentRepositoryService()
         con.wcmContentRepositoryService.wcmCacheService = new WcmCacheService()
-        con.wcmContentRepositoryService.wcmCacheService.cacheManager = new net.sf.ehcache.CacheManager()
+        con.wcmContentRepositoryService.wcmCacheService.weceemCacheManager = new net.sf.ehcache.CacheManager()
         con.wcmContentRepositoryService.wcmSecurityService = secSvc
         con.wcmContentRepositoryService.afterPropertiesSet()
 

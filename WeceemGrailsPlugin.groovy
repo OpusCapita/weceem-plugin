@@ -51,7 +51,7 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         // Register our custom binding beans
         customPropertyEditorRegistrar(org.weceem.binding.CustomPropertyEditorRegistrar)
         
-        cacheManager(net.sf.ehcache.CacheManager) { bean -> 
+        weceemCacheManager(net.sf.ehcache.CacheManager) { bean -> 
             bean.destroyMethod = 'shutdown'
         }
     }

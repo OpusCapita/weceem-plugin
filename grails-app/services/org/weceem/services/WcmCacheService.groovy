@@ -11,10 +11,10 @@ class WcmCacheService implements InitializingBean {
     
     static transactional = false
     
-    def cacheManager // From resources.groovy
+    def weceemCacheManager // From resources.groovy
 
     void afterPropertiesSet() {
-        log.info "Caches configured: ${cacheManager.cacheNames}"
+        log.info "Caches configured: ${weceemCacheManager.cacheNames}"
     }
     
     def clearCache(String name, boolean dontTellReplicators = false) {
@@ -26,7 +26,7 @@ class WcmCacheService implements InitializingBean {
     }
     
     def getCache(String name) {
-        def c = cacheManager.getCache(name)
+        def c = weceemCacheManager.getCache(name)
         if (!c) {
             log.warn "Tried to get cache with name [$name] but wasn't found - check ehcache.xml config"
         }

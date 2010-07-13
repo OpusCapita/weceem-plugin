@@ -11,7 +11,7 @@ abstract class AbstractWeceemIntegrationTest extends GroovyTestCase {
         
         wcmContentRepositoryService = new WcmContentRepositoryService()
         wcmContentRepositoryService.wcmCacheService = new WcmCacheService()
-        wcmContentRepositoryService.wcmCacheService.cacheManager = new net.sf.ehcache.CacheManager()
+        wcmContentRepositoryService.wcmCacheService.weceemCacheManager = new net.sf.ehcache.CacheManager()
         wcmContentRepositoryService.wcmSecurityService = new WcmSecurityService()
         wcmContentRepositoryService.wcmSecurityService.with {
             grailsApplication = [

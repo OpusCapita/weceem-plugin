@@ -192,7 +192,7 @@ class WcmContentFile extends WcmContent {
             }
         }
 
-        return true
+        return false // Move was not possible
     }
 
     Boolean deleteContent() {
