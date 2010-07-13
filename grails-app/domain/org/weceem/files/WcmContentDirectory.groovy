@@ -46,7 +46,7 @@ class WcmContentDirectory extends WcmContentFile {
         fileSize(group:'extra', editor: 'ReadOnly')
         filesCount(group:'extra', editor: 'ReadOnly')
         aliasURI( editor: 'ReadOnly', group:'extra')
-        mimeType(hidden:true)
+        fileMimeType(hidden:true)
         uploadedFile(hidden:true)
     }
 

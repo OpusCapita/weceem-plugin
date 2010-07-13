@@ -69,31 +69,31 @@ class WcmContentFile extends WcmContent {
         ico: 'image/x-icon'
     ]
 
-    String mimeType
+    String fileMimeType
     Long fileSize = 0
     Short syncStatus = 0
 
     MultipartFile uploadedFile
 
-    static transients = (WcmContent.transients - 'mimeType') + 'uploadedFile'
+    static transients = WcmContent.transients + 'uploadedFile'
 
     static constraints = {
         // @todo this is ugly, WcmContentDirectory should never have one, and all files SHOULD
-        mimeType(nullable:true, blank:true)
+        fileMimeType(nullable:true, blank:true)
     }
 
     static editors = {
         title()
         aliasURI( editor: 'ReadOnlyURI', group: 'extra')
         uploadedFile(editor:'ContentFileUpload')
-        mimeType(group:'extra')
+        fileMimeType(group:'extra')
         fileSize(group:'extra', editor: 'ReadOnly')
         status()
         syncStatus(hidden: true)
     }
 
     public void createAliasURI(parent) {
-        if (!aliasURI && (aliasURI != title)) {
+        if (!aliasURI) {
             aliasURI = title
         }
     }
@@ -110,7 +110,7 @@ class WcmContentFile extends WcmContent {
     
     // Get the servlet container to serve the file
     static handleRequest = { content ->
-        def mt = content.mimeType ?: getDefaultMimeType(content.aliasURI)
+        def mt = content.fileMimeType ?: getDefaultMimeType(content.aliasURI)
         response.setContentType(mt)
         renderAppResource(content.toResourcePath())
     }
@@ -124,8 +124,8 @@ class WcmContentFile extends WcmContent {
     Boolean create(WcmContent parentContent) {
         if (!title) {
             title = uploadedFile.originalFilename
-//            createAliasURI(parentContent)
         }
+        aliasURI = uploadedFile.originalFilename
         assert title
         def path = ''
         if (parentContent && (parentContent instanceof WcmContentDirectory)) {
@@ -138,9 +138,9 @@ class WcmContentFile extends WcmContent {
                 "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}${path}")).mkdirs()
         try {
             def f = new File(ServletContextHolder.servletContext.getRealPath(
-                "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}${path}/${title}"))
+                "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}${path}/${uploadedFile.originalFilename}"))
             uploadedFile.transferTo(f)
-            mimeType = uploadedFile.contentType
+            fileMimeType = uploadedFile.contentType ?: WcmContentFile.getDefaultMimeType(uploadedFile.originalFilename)
             fileSize = f.length()
         } catch (Exception e) {
             return false
@@ -220,7 +220,7 @@ class WcmContentFile extends WcmContent {
         def dirs = []
 
         while (sourceContent && (sourceContent instanceof WcmContentFile)) {
-            dirs << sourceContent.title // @todo this should be aliasURI shouldn't it?
+            dirs << sourceContent.aliasURI // @todo this should be aliasURI shouldn't it?
             sourceContent = sourceContent.parent
         }
         def path = dirs.reverse().join('/')
