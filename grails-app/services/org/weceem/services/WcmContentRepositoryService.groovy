@@ -611,26 +611,33 @@ class WcmContentRepositoryService implements InitializingBean {
                 return false
             } 
         }
+        def success = true
+        
         if (sourceContent.metaClass.respondsTo(sourceContent, "move", WcmContent)){
-            sourceContent.move(targetContent)
+            success = sourceContent.move(targetContent)
         }
-        def parent = sourceContent.parent
-        if (parent) {
-            parent.children.remove(sourceContent)
-            sourceContent.parent = null
-            assert parent.save()
+        
+        if (success) {
+            def parent = sourceContent.parent
+            if (parent) {
+                parent.children.remove(sourceContent)
+                sourceContent.parent = null
+                assert parent.save()
+            }
+            WcmContent inPoint = WcmContent.findByOrderIndexAndParent(orderIndex, targetContent)
+            if (inPoint != null){
+                shiftNodeChildrenOrderIndex(sourceContent.space, targetContent, orderIndex)
+            }
+            sourceContent.orderIndex = orderIndex
+            if (targetContent) {
+                if (!targetContent.children) targetContent.children = new TreeSet()
+                targetContent.addToChildren(sourceContent)
+                assert targetContent.save()
+            }
+            return sourceContent.save(flush: true)
+        } else {
+            return false
         }
-        WcmContent inPoint = WcmContent.findByOrderIndexAndParent(orderIndex, targetContent)
-        if (inPoint != null){
-            shiftNodeChildrenOrderIndex(sourceContent.space, targetContent, orderIndex)
-        }
-        sourceContent.orderIndex = orderIndex
-        if (targetContent) {
-            if (!targetContent.children) targetContent.children = new TreeSet()
-            targetContent.addToChildren(sourceContent)
-            assert targetContent.save()
-        }
-        return sourceContent.save(flush: true)
      }
      
     def shiftNodeChildrenOrderIndex(WcmSpace space, parent, shiftedOrderIndex){

@@ -79,7 +79,7 @@ $(function(){
             			You can filter results by type: <select id="classFilter">
                                                     	    <option value="none">All</option>
                                                     	    <g:each in="${grailsApplication.domainClasses.findAll{org.weceem.content.WcmContent.isAssignableFrom(it.clazz) && (it.clazz != org.weceem.content.WcmContent)}.sort({a,b->a.name.compareTo(b.name)})}">
-                                                    	        <option value="${it.fullName}"><g:message code="content.item.name.${it.fullName}"/></option>
+                                                    	        <option value="${it.fullName}"><g:message code="content.item.name.${it.fullName}" encodeAs="HTML"/></option>
                                                     	    </g:each>
                                                     	</select>,
             			status: <g:select id="statusFilter" from="${[['description': 'all', 'code': 0]] + org.weceem.content.WcmStatus.list()}" optionKey="code" optionValue="description" />
@@ -128,7 +128,7 @@ $(function(){
 
             <div class="span-24 last prepend-top"><g:render plugin="weceem" template="repository-buttons"/></div>
 
-<div id="createNewDialog" class="ui-helper-hidden" title="${message(code:'content.title.create')}">
+<div id="createNewDialog" class="ui-helper-hidden" title="${message(code:'content.title.create', encodeAsHTML())}">
     <g:form controller="wcmEditor" action="create" method="GET">
         <input id="parentid" name="parent.id" type="hidden"/>
         <label for="createNewType"><g:message code="content.label.type" encodeAs="HTML"/></label><br/>
@@ -138,8 +138,13 @@ $(function(){
 </div>
 
 <div id="deleteDialog" title="Do you want to delete this node?" class="ui-helper-hidden">
-	Deleting the content "<span id="deleteContentNodeTitle"></span>" will delete all its child nodes - you cannot undo this.
-	Continue with delete?
+	<p>Deleting the content "<span id="deleteContentNodeTitle"></span>" will delete all its child nodes - you cannot undo this.</p>
+	<p>Continue with delete?</p>
+</div>
+
+<div id="errorDialog" title="An error occurred" class="ui-helper-hidden">
+	<p>Sorry - there was a problem!</p>
+	<p id="errorDialogMessage"></p>
 </div>
 
 <div id="moreActionsMenu" class="ui-helper-hidden">
@@ -152,11 +157,11 @@ $(function(){
 </div>
 
 <div id="confirmDialog" title="Confirm your action" class="ui-helper-hidden">
-	Please, choose one from the following actions:
+	<p>What would you like to do with this content?</p>
 </div>
 
 <div id="expiredDialog" title="Session Expired" class="ui-helper-hidden">
-	${ message(code:'message.session.expired') }
+	<p><g:message code="message.session.expired" encodeAs="HTML"/></p>
 </div>
 
 </body>
