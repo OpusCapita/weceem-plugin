@@ -77,8 +77,10 @@ class WcmContent implements Comparable, Taggable {
         'contentAsHTML', 
         'mimeType', 
         'wcmSecurityService',
-        'absoluteURI'
+        'absoluteURI',
+        'lineage'
     ]
+
     static hasMany = [children: WcmContent]
     static hasOne = [parent: WcmContent]
 
@@ -206,6 +208,16 @@ class WcmContent implements Comparable, Taggable {
             uri.insert(0,c.aliasURI)
         }
         return uri.toString()
+    }
+    
+    public List getLineage() {
+        def result = []
+        def c = this
+        while (c.parent != null) {
+            c = c.parent
+            result << c
+        }
+        return result
     }
     
     def beforeInsert = {

@@ -62,7 +62,9 @@ class WcmEditorController {
 
             if (!content.hasErrors()) {
                 flash.message = message(code:'message.content.saved', args:[content.title, message(code:'content.item.name.'+content.class.name)])
-                log.debug "Saved content: ${content}"
+                if (log.debugEnabled) {
+                    log.debug "Saved content: ${content}"
+                }
                 if (!params['continue']) {
                     redirect(controller:'wcmRepository')
                 } else {
@@ -88,17 +90,35 @@ class WcmEditorController {
         update()
     }
 
+    def preview = {
+        params._preview = true
+        update()
+    }
+    
     def update = {
         workaroundBlankAssociationBug()
         
         WcmContent.withTransaction { txn -> 
             def result = wcmContentRepositoryService.updateNode(params.id, params)
-            println "Update result was: ${result}"
-            println "Updated content errors: ${result.content.errors}"
-            if (result?.errors) {
+            if (result?.errors || params._preview) {
                 txn.setRollbackOnly()
-                flash.message =  message(code:'message.content.has.errors')
-                render(view: 'edit', model: [content: result.content, editableProperties: wcmEditorService.getEditorInfo(result.content.class)])
+                if (result?.errors) {
+                    if (log.debugEnabled) {
+                        log.debug "Couldn't update content, has errors: ${result}"
+                    }
+                    flash.message =  message(code:'message.content.has.errors')
+                    if (params._preview) {
+                        render "Cannot preview, content has errors. Please return to editor"
+                    } else {
+                        render(view: 'edit', model: [content: result.content, editableProperties: wcmEditorService.getEditorInfo(result.content.class)])
+                    }
+                } else if (params._preview) {
+                    if (log.debugEnabled) {
+                        log.debug "Not updating content, preview mode for: ${result}"
+                    }
+                    WcmContentController.renderGSPContent(wcmContentRepositoryService, request, response, result.content)
+                    return null
+                }
             } else if (result?.notFound) {
                 response.sendError(404, "Cannot update node, no node found with id ${params.id}")
             } else {

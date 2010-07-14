@@ -35,6 +35,7 @@ $( function() {
             <div class="prepend-top append-bottom editorsaveactions">
                 <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="Save and continue editing" action="${content.id ? 'updateContinue' : 'saveContinue'}"/>
                 <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="Save" action="${content.id ? 'update' : 'save'}"/>
+                <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="Preview" action="preview"/>
                 <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="Cancel" action="cancel"/>
             </div>
         </div>

@@ -17,6 +17,9 @@ import org.weceem.content.*
 import grails.util.GrailsUtil
 import org.weceem.security.AccessDeniedException
 
+import org.weceem.controllers.WcmContentController
+
+
 /**
  * WcmWidget tag library describes the widget tag.
  * Tag renders a DIV widget with special settings and behaviour.
@@ -39,7 +42,7 @@ class WidgetTagLib {
     def widget = {attrs, body ->
         def widget
         def path = attrs.path
-        def space = attrs.space ? WcmSpace.findByAliasURI(attrs.space) : pageScope.space
+        def space = attrs.space ? WcmSpace.findByAliasURI(attrs.space) : request[WcmContentController.REQUEST_ATTRIBUTE_SPACE]
         if(!space) {throwTagError("No space by name ${attrs.space} or in page scope")}
 
         if (path) {
@@ -88,7 +91,7 @@ class WidgetTagLib {
             log.error "Security errors prevented widget from rendering", GrailsUtil.deepSanitize(ade)
         } catch (Throwable t) {
             log.error "Error executing widget page", GrailsUtil.deepSanitize(t)
-            throwTagError("There is an error in widget at [${path}], please see the logs")
+            throwTagError("There is an error in widget at [${path}], please see the logs. Error was: "+t)
         }
 
         //out << "</div>"

@@ -20,6 +20,7 @@ import org.weceem.security.AccessDeniedException
 import org.springframework.web.context.request.RequestContextHolder
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
 import org.codehaus.groovy.grails.web.pages.GSPResponseWriter
+import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 class WcmContentController {
     static String REQUEST_ATTRIBUTE_PAGE = "weceem.page"
@@ -55,21 +56,8 @@ class WcmContentController {
                     log.debug "Loading content from for uri: ${uri}"
                 }
                 def contentInfo = wcmContentRepositoryService.findContentForPath(uri,space)
-                def content = contentInfo?.content
+                def content = resolveActualContent(contentInfo?.content)
             
-                // Resolve virtual content refs
-                if (log.debugEnabled) {
-                    log.debug "Content for uri: ${uri} is: ${content?.dump()}"
-                    if (content?.metaClass?.hasProperty(content, 'target')) {
-                        log.debug "Content for uri: ${uri} has a target value of [${content.target}]"
-                    }
-                }
-                if (content) {
-                    if (content instanceof WcmVirtualContent) {
-                        content = content.target
-                    }
-                }
-
                 if (log.debugEnabled) {
                     log.debug "Content after resolving virtual content for uri: ${uri} is: ${content?.dump()}"
                 }
@@ -77,13 +65,7 @@ class WcmContentController {
                 def activeUser = wcmSecurityService.userName
             
                 if (content) {
-        			def pageInfo = [ URI:uri, 
-        			    parentURI:contentInfo.parentURI, 
-        			    lineage: contentInfo.lineage, 
-        			    title: content.title,
-        			    titleForHTML: content.titleForHTML,
-        			    titleForMenu: content.titleForMenu
-        			]
+        			def pageInfo = WcmContentController.makePageInfo(uri, contentInfo, content)
 
                     def contentClass = content.class
 
@@ -147,6 +129,57 @@ class WcmContentController {
         }        
     }
     
+    /**
+     * Take the requested content and resolve it to the actual target content, which may differ
+     * if the requested content is a WcmVirtualContent node
+     */
+    WcmContent resolveActualContent(WcmContent requestedContent) {
+        // Resolve virtual content refs to act as if they are served directly by this URI
+        if (log.debugEnabled) {
+            log.debug "Content is: ${requestedContent?.dump()}"
+            if (requestedContent?.metaClass?.hasProperty(requestedContent, 'target')) {
+                log.debug "Content has a target value of [${requestedContent.target}]"
+            }
+        }
+        if (requestedContent) {
+            if (requestedContent instanceof WcmVirtualContent) {
+                return requestedContent.target
+            }
+        }
+        return requestedContent
+    }
+
+    /**
+     * Construct the page info object for custom-rendering situations where you have not yet resolved the node
+     */
+    static PageInfo makePageInfo(uri, contentInfo, WcmContent actualContent) {
+        [
+            URI:uri, 
+		    parentURI: contentInfo.parentURI, 
+		    lineage: contentInfo.lineage, 
+		    title: actualContent.title,
+		    titleForHTML: actualContent.titleForHTML,
+		    titleForMenu: actualContent.titleForMenu
+		] as PageInfo
+    }
+
+    /**
+     * Construct the page info object where the lineage and related info has not yet been resolved
+     */
+    static PageInfo makePageInfo(uri, WcmContent actualContent) {
+        [
+            URI:uri, 
+		    parentURI: actualContent?.absoluteURI, 
+		    lineage: actualContent?.lineage, 
+		    title: actualContent?.title,
+		    titleForHTML: actualContent?.titleForHTML,
+		    titleForMenu: actualContent?.titleForMenu
+		] as PageInfo
+    }
+    
+    /**
+     * Evaluate some content with the specified model, the result can be converted to a string or written to output
+     */
     static evaluateGSPContent(wcmContentRepositoryService, WcmContent content, model) {
         def groovyTemplate = wcmContentRepositoryService.getGSPTemplate(content)
         return groovyTemplate?.make(model)
@@ -176,9 +209,27 @@ class WcmContentController {
             model.putAll(previousModel)
         }
         
+        // Patch up request attributes if don't exist already
+
+        // User info might have been resolved already, if not get it - remember we are static
+        if (!request[REQUEST_ATTRIBUTE_USER]) {
+            request[REQUEST_ATTRIBUTE_USER] = ApplicationHolder.application.mainContext.wcmSecurityService.userName
+        }
+        
+        // Render pipeline might have already supplied page info, if not generate it
+        if (!request[REQUEST_ATTRIBUTE_PAGE]) {
+            request[REQUEST_ATTRIBUTE_PAGE] = WcmContentController.makePageInfo(content.absoluteURI, content)
+        }
+
+        // Render pipeline might have already supplied space
+        if (!request[REQUEST_ATTRIBUTE_SPACE]) {
+            request[REQUEST_ATTRIBUTE_SPACE] = content.space
+        }
+        
         model.user = request[REQUEST_ATTRIBUTE_USER]
-        model.page = request[REQUEST_ATTRIBUTE_PAGE]
+        model.page = request[REQUEST_ATTRIBUTE_PAGE] 
         model.space = request[REQUEST_ATTRIBUTE_SPACE]
+
         // Prepare the existing output stream
         Writer out = GSPResponseWriter.getInstance(response, 65536)
         GrailsWebRequest webRequest = (GrailsWebRequest) RequestContextHolder.currentRequestAttributes()
@@ -277,4 +328,17 @@ class WcmContentController {
     }
     
     
+}
+
+/** 
+ * The object passed to the model representing info about the current page (not same as content!)
+ */
+class PageInfo {
+    String URI
+    String parentURI
+    List lineage
+    String text
+    String title
+    String titleForHTML
+    String titleForMenu
 }
