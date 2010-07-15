@@ -91,11 +91,14 @@ class WcmEditorController {
     }
 
     def preview = {
+        println "IN PREVIEW!"
         params._preview = true
         update()
     }
     
     def update = {
+        println "In update"
+        
         workaroundBlankAssociationBug()
         
         WcmContent.withTransaction { txn -> 
@@ -109,8 +112,10 @@ class WcmEditorController {
                     flash.message =  message(code:'message.content.has.errors')
                     if (params._preview) {
                         render "Cannot preview, content has errors. Please return to editor"
+                        return
                     } else {
                         render(view: 'edit', model: [content: result.content, editableProperties: wcmEditorService.getEditorInfo(result.content.class)])
+                        return
                     }
                 } else if (params._preview) {
                     if (log.debugEnabled) {
@@ -121,14 +126,17 @@ class WcmEditorController {
                 }
             } else if (result?.notFound) {
                 response.sendError(404, "Cannot update node, no node found with id ${params.id}")
+                return
             } else {
                 flash.message = message(code:'message.content.updated', args:[
                     result.content.title, 
                     message(code:'content.item.name.'+result.content.class.name)] )
                 if (!params['continue']) {
                     redirect(controller:'wcmRepository', action:'treeTable')
+                    return
                 } else {
                     redirect(action:'edit', params:[id:result.content.id])
+                    return
                 }
             }        
         }

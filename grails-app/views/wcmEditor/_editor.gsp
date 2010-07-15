@@ -4,6 +4,15 @@
 <%-- Highlight any accordion headers that have errors inside them --%>
 $( function() {
     $('div .ui-state-error', $('#panels')).parentsUntil('#panels').prev('.ui-accordion-header').addClass('ui-state-error');
+    $('.preview-button').click( function(event) {
+        var form = $(event.target).parents('form');
+        form.attr('target', '_preview');
+        $('#preview-action').val('preview');
+        form.submit();
+        form.attr('target', '');
+        $('#previewaction').val('');
+        event.preventDefault();
+    });
 });
 </g:javascript>
 
@@ -35,7 +44,8 @@ $( function() {
             <div class="prepend-top append-bottom editorsaveactions">
                 <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="Save and continue editing" action="${content.id ? 'updateContinue' : 'saveContinue'}"/>
                 <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="Save" action="${content.id ? 'update' : 'save'}"/>
-                <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="Preview" action="preview"/>
+                <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" class="ui-widget ui-state-default ui-corner-all preview-button" value="Preview" action="preview"/>
+                <input type="hidden" id="preview-action" name="_action_preview" value=""/> <%-- Needed to set the action when preview is submitted in JS --%>
                 <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="Cancel" action="cancel"/>
             </div>
         </div>

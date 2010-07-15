@@ -16,8 +16,8 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title><g:layoutTitle default="Weceem"/></title>
-    <link rel="shortcut icon" href="${resource(dir:'_weceem/images/favicon.ico')}"/>
 
+    <link rel="shortcut icon" href="${resource(dir:'_weceem/images/favicon.ico')}"/>
     <nav:resources/>
     <g:javascript library="jquery" plugin="jquery"/>
     <jqui:resources theme="cupertino" themeDir="_weceem/jquery-ui/themes/" plugin="weceem"/>
@@ -31,6 +31,7 @@
 	<link rel="stylesheet" href="${resource(dir: '_weceem/css',file:'weceem.css')}"/>
 
     <g:layoutHead/>
+
   </head>
   
   <body onload="${pageProperty(name:'body.onload')}" class="${pageProperty(name:'body.class')}">
