@@ -183,7 +183,7 @@ class EditorFieldTagLib {
         out << """
         <script language="javascript" type="text/javascript">
           editAreaLoader.init({
-              id : "editor_${attrs.property}",
+              id : "editor_${attrs.property.encodeAsJavaScript()}",
               syntax: "html",
               allow_toggle: false,
               start_highlight: true

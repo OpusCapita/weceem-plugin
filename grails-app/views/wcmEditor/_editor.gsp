@@ -1,16 +1,25 @@
 <div class="container">
 <g:javascript>
-<%-- I don't want to do this here but have no choice until we can include resources in header --%>
+<%-- I dont want to do this here but have no choice until we can include resources in header --%>
 <%-- Highlight any accordion headers that have errors inside them --%>
 $( function() {
     $('div .ui-state-error', $('#panels')).parentsUntil('#panels').prev('.ui-accordion-header').addClass('ui-state-error');
+    var originalFormOnSubmits = $('.preview-button').parents('form').attr('onsubmit');
     $('.preview-button').click( function(event) {
         var form = $(event.target).parents('form');
         form.attr('target', '_preview');
-        $('#preview-action').val('preview');
-        form.submit();
+        
+        //$('#preview-action').val('preview');
+        
+        // Now submit form using workaround for onsubmit calls
+        $('#preview-action-submitter').click()
+        
+        // Reset the form target so save works as expected
         form.attr('target', '');
-        $('#previewaction').val('');
+    
+        //$('#previewaction').val('');
+        
+        // Don't have a double-submit
         event.preventDefault();
     });
 });
@@ -45,7 +54,7 @@ $( function() {
                 <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="Save and continue editing" action="${content.id ? 'updateContinue' : 'saveContinue'}"/>
                 <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="Save" action="${content.id ? 'update' : 'save'}"/>
                 <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" class="ui-widget ui-state-default ui-corner-all preview-button" value="Preview" action="preview"/>
-                <input type="hidden" id="preview-action" name="_action_preview" value=""/> <%-- Needed to set the action when preview is submitted in JS --%>
+                <input style="display:none" type="submit" id="preview-action-submitter" name="_action_preview" value="preview"/> <%-- Needed to invoke onsubmit on form during our preview submit phase --%>
                 <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="Cancel" action="cancel"/>
             </div>
         </div>
