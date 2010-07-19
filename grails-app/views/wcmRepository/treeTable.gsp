@@ -20,6 +20,9 @@
 	.ui-state-highlight { height: 1.5em; line-height: 1.2em; }
 
     h2.title + span.type { margin-left: 10px;}
+    
+    #repository-toolbar label { display:inline; padding-right: 4px; }
+    #repository-searchbox { text-align: right; }
 </style>
 <script type="text/javascript">
 
@@ -60,20 +63,14 @@ $(function(){
 <body>
 
     <div class="span-24 last">
-        <div class="container">
-            <table class="form">
-              <tr>
-               <td><g:render plugin="weceem" template="repository-buttons"/></td>
-               <td>
-                 <label>Space:</label>
-                 <g:select id="spaceSelector" name="space" from="${spaces}" 
+        <div class="container" id="repository-toolbar">
+            <div class="span-12"><g:render plugin="weceem" template="repository-buttons"/></div>
+            <div class="span-6"><label>Space:</label><g:select id="spaceSelector" name="space" from="${spaces}" 
 				 optionKey="id" optionValue="name" onchange="changeSpace()" value="${space.id}"/>
-    		   </td>
-    		   <td>
-    		     <span id="search_btn" class="sbox_l"></span><span class="sbox"><input type="text" name="data" id="data" /></span><span id="clear_btn" class="sbox_r"></span>
-    		   </td>
-    		  </tr>
-    		</table>
+    		</div>
+    		<div class="span-6 last" id="repository-searchbox">
+		        <span id="search_btn" class="sbox_l"></span><span class="sbox"><input type="text" name="data" id="data" /></span><span id="clear_btn" class="sbox_r"></span>
+            </div>
             <form controller="wcmRepository">
             	<div id="advSearch" style="display:none" class="span-24 last"> 
             			You can filter results by type: <select id="classFilter">
