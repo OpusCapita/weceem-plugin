@@ -21,7 +21,7 @@
     <nav:resources/>
     <g:javascript library="jquery" plugin="jquery"/>
     <jqui:resources theme="cupertino" themeDir="_weceem/jquery-ui/themes/" plugin="weceem"/>
-    <blueprint:resources/>
+    <blueprint:resources plugins="buttons"/>
 
 	<link href="${resource(dir:'_weceem/js/fg-menu', file:'fg.menu.css')}" rel="stylesheet" type="text/css" />
 	<script type="text/javascript" src="${g.resource(dir: '_weceem/js/fg-menu', file:'fg.menu.js')}"></script>
