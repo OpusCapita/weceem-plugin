@@ -1,4 +1,4 @@
-<plugin name='weceem' version='0.9-SNAPSHOT' grailsVersion='1.2.2 &gt; *'>
+<plugin name='weceem' version='0.9-RC1' grailsVersion='1.2.2 &gt; *'>
   <author>jCatalog AG</author>
   <authorEmail>info@weceem.org</authorEmail>
   <title>Weceem CMS</title>
@@ -71,8 +71,8 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     <plugin name='feeds' version='1.5 &gt; *' />
     <plugin name='beanFields' version='1.0-RC3 &gt; *' />
     <plugin name='blueprint' version='0.9.1.1 &gt; *' />
-    <plugin name='jqueryUi' version='1.8.2.1 &gt; *' />
-    <plugin name='taggable' version='0.6.1 &gt; *' />
+    <plugin name='jqueryUi' version='1.8.2.4 &gt; *' />
+    <plugin name='taggable' version='0.6.2 &gt; *' />
   </dependencies>
   <behavior />
 </plugin>
