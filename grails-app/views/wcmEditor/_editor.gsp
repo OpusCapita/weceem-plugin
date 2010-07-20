@@ -21,6 +21,8 @@ $( function() {
         
         // Don't have a double-submit
         event.preventDefault();
+        
+        windows
     });
 });
 </g:javascript>

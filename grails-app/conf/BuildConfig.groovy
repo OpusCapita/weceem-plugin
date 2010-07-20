@@ -32,6 +32,7 @@ grails.project.dependency.resolution = {
 		runtime ':feeds:1.5'
 		runtime ':taggable:0.6.2'
 		runtime ':fckeditor:0.9.5'
+		runtime ':blueprint:0.9.1.1'
 	}
 }
 
