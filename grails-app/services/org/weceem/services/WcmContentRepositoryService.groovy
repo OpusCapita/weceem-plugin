@@ -103,8 +103,12 @@ class WcmContentRepositoryService implements InitializingBean {
                 def newStatus = [:] + DEFAULT_STATUSES.find { it.code == info[1] } 
 
                 // Write it out as user-supplied status code, or default...
-                newStatus.code = info[0] // In case user has overriden it but deleted the row
-                assert new WcmStatus(newStatus).save()
+                newStatus.code = this[defaultStatusPropertyName] // In case user has overriden it but deleted the row
+                def s = new WcmStatus(newStatus)
+                if (!s.save()) {
+                    log.error "Couldn't create missing status for ${info[0]}: ${s.errors}"
+                    assert s
+                }
             }
         }
     }
