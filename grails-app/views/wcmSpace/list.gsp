@@ -47,12 +47,12 @@
       <br/>
       <div>
         <g:link action="importSpace" class="button ui-corner-all" >
-            <img src="${createLinkTo(dir:'_weceem/images/weceem', file: 'fileimport_24.gif')}"
+            <img src="${g.resource(plugin:'weceem', dir:'_weceem/images/weceem', file: 'fileimport_24.gif')}"
                 alt="" style="vertical-align: middle;"/>
             <span><g:message code="space.link.import"/></span>
         </g:link>
         <g:link action="exportSpace" class="button ui-corner-all">
-            <img src="${createLinkTo(dir:'_weceem/images/weceem', file: 'fileexport_24.gif')}"
+            <img src="${g.resource(plugin:'weceem', dir:'_weceem/images/weceem', file: 'fileexport_24.gif')}"
                 alt="" style="vertical-align: middle;"/>
             <span><g:message code="space.link.export"/></span>
         </g:link>

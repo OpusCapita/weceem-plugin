@@ -17,18 +17,18 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <title><g:layoutTitle default="Weceem"/></title>
 
-    <link rel="shortcut icon" href="${resource(dir:'_weceem/images/favicon.ico')}"/>
+    <link rel="shortcut icon" href="${g.resource(plugin:'weceem', dir:'_weceem/images/favicon.ico')}"/>
     <nav:resources/>
     <g:javascript library="jquery" plugin="jquery"/>
     <jqui:resources theme="cupertino" themeDir="_weceem/jquery-ui/themes/" plugin="weceem"/>
     <blueprint:resources plugins="buttons"/>
 
-	<link href="${resource(dir:'_weceem/js/fg-menu', file:'fg.menu.css')}" rel="stylesheet" type="text/css" />
-	<script type="text/javascript" src="${g.resource(dir: '_weceem/js/fg-menu', file:'fg.menu.js')}"></script>
+	<link href="${g.resource(plugin:'weceem', dir:'_weceem/js/fg-menu', file:'fg.menu.css')}" rel="stylesheet" type="text/css" />
+	<script type="text/javascript" src="${g.resource(plugin:'weceem', dir: '_weceem/js/fg-menu', file:'fg.menu.js')}"></script>
 
-    <link rel="stylesheet" href="${resource(dir: '_weceem/css',file:'admin.css')}"/>
-    <link rel="stylesheet" href="${resource(dir: '_weceem/css',file:'admin-theme.css')}"/>
-	<link rel="stylesheet" href="${resource(dir: '_weceem/css',file:'weceem.css')}"/>
+    <link rel="stylesheet" href="${g.resource(plugin:'weceem', dir: '_weceem/css',file:'admin.css')}"/>
+    <link rel="stylesheet" href="${g.resource(plugin:'weceem', dir: '_weceem/css',file:'admin-theme.css')}"/>
+	<link rel="stylesheet" href="${g.resource(plugin:'weceem', dir: '_weceem/css',file:'weceem.css')}"/>
 
     <g:layoutHead/>
 

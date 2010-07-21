@@ -31,7 +31,7 @@
   </head>
 
   <body>
-    <img id="logo" src="${g.resource(dir:'_weceem/images/layout', file:'weceem-logo.png')}"/>
+    <img id="logo" src="${g.resource(plugin:'weceem', dir:'_weceem/images/layout', file:'weceem-logo.png')}"/>
     <h1>Access denied</h1>
     <p>${accessDeniedMessage.encodeAsHTML()}</p>
   </body>
