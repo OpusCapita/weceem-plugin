@@ -1,9 +1,10 @@
 package org.weceem.tags
 
-import org.weceem.content.Content
-import org.weceem.content.Space
-import org.weceem.content.Status
-import org.weceem.content.Template
+import org.weceem.content.WcmContent
+
+import org.weceem.content.WcmStatus
+import org.weceem.content.WcmTemplate
+import org.weceem.script.WcmScript
 import org.codehaus.groovy.grails.web.pages.TagLibraryLookup
 
 class EditorFieldTagLib {
@@ -16,8 +17,26 @@ class EditorFieldTagLib {
         out << bean.input(beanName:'content', property:attrs.property, noLabel:true)
     }
 
+    def editorFieldLongString = { attrs ->
+        out << bean.textArea(beanName:'content', property:attrs.property, rows:3, cols:40, noLabel:true)
+    }
+
+    def editorFieldBoolean = { attrs ->
+        out << bean.checkBox(beanName:'content', property:attrs.property, noLabel:true)
+    }
+
     def editorFieldTitle = { attrs ->
         out << bean.input(beanName:'content', property:attrs.property, noLabel:true, 'class':"big")
+    }
+
+    def editorFieldTags = { attrs ->
+        out << g.render(template:'/editors/tags', plugin:'weceem', 
+            model:[name:attrs.property, value:pageScope.content[attrs.property]])
+    }
+
+    def editorResourcesTags = { attrs ->
+        out << g.render(template:'/editors/tags_resources', plugin:'weceem', 
+            model:[name:attrs.property, value:pageScope.content[attrs.property]])
     }
 
     def editorFieldReadOnly = { attrs ->
@@ -26,35 +45,84 @@ class EditorFieldTagLib {
         out << "<span class=\"field-readonly\">${ v ?: '' }</span>"
     }
     
+    def editorFieldReadOnlyURI = { attrs ->
+        def v = pageScope.content[attrs.property]
+        if (v) v = v.encodeAsURL().encodeAsHTML()
+        out << "<span class=\"field-readonly\">${ v ?: '' }</span>"
+    }
+    
     def editorFieldReadOnlyDate = { attrs ->
         out << "<span class=\"field-readonly\">${g.formatDate(date:pageScope.content[attrs.property], format:'d MMM yyyy HH:mm:ss')}</span>"
     }
     
     def editorFieldDate = { attrs ->
-        out << bean.date(beanName:'content', property:attrs.property, noLabel:true)
-    }
+        StringBuilder sb = new StringBuilder()
+        def d = pageScope.content[attrs.property]
+        def dval = d?.format('yyyy/MM/dd')
+        sb << g.textField(name:attrs.property+'_date', size:10, maxLength:10, value:dval)
+        sb << " @ "
+        def hr = d?.format('HH')
+        def min = d?.format('mm')
+        sb << g.textField(name:attrs.property+'_hour', size:2, maxLength:2, value:hr, 'class':'date-editor-hour')
+        sb << " : "
+        sb << g.textField(name:attrs.property+'_minute', size:2, maxLength:2, value:min, 'class':'date-editor-minute')
 
-    def editorFieldTemplate = { attrs ->
-        def templates = Template.findAllBySpace( pageScope.content.space, [sort:'title'])
+        out << bean.customField(beanName:'content', property:attrs.property, noLabel:true) {
+            out << sb
+        }
+
+        out << g.javascript([:]) {
+"""
+\$(function(){ 
+    \$('#${attrs.property.encodeAsJavaScript()}_date').datepicker({ 
+        dateFormat: 'yy/mm/dd',
+        onSelect: function(dateText, inst) {
+            \$(this).siblings('.date-editor-hour').val('00');
+            \$(this).siblings('.date-editor-minute').val('00');
+        }
+    })
+})
+"""
+        }
+    }
+/*
+    def editorFieldDateTime = { attrs ->
+        out << bean.input(beanName:'content', property:attrs.property, noLabel:true)
+        out << g.javascript([:]) {
+"""
+\$(function(){ \$('#${attrs.property.encodeAsJavaScript()}').datepicker() })
+"""
+        }
+    }
+*/
+    def editorFieldWcmTemplate = { attrs ->
+        def templates = WcmTemplate.findAllBySpace( pageScope.content.space, [sort:'title'])
         out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
             noSelection: ['':'- No template -'],
             from: templates, optionValue:'title', optionKey:'id')
     }
 
-    def editorFieldStatus = { attrs ->
-        def statuses = Status.listOrderByCode() 
+    def editorFieldWcmScript = { attrs ->
+        def templates = WcmScript.findAllBySpace( pageScope.content.space, [sort:'title'])
+        out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
+            noSelection: ['':'- No template -'],
+            from: templates, optionValue:{ it.title + " (${it.absoluteURI})"}, optionKey:'id')
+    }
+
+    def editorFieldWcmStatus = { attrs ->
+        def statuses = WcmStatus.listOrderByCode()
         out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
             from: statuses, optionValue: { v -> g.message(code:'content.status.'+v.description) }, optionKey:'id')
     }
 
-    def editorFieldSpace = { attrs ->
+    def editorFieldWcmSpace = { attrs ->
         // Workaround for Grails 1.1.x bug invoking tags with body as method - have to use a template instead
         out << g.render(template:'/editors/space', plugin:'weceem', 
             model:[name:attrs.property, value:pageScope.content[attrs.property]])
     }
 
     def editorFieldContent = { attrs ->
-        def contents =  Content.findAllBySpace( pageScope.content.space, [sort:'title']).findAll( { c -> !c.is(pageScope.content) }) 
+        def contents =  WcmContent.findAllBySpace( pageScope.content.space, [sort:'title']).findAll( { c -> !c.is(pageScope.content) })
         out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
             noSelection: ['':'- No content -'],
             from: contents, optionValue:'title', optionKey:'id')
@@ -78,6 +146,14 @@ class EditorFieldTagLib {
             model:[name:attrs.property, value:pageScope.content[attrs.property]])
     }
     
+    def editorFieldHTMLContent = { attrs ->
+        if (pageScope.content.allowGSP) {
+            out << editorFieldHtmlCode(attrs)
+        } else {
+            out << editorFieldRichHTML(attrs)
+        }
+    }
+    
     def editorFieldWikiCode = { attrs ->
         // Workaround for Grails 1.1.x bug invoking tags with body as method - have to use a template instead
         out << g.render(template:'/editors/wikieditor', plugin:'weceem', 
@@ -96,18 +172,30 @@ class EditorFieldTagLib {
             model:[name:attrs.property, value:pageScope.content[attrs.property]])
     }
     
+    def editorFieldGroovyCode = { attrs ->
+        // Workaround for Grails 1.1.x bug invoking tags with body as method - have to use a template instead
+        out << g.render(template:'/editors/codeeditor', plugin:'weceem', 
+            model:[name:attrs.property, value:pageScope.content[attrs.property]])
+    }
+    
     def editorResourcesHtmlCode = { attrs ->
         includeEditArea()
         out << """
         <script language="javascript" type="text/javascript">
           editAreaLoader.init({
-              id : "editor_${attrs.property}",
+              id : "editor_${attrs.property.encodeAsJavaScript()}",
               syntax: "html",
               allow_toggle: false,
               start_highlight: true
           });
         </script> 
         """
+    }
+    
+    def editorResourcesHTMLContent = { attrs ->
+        if (pageScope.content.allowGSP) {
+            out << editorResourcesHtmlCode(attrs)
+        }
     }
     
     def editorResourcesJSCode = { attrs ->
@@ -124,6 +212,20 @@ class EditorFieldTagLib {
         """
     }
     
+    def editorResourcesGroovyCode = { attrs ->
+       includeEditArea()
+       out << """
+       <script language="javascript" type="text/javascript">
+         editAreaLoader.init({
+             id : "editor_${attrs.property}",
+             syntax: "c",
+             allow_toggle: false,
+             start_highlight: true
+         });
+       </script> 
+       """
+    }
+
     def editorFieldCssCode = { attrs ->
         // Workaround for Grails 1.1.x bug invoking tags with body as method - have to use a template instead
         out << g.render(template:'/editors/codeeditor', plugin:'weceem', 

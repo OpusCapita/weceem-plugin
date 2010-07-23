@@ -31,13 +31,16 @@ import org.weceem.content.*
  *
  */
 class ExternalLinksJob {
-    // check external links every six hours
-    // timeout value in milliseconds
-    def timeout = DateUtils.MILLIS_PER_HOUR*6
-
+    static triggers = {
+        // check external links every six hours
+        simple name: 'externallink', startDelay: 60000, repeatInterval: DateUtils.MILLIS_PER_HOUR*6  
+    }
+      
+    static group = 'weceem'
+    
     def execute(){
 
-        RelatedContent.findAllWhere("isInternal": false).each() {
+        WcmRelatedContent.findAllWhere("isInternal": false).each() {
             // open connection to external link
             def url = new URL(it.toContent)
             def connection = url.openConnection()

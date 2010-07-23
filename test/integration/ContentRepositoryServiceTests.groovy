@@ -1,16 +1,11 @@
-import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.weceem.content.*
 import org.weceem.html.*
 import org.weceem.wiki.*
-import org.weceem.files.*
-import org.weceem.services.*
 
-
-class ContentRepositoryServiceTests extends GroovyTestCase {
+class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     
     static transactional = true
     
-    def contentRepositoryService
     def nodeA
     def nodeB
     def nodeC
@@ -19,67 +14,48 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
     def spaceB
     def template
     def defStatus
+    def virtContent1
+    def virtContent2
     
     def extraNode
 
     void setUp() {
         super.setUp()
         
-        contentRepositoryService = new ContentRepositoryService()
-        contentRepositoryService.cacheService = new CacheService()
-        contentRepositoryService.cacheService.cacheManager = new net.sf.ehcache.CacheManager()
-        contentRepositoryService.weceemSecurityService = new WeceemSecurityService()
-        contentRepositoryService.weceemSecurityService.with {
-            grailsApplication = [
-                config: [
-                    weceem: [
-                        security: [
-                            policy: [
-                                path: ''
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-            afterPropertiesSet()
-        }
-        contentRepositoryService.grailsApplication = ApplicationHolder.application
-        contentRepositoryService.afterPropertiesSet()
-        
-        defStatus = new Status(code: 400, description: "published", publicContent: true)
+        defStatus = new WcmStatus(code: 400, description: "published", publicContent: true)
         assert defStatus.save(flush:true)
 
-        spaceA = new Space(name: 'jcatalog', aliasURI: 'jcatalog')
+        spaceA = new WcmSpace(name: 'jcatalog', aliasURI: 'jcatalog')
         assert spaceA.save(flush: true)
-        spaceB = new Space(name: 'other', aliasURI: 'other')
+        spaceB = new WcmSpace(name: 'other', aliasURI: 'other')
         assert spaceB.save(flush: true)
 
-        template = new Template(title: 'template', aliasURI: 'template',
+        template = new WcmTemplate(title: 'template', aliasURI: 'template',
                     space: spaceA, status: defStatus,
                     createdBy: 'admin', createdOn: new Date(),
                     content: 'template content', orderIndex: 0)
         assert template.save(flush: true)
-        nodeA = new HTMLContent(title: 'contentA', aliasURI: 'contentA',
+        nodeA = new WcmHTMLContent(title: 'contentA', aliasURI: 'contentA',
                 content: 'sample A content', status: defStatus,
                 createdBy: 'admin', createdOn: new Date(),
                 space: spaceA, keywords: 'software',
                 template: template, orderIndex: 1)
         assert nodeA.save(flush: true)
-        nodeB = new HTMLContent(title: 'contentB', aliasURI: 'contentB',
+        nodeB = new WcmHTMLContent(title: 'contentB', aliasURI: 'contentB',
                 parent: nodeA,
                 content: 'sample B content', status: defStatus,
                 createdBy: 'admin', createdOn: new Date(),
                 space: spaceA, keywords: 'software',
                 template: template, orderIndex: 2)
         assert nodeB.save(flush:true)
-        nodeC = new HTMLContent(title: 'contentC', aliasURI: 'contentC',
+        nodeC = new WcmHTMLContent(title: 'contentC', aliasURI: 'contentC',
                 parent: nodeA,
                 content: 'sample C content', status: defStatus,
                 createdBy: 'admin', createdOn: new Date(),
                 space: spaceA, keywords: 'software',
                 template: template, orderIndex: 3)
         assert nodeC.save(flush:true)
-        nodeWiki = new WikiItem(title: 'contentD', aliasURI: 'contentD',
+        nodeWiki = new WcmWikiItem(title: 'contentD', aliasURI: 'contentD',
                 parent: nodeA,
                 content: 'sample D content', status: defStatus,
                 createdBy: 'admin', createdOn: new Date(),
@@ -92,18 +68,18 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
         nodeA.children << nodeWiki
         nodeA.save(flush: true)
 
-        def virtContent1 = new VirtualContent(title: 'virtContent1', aliasURI: 'virtContent1',
+        virtContent1 = new WcmVirtualContent(title: 'virtContent1', aliasURI: 'virtContent1',
                            parent: nodeC, target: nodeB, status: defStatus,
-                           content: 'VirtualContent B for nodeC',
+                           content: 'WcmVirtualContent B for nodeC',
                            space: spaceA, orderIndex: 5)
         assert virtContent1.save(flush:true)
         nodeC.children = new TreeSet()
         nodeC.children << virtContent1
         nodeC.save()
 
-        def virtContent2 = new VirtualContent(title: 'virtContent2', aliasURI: 'virtContent2',
+        virtContent2 = new WcmVirtualContent(title: 'virtContent2', aliasURI: 'virtContent2',
                            parent: nodeWiki, target: nodeB, status: defStatus,
-                           content: 'VirtualContent B for nodeWiki',
+                           content: 'WcmVirtualContent B for nodeWiki',
                            space: spaceA, orderIndex: 6)
         assert virtContent2.save(flush:true)
         nodeWiki.children = new TreeSet()
@@ -120,7 +96,7 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
         //       ----b (3)
 
 
-        assert new HTMLContent(title: 'Other Index', aliasURI: 'contentA',
+        assert new WcmHTMLContent(title: 'Other Index', aliasURI: 'contentA',
                 content: 'Other Index page', status: defStatus,
                 createdBy: 'admin', createdOn: new Date(),
                 space: spaceB, 
@@ -129,43 +105,43 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
     }
 
     void tearDown() {
-        Content.list().each {
+        WcmContent.list().each {
             it.children = [] as SortedSet
             it.parent = null 
         }
-        HTMLContent.list()*.template = null
-        WikiItem.list()*.template = null
-        VirtualContent.list()*.target = null
-        //Content.list()*.delete(flush:true)
+        WcmHTMLContent.list()*.template = null
+        WcmWikiItem.list()*.template = null
+        WcmVirtualContent.list()*.target = null
+        //WcmContent.list()*.delete(flush:true)
     }
 
     void testResolveSpaceAndURI() {
-        def res = contentRepositoryService.resolveSpaceAndURI('/jcatalog/anything')
+        def res = wcmContentRepositoryService.resolveSpaceAndURI('/jcatalog/anything')
         assert res.space.id == spaceA.id
         assertEquals 'anything', res.uri
         
-        res = contentRepositoryService.resolveSpaceAndURI('jcatalog/anything')
+        res = wcmContentRepositoryService.resolveSpaceAndURI('jcatalog/anything')
         assert res.space.id == spaceA.id
         assertEquals 'anything', res.uri
 
-        res = contentRepositoryService.resolveSpaceAndURI('other/anything')
+        res = wcmContentRepositoryService.resolveSpaceAndURI('other/anything')
         assert res.space.id == spaceB.id
         assertEquals 'anything', res.uri
     }
 
     void testFindContentForPath() {
         // Without cache
-        assertEquals nodeA.id, contentRepositoryService.findContentForPath('contentA', spaceA, false).content.id
-        assertEquals nodeB.id, contentRepositoryService.findContentForPath('contentA/contentB', spaceA, false).content.id
-        assertFalse nodeA.id == contentRepositoryService.findContentForPath('contentA', spaceB, false).content.id
-        assertNull contentRepositoryService.findContentForPath('contentA/contentB', spaceB, false)
+        assertEquals nodeA.id, wcmContentRepositoryService.findContentForPath('contentA', spaceA, false).content.id
+        assertEquals nodeB.id, wcmContentRepositoryService.findContentForPath('contentA/contentB', spaceA, false).content.id
+        assertFalse nodeA.id == wcmContentRepositoryService.findContentForPath('contentA', spaceB, false).content.id
+        assertNull wcmContentRepositoryService.findContentForPath('contentA/contentB', spaceB, false)
 
         // With cache, once to load, second to hit
         2.times {
-            assertEquals nodeA.id, contentRepositoryService.findContentForPath('contentA', spaceA).content.id
-            assertEquals nodeB.id, contentRepositoryService.findContentForPath('contentA/contentB', spaceA).content.id
-            assertFalse nodeA.id == contentRepositoryService.findContentForPath('contentA', spaceB).content.id
-            assertNull contentRepositoryService.findContentForPath('contentA/contentB', spaceB)
+            assertEquals nodeA.id, wcmContentRepositoryService.findContentForPath('contentA', spaceA).content.id
+            assertEquals nodeB.id, wcmContentRepositoryService.findContentForPath('contentA/contentB', spaceA).content.id
+            assertFalse nodeA.id == wcmContentRepositoryService.findContentForPath('contentA', spaceB).content.id
+            assertNull wcmContentRepositoryService.findContentForPath('contentA/contentB', spaceB)
         }
     }
     
@@ -181,18 +157,18 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
         }
         nodeA.children = null
         assert nodeA.save(flush:true)
-        contentRepositoryService.deleteNode(nodeA)
-        nodeA = Content.findByTitle('contentA')
-        nodeB = Content.findByTitle('contentB')
+        wcmContentRepositoryService.deleteNode(nodeA)
+        nodeA = WcmContent.findByTitle('contentA')
+        nodeB = WcmContent.findByTitle('contentB')
 
         // check that there are no parents for contentC
-        def references = VirtualContent.findAllWhere(target: nodeC)?.unique()*.parent
+        def references = WcmVirtualContent.findAllWhere(target: nodeC)?.unique()*.parent
         if (nodeC.parent) reference << nodeC.parent
          
         assertEquals 0, references.size()
 
         // check that contentA was deleted
-        assertTrue "Countent should not exist!", Content.findByTitle('contentA') == null
+        assertTrue "Countent should not exist!", WcmContent.findByTitle('contentA') == null
     }
 
     void testDeleteNodeB() {
@@ -201,7 +177,7 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
         //   ----c
         //   ----d
         
-        contentRepositoryService.deleteNode(nodeB)
+        wcmContentRepositoryService.deleteNode(nodeB)
         nodeA.refresh()
         nodeC.refresh()
         nodeWiki.refresh()
@@ -224,12 +200,12 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
         //   ----b
         //   ----d
         //       ----b2
-        contentRepositoryService.deleteNode(nodeC)
+        wcmContentRepositoryService.deleteNode(nodeC)
         nodeA.refresh()
         nodeWiki.refresh()
         
         // check that contentB has only two different parents: contentA + contentD
-        def references = VirtualContent.findAllWhere(target: nodeB)*.parent
+        def references = WcmVirtualContent.findAllWhere(target: nodeB)*.parent
         if (nodeB.parent) references << nodeB.parent
 
         assertEquals 2, references.size()  // The node C and its virtual child should have been deleted
@@ -244,14 +220,14 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
         //   ----c
         //   ----d
 
-        contentRepositoryService.deleteNode(VirtualContent.findWhere(title: 'virtContent1'))
+        wcmContentRepositoryService.deleteNode(WcmVirtualContent.findWhere(title: 'virtContent1'))
 
-        nodeA = Content.findByTitle('contentA')
-        nodeC = Content.findByTitle('contentC')
-        nodeWiki = Content.findByTitle('contentD')
+        nodeA = WcmContent.findByTitle('contentA')
+        nodeC = WcmContent.findByTitle('contentC')
+        nodeWiki = WcmContent.findByTitle('contentD')
 
         // Make sure the target of the virtual content is not deleted
-        nodeB = Content.findByTitle('contentB')
+        nodeB = WcmContent.findByTitle('contentB')
         assertNotNull nodeB
 
         // check that there are two childen for contentA: contentC + contentD
@@ -276,12 +252,12 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
         //   ----e
         //       ----b
         
-        contentRepositoryService.deleteLink(nodeC, nodeA)
-        nodeA = Content.findByTitle('contentA')
-        nodeC = Content.findByTitle('contentC')
+        wcmContentRepositoryService.deleteLink(nodeC, nodeA)
+        nodeA = WcmContent.findByTitle('contentA')
+        nodeC = WcmContent.findByTitle('contentC')
         
         // check that nodeC do not have parent contentA
-        def references = VirtualContent.findAllWhere(target: nodeC)*.parent
+        def references = WcmVirtualContent.findAllWhere(target: nodeC)*.parent
         if (nodeC.parent) references << nodeC.parent
         assertEquals 0, references.size()
 
@@ -298,9 +274,9 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
         //       ----b (2)
         //   b
         
-        contentRepositoryService.deleteLink(nodeB, nodeA)
-        nodeA = Content.findByTitle('contentA')
-        nodeB = Content.findByTitle('contentB')
+        wcmContentRepositoryService.deleteLink(nodeB, nodeA)
+        nodeA = WcmContent.findByTitle('contentA')
+        nodeB = WcmContent.findByTitle('contentB')
 
         // check that there is only two child for contentA: contentC, contentD
         def references = nodeA.children
@@ -318,10 +294,10 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
         //   ----d
         //       ----b (virtual copy 2)
 
-        contentRepositoryService.deleteLink(VirtualContent.findWhere(title: 'virtContent1'), nodeC)
-        nodeA = Content.findByTitle('contentA')
-        nodeC = Content.findByTitle('contentC')
-        nodeB = Content.findByTitle('contentB')
+        wcmContentRepositoryService.deleteLink(WcmVirtualContent.findWhere(title: 'virtContent1'), nodeC)
+        nodeA = WcmContent.findByTitle('contentA')
+        nodeC = WcmContent.findByTitle('contentC')
+        nodeB = WcmContent.findByTitle('contentB')
         
         // check that contentC does not have any children
         assertEquals 0, nodeC.children.size()
@@ -341,11 +317,11 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
         //   e
         //   ----c (virtual copy) 
 
-        assert null != contentRepositoryService.linkNode(nodeC, extraNode, 0)
-        nodeC = Content.findByTitle('contentC')
+        assert null != wcmContentRepositoryService.linkNode(nodeC, extraNode, 0)
+        nodeC = WcmContent.findByTitle('contentC')
 
         // check that contentC has 2 parents
-        def references = VirtualContent.findAllWhere(target: nodeC)*.parent
+        def references = WcmVirtualContent.findAllWhere(target: nodeC)*.parent
         if (nodeC.parent) references << nodeC.parent
         assertEquals 2, references.size()
     }
@@ -361,11 +337,11 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
         //   ----b
         //   ----d
         //       ----b
-        assert null != contentRepositoryService.linkNode(nodeB, extraNode, 0)
-        nodeB = Content.findByTitle('contentB')
+        assert null != wcmContentRepositoryService.linkNode(nodeB, extraNode, 0)
+        nodeB = WcmContent.findByTitle('contentB')
 
         // check that contentB has 4 parents
-        def references = VirtualContent.findAllWhere(target: nodeB)*.parent
+        def references = WcmVirtualContent.findAllWhere(target: nodeB)*.parent
         if (nodeB.parent) references << nodeB.parent
         assertEquals 4, references.size()
 
@@ -381,12 +357,12 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
         //       ----b (virtual copy)
         //   ----d
         //       ----b (virtual copy)
-        contentRepositoryService.moveNode(nodeB, null, 0)
-        nodeA = Content.findByTitle('contentA')
-        nodeB = Content.findByTitle('contentB')
+        wcmContentRepositoryService.moveNode(nodeB, null, 0)
+        nodeA = WcmContent.findByTitle('contentA')
+        nodeB = WcmContent.findByTitle('contentB')
                 
         // check that copies of contentB has two parents: contentC and extraContent
-        def references = VirtualContent.findAllWhere(target: nodeB)*.parent
+        def references = WcmVirtualContent.findAllWhere(target: nodeB)*.parent
         assertEquals 2, references.size()
         assertNotNull references.find { it == nodeC }
         assertNotNull references.find { it == nodeWiki }
@@ -403,12 +379,12 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
         //   ----c
         //   ----d
         //       ----b (virtual copy 2)
-        contentRepositoryService.moveNode(nodeB, null, 0)
-        nodeA = Content.findByTitle('contentA')
-        nodeB = Content.findByTitle('contentB')
+        wcmContentRepositoryService.moveNode(nodeB, null, 0)
+        nodeA = WcmContent.findByTitle('contentA')
+        nodeB = WcmContent.findByTitle('contentB')
 
         // check that copies of contentB has two parents: contentC and extraContent
-        def references = VirtualContent.findAllWhere(target: nodeB)*.parent
+        def references = WcmVirtualContent.findAllWhere(target: nodeB)*.parent
         assertEquals 2, references.size()
         assertNotNull references.find { it == nodeC }
         assertNotNull references.find { it == nodeWiki }
@@ -427,10 +403,10 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
         //       ----b (virtual copy 2)
         //   e
         //   ----b (virtual copy 3)
-        contentRepositoryService.moveNode(nodeB, extraNode, 0)
-        extraNode = Content.findByTitle('newContent')
-        nodeA = Content.findByTitle('contentA')
-        nodeB = Content.findByTitle('contentB')
+        wcmContentRepositoryService.moveNode(nodeB, extraNode, 0)
+        extraNode = WcmContent.findByTitle('newContent')
+        nodeA = WcmContent.findByTitle('contentA')
+        nodeB = WcmContent.findByTitle('contentB')
 
         // check that extraContent has child: contentB
         def references = extraNode.children
@@ -449,23 +425,23 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
         //   ----c
         //       ----b
         //       ----e
-        contentRepositoryService.moveNode(extraNode, nodeC, 0)
-        extraNode = Content.findByTitle('newContent')
-        nodeC = Content.findByTitle('contentC')
+        wcmContentRepositoryService.moveNode(extraNode, nodeC, 0)
+        extraNode = WcmContent.findByTitle('newContent')
+        nodeC = WcmContent.findByTitle('contentC')
 
         // check that extraContent has parent: contentC
         assert extraNode.parent == nodeC
         def references = nodeC.children
         assertEquals 2, references.size()
 
-        assertNotNull references.find { it == VirtualContent.findWhere(title: 'virtContent1')}
+        assertNotNull references.find { it == WcmVirtualContent.findWhere(title: 'virtContent1')}
         assertNotNull references.find { it == extraNode}
     }
 
     void testContentDetails() {
-        def content = Content.findByTitle('contentA')
-        def details = contentRepositoryService.getContentDetails(content)
-        assertEquals 'org.weceem.html.HTMLContent', details.className
+        def content = WcmContent.findByTitle('contentA')
+        def details = wcmContentRepositoryService.getContentDetails(content)
+        assertEquals 'org.weceem.html.WcmHTMLContent', details.className
         assertEquals 'contentA', details.title
         assertEquals 'admin', details.createdBy
         assertNotNull details.createdOn
@@ -473,19 +449,19 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
         //assertNull details.changedBy // it has not been changed
         //assertNull details.changedOn
         assertEquals content.summary, details.summary
-        assertEquals 'org.weceem.html.HTMLContent', details.contentType
+        assertEquals 'org.weceem.html.WcmHTMLContent', details.contentType
     }
 
     void insertNewNode() {
-        extraNode = new HTMLContent(title: 'newContent', aliasURI: 'newContent',
+        extraNode = new WcmHTMLContent(title: 'newContent', aliasURI: 'newContent',
                 content: 'sample newContent', status: defStatus,
                 createdBy: 'admin', createdOn: new Date(),
-                space: Space.findWhere(name: 'jcatalog'), keywords: 'software',
-                template: Template.findWhere(title: 'template')).save(flush: true)
+                space: WcmSpace.findWhere(name: 'jcatalog'), keywords: 'software',
+                template: WcmTemplate.findWhere(title: 'template')).save(flush: true)
     }
 
     void testFindChildrenNoType() {
-        def children = contentRepositoryService.findChildren(nodeA)
+        def children = wcmContentRepositoryService.findChildren(nodeA)
         assertEquals 3, children.size()
         assertTrue children.contains(nodeB)
         assertTrue children.contains(nodeC)
@@ -493,18 +469,18 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
     }
 
     void testFindChildrenWithType() {
-        def children = contentRepositoryService.findChildren(nodeA, [type:WikiItem])
+        def children = wcmContentRepositoryService.findChildren(nodeA, [type:WcmWikiItem])
         assertEquals 1, children.size()
         assertTrue children.contains(nodeWiki)
 
-        children = contentRepositoryService.findChildren(nodeA, [type:HTMLContent])
+        children = wcmContentRepositoryService.findChildren(nodeA, [type:WcmHTMLContent])
         assertEquals 2, children.size()
         assertTrue children.contains(nodeB)
         assertTrue children.contains(nodeC)
     }
 
     void testFindParentsNoType() {
-        def parents = contentRepositoryService.findParents(nodeB)
+        def parents = wcmContentRepositoryService.findParents(nodeB)
         assertEquals 3, parents.size()
         assertTrue parents.contains(nodeA)
         assertTrue parents.contains(nodeC)
@@ -512,11 +488,11 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
     }
 
     void testFindParentsWithType() {
-        def parents = contentRepositoryService.findParents(nodeB, [type:WikiItem])
+        def parents = wcmContentRepositoryService.findParents(nodeB, [type:WcmWikiItem])
         assertEquals 1, parents.size()
         assertTrue parents.contains(nodeWiki)
 
-        parents = contentRepositoryService.findParents(nodeB, [type:HTMLContent])
+        parents = wcmContentRepositoryService.findParents(nodeB, [type:WcmHTMLContent])
         assertEquals 2, parents.size()
         assertTrue parents.contains(nodeA)
         assertTrue parents.contains(nodeC)
@@ -524,31 +500,31 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
         
 
     void testCreateNode() {
-        def newnode = new HTMLContent(title: 'contentX', aliasURI: 'contentX',
+        def newnode = new WcmHTMLContent(title: 'contentX', aliasURI: 'contentX',
                 content: 'sample X content', status: defStatus,
                 createdBy: 'admin', createdOn: new Date(),
                 space: spaceA, keywords: 'software',
                 template: template, orderIndex: 1)
 
-        assertTrue contentRepositoryService.createNode(newnode, null)
+        assertTrue wcmContentRepositoryService.createNode(newnode, null)
 
-        def newnode2 = new HTMLContent(title: 'contentY', aliasURI: 'contentY',
+        def newnode2 = new WcmHTMLContent(title: 'contentY', aliasURI: 'contentY',
                 content: 'sample Y content', status: defStatus, 
                 createdBy: 'admin', createdOn: new Date(),
                 space: spaceA, keywords: 'software',
                 template: template, orderIndex: 1)
-        assertTrue contentRepositoryService.createNode(newnode2, nodeB)
+        assertTrue wcmContentRepositoryService.createNode(newnode2, nodeB)
         assertEquals nodeB, newnode2.parent
         assertTrue nodeB.children.contains(newnode2)
     }
 
     void testFindByRootURI() {
-        def node = contentRepositoryService.findRootContentByURI('contentA', spaceA)
+        def node = wcmContentRepositoryService.findRootContentByURI('contentA', spaceA)
         assertEquals nodeA, node
     }
 
     void testFindChildrenSorted() {
-        def nodes = contentRepositoryService.findChildren(nodeA, [params:[sort:'title', order:'desc']])
+        def nodes = wcmContentRepositoryService.findChildren(nodeA, [params:[sort:'title', order:'desc']])
         
         def expectedNodes = [nodeB, nodeC, nodeWiki]
         assertTrue nodes.every { expectedNodes.contains(it) }
@@ -560,24 +536,85 @@ class ContentRepositoryServiceTests extends GroovyTestCase {
     }
 
     void testFindAllRootContent() {
-        def nodes = contentRepositoryService.findAllRootContent(spaceA)
+        def nodes = wcmContentRepositoryService.findAllRootContent(spaceA)
         println "nodes: $nodes"
         assertEquals 2, nodes.size()
         assertTrue nodes.contains(nodeA)
         assertTrue nodes.contains(template)
     }
+    
+    void testFindAllContent() {
+        def nodes = wcmContentRepositoryService.findAllContent(spaceA)
+        println "nodes: $nodes"
+        assertEquals 7, nodes.size()
+        assertTrue nodes.contains(nodeA)
+        assertTrue nodes.contains(nodeB)
+        assertTrue nodes.contains(nodeC)
+        assertTrue nodes.contains(nodeWiki)
+        assertTrue nodes.contains(template)
+        assertTrue nodes.contains(virtContent1)
+        assertTrue nodes.contains(virtContent2)
+    }
+    
+    void testFindAllContentWithType() {
+        def nodes = wcmContentRepositoryService.findAllContent(spaceA, [type: 'org.weceem.html.WcmHTMLContent'])
+        println "nodes: $nodes"
+        assertEquals 3, nodes.size()
+        assertTrue nodes.contains(nodeA)
+        assertTrue nodes.contains(nodeB)
+        assertTrue nodes.contains(nodeC)
+    }
+    
+    void testFindAllContentWithStatus() {
+        def status100 = new WcmStatus(code: 100, description: "draft", publicContent: false)
+        assert status100.save(flush:true)
+        def status200 = new WcmStatus(code: 200, description: "review", publicContent: true)
+        assert status200.save(flush:true)
+        nodeA.status = status100
+        assert nodeA.save(flush: true)
+        nodeC.status = status200
+        assert nodeC.save(flush: true)
+        
+        def nodes = wcmContentRepositoryService.findAllContent(spaceA, [status: [100, 200]])
+        println "nodes: $nodes"
+        assertEquals 2, nodes.size()
+        assertTrue nodes.contains(nodeA)
+        assertTrue nodes.contains(nodeC)
+    }
+    
+    void testCountContent() {
+        assertEquals(7, wcmContentRepositoryService.countContent(spaceA))
+    }
+    
+    void testCountContentWithType() {
+        assertEquals(3, wcmContentRepositoryService.countContent(spaceA, [type: 'org.weceem.html.WcmHTMLContent']))
+    }
+    
+    void testCountContentWithStatus() {
+        def status100 = new WcmStatus(code: 100, description: "draft", publicContent: false)
+        assert status100.save(flush:true)
+        def status200 = new WcmStatus(code: 200, description: "review", publicContent: true)
+        assert status200.save(flush:true)
+        nodeA.status = status100
+        assert nodeA.save(flush: true)
+        nodeC.status = status200
+        assert nodeC.save(flush: true)
+        
+        assertEquals(2, wcmContentRepositoryService.countContent(spaceA, [status: [100, 200]]))
+    }
+
 
     void testFindReferencesTo(){
-        def contentC = Content.findByAliasURI("contentC")
-        def contentA = Content.findByAliasURI("contentA")
-        def virtContent1 = VirtualContent.findByAliasURI("virtContent1")
-        def refs = contentRepositoryService.findReferencesTo(contentC)
+        def contentC = WcmContent.findByAliasURI("contentC")
+        def contentA = WcmContent.findByAliasURI("contentA")
+        def virtContent1 = WcmVirtualContent.findByAliasURI("virtContent1")
+        def refs = wcmContentRepositoryService.findReferencesTo(contentC)
         for (ref in refs){
             assert (ref.referencingContent.aliasURI == contentA.aliasURI) || 
             (ref.referencingContent.aliasURI == virtContent1.aliasURI)
             assert ref.targetContent.aliasURI == contentC.aliasURI
             def refCont = ref.referencingContent."${ref.referringProperty}"
-            if (refCont instanceof Content){
+            if (refCont instanceof WcmContent){
                 assert refCont.aliasURI == contentC.aliasURI
             }
             if (refCont instanceof Collection){

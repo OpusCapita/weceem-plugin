@@ -1,3 +1,5 @@
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
+
 /**
  * This {@link groovy.util.ConfigObject} script provides Grails Searchable Plugin configuration.
  *
@@ -32,7 +34,7 @@ searchable {
      * The default is "${user.home}/.grails/projects/${app.name}/searchable-index/${grails.env}"
      */
     compassConnection = new File( 
-        System.getProperty('weceem.index.location', "${userHome}/.weceem/searchable-index") 
+        "${userHome}/.weceem/searchable-index"
     ).absolutePath
 
     /**

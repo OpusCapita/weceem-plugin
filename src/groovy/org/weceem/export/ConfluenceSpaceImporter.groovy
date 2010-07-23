@@ -17,10 +17,10 @@ class ConfluenceSpaceImporter implements SpaceImporter {
 
     Log log = LogFactory.getLog(DefaultSpaceImporter)
 
-    public void execute(Space space, File file) {
+    public void execute(WcmSpace space, File file) {
         def grailsApp = ApplicationHolder.application
 
-        def defStatus = Status.findByPublicContent(true)
+        def defStatus = WcmStatus.findByPublicContent(true)
         def parser = SAXParserFactory.newInstance().newSAXParser()
         def handler = new SAXConfluenceParser()
         try {
@@ -36,15 +36,15 @@ class ConfluenceSpaceImporter implements SpaceImporter {
         // group pages by title
         def pageGroups = handler.pages.groupBy { it.title }
         pageGroups.each {k, v ->
-            def wi = new WikiItem(title: k, space: space, status: defStatus)
-            wi.createAliasURI()
+            def wi = new WcmWikiItem(title: k, space: space, status: defStatus)
+            wi.createAliasURI(null)
             def latestItem = v.max { Long.valueOf(it.version) }
             wi.content = latestItem.body
 
-            def wikiItem = WikiItem.findWhere(aliasURI: wi.aliasURI, space: space)
+            def wikiItem = WcmWikiItem.findWhere(aliasURI: wi.aliasURI, space: space)
             if (wikiItem) {
                 // @todo remove this and revert to x.properties = y after Grails 1.2-RC1
-                grailsApp.mainContext.contentRepositoryService.hackedBindData(wikiItem, wi.properties)
+                grailsApp.mainContext.wcmContentRepositoryService.hackedBindData(wikiItem, wi.properties)
             } else wikiItem = wi
             wikiItem.save(flush: true)
         }

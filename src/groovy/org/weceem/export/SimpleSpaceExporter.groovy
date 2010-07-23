@@ -2,16 +2,12 @@ package org.weceem.export
 
 import java.text.SimpleDateFormat
 import org.codehaus.groovy.grails.commons.ApplicationHolder
-import com.thoughtworks.xstream.XStream
+
 import groovy.xml.MarkupBuilder
 
 import org.weceem.content.*
-import org.weceem.css.*
+
 import org.weceem.files.*
-import org.weceem.blog.*
-import org.weceem.html.*
-import org.weceem.wiki.*
-import java.text.SimpleDateFormat
 
 /**
  * SimpleSpaceExporter.
@@ -20,10 +16,10 @@ import java.text.SimpleDateFormat
  */
 class SimpleSpaceExporter implements SpaceExporter {
     
-    File execute(Space spc) {
+    File execute(WcmSpace spc) {
         def ts = new SimpleDateFormat('yyMMddHHmmssSSS').format(new Date())
         def filesDir = new File(ApplicationHolder.application.mainContext.servletContext.getRealPath(
-                "/${ContentFile.DEFAULT_UPLOAD_DIR}"))
+                "/${WcmContentFile.DEFAULT_UPLOAD_DIR}"))
 
         def baseDir = new File("${filesDir.absolutePath}/export-${ts}")
         baseDir.mkdir()
@@ -33,8 +29,8 @@ class SimpleSpaceExporter implements SpaceExporter {
         def writer = new StringWriter()
         def xml = new MarkupBuilder(writer)
         
-        def contentList = Content.findAll(
-                "from Content c where c.space=? ", spc)
+        def contentList = WcmContent.findAll(
+                "from WcmContent c where c.space=? ", spc)
         //Building XML structure
         xml.content(){
             for (cnt in contentList){
@@ -46,13 +42,9 @@ class SimpleSpaceExporter implements SpaceExporter {
                         if (cntProp != null){
                             def cntPropClass = cntProp.class
                             def cntPropClassName = ""
-                            if (cntProp.metaClass.respondsTo(cntProp, "toName")){
-                                cntPropClassName = cntProp.toName()
-                            }else{
-                                cntPropClassName = cntProp.class.name
-                            }
+                            cntPropClassName = cntProp.class.name
                             //Check property's type: association or not
-                            if (prop.isAssociation() && !Status.isAssignableFrom(cntPropClass)){
+                            if (prop.isAssociation() && !WcmStatus.isAssignableFrom(cntPropClass)){
                                 if (Collection.isAssignableFrom(cntPropClass)){
                                     "${prop.name}"("class": cntPropClassName){
                                         for (child in cntProp){
@@ -71,6 +63,8 @@ class SimpleSpaceExporter implements SpaceExporter {
                             }
                         }
                     }
+                    // Write out the tags
+                    tags(cnt.tags.join(','))
                 }
             }
         }
@@ -102,8 +96,7 @@ class SimpleSpaceExporter implements SpaceExporter {
         def grailsApp = ApplicationHolder.application
         def props = grailsApp.getDomainClass(obj.class.name).
             getPersistentProperties().findAll{prop -> 
-            !(prop.name in ["language", "space", "versioningContent", 
-            "mimeType", "versioningProperties"])}
+                !(prop.name in ["space"])}
         return props
     }
     
@@ -116,7 +109,7 @@ class SimpleSpaceExporter implements SpaceExporter {
         (java.lang.Integer): {value-> value},
         (java.lang.Short): {value-> value},
         (java.lang.String): {value -> value},
-        (org.weceem.content.Status): {value -> value.code}
+        (org.weceem.content.WcmStatus): {value -> value.code}
     ]
 
 }

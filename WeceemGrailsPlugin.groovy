@@ -1,25 +1,24 @@
 import org.apache.commons.logging.LogFactory
-import org.codehaus.groovy.grails.commons.GrailsDomainClass
-import org.codehaus.groovy.grails.commons.GrailsServiceClass
-import grails.util.Environment
-
-import org.weceem.content.*
 
 class WeceemGrailsPlugin {
     def _log = LogFactory.getLog('org.weceem.WeceemGrailsPlugin')
 
     // the plugin version
-    def version = "0.8"
+    def version = "0.9"
     // the version or versions of Grails the plugin is designed for
-    def grailsVersion = "1.2.0 > *"
+    def grailsVersion = "1.2.2 > *"
     
     // the other plugins this plugin depends on
     def dependsOn = [
-        searchable:'0.5.4 > *', 
-        quartz:'0.4.1 > *', 
+        searchable:'0.5.5 > *', 
+        quartz:'0.4.2 > *', 
         navigation:'1.1.1 > *',
         fckeditor:'0.9.2 > *',
-        beanFields:'0.4 > *'
+        feeds:'1.5 > *',
+        beanFields:'1.0-RC3 > *',
+        blueprint:'0.9.1.1 > *',
+        jqueryUi:'1.8.2.4 > *',
+        taggable:'0.6.2 > *'
     ]
     def observe = ["hibernate", 'services']
     
@@ -28,7 +27,7 @@ class WeceemGrailsPlugin {
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
         "grails-app/views/error.gsp",
-        "web-app/${org.weceem.files.ContentFile.DEFAULT_UPLOAD_DIR}/**/*"
+        "web-app/${org.weceem.files.WcmContentFile.DEFAULT_UPLOAD_DIR}/**/*"
     ]
 
     // TODO Fill in these fields
@@ -48,8 +47,11 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         simpleSpaceImporter(org.weceem.export.SimpleSpaceImporter)
         defaultSpaceImporter(org.weceem.export.DefaultSpaceImporter)
         confluenceSpaceImporter(org.weceem.export.ConfluenceSpaceImporter)
+
+        // Register our custom binding beans
+        customPropertyEditorRegistrar(org.weceem.binding.CustomPropertyEditorRegistrar)
         
-        cacheManager(net.sf.ehcache.CacheManager) { bean -> 
+        weceemCacheManager(net.sf.ehcache.CacheManager) { bean -> 
             bean.destroyMethod = 'shutdown'
         }
     }
@@ -60,23 +62,23 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         _log.info "Weceem plugin running with grails configuration ${applicationContext.grailsApplication.config}"
         
         applicationContext.navigationService.registerItem( 'weceem', 
-            [controller:'repository', action:'treeTable', title:'content', path:'contentrepo', order:0])
+            [controller:'wcmRepository', action:'treeTable', title:'content', path:'contentrepo', order:0])
         applicationContext.navigationService.registerItem( 'weceem', 
-            [controller:'portal', action:'administration', title:'administration', path:'admin',order:2])
+            [controller:'wcmPortal', action:'administration', title:'administration', path:'admin',order:2])
         [
-            [controller:'space', action:'list', title:'spaces', path:'admin/spaces', order: 0],
-            [controller:'synchronization', action:'list', title:'synchronize', path:'admin/files/synchronize', order: 1],
-            [controller:'portal', action:'comingsoon', title:'plugins', path:'admin/plugins', order: 2],
-            [controller:'portal', action:'licenses', title:'licenses', path:'admin/licenses', order: 3],
-            [controller:'portal', action:'comingsoon', title:'linkcheck', path:'admin/linkchecker', order: 4] ].each { item ->
+            [controller:'wcmSpace', action:'list', title:'spaces', path:'admin/spaces', order: 0],
+            [controller:'wcmSynchronization', action:'list', title:'synchronize', path:'admin/files/synchronize', order: 1],
+            [controller:'wcmPortal', action:'comingsoon', title:'plugins', path:'admin/plugins', order: 2],
+            [controller:'wcmPortal', action:'licenses', title:'licenses', path:'admin/licenses', order: 3],
+            [controller:'wcmPortal', action:'comingsoon', title:'linkcheck', path:'admin/linkchecker', order: 4] ].each { item ->
                 applicationContext.navigationService.registerItem( 'weceem.plugin.admin', item)
         }
 
-        applicationContext.editorService.cacheEditorInfo()
-        applicationContext.editorService.configureFCKEditor()
+        applicationContext.wcmEditorService.cacheEditorInfo()
+        applicationContext.wcmEditorService.configureFCKEditor()
 
-        applicationContext.contentRepositoryService.createDefaultStatuses()
-        applicationContext.contentRepositoryService.createDefaultSpace()
+        applicationContext.wcmContentRepositoryService.createDefaultStatuses()
+        applicationContext.wcmContentRepositoryService.createDefaultSpace()
     }
 
     def doWithWebDescriptor = { xml ->
@@ -88,7 +90,7 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
 
     def onChange = { event ->
         // Reload all if service / whole app reloaded
-        applicationContext.editorService.cacheEditorInfo()
+        applicationContext.wcmEditorService.cacheEditorInfo()
     }
 
     def onConfigChange = { event ->

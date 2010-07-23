@@ -24,8 +24,8 @@ class ImportExportConverter implements Converter {
     }
 
     public boolean canConvert(Class clazz) {
-        clazz.name != rootClassName && (clazz.equals(Space.class)
-                || clazz.equals(Template.class))
+        clazz.name != rootClassName && (clazz.equals(WcmSpace.class)
+                || clazz.equals(WcmTemplate.class))
     }
 
     public void marshal(Object value, HierarchicalStreamWriter writer,
@@ -36,14 +36,14 @@ class ImportExportConverter implements Converter {
         writer.startNode('id')
         writer.setValue(value.id.toString())
         writer.endNode()
-        if (value instanceof Template) {
+        if (value instanceof WcmTemplate) {
             writer.startNode('aliasURI')
             writer.setValue(value.aliasURI)
             writer.endNode()
             writer.startNode('spaceName')
             writer.setValue(value.space.name)
             writer.endNode()
-        } else if (value instanceof Space) {
+        } else if (value instanceof WcmSpace) {
             writer.startNode('name')
             writer.setValue(value.name)
             writer.endNode()
@@ -61,22 +61,22 @@ class ImportExportConverter implements Converter {
         
         def result
         switch (className) {
-            case Template.class.name:
+            case WcmTemplate.class.name:
                 reader.moveDown()
                 def aliasURI = reader.value
                 reader.moveUp()
                 reader.moveDown()
                 def spaceName = reader.value
                 reader.moveUp()
-                result = Template.findWhere(aliasURI: aliasURI,
-                        space: Space.findByName(spaceName))
+                result = WcmTemplate.findWhere(aliasURI: aliasURI,
+                        space: WcmSpace.findByName(spaceName))
                 break
 
-            case Space.class.name:
+            case WcmSpace.class.name:
                 reader.moveDown()
                 def name = reader.value
                 reader.moveUp()
-                result = Space.findByName(name)
+                result = WcmSpace.findByName(name)
                 break
  
             default:

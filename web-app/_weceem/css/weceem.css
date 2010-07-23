@@ -91,3 +91,31 @@ th.asc a{
 th.desc a{
   background: url(../images/skin/sorted_desc.gif) center right no-repeat;
 }
+
+textarea {
+    width: auto;
+    height: auto;
+}
+
+button.removeTag {
+    float: none;
+    display: inline;
+}
+
+div.existingTag {
+    display: inline;
+}
+
+#editor-extras {
+    padding: 0;
+}
+
+label {
+    padding-top: 10px;
+    display: block;
+}
+
+/* override the jquery treetable CSS */
+div.table {
+    margin-bottom: 0;
+}

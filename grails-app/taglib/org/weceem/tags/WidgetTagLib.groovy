@@ -17,8 +17,11 @@ import org.weceem.content.*
 import grails.util.GrailsUtil
 import org.weceem.security.AccessDeniedException
 
+import org.weceem.controllers.WcmContentController
+
+
 /**
- * Widget tag library describes the widget tag.
+ * WcmWidget tag library describes the widget tag.
  * Tag renders a DIV widget with special settings and behaviour.
  * If the session mode is editable (session.mode == 'edit') its possible to
  * edit widgets by clicking on it.
@@ -34,22 +37,22 @@ class WidgetTagLib {
 
     static namespace = "wcm"
     
-    def contentRepositoryService
+    def wcmContentRepositoryService
     
     def widget = {attrs, body ->
         def widget
         def path = attrs.path
-        def space = attrs.space ? Space.findByAliasURI(attrs.space) : pageScope.space
-        if(!space) {throwTagError("No space by name ${attrs.space}")}
+        def space = attrs.space ? WcmSpace.findByAliasURI(attrs.space) : request[WcmContentController.REQUEST_ATTRIBUTE_SPACE]
+        if(!space) {throwTagError("No space by name ${attrs.space} or in page scope")}
 
         if (path) {
-            widget = contentRepositoryService.findContentForPath(path, space)?.content
+            widget = wcmContentRepositoryService.findContentForPath(path, space)?.content
             if (!widget) {
                 throwTagError("There is no Widget at aliasURI [${path}] in the space [${space.name}]")
             }
         } else if (attrs.id) {
             log.warn("Use of [id] attribute on widget tag is deprecated")
-            widget = Widget.findBySpaceAndTitle(space, attrs.id)
+            widget = WcmWidget.findBySpaceAndTitle(space, attrs.id)
             if (!widget) {
                 throwTagError("There is no Widget with title [${attrs.id}] in the space [${space.name}]. Tip: use path attribute!")
             }
@@ -61,14 +64,14 @@ class WidgetTagLib {
         def id = attrs.id ?: widget.id
         /*
         if (session.mode == 'edit') {
-            out << "<div id=\"${id}\" onclick=\"window.open('${createLink(controller: 'widget', action: 'edit', id: widget.id, params: ['externalCall': true])}', 'Edit Widget', 'resizable=yes, scrollbars=yes, status=no'\">"
+            out << "<div id=\"${id}\" onclick=\"window.open('${createLink(controller: 'widget', action: 'edit', id: widget.id, params: ['externalCall': true])}', 'Edit WcmWidget', 'resizable=yes, scrollbars=yes, status=no'\">"
         } else {
             out << "<div id=\"${id}\">"
         }*/
 
         out << body()
 
-        def groovyTemplate = contentRepositoryService.getGSPTemplate(widget.absoluteURI, widget.content)
+        def groovyTemplate = wcmContentRepositoryService.getGSPTemplate(widget)
         try {
             if (attrs.model instanceof Map) {
                 def model = [:] 
@@ -80,7 +83,7 @@ class WidgetTagLib {
                 groovyTemplate.make(model).writeTo(out)
             } else {
                 if (log.debugEnabled) {
-                    log.debug "Widget executing with pageScope variables"
+                    log.debug "WcmWidget executing with pageScope variables"
                 }
                 groovyTemplate.make(pageScope.variables).writeTo(out)
             }
@@ -88,7 +91,7 @@ class WidgetTagLib {
             log.error "Security errors prevented widget from rendering", GrailsUtil.deepSanitize(ade)
         } catch (Throwable t) {
             log.error "Error executing widget page", GrailsUtil.deepSanitize(t)
-            throwTagError("There is an error in widget at [${path}], please see the logs")
+            throwTagError("There is an error in widget at [${path}], please see the logs. Error was: "+t)
         }
 
         //out << "</div>"

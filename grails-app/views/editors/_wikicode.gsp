@@ -6,7 +6,7 @@
                 var richEditor = FCKeditorAPI.GetInstance("${name}");
                 switch (tabid){
                     case "tab-${name}-1":
-                        $.post("${createLink(action: 'convertToWiki', controller: 'editor')}",
+                        $.post("${createLink(action: 'convertToWiki', controller: 'wcmEditor')}",
                             {text: richEditor.GetXHTML(true)},
                             function (data){
         	                    var response = eval('(' + data + ')');
@@ -14,7 +14,7 @@
         	                });
                         break;
                     case "tab-${name}-2":
-                        $.post("${createLink(action: 'convertToHtml', controller: 'editor')}",
+                        $.post("${createLink(action: 'convertToHtml', controller: 'wcmEditor')}",
                             {text: $("#wikiEditor")[0].value},
                             function (data){
         	                    var response = eval('(' + data + ')');

@@ -1,17 +1,12 @@
 package org.weceem.export
 
-import com.thoughtworks.xstream.XStream
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.apache.commons.logging.LogFactory
 import org.apache.commons.logging.Log
 
 import org.weceem.content.*
 import org.weceem.files.*
-import org.weceem.blog.*
-import org.weceem.css.*
-import org.weceem.forum.*
-import org.weceem.html.*
-import org.weceem.wiki.*
+
 import java.text.*
 
 /**
@@ -27,7 +22,7 @@ class SimpleSpaceImporter implements SpaceImporter {
     def childrenMap = [:]
     def defStatus
 
-    void execute(Space space, File file) {
+    void execute(WcmSpace space, File file) {
         def tmpDir = File.createTempFile("unzip-import-", null)
         tmpDir.delete()
         tmpDir.mkdir()
@@ -53,25 +48,30 @@ class SimpleSpaceImporter implements SpaceImporter {
         def cont_parent = [:]
         def cont_children = [:]
         //Obtaining default status
-        defStatus = Status.findByPublicContent(true)
-        //Parse each Content element
+        defStatus = WcmStatus.findByPublicContent(true)
+        //Parse each WcmContent element
         xml.children().each{ch ->
             parse(ch, xml, space)
         }
         // if orderIndexes are duplicated than fix it
         fixBrokenIndexes()
         //Recursively save each element
-        for (cnt in backrefMap.values()){
-            saveContent(cnt)
+        for (cntInfo in backrefMap.values()){
+            def savedContent = saveContent(cntInfo.content)
+            
+            // Reinstate tags
+            if (cntInfo.tags) {
+                savedContent.parseTags(cntInfo.tags)
+            }
         }
         //Update element's children
         for (entry in backrefMap.entrySet()){
-            def cnt = entry.value
+            def cnt = entry.value.content
             if (cnt){
                 def sid = entry.key
                 def childrenList = childrenMap[(sid)]
                 for (chid in childrenList){
-                    cnt.addToChildren(backrefMap[(chid)])
+                    cnt.addToChildren(backrefMap[(chid)].content)
                 }
                 if (!cnt.save()){
                     log.error("Can't save content: ${cnt.aliasURI}, error: ${cnt.errors}")
@@ -79,7 +79,7 @@ class SimpleSpaceImporter implements SpaceImporter {
             }
         }
         def filesDir = new File(ApplicationHolder.application.mainContext.servletContext.getRealPath(
-                "/${ContentFile.DEFAULT_UPLOAD_DIR}"))
+                "/${WcmContentFile.DEFAULT_UPLOAD_DIR}"))
         ant.copy(todir: "${filesDir.absolutePath}/${space.makeUploadName()}", failonerror: false) {
             fileset(dir: "${tmpDir.absolutePath}/files")
         }
@@ -97,7 +97,7 @@ class SimpleSpaceImporter implements SpaceImporter {
                 }
             }
             return true
-        }.collect{it -> it.value}
+        }.collect{it -> it.value.content }
         // update orderIndex for root nodes 
         def prevIndex = 0
         if (rootNodes*.orderIndex.unique().size() != rootNodes.size()){
@@ -113,8 +113,8 @@ class SimpleSpaceImporter implements SpaceImporter {
         // update orderIndex for all children
         childrenMap.each{parent, children->
             prevIndex = 0
-            def chdr = children.collect{it -> 
-                backrefMap[it]
+            def chdr = children.collect{ it -> 
+                backrefMap[it]?.content
             }.findAll{it-> it != null}
             if (chdr*.orderIndex.unique().size() != chdr.size()){
                 chdr.sort().eachWithIndex(){it, i->
@@ -133,18 +133,18 @@ class SimpleSpaceImporter implements SpaceImporter {
     * Recursively parse content and it's references from XML to backrefMap
     */
     def parse(def element, def document, def space){
-        def grailsApp = ApplicationHolder.application
         if (element.name() == "*") return
         def id = element.id.text().toLong()
-        def props = grailsApp.getDomainClass(element.name()).getPersistantProperties()
+        def props = getDomainClassArtefact(element.name()).getPersistantProperties()
         if (backrefMap[id] != null){
             return backrefMap[id]
         }
         def params = [:]
-        params += ["space": (space)]
+        def tags
+                
         //Getting element's properties
         element.children().each{child->
-            if (child.name() != "id"){
+            if (!["id", 'tags'].contains(child.name()) ){
                 def currProp = props.find{prop -> prop.name == child.name()}
                 //Check element's type: association or not
                 if (currProp?.isAssociation() && (currProp.name != "status")){
@@ -159,11 +159,11 @@ class SimpleSpaceImporter implements SpaceImporter {
                         def association
                         //If element was proccessed before, retrieve it from backrefMap
                         if (backrefMap[chldid] != null){
-                            association = backrefMap[chldid]
+                            association = backrefMap[chldid].content
                         }else{
                             def newElement = findByID(document, chldid)
                             association = parse(newElement, document, space)
-                            backrefMap += [(chldid) : (association)]
+                            //backrefMap += [(chldid) : [content:association]
                         }
                         params += [(child.name()) : association]
                     }    
@@ -172,18 +172,26 @@ class SimpleSpaceImporter implements SpaceImporter {
                         k.isAssignableFrom(getClass(child.@class.text()))}.value
                     params += [(child.name()) : conv(child.text())]
                 }
+            } else if ('tags' == child.name()) {
+                tags = child.text()
             }
         }
-        def content = Content.findWhere(aliasURI: params.aliasURI, space: space)
+        def content = WcmContent.findWhere(aliasURI: params.aliasURI, space: space)
         if (!content){
-            content = getClass(element.name()).newInstance()    
+            content = getClass(element.name()).newInstance()
         }
         params.remove "id"
+        params.remove "space"
+        params.remove "space.id"
+        
         // @todo remove this and revert to x.properties = y after Grails 1.2-RC1
-        grailsApp.mainContext.contentRepositoryService.hackedBindData(content, params)
+        def grailsApp = ApplicationHolder.application
+        grailsApp.mainContext.wcmContentRepositoryService.hackedBindData(content, params)
+        
+        content.space = space
         
         if (content.orderIndex == null) content.orderIndex = 0
-        backrefMap += [(id): content]
+        backrefMap += [(id): [content:content, tags:tags] ]
         return content
     }
     
@@ -194,18 +202,16 @@ class SimpleSpaceImporter implements SpaceImporter {
         if (content == null) return
         def grailsApp = ApplicationHolder.application
         //if status isn't set then set default status
-        if ((content instanceof Content) && (content.status == null)){
+        if ((content instanceof WcmContent) && (content.status == null)){
             content.status = defStatus
         } 
         //If id != null , then element has been already saved
         if (content.id == null){
-            def props = grailsApp.
-                getDomainClass(content.class.name).
-                getPersistentProperties().findAll{p->
-                    p.isAssociation()
-                }
+            def props = grailsApp.getDomainClass(content.class.name).persistentProperties.findAll { p ->
+                p.isAssociation()
+            }
             //If property wasn't saved then save it
-            for (prop in props){
+            for (prop in props) {
                 if ((content."${prop.name}" != null) && 
                     (prop.name != "children") &&
                     (content."${prop.name}".id != null)) 
@@ -213,20 +219,51 @@ class SimpleSpaceImporter implements SpaceImporter {
                     saveContent(content."${prop.name}")
                 }
             }
-            if (!content.save()){
+            
+            def result = content.save()
+            if (!result){
                 log.error("Can't save content: ${content.aliasURI}, error: ${content.errors}")
             }
-        }
+            return result
+        } else return content
     }
     
     def findByID(def document, Long id){
         document.children().find{el ->
         el.id.text().toLong() == id}
     }
-    
+
+    String convertLegacyClassNames(def className) {
+        if (!className.startsWith('org.weceem')) {
+            return className
+        }
+        // It might be an old weceem <= 0.8 export so lets try adding Wcm to the class name
+        def classParts = className.toString().tokenize('.')
+        def convertedLegacyClassName = classParts[0..classParts.size()-2].join('.')
+        convertedLegacyClassName += '.Wcm' + classParts[-1]
+        return convertedLegacyClassName
+    }
+
     Class getClass(def className){
         def classLoader = this.class.classLoader
-        Class.forName(className, false, classLoader)
+        def c
+        try {
+            c = Class.forName(className, false, classLoader)
+        } catch (ClassNotFoundException cnfe) {
+            c = Class.forName(convertLegacyClassNames(className), false, classLoader)
+        }
+        return c
+    }
+
+    def getDomainClassArtefact(def className){
+        def grailsApp = ApplicationHolder.application
+        def c = grailsApp.getDomainClass(className)
+        if (!c) {
+            def newName = convertLegacyClassNames(className)
+            println "Trying to get artefact for legacy class: ${className} using modified name ${newName}"
+            c = grailsApp.getDomainClass(newName)
+        }
+        return c
     }
 
     String getName() {
@@ -240,7 +277,8 @@ class SimpleSpaceImporter implements SpaceImporter {
         (java.lang.Number): {value->
             value.toInteger()},
         (java.lang.String): {value -> value},
-        (org.weceem.content.Status): {value-> Status.findByCode(value)}
+        (java.lang.Boolean): {value -> value.toBoolean()},
+        (org.weceem.content.WcmStatus): {value-> WcmStatus.findByCode(value)}
     ]
 
 }
