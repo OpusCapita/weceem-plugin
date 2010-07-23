@@ -115,3 +115,7 @@ label {
     display: block;
 }
 
+/* override the jquery treetable CSS */
+div.table {
+    margin-bottom: 0;
+}

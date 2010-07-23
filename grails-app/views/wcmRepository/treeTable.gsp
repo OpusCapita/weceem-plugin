@@ -92,7 +92,7 @@ $(function(){
                     <tr>
                       <th align="left">Page</th>
                       <th align="left">Status</th>
-                      <th align="left">Created By</th>
+                      <th align="left">Created by</th>
                       <th align="left">Last changed</th>
                       <th>&nbsp;</th>
                     </tr>
@@ -105,6 +105,7 @@ $(function(){
                 </table>
              </div>
             </div>
+            <div class="span-24 last"><g:render plugin="weceem" template="repository-buttons"/></div>
             
             <div id="searchDiv" style="display: none">
                 <div class="table">
@@ -113,7 +114,7 @@ $(function(){
                           <tr>
                             <th align="left" class="asc"><a href="#" onclick="sortByField('title')">Page&nbsp;&nbsp;</a></th>
                             <th align="left" class="asc"><a href="#" onclick="sortByField('status.description')">Status&nbsp;&nbsp;</a></th>
-                            <th align="left" class="asc"><a href="#" onclick="sortByField('createdBy')">Created By&nbsp;&nbsp;</a></th>
+                            <th align="left" class="asc"><a href="#" onclick="sortByField('createdBy')">Created by&nbsp;&nbsp;</a></th>
                             <th align="left" class="asc"><a href="#" onclick="sortByField('changedOn')">Last changed&nbsp;&nbsp;</a></th>
                           </tr>
                         </thead>
@@ -122,8 +123,6 @@ $(function(){
                     </table>
                 </div>
             </div>
-
-            <div class="span-24 last prepend-top"><g:render plugin="weceem" template="repository-buttons"/></div>
 
 <div id="createNewDialog" class="ui-helper-hidden" title="${message(code:'content.title.create', encodeAsHTML())}">
     <g:form controller="wcmEditor" action="create" method="GET">
