@@ -127,10 +127,10 @@ class WcmContent implements Comparable, Taggable {
         language(group:'extra', editor:'LanguageList')
 
         orderIndex hidden:true
-        createdBy editor:'ReadOnly', group:'extra'
-        createdOn editor:'ReadOnlyDate', group:'extra'
-        changedBy editor:'ReadOnly', group:'extra'
-        changedOn editor:'ReadOnlyDate', group:'extra'
+        createdBy editor:'ModifiedBy', group:'extra'
+        createdOn hidden: true
+        changedBy editor:'ModifiedBy', group:'extra'
+        changedOn hidden: true
         publishFrom group:'extra'
         publishUntil group:'extra'
         tags editor:'Tags', group:'extra'

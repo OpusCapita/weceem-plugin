@@ -51,6 +51,15 @@ class EditorFieldTagLib {
         out << "<span class=\"field-readonly\">${ v ?: '' }</span>"
     }
     
+    def editorFieldModifiedBy = { attrs ->
+        // Only for xxxxBy fields
+        assert attrs.property.endsWith('By')
+        
+        def byProp = pageScope.content[attrs.property]
+        def onProp = pageScope.content[attrs.property[0..-3]+'On']
+        out << "<span class=\"field-readonly\">${byProp.encodeAsHTML()} on ${g.formatDate(date:onProp, format:'d MMM yyyy HH:mm:ss')}</span>"
+    }
+    
     def editorFieldReadOnlyDate = { attrs ->
         out << "<span class=\"field-readonly\">${g.formatDate(date:pageScope.content[attrs.property], format:'d MMM yyyy HH:mm:ss')}</span>"
     }
