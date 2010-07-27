@@ -130,7 +130,7 @@ class EditorFieldTagLib {
             model:[name:attrs.property, value:pageScope.content[attrs.property]])
     }
 
-    def editorFieldContent = { attrs ->
+    def editorFieldWcmContent = { attrs ->
         def contents =  WcmContent.findAllBySpace( pageScope.content.space, [sort:'title']).findAll( { c -> !c.is(pageScope.content) })
         out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
             noSelection: ['':'- No content -'],
