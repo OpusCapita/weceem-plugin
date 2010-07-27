@@ -114,8 +114,8 @@ class WeceemTagLib {
 */    
     private makeFindParams(attrs) {
         def r = [:]
-        r.max = attrs[ATTR_MAX]
-        r.offset = attrs[ATTR_OFFSET]
+        r.max = attrs[ATTR_MAX]?.toInteger()
+        r.offset = attrs[ATTR_OFFSET]?.toInteger()
         r.sort = attrs[ATTR_SORT] ?: 'orderIndex' // Default to orderIndex otherwise things are crazy
         r.order = attrs[ATTR_ORDER] ?: 'asc'
         r.changedSince = attrs[ATTR_CHANGEDSINCE]
@@ -236,18 +236,11 @@ class WeceemTagLib {
                 throwTagError "Tag invoked with space attribute value [${attrs[ATTR_SPACE]}] but no space could be found with that aliasURI"
             }
         }
-        def shuffle = attrs[ATTR_SHUFFLE] ? Boolean.parseBoolean(attrs[ATTR_SHUFFLE].toString()) : false
         def params = makeFindParams(attrs)
         def status = attrs[ATTR_STATUS] ?: WcmContentRepositoryService.STATUS_ANY_PUBLISHED
-        if (shuffle && attrs[ATTR_MAX] && attrs[ATTR_OFFSET] == null) {
-            def countParams = [ATTR_CHANGEDSINCE:params.changedSince, ATTR_CHANGEDBEFORE:params.changedBefore, ATTR_CREATEDSINCE:params.createdSince, ATTR_CREATEDBEFORE:params.createdBefore]
-            def count = wcmContentRepositoryService.countAllContent(space, [type:attrs[ATTR_TYPE], status:status, params:countParams]) 
-            params.offset = (int) Math.round(Math.random() * (count - params.max))
-        }
         
         def contentList = wcmContentRepositoryService.findAllContent(space, [type:attrs[ATTR_TYPE], status:status, params:params])
         if (attrs[ATTR_FILTER]) contentList = contentList?.findAll(attrs[ATTR_FILTER])
-        if (shuffle) Collections.shuffle(contentList)
         def var = attrs[ATTR_VAR] ?: null
         contentList?.each { content ->
             out << body(var ? [(var):content] : content)
@@ -752,6 +745,12 @@ class WeceemTagLib {
         def p = attrs.resultsPath ? [resultsPath:attrs.resultsPath] : null
         if (attrs.types) {
             p.types = attrs.types
+        }
+        // Search the current space
+        p.uri = spaceAlias+'/'
+        def base = attrs.remove('baseURI')
+        if (base) {
+            p.uri += base
         }
         out << g.createLink(mapping:'search', params:p) 
     }

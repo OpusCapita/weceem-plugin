@@ -23,7 +23,6 @@ grails.project.dependency.resolution = {
     }
 
 	plugins { 
-		runtime ':hibernate:1.3.1'
 		runtime ':searchable:0.5.5'
 		runtime ':navigation:1.1.1'
 		runtime ':bean-fields:1.0-RC3'
