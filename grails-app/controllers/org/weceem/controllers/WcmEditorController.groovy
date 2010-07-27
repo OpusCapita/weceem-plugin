@@ -37,7 +37,7 @@ class WcmEditorController {
     }
 
     void workaroundBlankAssociationBug() {
-        ['template', 'target', 'parent'].each { fld ->
+        ['script', 'template', 'target', 'parent'].each { fld ->
             if (params[fld]) params.remove(['fld'])
             if (params[fld+'.id'] == '') {
                 params.remove(fld+'.id')
