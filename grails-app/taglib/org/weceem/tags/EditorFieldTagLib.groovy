@@ -107,14 +107,14 @@ class EditorFieldTagLib {
     def editorFieldWcmTemplate = { attrs ->
         def templates = WcmTemplate.findAllBySpace( pageScope.content.space, [sort:'title'])
         out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
-            noSelection: ['':'- No template -'],
+            noSelection: ['':'- No template (inherit) -'],
             from: templates, optionValue:'title', optionKey:'id')
     }
 
     def editorFieldWcmScript = { attrs ->
         def templates = WcmScript.findAllBySpace( pageScope.content.space, [sort:'title'])
         out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
-            noSelection: ['':'- No template -'],
+            noSelection: ['':'- Select a script -'],
             from: templates, optionValue:{ it.title + " (${it.absoluteURI})"}, optionKey:'id')
     }
 

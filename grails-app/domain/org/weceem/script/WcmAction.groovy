@@ -20,6 +20,7 @@ class WcmAction extends WcmContent {
     static transients = WcmContent.transients
     
     static constraints = {
+        script(nullable: false)
         description(maxSize:200)
         allowedMethods(maxSize:40)
     }
