@@ -75,6 +75,15 @@ $( function() {
                 </g:grep>
             </div>
 
+            <h2><a href="#">Change history</a></h2>
+            <div id="editor-changes">
+                <div class="span-22 last">
+                    <g:each in="${changeHistory}" var="change">
+                        <wcm:humanDate date="${change.createdOn}"/> by ${change.createdBy.encodeAsHTML()}<br/>
+                    </g:each>
+                </div>
+            </div>
+
             <h2><a href="#">Parent &amp; Children</a></h2>
             <div id="editor-family">
                 <div class="clear prepend-1 span-2">

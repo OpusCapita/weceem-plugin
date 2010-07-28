@@ -522,7 +522,12 @@ class WeceemTagLib {
             use(org.codehaus.groovy.runtime.TimeCategory) {
                 def millisDelta = now - attrs.date
                 def daysElapsed = millisDelta.days
-                if (daysElapsed > 0) {
+                if (daysElapsed > 30) {
+                    out << message(code:'human.date.on', args:[g.formatDate(date:attrs.date, format:'yyyy/MM/dd'),
+                        g.formatDate(date:attrs.date, format:'hh:mm:ss')])
+                } else if (daysElapsed > 7) {
+                    out << message(code:'human.date.weeks.ago', args:[Math.round(daysElapsed/7)])
+                } else if (daysElapsed > 0) {
                     out << message(code:'human.date.days.ago', args:[daysElapsed])
                 } else {
                     def hoursElapsed = millisDelta.hours

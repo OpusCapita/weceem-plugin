@@ -276,8 +276,8 @@ class WcmContent implements Comparable, Taggable {
                 objectContent: xml,
                 contentTitle: latestTitle,
                 spaceName: latestSpaceName,
-                createdBy: createdBy,
-                createdOn: createdOn)
+                createdBy: wcmSecurityService?.userName,
+                createdOn: new Date())
 
         cv.updateRevisions()
         if (!cv.save()) {

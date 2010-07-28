@@ -394,11 +394,14 @@ class WcmContentRepositoryService implements InitializingBean {
      *
      * @param content
      */
-    Map getRecentChanges(WcmContent content) {
+    List getChangeHistory(WcmContent content, queryArgs = [:]) {
         requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_VIEW])        
-        def changes = WcmContentVersion.findAllByObjectKey(content.ident(),
-                [sort: 'revision', order: 'desc'])
-        return [changes: changes]
+        def args = [:] + queryArgs
+        if (!args.sort) {
+            args += [sort:'createdOn', order: 'desc']
+        }
+        def changes = WcmContentVersion.findAllByObjectKeyAndObjectClassName(content.ident(), content.class.name, args)
+        return changes
     }
 
     /**

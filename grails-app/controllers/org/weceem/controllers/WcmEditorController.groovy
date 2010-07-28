@@ -32,7 +32,8 @@ class WcmEditorController {
             flash.message = "Content not found with id ${params.id}"
             redirect(controller:'wcmRepository')
         } else {
-            return [content: content, editableProperties: wcmEditorService.getEditorInfo(content.class)]
+            return [content: content, changeHistory: wcmContentRepositoryService.getChangeHistory(content), 
+                editableProperties: wcmEditorService.getEditorInfo(content.class)]
         }
     }
 
@@ -75,7 +76,9 @@ class WcmEditorController {
                 flash.error = renderErrors(bean: content)
                 txn.setRollbackOnly()
                 log.error "Unable to save content: ${content.errors}"
-                render(view: 'create', model: [content: content, editableProperties: wcmEditorService.getEditorInfo(content.class)])
+                render(view: 'create', model: [content: content, 
+                    changeHistory: wcmContentRepositoryService.getChangeHistory(content),
+                    editableProperties: wcmEditorService.getEditorInfo(content.class)])
             }
         }
     }
@@ -114,7 +117,9 @@ class WcmEditorController {
                         render "Cannot preview, content has errors. Please return to editor"
                         return
                     } else {
-                        render(view: 'edit', model: [content: result.content, editableProperties: wcmEditorService.getEditorInfo(result.content.class)])
+                        render(view: 'edit', model: [content: result.content, 
+                            changeHistory: wcmContentRepositoryService.getChangeHistory(content),
+                            editableProperties: wcmEditorService.getEditorInfo(result.content.class)])
                         return
                     }
                 } else if (params._preview) {
