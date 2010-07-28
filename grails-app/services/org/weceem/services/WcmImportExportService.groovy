@@ -22,6 +22,7 @@ class WcmImportExportService {
             WcmContent.withTransaction { txn ->
                 try {
                     grailsApplication.mainContext.wcmContentRepositoryService.deleteSpaceContent(space)
+                    grailsApplication.mainContext.wcmContentRepositoryService.invalidateCachingForSpace(space)
                     getImporters()."${importerName}"?.execute(space, file)
                 } catch (Throwable t) {
                     txn.setRollbackOnly()

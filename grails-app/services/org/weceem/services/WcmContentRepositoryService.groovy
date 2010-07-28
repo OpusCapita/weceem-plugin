@@ -14,8 +14,6 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.weceem.content.*
 
 //@todo design smell!
-
-
 import org.weceem.files.*
 import org.weceem.script.WcmScript
 
@@ -515,22 +513,6 @@ class WcmContentRepositoryService implements InitializingBean {
     }
 
     /**
-     * Changes node's title.
-     *
-     * @param content
-     * @param oldTitle
-     */
-    Boolean renameNode(WcmContent content, oldTitle) {
-        requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_EDIT])        
-
-        if (content.metaClass.respondsTo(content, 'rename', String)) {
-            return content.rename(oldTitle)
-        } else {
-            return true
-        }
-    }
-
-    /**
      * Creates new virtual copy of a content node.
      *
      * @todo rename to createNodeReference? virtualCopyNode?
@@ -852,6 +834,26 @@ class WcmContentRepositoryService implements InitializingBean {
         space.aliasURI+':'+uri
     }
 
+    /**
+     * Flush all uri caches for given space
+     */
+    void invalidateCachingForSpace(WcmSpace space) {
+        def uri = space.aliasURI+':'
+        gspClassCache.keys.each { k ->
+            if (k.startsWith(uri)) {
+                gspClassCache.remove(k)
+            }
+        }
+        uriToIdCache.keys.each { k ->
+            if (k.startsWith(uri)) {
+                uriToIdCache.remove(k)
+            }
+        }
+    }
+
+    /**
+     * Flush all uri caches for given space and uri prefix
+     */
     void invalidateCachingForURI( WcmSpace space, uri) {
         // If this was content that created a cached GSP class, clear it now
         def key = makeURICacheKey(space,uri)
@@ -1543,7 +1545,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
             
             or {
                 isNull('publishUntil')
-                le('publishUtil', endDate)
+                le('publishUntil', endDate)
             }
 
             order('publishFrom', 'desc')
