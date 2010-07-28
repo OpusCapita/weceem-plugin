@@ -266,7 +266,7 @@ class WcmContent implements Comparable, Taggable {
             }
         }
         
-        output << "<content>${getContentAsText().encodeAsHTML()}</content>"
+        output << "<content>${getContentAsText()?.encodeAsHTML()}</content>"
         output << "</revision>"
 
         def xml = output.toString()
