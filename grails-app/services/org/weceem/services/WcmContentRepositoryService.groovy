@@ -616,6 +616,9 @@ class WcmContentRepositoryService implements InitializingBean {
             } 
         }
         def success = true
+
+        // We need this to invalidate caches
+        def originalURI = sourceContent.absoluteURI
         
         if (sourceContent.metaClass.respondsTo(sourceContent, "move", WcmContent)){
             success = sourceContent.move(targetContent)
@@ -638,6 +641,10 @@ class WcmContentRepositoryService implements InitializingBean {
                 targetContent.addToChildren(sourceContent)
                 assert targetContent.save()
             }
+
+            // Invalidate the caches 
+            invalidateCachingForURI(sourceContent.space, originalURI)
+
             return sourceContent.save(flush: true)
         } else {
             return false
@@ -851,8 +858,26 @@ class WcmContentRepositoryService implements InitializingBean {
         log.debug "Removing cached info for cache key [$key]"
         gspClassCache.remove(key) // even if its not a GSP/script lets just assume so, quicker than checking & remove
         uriToIdCache.remove(key)
+        
+        // Now remove the caches of all child nodes too, as the parent may have moved and all URIs changed
+        def parentKey = makeURICacheKey(space,uri+'/')
+        gspClassCache.keys.each { k ->
+            if (k.startsWith(parentKey)) {
+                gspClassCache.remove(k)
+            }
+        }
+        uriToIdCache.keys.each { k ->
+            if (k.startsWith(parentKey)) {
+                uriToIdCache.remove(k)
+            }
+        }
     }
     
+    /**
+     * Update a content node in the database, binding new properties in from "params"
+     *
+     * @return an object with properties "content", "errors" and "notFound" - set as appropriate
+     */
     def updateNode(WcmContent content, def params) {
         requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_EDIT])        
 
@@ -1199,7 +1224,7 @@ class WcmContentRepositoryService implements InitializingBean {
             def cachedContentInfo = cachedElement?.getValue()
             if (cachedContentInfo) {
                 if (log.debugEnabled) {
-                    log.debug "Found content info into cache for uri $uriPath: ${cachedContentInfo}"
+                    log.debug "Found content info in cache for uri $uriPath: ${cachedContentInfo}"
                 }
                 // @todo will this break with different table mapping strategy eg multiple ids of "1" with separate tables?
                 WcmContent c = WcmContent.get(cachedContentInfo.id)

@@ -145,6 +145,20 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         }
     }
     
+    void testUpdatingNodesMaintainsURICacheIntegrity() {
+        assertEquals nodeA.id, wcmContentRepositoryService.findContentForPath('contentA', spaceA).content.id
+        assertEquals nodeB.id, wcmContentRepositoryService.findContentForPath('contentA/contentB', spaceA).content.id
+
+        def result = wcmContentRepositoryService.updateNode(nodeA.id.toString(), [aliasURI:'changed-alias'])
+        assertTrue(!result.notFound)
+        assertTrue(!result.errors)
+        
+        assertNull wcmContentRepositoryService.findContentForPath('contentA', spaceA)
+        assertNull wcmContentRepositoryService.findContentForPath('contentA/contentB', spaceA)
+        assertEquals nodeA.id, wcmContentRepositoryService.findContentForPath('changed-alias', spaceA).content.id
+        assertEquals nodeB.id, wcmContentRepositoryService.findContentForPath('changed-alias/contentB', spaceA).content.id
+    }    
+    
     void testDeleteNodeA() {
         // Result Tree:
         //   c
@@ -357,6 +371,11 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         //       ----b (virtual copy)
         //   ----d
         //       ----b (virtual copy)
+
+        // Force caching of the URI
+        def beforeURI = nodeB.absoluteURI
+        assertNotNull wcmContentRepositoryService.findContentForPath(beforeURI, nodeB.space)
+
         wcmContentRepositoryService.moveNode(nodeB, null, 0)
         nodeA = WcmContent.findByTitle('contentA')
         nodeB = WcmContent.findByTitle('contentB')
@@ -369,6 +388,11 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
 
         assertNull nodeB.parent
         assert nodeA.children.contains(nodeB) == false
+
+        // Make sure the content uri cache has been invalidated for old URI
+        println "Old URI for the node is [$beforeURI], new is ${nodeB.absoluteURI}"
+        assertNull wcmContentRepositoryService.findContentForPath(beforeURI, nodeB.space)
+        assertNotNull wcmContentRepositoryService.findContentForPath(nodeB.absoluteURI, nodeB.space)
     }
 
     void testMoveB1toRoot() {
@@ -379,6 +403,10 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         //   ----c
         //   ----d
         //       ----b (virtual copy 2)
+        // Force caching of the URI
+        def beforeURI = nodeB.absoluteURI
+        assertNotNull wcmContentRepositoryService.findContentForPath(beforeURI, nodeB.space)
+
         wcmContentRepositoryService.moveNode(nodeB, null, 0)
         nodeA = WcmContent.findByTitle('contentA')
         nodeB = WcmContent.findByTitle('contentB')
@@ -391,6 +419,11 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
 
         assertNull nodeB.parent
         assert nodeA.children.contains(nodeB) == false
+
+        // Make sure the content uri cache has been invalidated for old URI
+        println "Old URI for the node is [$beforeURI], new is ${nodeB.absoluteURI}"
+        assertNull wcmContentRepositoryService.findContentForPath(beforeURI, nodeB.space)
+        assertNotNull wcmContentRepositoryService.findContentForPath(nodeB.absoluteURI, nodeB.space)
      }
 
     void testMoveBtoE() {
@@ -402,7 +435,7 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         //   ----d
         //       ----b (virtual copy 2)
         //   e
-        //   ----b (virtual copy 3)
+        //   ----b
         wcmContentRepositoryService.moveNode(nodeB, extraNode, 0)
         extraNode = WcmContent.findByTitle('newContent')
         nodeA = WcmContent.findByTitle('contentA')
