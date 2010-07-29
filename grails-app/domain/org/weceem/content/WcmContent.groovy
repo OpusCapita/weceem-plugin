@@ -240,6 +240,9 @@ class WcmContent implements Comparable, Taggable {
         }
     }
 
+    /**
+     * Save a new content revision object with the current state of this content node
+     */
     void saveRevision(def latestTitle, def latestSpaceName) {
         def self = this 
         
@@ -259,14 +262,14 @@ class WcmContent implements Comparable, Taggable {
         def output = new StringBuilder()
         output << "<revision>"
         verProps.each { vp ->
-            def propName = vp.key
-            def propValue = vp.value
+            def propName = escapeToXML(vp.key)
+            def propValue = escapeToXML(vp.value?.toString())
             if (propValue) {
-                output << "<${propName}>${propValue.encodeAsHTML()}</${propName}>"
+                output << "<property name=\"${propName}\">${propValue}</property>"
             }
         }
-        
-        output << "<content>${getContentAsText()?.encodeAsHTML()}</content>"
+        // Write out the human-readable content summary always
+        output << "<content>${escapeToXML(getContentAsText())}</content>"
         output << "</revision>"
 
         def xml = output.toString()
@@ -284,5 +287,13 @@ class WcmContent implements Comparable, Taggable {
             log.error "In createVersion of ${this}, save failed: ${cv.errors}"
             assert false
         }
+    }
+    
+    def escapeToXML(s) {
+        // MUST escape & first
+        s = s?.replaceAll('&', '&amp;')
+        s = s?.replaceAll('<', '&lt;')
+        s = s?.replaceAll('>', '&gt;')
+        return s
     }
 }

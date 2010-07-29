@@ -37,6 +37,7 @@ class WcmContentVersion {
     }
 
     static constraints = {
+        objectContent(maxSize:500000)
         revision(nullable: true)
         createdBy(nullable: true)
         createdOn(nullable: true)
@@ -44,5 +45,24 @@ class WcmContentVersion {
 
     static mapping = {
         objectContent type: 'text'
+    }
+    
+    def extractProperties() {
+        def slurper = new XmlSlurper()
+        def doc = slurper.parseText(objectContent)
+        def data = [content:null, properties:[:]]
+        data.content = decodeXML(doc.content.text())
+        doc.property.each { n ->
+            data.properties[decodeXML(n.@name.text())] = decodeXML(n.text())
+        }
+        return data
+    }
+    
+    def decodeXML(s) {
+        // MUST escape & last
+        s = s?.replaceAll('&lt;', '<')
+        s = s?.replaceAll('&gt;', '>')
+        s = s?.replaceAll('&amp;', '&')
+        return s
     }
 }

@@ -79,7 +79,7 @@ $( function() {
             <div id="editor-changes">
                 <div class="span-22 last">
                     <g:each in="${changeHistory}" var="change">
-                        <wcm:humanDate date="${change.createdOn}"/> by ${change.createdBy.encodeAsHTML()}<br/>
+                        <g:link target="weceem_history" controller="wcmEditor" action="showRevision" id="${change.id}"><wcm:humanDate date="${change.createdOn}"/> by ${change.createdBy.encodeAsHTML()}</g:link><br/>
                     </g:each>
                 </div>
             </div>

@@ -404,6 +404,13 @@ class WcmContentRepositoryService implements InitializingBean {
         return changes
     }
 
+    /** 
+     * Get a specific change history item
+     */
+    def getChangeHistoryItem(id) {
+        WcmContentVersion.get(id)
+    }
+    
     /**
      * Creates new WcmContent node and it's relation from request parameters
      *

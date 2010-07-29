@@ -94,13 +94,11 @@ class WcmEditorController {
     }
 
     def preview = {
-        println "IN PREVIEW!"
         params._preview = true
         update()
     }
     
     def update = {
-        println "In update"
         
         workaroundBlankAssociationBug()
         
@@ -158,19 +156,13 @@ class WcmEditorController {
             redirect(action: list)
         }
     }
-    
-    def dochange = {
-        def selectedSpace = WcmSpace.get(params.id)
-        def templates = WcmTemplate.findAllBySpace(selectedSpace)
-        def data = []
-        templates.each {
-        def template = [:]
-            template.id = it.id
-            template.title = it.title
-            template.space = selectedSpace.name
-            data << template
-        }
-        render data as JSON
+
+    def showRevision = {
+        def revId = params.id
+        def rev = wcmContentRepositoryService.getChangeHistoryItem(revId)
+        def props = rev.extractProperties()
+        def con = grailsApplication.classLoader.loadClass(rev.objectClassName).get(rev.objectKey)
+        [historyItem:rev, content:props.content, contentProperties:props.properties, currentContent:con]
     }
     
     def convertToWiki = {
