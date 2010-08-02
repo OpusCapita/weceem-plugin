@@ -53,7 +53,7 @@ class WcmBlogEntry extends WcmContent {
     static editors = {
         summary(editor:'LongString')
         content(editor:'RichHTML')
-        keywords()
+        keywords(group:'meta')
     }
 
     static transients = WcmContent.transients + ['summary']

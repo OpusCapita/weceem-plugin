@@ -99,7 +99,7 @@ class WcmHTMLContent extends WcmContent {
         menuTitle(group:'extra')
         htmlTitle(group:'extra')
         content(editor:'HTMLContent')
-        keywords()
+        keywords(group:'meta')
     }
 
     static transients = WcmContent.transients + [ 'summary']

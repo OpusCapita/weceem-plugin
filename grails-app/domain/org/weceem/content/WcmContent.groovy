@@ -68,6 +68,14 @@ class WcmContent implements Comparable, Taggable {
     
     WcmStatus status
     
+    // Dublin Core stuff
+    String metaCreator     // The name of the originator of the content
+    String metaPublisher   // Entity responsible for making content available
+    String metaDescription // Description/abstract of the content
+    String metaIdentifier  // A unique ID
+    String metaSource      // Entity that was original source of the content
+    String metaSubject     // Subject matter of the content
+    
     static belongsTo = [space: WcmSpace, parent: WcmContent]
     static transients = [ 
         'titleForHTML', 
@@ -106,6 +114,13 @@ class WcmContent implements Comparable, Taggable {
             return null
         })
         language(nullable: true, size:0..3)
+
+        metaCreator nullable: true, blank: true, size:0..40   
+        metaPublisher nullable: true, blank: true, size:0..80   
+        metaDescription nullable: true, blank: true, size:0..500
+        metaIdentifier nullable: true, blank: true, size:0..80
+        metaSource nullable: true, blank: true, size:0..80
+        metaSubject nullable: true, blank: true, size:0..200
     }
 
     static mapping = {
@@ -136,6 +151,13 @@ class WcmContent implements Comparable, Taggable {
         tags editor:'Tags', group:'extra'
         parent hidden:true
         children hidden:true
+
+        metaCreator group:'meta'    
+        metaPublisher group:'meta'   
+        metaDescription group:'meta', editor:'LongString'
+        metaIdentifier group:'meta'
+        metaSource group:'meta'      
+        metaSubject group:'meta'
     }
     
     int compareTo(Object o) {

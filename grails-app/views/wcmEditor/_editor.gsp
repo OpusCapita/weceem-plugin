@@ -75,6 +75,19 @@ $( function() {
                 </g:grep>
             </div>
 
+            <h2><a href="#">Metadata</a></h2>
+            <div id="editor-meta">
+                <g:grep in="${editableProperties}" var="prop" filter="${ { p -> p.group == 'meta'} }">
+                
+                    <div class="clear prepend-1 span-4">
+                        <bean:label beanName="content" property="${prop.property}" labelKey="${'content.label.'+prop.property}"/>
+                    </div>
+                    <div class="field prepend-1 span-17 last">
+                        <% println wcm."editorField${prop.editor}"(bean:content, property:prop.property) %>
+                    </div>
+                </g:grep>
+            </div>
+            
             <h2><a href="#">Change history</a></h2>
             <div id="editor-changes">
                 <div class="span-22 last">
