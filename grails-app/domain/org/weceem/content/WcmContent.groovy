@@ -171,6 +171,8 @@ class WcmContent implements Comparable, Taggable {
 
     Boolean canHaveChildren() { true }
 
+    Boolean canAcceptChild(WcmContent newChild) { true }
+
     Boolean canHaveMultipleParents() { true }
     
     String getMimeType() { "text/plain" }

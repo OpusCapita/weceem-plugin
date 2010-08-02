@@ -444,18 +444,25 @@ class WcmContentRepositoryService implements InitializingBean {
             log.debug "Creating node: ${content.dump()} with parent [$parentContent]"
         }
         
-        def result 
-        if (content.metaClass.respondsTo(content, 'create', WcmContent)) {
-            if (log.debugEnabled) {
-                log.debug "Creating node, type ${content.class} support 'create' event, calling"
+        def result = false
+
+        if (parentContent) {
+            result = parentContent.canAcceptChild(content)
+        }
+        
+        if (result) {
+            if (content.metaClass.respondsTo(content, 'create', WcmContent)) {
+                if (log.debugEnabled) {
+                    log.debug "Creating node, type ${content.class} support 'create' event, calling"
+                }
+                // Call the event so that nodes can perform post-creation tasks
+                result = content.create(parentContent)
+            } else {
+                if (log.debugEnabled) {
+                    log.debug "Creating node, type ${content.class} does not support 'create' event, skipping"
+                }
+                result = true
             }
-            // Call the event so that nodes can perform post-creation tasks
-            result = content.create(parentContent)
-        } else {
-            if (log.debugEnabled) {
-                log.debug "Creating node, type ${content.class} does not support 'create' event, skipping"
-            }
-            result = true
         }
 
         if (result) {
@@ -618,8 +625,14 @@ class WcmContentRepositoryService implements InitializingBean {
         // We need this to invalidate caches
         def originalURI = sourceContent.absoluteURI
         
-        if (sourceContent.metaClass.respondsTo(sourceContent, "move", WcmContent)){
-            success = sourceContent.move(targetContent)
+        if (targetContent) {
+            success = targetContent.canAcceptChild(sourceContent)
+        }
+
+        if (success) {
+            if (sourceContent.metaClass.respondsTo(sourceContent, "move", WcmContent)){
+                success = sourceContent.move(targetContent)
+            }
         }
         
         if (success) {

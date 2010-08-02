@@ -21,6 +21,10 @@ class WcmContentDirectory extends WcmContentFile {
 
     Boolean canHaveChildren() { true }
 
+    Boolean canAcceptChild(WcmContent newChild) { 
+        newChild.instanceOf(WcmContentDirectory)
+    }
+
     Boolean create(WcmContent parentContent) {
         def f
         if (parentContent && (parentContent instanceof WcmContentDirectory)) {
