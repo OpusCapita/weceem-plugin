@@ -487,6 +487,12 @@ class WcmContentRepositoryService implements InitializingBean {
                 content.createAliasURI(parentContent)
             }
             
+            // Auto-set publishFrom to now if content is created as public but no publishFrom specified
+            // Required for blogs and sort by publishFrom to work
+            if (content.status.publicContent && (content.publishFrom == null)) {
+                content.publishFrom = new Date()
+            }
+            
             // We must have generated aliasURI and set parent here to be sure that the uri is unique
             boolean saved = false
             int attempts = 0
@@ -501,7 +507,7 @@ class WcmContentRepositoryService implements InitializingBean {
                     content.createAliasURI(parentContent)
                     if (oldAliasURI != content.aliasURI) {
                         if (log.warnEnabled) {
-                            log.warn "Failed to create new content ${content.dump()} due to constraint violation, trying again with new aliasURI"
+                            log.warn "Failed to create new content ${content.dump()} due to constraint violation, trying again with a new aliasURI"
                         }
                     } else {
                         log.error "Failed to create new content ${content.dump()} due to constraint violation, giving up as aliasURI is invariant"
@@ -922,6 +928,12 @@ class WcmContentRepositoryService implements InitializingBean {
             }
             if (!content.aliasURI && content.title) {
                 content.createAliasURI(content.parent)
+            }
+
+            // Auto-set publishFrom to now if content is created as public but no publishFrom specified
+            // Required for blogs and sort by publishFrom to work
+            if (content.status.publicContent && (content.publishFrom == null)) {
+                content.publishFrom = new Date()
             }
 
             def ok = content.validate()

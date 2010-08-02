@@ -43,7 +43,7 @@ class WcmBlogEntry extends WcmContent {
     }
     
     static constraints = {
-        summary(maxSize:500)
+        summary(nullable: true, blank: true, maxSize:500)
         content(maxSize:100000)
         status(nullable: false)
     }
