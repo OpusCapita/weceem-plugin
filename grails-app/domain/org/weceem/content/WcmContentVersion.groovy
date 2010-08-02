@@ -31,6 +31,7 @@ class WcmContentVersion {
     Date createdOn
 
     def updateRevisions() {
+        // Keep past revisions up to date with the node's current info, in case node is deleted eventually
         WcmContentVersion.executeUpdate(
                 "update WcmContentVersion cv set cv.contentTitle = ?, cv.spaceName = ? where cv.objectKey = ?",
                 [contentTitle, spaceName, objectKey])

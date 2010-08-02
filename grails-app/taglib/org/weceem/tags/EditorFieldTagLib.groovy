@@ -17,6 +17,10 @@ class EditorFieldTagLib {
         out << bean.input(beanName:'content', property:attrs.property, noLabel:true)
     }
 
+    def editorFieldSelectInList = { attrs ->
+        out << bean.select(beanName:'content', property:attrs.property, noLabel:true)
+    }
+
     def editorFieldLongString = { attrs ->
         out << bean.textArea(beanName:'content', property:attrs.property, rows:3, cols:40, noLabel:true)
     }
@@ -56,8 +60,12 @@ class EditorFieldTagLib {
         assert attrs.property.endsWith('By')
         
         def byProp = pageScope.content[attrs.property]
-        def onProp = pageScope.content[attrs.property[0..-3]+'On']
-        out << "<span class=\"field-readonly\">${byProp.encodeAsHTML()} on ${g.formatDate(date:onProp, format:'d MMM yyyy HH:mm:ss')}</span>"
+        def v = ''
+        if (byProp) {
+            def onProp = pageScope.content[attrs.property[0..-3]+'On']
+            v = "${byProp?.encodeAsHTML()} on ${g.formatDate(date:onProp, format:'d MMM yyyy \'at\' HH:mm:ss')}"
+        }
+        out << "<span class=\"field-readonly\">${v}</span>"
     }
     
     def editorFieldReadOnlyDate = { attrs ->

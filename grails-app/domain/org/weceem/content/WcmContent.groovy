@@ -211,7 +211,13 @@ class WcmContent implements Comparable, Taggable {
             createdBy:t.createdBy,
             createdOn:t.createdOn,
             changedBy:t.changedBy,
-            changedOn:t.changedOn
+            changedOn:t.changedOn,
+            metaCreator:metaCreator,    
+            metaPublisher:metaPublisher,
+            metaDescription:metaDescription,
+            metaIdentifier:metaIdentifier,
+            metaSource:metaSource,
+            metaSubject:metaSubject
         ] 
     }
 
@@ -270,11 +276,19 @@ class WcmContent implements Comparable, Taggable {
         
         def t = this
         
-        def criteria = WcmContentVersion.createCriteria()
-        def lastRevision = criteria.get {
-            eq('objectKey', ident())
-            projections {
-                max('revision')
+        if (log.debugEnabled) {
+            log.debug "Building revision info for ${this}"
+        }
+        
+        def lastRevision
+        // Don't force this session to flush just so we can query!
+        WcmContentVersion.withNewSession {
+            def criteria = WcmContentVersion.createCriteria()
+            lastRevision = criteria.get {
+                eq('objectKey', ident())
+                projections {
+                    max('revision')
+                }
             }
         }
         
@@ -305,6 +319,9 @@ class WcmContent implements Comparable, Taggable {
                 createdOn: new Date())
 
         cv.updateRevisions()
+        if (log.debugEnabled) {
+            log.debug "Saving revision info for ${this}"
+        }
         if (!cv.save()) {
             log.error "In createVersion of ${this}, save failed: ${cv.errors}"
             assert false

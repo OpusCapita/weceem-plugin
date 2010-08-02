@@ -18,11 +18,9 @@ import org.weceem.content.*
 import org.weceem.util.ContentUtils
 
 /**
- * BlogContentNode class describes the content node of type 'blog'.
- * The teaser of the blog is an equivalent to summary of content node.
+ * A blog entry
  *
- * @author Stephan Albers
- * @author July Karpey
+ * @author Marc Palmer
  */
 class WcmBlogEntry extends WcmContent {
 
@@ -56,7 +54,7 @@ class WcmBlogEntry extends WcmContent {
         keywords(group:'meta')
     }
 
-    static transients = WcmContent.transients + ['summary']
+    static transients = WcmContent.transients
 
     String getMimeType() { "text/html" }
 

@@ -19,7 +19,7 @@
           <table>
               <tr><th>Name</th><th>Value</th></tr>
               <g:each in="${contentProperties}" var="p">
-              <tr><td>${p.key.encodeAsHTML()}</td><td>${p.value?.encodeAsHTML()}</td></tr>
+              <tr><td><bean:label beanName="contentProperties" property="${p.key}" labelKey="${'content.label.'+p.key}"/></td><td>${p.value?.encodeAsHTML()}</td></tr>
               </g:each>
           </table>
         </div>

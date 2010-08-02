@@ -899,7 +899,11 @@ class WcmContentRepositoryService implements InitializingBean {
             log.debug("Updating node with id ${content.id}, with parameters: $params")
         }
         def oldAbsURI = content.absoluteURI
-        content.saveRevision(params.title ?: content.title, params.space ? WcmSpace.get(params.'space.id')?.name : content.space.name)
+        def oldSpaceName = params.space ? WcmSpace.get(params.'space.id')?.name : content.space.name
+        
+        // Get read-only instance now, for persisting revision info after we bind and successfully update
+        def contentForRevisionSave = content.class.read(content.id)
+
         def oldTitle = content.title
         // map in new values
         hackedBindData(content, params)
@@ -922,6 +926,9 @@ class WcmContentRepositoryService implements InitializingBean {
 
             def ok = content.validate()
             if (content.save()) {
+                // Save the revision now
+                contentForRevisionSave.saveRevision(params.title ?: oldTitle, oldSpaceName)
+
                 if (log.debugEnabled) {
                     log.debug("Update node with id ${content.id} saved OK")
                 }

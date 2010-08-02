@@ -90,10 +90,12 @@ $( function() {
             
             <h2><a href="#">Change history</a></h2>
             <div id="editor-changes">
-                <div class="span-22 last">
+                <div class="prepend-1 span-22 last">
+                    <div>
                     <g:each in="${changeHistory}" var="change">
                         <g:link target="weceem_history" controller="wcmEditor" action="showRevision" id="${change.id}"><wcm:humanDate date="${change.createdOn}"/> by ${change.createdBy.encodeAsHTML()}</g:link><br/>
                     </g:each>
+                    </div>
                 </div>
             </div>
 
@@ -110,7 +112,7 @@ $( function() {
                 </div>
                 <%-- Only show children if we are editing --%>
                 <g:if test="${content.id}">
-                    <div class="clear span-2">
+                    <div class="clear prepend-1 span-2">
                         <label>Children:</label>
                     </div>
                     <div class="prepend-1 span-21 last">

@@ -116,7 +116,8 @@ class WcmEditorController {
                         return
                     } else {
                         render(view: 'edit', model: [content: result.content, 
-                            changeHistory: wcmContentRepositoryService.getChangeHistory(content),
+                            // Get history in a new session so we don't see unsaved revision
+                            changeHistory: WcmContent.withNewSession { wcmContentRepositoryService.getChangeHistory(result.content) },
                             editableProperties: wcmEditorService.getEditorInfo(result.content.class)])
                         return
                     }
@@ -160,7 +161,7 @@ class WcmEditorController {
     def showRevision = {
         def revId = params.id
         def rev = wcmContentRepositoryService.getChangeHistoryItem(revId)
-        def props = rev.extractProperties()
+        def props = rev?.extractProperties()
         def con = grailsApplication.classLoader.loadClass(rev.objectClassName).get(rev.objectKey)
         [historyItem:rev, content:props.content, contentProperties:props.properties, currentContent:con]
     }
