@@ -291,8 +291,9 @@ class WcmContentRepositoryService implements InitializingBean {
             if (log.debugEnabled) {
                 log.debug "Creating GSP template class for $absURI"
             }
-            // Workaround for Grails 1.2.0 bug wher page name must be a valid local system file path!
+            // Workaround for Grails 1.2.0 bug where page name must be a valid local system file path!
             // Was dying on Windows with / in uris. http://jira.codehaus.org/browse/GRAILS-5772
+            // @todo This is VERY nasty, assumes GSP content is in a "content" property
             groovyPagesTemplateEngine.createTemplate(content.content, ('WcmContent:'+absURI).replaceAll(/[^a-zA-Z0-9\-]/, '_') )
         }
     }
