@@ -57,6 +57,7 @@ class WeceemTagLib {
     static ATTR_CODEC = "codec"
     static ATTR_TITLE = "title"
     static ATTR_VERSION = "version"
+    static ATTR_RESULTSPATH = "resultsPath"
 
     static namespace = "wcm"
     
@@ -729,16 +730,16 @@ class WeceemTagLib {
     
     def search = { attrs ->
         def spaceAlias = request[WcmContentController.REQUEST_ATTRIBUTE_SPACE].aliasURI
-        def p = attrs.resultsPath ? [resultsPath:spaceAlias+'/'+attrs.resultsPath] : [:]
-        if (attrs.types) {
-            p.types = attrs.types
-        }
-        // Search the current space
+        def resPath = attrs.remove(ATTR_RESULTSPATH)
+        def p = resPath ? [resultsPath:spaceAlias+'/'+resPath] : [:]
+        // Search the current space only
         p.uri = spaceAlias+'/'
         def base = attrs.remove('baseURI')
         if (base) {
             p.uri += base
         }
+        // Copy the rest of attribs over
+        p.putAll(attrs)
         
         out << g.form(controller:'wcmSearch', action:'search', params:p) {
             out << wcm.searchField()
@@ -746,20 +747,43 @@ class WeceemTagLib {
         }
     }
     
-    def searchLink = { attrs ->
-        def p = attrs.resultsPath ? [resultsPath:attrs.resultsPath] : null
-        if (attrs.types) {
-            p.types = attrs.types
-        }
-        // Search the current space
+/*
+<div class="blog-entry-date"><g:formatDate date="${node.publishFrom}" format="dd MMM yyyy 'at' hh:mm"/></div>
+<div class="blog-entry-content">
+${node.content}
+</div>
+<div class="blog-entry-post-info">
+	<span class="quiet"><wcm:countChildren node="${node}" type="org.weceem.content.WcmComment"/> Comments</span>
+</div>
+<div class="blog-entry-post-info">
+	<span class="quiet">Tags:
+	<wcm:join in="${node.tags}" delimiter=", " var="tag">
+		<a href="${wcm.searchLink(mode:'tag', query:tag)}">${tag.encodeAsHTML()}</a>
+	</wcm:join>
+	</span>
+</div>
+*/
+    def createSearchLink = { attrs ->
+        def spaceAlias = request[WcmContentController.REQUEST_ATTRIBUTE_SPACE].aliasURI
+        def resPath = attrs.remove(ATTR_RESULTSPATH)
+        def p = resPath ? [resultsPath:spaceAlias+'/'+resPath] : [:]
+        // Search the current space only
         p.uri = spaceAlias+'/'
         def base = attrs.remove('baseURI')
         if (base) {
             p.uri += base
         }
+        // Copy the rest of attribs over
+        p.putAll(attrs)
+
+        log.debug "Params are: $p"
         out << g.createLink(mapping:'search', params:p) 
     }
 
+    def searchLink = { attrs, body ->
+        out << g.link(url:wcm.createSearchLink(attrs), body)
+    }
+    
     def searchField = { attrs ->
         out << g.textField(name:'query', 'class':'searchField')
     }

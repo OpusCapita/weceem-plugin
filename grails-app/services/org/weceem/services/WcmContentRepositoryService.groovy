@@ -444,7 +444,7 @@ class WcmContentRepositoryService implements InitializingBean {
             log.debug "Creating node: ${content.dump()} with parent [$parentContent]"
         }
         
-        def result = false
+        def result = true
 
         if (parentContent) {
             result = parentContent.canAcceptChild(content)
@@ -643,7 +643,7 @@ class WcmContentRepositoryService implements InitializingBean {
                 assert parent.save()
             }
             WcmContent inPoint = WcmContent.findByOrderIndexAndParent(orderIndex, targetContent)
-            if (inPoint != null){
+            if (inPoint != null) {
                 shiftNodeChildrenOrderIndex(sourceContent.space, targetContent, orderIndex)
             }
             sourceContent.orderIndex = orderIndex
@@ -1785,7 +1785,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
         listOfContent.findAll { c -> types.any { t -> t.isAssignableFrom(c.class) } }
     }
 
-    def searchForPublicContentByTag(String tag, WcmSpace space, contentOrPath = null, args = null) {
+    def searchForPublicContentByTag(String tag, WcmSpace space, contentOrPath = null, args = [:]) {
         if (log.debugEnabled) {
             log.debug "Searching for content by tag $tag"
         }
@@ -1798,22 +1798,20 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
             }
         }
 
-        def hits = WcmContent.findAllByTag(tag)
-        // Filter by type if required
-        if (args.types) {
-            hits = filterToTypes(hits, args.types)
-        }
-
-        /*WithCriteria(tag) {
+        def hits = WcmContent.findAllByTagWithCriteria(tag) {
             eq('space', space)
 
             // @todo apply baseURI
             
-            firstResult(args?.offset ?:0)
-            maxResults(args?.max ?: 25) 
+            firstResult(args.offset?.toInteger() ?:0)
+            maxResults(args.max?.toInteger() ?: 25) 
             // Default to newest content first
             order(args.sort ?: 'createdOn', args.order ?: 'desc')
-        }*/
+        }
+        // Filter by type if required - probably do this inside the criteria?
+        if (args.types) {
+            hits = filterToTypes(hits, args.types)
+        }
         [results:hits, total:hits.size()]
     }
 
