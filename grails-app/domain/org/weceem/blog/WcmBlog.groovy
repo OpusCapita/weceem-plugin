@@ -16,9 +16,18 @@ class WcmBlog extends WcmContent {
         only = ['title', 'status']
     }
     
+    Map getVersioningProperties() { 
+        def r = super.getVersioningProperties() + [ 
+            maxEntriesToDisplay:maxEntriesToDisplay,
+            commentMarkup:commentMarkup,
+            template:template?.ident() // Is this right?
+        ] 
+        return r
+    }
+
     static constraints = {
         template(nullable: true)
-        maxEntriesToDisplay(inList:[3, 5, 10, 20])
+        maxEntriesToDisplay(min:1, max:50)
         commentMarkup(inList:["", "html", "wiki"])
     }
     
@@ -29,13 +38,8 @@ class WcmBlog extends WcmContent {
     static transients = WcmContent.transients
 
     static editors = {
+        commentMarkup(editor:'SelectInList')
         template(group:'extra')
     }
-    
-    Map getVersioningProperties() { 
-       def r = super.getVersioningProperties() + [ 
-           template:template?.ident() // Is this right?
-       ] 
-       return r
-    }
+
 }

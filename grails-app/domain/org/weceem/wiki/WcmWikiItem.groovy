@@ -66,7 +66,7 @@ class WcmWikiItem extends WcmContent {
     static editors = {
         template(group:'extra')
         content(editor:'WikiCode')
-        keywords()
+        keywords(group:'meta')
     }
 
     static transients = WcmContent.transients + ['summary']

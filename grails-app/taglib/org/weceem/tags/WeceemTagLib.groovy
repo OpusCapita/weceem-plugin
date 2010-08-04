@@ -57,6 +57,7 @@ class WeceemTagLib {
     static ATTR_CODEC = "codec"
     static ATTR_TITLE = "title"
     static ATTR_VERSION = "version"
+    static ATTR_RESULTSPATH = "resultsPath"
 
     static namespace = "wcm"
     
@@ -114,8 +115,8 @@ class WeceemTagLib {
 */    
     private makeFindParams(attrs) {
         def r = [:]
-        r.max = attrs[ATTR_MAX]
-        r.offset = attrs[ATTR_OFFSET]
+        r.max = attrs[ATTR_MAX]?.toInteger()
+        r.offset = attrs[ATTR_OFFSET]?.toInteger()
         r.sort = attrs[ATTR_SORT] ?: 'orderIndex' // Default to orderIndex otherwise things are crazy
         r.order = attrs[ATTR_ORDER] ?: 'asc'
         r.changedSince = attrs[ATTR_CHANGEDSINCE]
@@ -236,18 +237,11 @@ class WeceemTagLib {
                 throwTagError "Tag invoked with space attribute value [${attrs[ATTR_SPACE]}] but no space could be found with that aliasURI"
             }
         }
-        def shuffle = attrs[ATTR_SHUFFLE] ? Boolean.parseBoolean(attrs[ATTR_SHUFFLE].toString()) : false
         def params = makeFindParams(attrs)
         def status = attrs[ATTR_STATUS] ?: WcmContentRepositoryService.STATUS_ANY_PUBLISHED
-        if (shuffle && attrs[ATTR_MAX] && attrs[ATTR_OFFSET] == null) {
-            def countParams = [ATTR_CHANGEDSINCE:params.changedSince, ATTR_CHANGEDBEFORE:params.changedBefore, ATTR_CREATEDSINCE:params.createdSince, ATTR_CREATEDBEFORE:params.createdBefore]
-            def count = wcmContentRepositoryService.countAllContent(space, [type:attrs[ATTR_TYPE], status:status, params:countParams]) 
-            params.offset = (int) Math.round(Math.random() * (count - params.max))
-        }
         
         def contentList = wcmContentRepositoryService.findAllContent(space, [type:attrs[ATTR_TYPE], status:status, params:params])
         if (attrs[ATTR_FILTER]) contentList = contentList?.findAll(attrs[ATTR_FILTER])
-        if (shuffle) Collections.shuffle(contentList)
         def var = attrs[ATTR_VAR] ?: null
         contentList?.each { content ->
             out << body(var ? [(var):content] : content)
@@ -529,7 +523,12 @@ class WeceemTagLib {
             use(org.codehaus.groovy.runtime.TimeCategory) {
                 def millisDelta = now - attrs.date
                 def daysElapsed = millisDelta.days
-                if (daysElapsed > 0) {
+                if (daysElapsed > 30) {
+                    out << message(code:'human.date.on', args:[g.formatDate(date:attrs.date, format:'yyyy/MM/dd'),
+                        g.formatDate(date:attrs.date, format:'hh:mm:ss')])
+                } else if (daysElapsed > 7) {
+                    out << message(code:'human.date.weeks.ago', args:[Math.round(daysElapsed/7)])
+                } else if (daysElapsed > 0) {
                     out << message(code:'human.date.days.ago', args:[daysElapsed])
                 } else {
                     def hoursElapsed = millisDelta.hours
@@ -731,16 +730,16 @@ class WeceemTagLib {
     
     def search = { attrs ->
         def spaceAlias = request[WcmContentController.REQUEST_ATTRIBUTE_SPACE].aliasURI
-        def p = attrs.resultsPath ? [resultsPath:spaceAlias+'/'+attrs.resultsPath] : [:]
-        if (attrs.types) {
-            p.types = attrs.types
-        }
-        // Search the current space
+        def resPath = attrs.remove(ATTR_RESULTSPATH)
+        def p = resPath ? [resultsPath:spaceAlias+'/'+resPath] : [:]
+        // Search the current space only
         p.uri = spaceAlias+'/'
         def base = attrs.remove('baseURI')
         if (base) {
             p.uri += base
         }
+        // Copy the rest of attribs over
+        p.putAll(attrs)
         
         out << g.form(controller:'wcmSearch', action:'search', params:p) {
             out << wcm.searchField()
@@ -748,14 +747,43 @@ class WeceemTagLib {
         }
     }
     
-    def searchLink = { attrs ->
-        def p = attrs.resultsPath ? [resultsPath:attrs.resultsPath] : null
-        if (attrs.types) {
-            p.types = attrs.types
+/*
+<div class="blog-entry-date"><g:formatDate date="${node.publishFrom}" format="dd MMM yyyy 'at' hh:mm"/></div>
+<div class="blog-entry-content">
+${node.content}
+</div>
+<div class="blog-entry-post-info">
+	<span class="quiet"><wcm:countChildren node="${node}" type="org.weceem.content.WcmComment"/> Comments</span>
+</div>
+<div class="blog-entry-post-info">
+	<span class="quiet">Tags:
+	<wcm:join in="${node.tags}" delimiter=", " var="tag">
+		<a href="${wcm.searchLink(mode:'tag', query:tag)}">${tag.encodeAsHTML()}</a>
+	</wcm:join>
+	</span>
+</div>
+*/
+    def createSearchLink = { attrs ->
+        def spaceAlias = request[WcmContentController.REQUEST_ATTRIBUTE_SPACE].aliasURI
+        def resPath = attrs.remove(ATTR_RESULTSPATH)
+        def p = resPath ? [resultsPath:spaceAlias+'/'+resPath] : [:]
+        // Search the current space only
+        p.uri = spaceAlias+'/'
+        def base = attrs.remove('baseURI')
+        if (base) {
+            p.uri += base
         }
+        // Copy the rest of attribs over
+        p.putAll(attrs)
+
+        log.debug "Params are: $p"
         out << g.createLink(mapping:'search', params:p) 
     }
 
+    def searchLink = { attrs, body ->
+        out << g.link(url:wcm.createSearchLink(attrs), body)
+    }
+    
     def searchField = { attrs ->
         out << g.textField(name:'query', 'class':'searchField')
     }

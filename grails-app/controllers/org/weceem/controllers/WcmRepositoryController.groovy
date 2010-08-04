@@ -406,31 +406,6 @@ class WcmRepositoryController {
     }
 
     /**
-     * @param contentPath
-     * @param title
-     */
-    def renameNode = {
-        assert !"This obsolete?"
-        def content = getContent(params.contentPath, WcmSpace.get(params['space.id']?.toLong()))
-        def parent = content.parent
-        if (!contentFileExists(content.title, parent, content.space)) {
-            def oldTitle = content.title
-            content.title = params.title
-            if (content.save()) {
-                if (!wcmContentRepositoryService.renameNode(content, oldTitle)) {
-                    flash.error = message(code: 'error.contentRepository.fileSystem')
-                }
-            } else {
-                flash.contentNode = content
-            }
-        } else {
-            flash.error = message(code: 'error.contentRepository.fileExists')
-        }
-
-        redirect(action: treeTable)
-    }
-
-    /**
      * This actions 'copyNode' and 'moveNode' are called when the user drops selected node.
      *
      * There are 3 different dialogs that can be shown on UI after drop:

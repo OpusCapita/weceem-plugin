@@ -169,24 +169,34 @@ class WcmContentFile extends WcmContent {
             def srcPath = ''
             def dstPath = ''
 
+            // Increment file counter for new parent (really need this?)
             if (targetParent && !(this instanceof WcmContentDirectory)) {
                 targetParent.filesCount += 1
                 assert targetParent.save()
             }
+            
             dstPath = getPathTo(targetParent)
+
+            // Decrement file counter for previous parent (really need this?)
             if (this.parent instanceof WcmContentDirectory) {
                 this.parent.filesCount -= 1
                 assert this.parent.save()
             } 
+            
             srcPath = getPathTo(this)
+            
             if (srcPath || dstPath) {
                 def file = new File(ServletContextHolder.servletContext.getRealPath(
                         "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/${srcPath}"))
                 def targetDir = new File(ServletContextHolder.servletContext.getRealPath(
                         "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/${dstPath}"))
+                log.info "Moving file ${file} to ${targetDir}"
                 try {
                     FileUtils.moveToDirectory file, targetDir, true
+
+                    return true
                 } catch (Exception e) {
+                    log.error "Couldn't move files", e
                     return false
                 }
             }

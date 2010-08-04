@@ -68,6 +68,15 @@ class WcmContent implements Comparable, Taggable {
     
     WcmStatus status
     
+    String description // Description/abstract of the content
+    String identifier  // A unique ID
+
+    // Dublin Core stuff
+    String metaCreator     // The name of the originator of the content
+    String metaPublisher   // Entity responsible for making content available
+    String metaSource      // Entity that was original source of the content
+    String metaCopyright   // Copyright for the content (aka Rights)
+    
     static belongsTo = [space: WcmSpace, parent: WcmContent]
     static transients = [ 
         'titleForHTML', 
@@ -106,6 +115,13 @@ class WcmContent implements Comparable, Taggable {
             return null
         })
         language(nullable: true, size:0..3)
+
+        metaCreator nullable: true, blank: true, size:0..80   
+        metaPublisher nullable: true, blank: true, size:0..80   
+        description nullable: true, blank: true, size:0..500
+        identifier nullable: true, blank: true, size:0..80
+        metaSource nullable: true, blank: true, size:0..80
+        metaCopyright nullable: true, blank: true, size:0..200
     }
 
     static mapping = {
@@ -127,15 +143,22 @@ class WcmContent implements Comparable, Taggable {
         language(group:'extra', editor:'LanguageList')
 
         orderIndex hidden:true
-        createdBy editor:'ReadOnly', group:'extra'
-        createdOn editor:'ReadOnlyDate', group:'extra'
-        changedBy editor:'ReadOnly', group:'extra'
-        changedOn editor:'ReadOnlyDate', group:'extra'
+        createdBy editor:'ModifiedBy', group:'extra'
+        createdOn hidden: true
+        changedBy editor:'ModifiedBy', group:'extra'
+        changedOn hidden: true
         publishFrom group:'extra'
         publishUntil group:'extra'
         tags editor:'Tags', group:'extra'
         parent hidden:true
         children hidden:true
+
+        metaCreator group:'meta'    
+        metaPublisher group:'meta'   
+        description group:'extra', editor:'LongString'
+        identifier group:'extra'
+        metaSource group:'meta'      
+        metaCopyright group:'meta'
     }
     
     int compareTo(Object o) {
@@ -148,6 +171,8 @@ class WcmContent implements Comparable, Taggable {
     }
 
     Boolean canHaveChildren() { true }
+
+    Boolean canAcceptChild(WcmContent newChild) { true }
 
     Boolean canHaveMultipleParents() { true }
     
@@ -189,7 +214,13 @@ class WcmContent implements Comparable, Taggable {
             createdBy:t.createdBy,
             createdOn:t.createdOn,
             changedBy:t.changedBy,
-            changedOn:t.changedOn
+            changedOn:t.changedOn,
+            metaCreator:metaCreator,    
+            metaPublisher:metaPublisher,
+            description:description,
+            identifier:identifier,
+            metaSource:metaSource,
+            metaCopyright:metaCopyright
         ] 
     }
 
@@ -240,16 +271,27 @@ class WcmContent implements Comparable, Taggable {
         }
     }
 
+    /**
+     * Save a new content revision object with the current state of this content node
+     */
     void saveRevision(def latestTitle, def latestSpaceName) {
         def self = this 
         
         def t = this
         
-        def criteria = WcmContentVersion.createCriteria()
-        def lastRevision = criteria.get {
-            eq('objectKey', ident())
-            projections {
-                max('revision')
+        if (log.debugEnabled) {
+            log.debug "Building revision info for ${this}"
+        }
+        
+        def lastRevision
+        // Don't force this session to flush just so we can query!
+        WcmContentVersion.withNewSession {
+            def criteria = WcmContentVersion.createCriteria()
+            lastRevision = criteria.get {
+                eq('objectKey', ident())
+                projections {
+                    max('revision')
+                }
             }
         }
         
@@ -259,14 +301,14 @@ class WcmContent implements Comparable, Taggable {
         def output = new StringBuilder()
         output << "<revision>"
         verProps.each { vp ->
-            def propName = vp.key
-            def propValue = vp.value
+            def propName = escapeToXML(vp.key)
+            def propValue = escapeToXML(vp.value?.toString())
             if (propValue) {
-                output << "<${propName}>${propValue.encodeAsHTML()}</${propName}>"
+                output << "<property name=\"${propName}\">${propValue}</property>"
             }
         }
-        
-        output << "<content>${getContentAsText().encodeAsHTML()}</content>"
+        // Write out the human-readable content summary always
+        output << "<content>${escapeToXML(getContentAsText())}</content>"
         output << "</revision>"
 
         def xml = output.toString()
@@ -276,13 +318,24 @@ class WcmContent implements Comparable, Taggable {
                 objectContent: xml,
                 contentTitle: latestTitle,
                 spaceName: latestSpaceName,
-                createdBy: createdBy,
-                createdOn: createdOn)
+                createdBy: wcmSecurityService?.userName,
+                createdOn: new Date())
 
         cv.updateRevisions()
+        if (log.debugEnabled) {
+            log.debug "Saving revision info for ${this}"
+        }
         if (!cv.save()) {
             log.error "In createVersion of ${this}, save failed: ${cv.errors}"
             assert false
         }
+    }
+    
+    def escapeToXML(s) {
+        // MUST escape & first
+        s = s?.replaceAll('&', '&amp;')
+        s = s?.replaceAll('<', '&lt;')
+        s = s?.replaceAll('>', '&gt;')
+        return s
     }
 }

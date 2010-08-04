@@ -32,12 +32,13 @@ class WcmEditorController {
             flash.message = "Content not found with id ${params.id}"
             redirect(controller:'wcmRepository')
         } else {
-            return [content: content, editableProperties: wcmEditorService.getEditorInfo(content.class)]
+            return [content: content, changeHistory: wcmContentRepositoryService.getChangeHistory(content), 
+                editableProperties: wcmEditorService.getEditorInfo(content.class)]
         }
     }
 
     void workaroundBlankAssociationBug() {
-        ['template', 'target', 'parent'].each { fld ->
+        ['script', 'template', 'target', 'parent'].each { fld ->
             if (params[fld]) params.remove(['fld'])
             if (params[fld+'.id'] == '') {
                 params.remove(fld+'.id')
@@ -75,7 +76,9 @@ class WcmEditorController {
                 flash.error = renderErrors(bean: content)
                 txn.setRollbackOnly()
                 log.error "Unable to save content: ${content.errors}"
-                render(view: 'create', model: [content: content, editableProperties: wcmEditorService.getEditorInfo(content.class)])
+                render(view: 'create', model: [content: content, 
+                    changeHistory: wcmContentRepositoryService.getChangeHistory(content),
+                    editableProperties: wcmEditorService.getEditorInfo(content.class)])
             }
         }
     }
@@ -91,51 +94,64 @@ class WcmEditorController {
     }
 
     def preview = {
-        println "IN PREVIEW!"
         params._preview = true
         update()
     }
     
     def update = {
-        println "In update"
         
         workaroundBlankAssociationBug()
         
         WcmContent.withTransaction { txn -> 
-            def result = wcmContentRepositoryService.updateNode(params.id, params)
-            if (result?.errors || params._preview) {
+            def content
+            def errors
+            def notFound = false
+            if (!params.id && params._preview) {
+                def result = wcmContentRepositoryService.createNode(params.type, params)
+                errors = result.hasErrors() ? result.errors : null
+                content = result
+            } else {
+                def result = wcmContentRepositoryService.updateNode(params.id, params)
+                errors = result.errors
+                content = result.content
+                notFound = result.notFound
+            }
+            if (errors || params._preview) {
                 txn.setRollbackOnly()
-                if (result?.errors) {
+                if (errors) {
                     if (log.debugEnabled) {
-                        log.debug "Couldn't update content, has errors: ${result}"
+                        log.debug "Couldn't update content, has errors: ${errors}"
                     }
                     flash.message =  message(code:'message.content.has.errors')
                     if (params._preview) {
                         render "Cannot preview, content has errors. Please return to editor"
                         return
                     } else {
-                        render(view: 'edit', model: [content: result.content, editableProperties: wcmEditorService.getEditorInfo(result.content.class)])
+                        render(view: 'edit', model: [content: content, 
+                            // Get history in a new session so we don't see unsaved revision
+                            changeHistory: WcmContent.withNewSession { wcmContentRepositoryService.getChangeHistory(content) },
+                            editableProperties: wcmEditorService.getEditorInfo(content.class)])
                         return
                     }
                 } else if (params._preview) {
                     if (log.debugEnabled) {
-                        log.debug "Not updating content, preview mode for: ${result}"
+                        log.debug "Not updating content, preview mode for: ${content}"
                     }
-                    WcmContentController.renderGSPContent(wcmContentRepositoryService, request, response, result.content)
+                    WcmContentController.renderGSPContent(wcmContentRepositoryService, request, response, content)
                     return null
                 }
-            } else if (result?.notFound) {
+            } else if (notFound) {
                 response.sendError(404, "Cannot update node, no node found with id ${params.id}")
                 return
             } else {
                 flash.message = message(code:'message.content.updated', args:[
-                    result.content.title, 
-                    message(code:'content.item.name.'+result.content.class.name)] )
+                    content.title, 
+                    message(code:'content.item.name.'+content.class.name)] )
                 if (!params['continue']) {
                     redirect(controller:'wcmRepository', action:'treeTable')
                     return
                 } else {
-                    redirect(action:'edit', params:[id:result.content.id])
+                    redirect(action:'edit', params:[id:content.id])
                     return
                 }
             }        
@@ -153,19 +169,13 @@ class WcmEditorController {
             redirect(action: list)
         }
     }
-    
-    def dochange = {
-        def selectedSpace = WcmSpace.get(params.id)
-        def templates = WcmTemplate.findAllBySpace(selectedSpace)
-        def data = []
-        templates.each {
-        def template = [:]
-            template.id = it.id
-            template.title = it.title
-            template.space = selectedSpace.name
-            data << template
-        }
-        render data as JSON
+
+    def showRevision = {
+        def revId = params.id
+        def rev = wcmContentRepositoryService.getChangeHistoryItem(revId)
+        def props = rev?.extractProperties()
+        def con = grailsApplication.classLoader.loadClass(rev.objectClassName).get(rev.objectKey)
+        [historyItem:rev, content:props.content, contentProperties:props.properties, currentContent:con]
     }
     
     def convertToWiki = {

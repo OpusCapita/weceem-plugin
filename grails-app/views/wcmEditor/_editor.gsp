@@ -75,6 +75,30 @@ $( function() {
                 </g:grep>
             </div>
 
+            <h2><a href="#">Metadata</a></h2>
+            <div id="editor-meta">
+                <g:grep in="${editableProperties}" var="prop" filter="${ { p -> p.group == 'meta'} }">
+                
+                    <div class="clear prepend-1 span-4">
+                        <bean:label beanName="content" property="${prop.property}" labelKey="${'content.label.'+prop.property}"/>
+                    </div>
+                    <div class="field prepend-1 span-17 last">
+                        <% println wcm."editorField${prop.editor}"(bean:content, property:prop.property) %>
+                    </div>
+                </g:grep>
+            </div>
+            
+            <h2><a href="#">Change history</a></h2>
+            <div id="editor-changes">
+                <div class="prepend-1 span-22 last">
+                    <div>
+                    <g:each in="${changeHistory}" var="change">
+                        <g:link target="weceem_history" controller="wcmEditor" action="showRevision" id="${change.id}"><wcm:humanDate date="${change.createdOn}"/> by ${change.createdBy.encodeAsHTML()}</g:link><br/>
+                    </g:each>
+                    </div>
+                </div>
+            </div>
+
             <h2><a href="#">Parent &amp; Children</a></h2>
             <div id="editor-family">
                 <div class="clear prepend-1 span-2">
@@ -88,7 +112,7 @@ $( function() {
                 </div>
                 <%-- Only show children if we are editing --%>
                 <g:if test="${content.id}">
-                    <div class="clear span-2">
+                    <div class="clear prepend-1 span-2">
                         <label>Children:</label>
                     </div>
                     <div class="prepend-1 span-21 last">

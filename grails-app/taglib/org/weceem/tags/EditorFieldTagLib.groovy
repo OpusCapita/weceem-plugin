@@ -17,6 +17,10 @@ class EditorFieldTagLib {
         out << bean.input(beanName:'content', property:attrs.property, noLabel:true)
     }
 
+    def editorFieldSelectInList = { attrs ->
+        out << bean.select(beanName:'content', property:attrs.property, noLabel:true)
+    }
+
     def editorFieldLongString = { attrs ->
         out << bean.textArea(beanName:'content', property:attrs.property, rows:3, cols:40, noLabel:true)
     }
@@ -49,6 +53,19 @@ class EditorFieldTagLib {
         def v = pageScope.content[attrs.property]
         if (v) v = v.encodeAsURL().encodeAsHTML()
         out << "<span class=\"field-readonly\">${ v ?: '' }</span>"
+    }
+    
+    def editorFieldModifiedBy = { attrs ->
+        // Only for xxxxBy fields
+        assert attrs.property.endsWith('By')
+        
+        def byProp = pageScope.content[attrs.property]
+        def v = ''
+        if (byProp) {
+            def onProp = pageScope.content[attrs.property[0..-3]+'On']
+            v = "${byProp?.encodeAsHTML()} on ${g.formatDate(date:onProp, format:'d MMM yyyy \'at\' HH:mm:ss')}"
+        }
+        out << "<span class=\"field-readonly\">${v}</span>"
     }
     
     def editorFieldReadOnlyDate = { attrs ->
@@ -98,14 +115,14 @@ class EditorFieldTagLib {
     def editorFieldWcmTemplate = { attrs ->
         def templates = WcmTemplate.findAllBySpace( pageScope.content.space, [sort:'title'])
         out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
-            noSelection: ['':'- No template -'],
+            noSelection: ['':'- No template (inherit) -'],
             from: templates, optionValue:'title', optionKey:'id')
     }
 
     def editorFieldWcmScript = { attrs ->
         def templates = WcmScript.findAllBySpace( pageScope.content.space, [sort:'title'])
         out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
-            noSelection: ['':'- No template -'],
+            noSelection: ['':'- Select a script -'],
             from: templates, optionValue:{ it.title + " (${it.absoluteURI})"}, optionKey:'id')
     }
 
@@ -121,7 +138,7 @@ class EditorFieldTagLib {
             model:[name:attrs.property, value:pageScope.content[attrs.property]])
     }
 
-    def editorFieldContent = { attrs ->
+    def editorFieldWcmContent = { attrs ->
         def contents =  WcmContent.findAllBySpace( pageScope.content.space, [sort:'title']).findAll( { c -> !c.is(pageScope.content) })
         out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
             noSelection: ['':'- No content -'],

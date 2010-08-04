@@ -18,11 +18,9 @@ import org.weceem.content.*
 import org.weceem.util.ContentUtils
 
 /**
- * BlogContentNode class describes the content node of type 'blog'.
- * The teaser of the blog is an equivalent to summary of content node.
+ * A blog entry
  *
- * @author Stephan Albers
- * @author July Karpey
+ * @author Marc Palmer
  */
 class WcmBlogEntry extends WcmContent {
 
@@ -45,7 +43,7 @@ class WcmBlogEntry extends WcmContent {
     }
     
     static constraints = {
-        summary(maxSize:500)
+        summary(nullable: true, blank: true, maxSize:500)
         content(maxSize:100000)
         status(nullable: false)
     }
@@ -53,10 +51,10 @@ class WcmBlogEntry extends WcmContent {
     static editors = {
         summary(editor:'LongString')
         content(editor:'RichHTML')
-        keywords()
+        keywords(group:'meta')
     }
 
-    static transients = WcmContent.transients + ['summary']
+    static transients = WcmContent.transients
 
     String getMimeType() { "text/html" }
 

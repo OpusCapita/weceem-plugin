@@ -31,12 +31,14 @@ class WcmContentVersion {
     Date createdOn
 
     def updateRevisions() {
+        // Keep past revisions up to date with the node's current info, in case node is deleted eventually
         WcmContentVersion.executeUpdate(
                 "update WcmContentVersion cv set cv.contentTitle = ?, cv.spaceName = ? where cv.objectKey = ?",
                 [contentTitle, spaceName, objectKey])
     }
 
     static constraints = {
+        objectContent(maxSize:500000)
         revision(nullable: true)
         createdBy(nullable: true)
         createdOn(nullable: true)
@@ -44,5 +46,24 @@ class WcmContentVersion {
 
     static mapping = {
         objectContent type: 'text'
+    }
+    
+    def extractProperties() {
+        def slurper = new XmlSlurper()
+        def doc = slurper.parseText(objectContent)
+        def data = [content:null, properties:[:]]
+        data.content = decodeXML(doc.content.text())
+        doc.property.each { n ->
+            data.properties[decodeXML(n.@name.text())] = decodeXML(n.text())
+        }
+        return data
+    }
+    
+    def decodeXML(s) {
+        // MUST escape & last
+        s = s?.replaceAll('&lt;', '<')
+        s = s?.replaceAll('&gt;', '>')
+        s = s?.replaceAll('&amp;', '&')
+        return s
     }
 }

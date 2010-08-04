@@ -14,8 +14,6 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.weceem.content.*
 
 //@todo design smell!
-
-
 import org.weceem.files.*
 import org.weceem.script.WcmScript
 
@@ -293,8 +291,9 @@ class WcmContentRepositoryService implements InitializingBean {
             if (log.debugEnabled) {
                 log.debug "Creating GSP template class for $absURI"
             }
-            // Workaround for Grails 1.2.0 bug wher page name must be a valid local system file path!
+            // Workaround for Grails 1.2.0 bug where page name must be a valid local system file path!
             // Was dying on Windows with / in uris. http://jira.codehaus.org/browse/GRAILS-5772
+            // @todo This is VERY nasty, assumes GSP content is in a "content" property
             groovyPagesTemplateEngine.createTemplate(content.content, ('WcmContent:'+absURI).replaceAll(/[^a-zA-Z0-9\-]/, '_') )
         }
     }
@@ -396,13 +395,23 @@ class WcmContentRepositoryService implements InitializingBean {
      *
      * @param content
      */
-    Map getRecentChanges(WcmContent content) {
+    List getChangeHistory(WcmContent content, queryArgs = [:]) {
         requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_VIEW])        
-        def changes = WcmContentVersion.findAllByObjectKey(content.ident(),
-                [sort: 'revision', order: 'desc'])
-        return [changes: changes]
+        def args = [:] + queryArgs
+        if (!args.sort) {
+            args += [sort:'createdOn', order: 'desc']
+        }
+        def changes = WcmContentVersion.findAllByObjectKeyAndObjectClassName(content.ident(), content.class.name, args)
+        return changes
     }
 
+    /** 
+     * Get a specific change history item
+     */
+    def getChangeHistoryItem(id) {
+        WcmContentVersion.get(id)
+    }
+    
     /**
      * Creates new WcmContent node and it's relation from request parameters
      *
@@ -436,18 +445,25 @@ class WcmContentRepositoryService implements InitializingBean {
             log.debug "Creating node: ${content.dump()} with parent [$parentContent]"
         }
         
-        def result 
-        if (content.metaClass.respondsTo(content, 'create', WcmContent)) {
-            if (log.debugEnabled) {
-                log.debug "Creating node, type ${content.class} support 'create' event, calling"
+        def result = true
+
+        if (parentContent) {
+            result = parentContent.canAcceptChild(content)
+        }
+        
+        if (result) {
+            if (content.metaClass.respondsTo(content, 'create', WcmContent)) {
+                if (log.debugEnabled) {
+                    log.debug "Creating node, type ${content.class} support 'create' event, calling"
+                }
+                // Call the event so that nodes can perform post-creation tasks
+                result = content.create(parentContent)
+            } else {
+                if (log.debugEnabled) {
+                    log.debug "Creating node, type ${content.class} does not support 'create' event, skipping"
+                }
+                result = true
             }
-            // Call the event so that nodes can perform post-creation tasks
-            result = content.create(parentContent)
-        } else {
-            if (log.debugEnabled) {
-                log.debug "Creating node, type ${content.class} does not support 'create' event, skipping"
-            }
-            result = true
         }
 
         if (result) {
@@ -479,6 +495,12 @@ class WcmContentRepositoryService implements InitializingBean {
                 content.createAliasURI(parentContent)
             }
             
+            // Auto-set publishFrom to now if content is created as public but no publishFrom specified
+            // Required for blogs and sort by publishFrom to work
+            if (content.status.publicContent && (content.publishFrom == null)) {
+                content.publishFrom = new Date()
+            }
+            
             // We must have generated aliasURI and set parent here to be sure that the uri is unique
             boolean saved = false
             int attempts = 0
@@ -493,7 +515,7 @@ class WcmContentRepositoryService implements InitializingBean {
                     content.createAliasURI(parentContent)
                     if (oldAliasURI != content.aliasURI) {
                         if (log.warnEnabled) {
-                            log.warn "Failed to create new content ${content.dump()} due to constraint violation, trying again with new aliasURI"
+                            log.warn "Failed to create new content ${content.dump()} due to constraint violation, trying again with a new aliasURI"
                         }
                     } else {
                         log.error "Failed to create new content ${content.dump()} due to constraint violation, giving up as aliasURI is invariant"
@@ -512,22 +534,6 @@ class WcmContentRepositoryService implements InitializingBean {
             wcmEventService.afterContentAdded(content)
         }
         return result
-    }
-
-    /**
-     * Changes node's title.
-     *
-     * @param content
-     * @param oldTitle
-     */
-    Boolean renameNode(WcmContent content, oldTitle) {
-        requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_EDIT])        
-
-        if (content.metaClass.respondsTo(content, 'rename', String)) {
-            return content.rename(oldTitle)
-        } else {
-            return true
-        }
     }
 
     /**
@@ -616,9 +622,18 @@ class WcmContentRepositoryService implements InitializingBean {
             } 
         }
         def success = true
+
+        // We need this to invalidate caches
+        def originalURI = sourceContent.absoluteURI
         
-        if (sourceContent.metaClass.respondsTo(sourceContent, "move", WcmContent)){
-            success = sourceContent.move(targetContent)
+        if (targetContent) {
+            success = targetContent.canAcceptChild(sourceContent)
+        }
+
+        if (success) {
+            if (sourceContent.metaClass.respondsTo(sourceContent, "move", WcmContent)){
+                success = sourceContent.move(targetContent)
+            }
         }
         
         if (success) {
@@ -629,7 +644,7 @@ class WcmContentRepositoryService implements InitializingBean {
                 assert parent.save()
             }
             WcmContent inPoint = WcmContent.findByOrderIndexAndParent(orderIndex, targetContent)
-            if (inPoint != null){
+            if (inPoint != null) {
                 shiftNodeChildrenOrderIndex(sourceContent.space, targetContent, orderIndex)
             }
             sourceContent.orderIndex = orderIndex
@@ -638,6 +653,10 @@ class WcmContentRepositoryService implements InitializingBean {
                 targetContent.addToChildren(sourceContent)
                 assert targetContent.save()
             }
+
+            // Invalidate the caches 
+            invalidateCachingForURI(sourceContent.space, originalURI)
+
             return sourceContent.save(flush: true)
         } else {
             return false
@@ -845,14 +864,52 @@ class WcmContentRepositoryService implements InitializingBean {
         space.aliasURI+':'+uri
     }
 
+    /**
+     * Flush all uri caches for given space
+     */
+    void invalidateCachingForSpace(WcmSpace space) {
+        def uri = space.aliasURI+':'
+        gspClassCache.keys.each { k ->
+            if (k.startsWith(uri)) {
+                gspClassCache.remove(k)
+            }
+        }
+        uriToIdCache.keys.each { k ->
+            if (k.startsWith(uri)) {
+                uriToIdCache.remove(k)
+            }
+        }
+    }
+
+    /**
+     * Flush all uri caches for given space and uri prefix
+     */
     void invalidateCachingForURI( WcmSpace space, uri) {
         // If this was content that created a cached GSP class, clear it now
         def key = makeURICacheKey(space,uri)
         log.debug "Removing cached info for cache key [$key]"
         gspClassCache.remove(key) // even if its not a GSP/script lets just assume so, quicker than checking & remove
         uriToIdCache.remove(key)
+        
+        // Now remove the caches of all child nodes too, as the parent may have moved and all URIs changed
+        def parentKey = makeURICacheKey(space,uri+'/')
+        gspClassCache.keys.each { k ->
+            if (k.startsWith(parentKey)) {
+                gspClassCache.remove(k)
+            }
+        }
+        uriToIdCache.keys.each { k ->
+            if (k.startsWith(parentKey)) {
+                uriToIdCache.remove(k)
+            }
+        }
     }
     
+    /**
+     * Update a content node in the database, binding new properties in from "params"
+     *
+     * @return an object with properties "content", "errors" and "notFound" - set as appropriate
+     */
     def updateNode(WcmContent content, def params) {
         requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_EDIT])        
 
@@ -862,7 +919,11 @@ class WcmContentRepositoryService implements InitializingBean {
             log.debug("Updating node with id ${content.id}, with parameters: $params")
         }
         def oldAbsURI = content.absoluteURI
-        content.saveRevision(params.title ?: content.title, params.space ? WcmSpace.get(params.'space.id')?.name : content.space.name)
+        def oldSpaceName = params.space ? WcmSpace.get(params.'space.id')?.name : content.space.name
+        
+        // Get read-only instance now, for persisting revision info after we bind and successfully update
+        def contentForRevisionSave = content.class.read(content.id)
+
         def oldTitle = content.title
         // map in new values
         hackedBindData(content, params)
@@ -883,8 +944,17 @@ class WcmContentRepositoryService implements InitializingBean {
                 content.createAliasURI(content.parent)
             }
 
+            // Auto-set publishFrom to now if content is created as public but no publishFrom specified
+            // Required for blogs and sort by publishFrom to work
+            if (content.status.publicContent && (content.publishFrom == null)) {
+                content.publishFrom = new Date()
+            }
+
             def ok = content.validate()
             if (content.save()) {
+                // Save the revision now
+                contentForRevisionSave.saveRevision(params.title ?: oldTitle, oldSpaceName)
+
                 if (log.debugEnabled) {
                     log.debug("Update node with id ${content.id} saved OK")
                 }
@@ -1199,7 +1269,7 @@ class WcmContentRepositoryService implements InitializingBean {
             def cachedContentInfo = cachedElement?.getValue()
             if (cachedContentInfo) {
                 if (log.debugEnabled) {
-                    log.debug "Found content info into cache for uri $uriPath: ${cachedContentInfo}"
+                    log.debug "Found content info in cache for uri $uriPath: ${cachedContentInfo}"
                 }
                 // @todo will this break with different table mapping strategy eg multiple ids of "1" with separate tables?
                 WcmContent c = WcmContent.get(cachedContentInfo.id)
@@ -1518,7 +1588,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
             
             or {
                 isNull('publishUntil')
-                le('publishUtil', endDate)
+                le('publishUntil', endDate)
             }
 
             order('publishFrom', 'desc')
@@ -1716,7 +1786,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
         listOfContent.findAll { c -> types.any { t -> t.isAssignableFrom(c.class) } }
     }
 
-    def searchForPublicContentByTag(String tag, WcmSpace space, contentOrPath = null, args = null) {
+    def searchForPublicContentByTag(String tag, WcmSpace space, contentOrPath = null, args = [:]) {
         if (log.debugEnabled) {
             log.debug "Searching for content by tag $tag"
         }
@@ -1729,22 +1799,20 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
             }
         }
 
-        def hits = WcmContent.findAllByTag(tag)
-        // Filter by type if required
-        if (args.types) {
-            hits = filterToTypes(hits, args.types)
-        }
-
-        /*WithCriteria(tag) {
+        def hits = WcmContent.findAllByTagWithCriteria(tag) {
             eq('space', space)
 
             // @todo apply baseURI
             
-            firstResult(args?.offset ?:0)
-            maxResults(args?.max ?: 25) 
+            firstResult(args.offset?.toInteger() ?:0)
+            maxResults(args.max?.toInteger() ?: 25) 
             // Default to newest content first
             order(args.sort ?: 'createdOn', args.order ?: 'desc')
-        }*/
+        }
+        // Filter by type if required - probably do this inside the criteria?
+        if (args.types) {
+            hits = filterToTypes(hits, args.types)
+        }
         [results:hits, total:hits.size()]
     }
 

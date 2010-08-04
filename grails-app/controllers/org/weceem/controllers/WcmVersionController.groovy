@@ -9,9 +9,11 @@ import org.weceem.versioning.*
 
 /**
  * @author Sergei Shushkevich
+ * @deprecated don't use thiss
  */
 class WcmVersionController {
 
+/*
     def pagingService
     def xstreamConfigurer
     def contentVersionService
@@ -98,13 +100,14 @@ class WcmVersionController {
         'oCreatedBy': contentVersion.createdBy, 'cChangedBy': currentContent.changedBy,
         'oCreatedOn': contentVersion.createdOn, 'cChangedOn': currentContent.changedOn]
     }
-
+*/
     /**
      * Renders changes for specified WcmContent versions.
      *
      * params.fromVersion
      * params.toVersion
      */
+/*
     def showVersionsChanges = {
         def fromVersion = WcmContentVersion.get(params.fromVersion)
         def toVersion = WcmContentVersion.get(params.toVersion)
@@ -130,4 +133,5 @@ class WcmVersionController {
         }
         return result.sort()
     }
+*/
 }
