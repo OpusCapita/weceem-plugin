@@ -268,7 +268,7 @@ class WeceemTagLib {
                     o << div
                 }
 
-                o << link(node:args.node) {
+                o << wcm.link(node:args.node) {
                     out << args.node.titleForMenu.encodeAsHTML() 
                 } 
                 return o.toString()
@@ -464,7 +464,7 @@ class WeceemTagLib {
     }
     
     def date = { attrs, body -> 
-        out << formatDate(format:format ?: 'dd MMM yyyy', date: new Date())
+        out << formatDate(format:attrs.format ?: 'dd MMM yyyy', date: new Date())
     }
     
     def find = { attrs, body -> 
