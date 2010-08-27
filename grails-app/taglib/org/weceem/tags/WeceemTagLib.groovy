@@ -281,6 +281,10 @@ class WeceemTagLib {
             }
             first = false
         }
+        if (!first) {
+            out << div
+        }
+        out << node.titleForMenu.encodeAsHTML()
     }
     
     /**
