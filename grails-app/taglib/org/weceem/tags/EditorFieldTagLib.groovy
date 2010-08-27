@@ -163,6 +163,39 @@ class EditorFieldTagLib {
             model:[name:attrs.property, value:pageScope.content[attrs.property]])
     }
     
+    void includeCKEditor() {
+        if (!request['weceem.editor.ckeditor.js.included']) {
+            out << ckeditor.resources()
+            out << ckeditor.config(var:"toolbar_HTMLEditor") {
+"""
+        [
+            ['Maximize'],
+            ['Cut','Copy','Paste','PasteText','PasteFromWord','-','Print', 'SpellChecker', 'Scayt'],
+            ['Undo','Redo','-','Find','Replace','-','SelectAll','RemoveFormat'],
+            ['NewPage'],
+            ['Source','ShowBlocks','-','About'],
+            '/',
+            ['Link','Unlink','Anchor'],
+            ['Image','Flash','Table','HorizontalRule','SpecialChar','PageBreak'],
+            ['Outdent','Indent','Blockquote','CreateDiv'],
+            ['Subscript','Superscript'],
+            ['TextColor','BGColor'],
+            ['BidiLtr', 'BidiRtl'],
+            '/',
+            ['Styles','Format','Font','FontSize'],
+            ['Bold','Italic','Underline','Strike','-','NumberedList','BulletedList','-'],
+            ['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock']
+        ]
+"""
+            }
+            request['weceem.editor.ckeditor.js.included'] = true
+        }
+    }
+
+    def editorResourcesRichHTML = { attrs ->
+        includeCKEditor()
+    }
+    
     def editorFieldHTMLContent = { attrs ->
         if (pageScope.content.allowGSP) {
             out << editorFieldHtmlCode(attrs)
@@ -212,6 +245,8 @@ class EditorFieldTagLib {
     def editorResourcesHTMLContent = { attrs ->
         if (pageScope.content.allowGSP) {
             out << editorResourcesHtmlCode(attrs)
+        } else {
+            out << editorResourcesRichHTML(attrs)
         }
     }
     

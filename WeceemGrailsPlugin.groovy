@@ -1,10 +1,11 @@
 import org.apache.commons.logging.LogFactory
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 class WeceemGrailsPlugin {
     def _log = LogFactory.getLog('org.weceem.WeceemGrailsPlugin')
 
     // the plugin version
-    def version = "0.9.1"
+    def version = "0.9.2"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.2.2 > *"
     
@@ -13,7 +14,7 @@ class WeceemGrailsPlugin {
         searchable:'0.5.5 > *', 
         quartz:'0.4.2 > *', 
         navigation:'1.1.1 > *',
-        fckeditor:'0.9.2 > *',
+        ckeditor:'3.4 > *',
         feeds:'1.5 > *',
         beanFields:'1.0-RC3 > *',
         blueprint:'0.9.1.1 > *',
@@ -75,12 +76,29 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         }
 
         applicationContext.wcmEditorService.cacheEditorInfo()
-        applicationContext.wcmEditorService.configureFCKEditor()
+        configureCKEditor()
 
         applicationContext.wcmContentRepositoryService.createDefaultStatuses()
         applicationContext.wcmContentRepositoryService.createDefaultSpace()
     }
 
+    def configureCKEditor(){
+        def settings = ConfigurationHolder.config
+        def co = new ConfigObject()
+        co.ckeditor.upload.basedir = "/${org.weceem.files.WcmContentFile.DEFAULT_UPLOAD_DIR}/"
+        co.ckeditor.upload.overwrite = false
+        co.ckeditor.defaultFileBrowser = "ofm"
+        co.ckeditor.upload.image.browser = true
+        co.ckeditor.upload.image.upload = true
+        co.ckeditor.upload.image.allowed = ['jpg', 'gif', 'jpeg', 'png']
+        co.ckeditor.upload.image.denied = []
+        co.ckeditor.upload.media.browser = true
+        co.ckeditor.upload.media.upload = true
+        co.ckeditor.upload.media.allowed = ['mpg','mpeg','avi','wmv','asf','mov']
+        co.ckeditor.upload.media.denied = []
+        settings.merge(co)
+    }
+    
     def doWithWebDescriptor = { xml ->
         // TODO Implement additions to web.xml (optional)
     }

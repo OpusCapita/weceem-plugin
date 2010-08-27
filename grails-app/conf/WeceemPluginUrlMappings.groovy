@@ -13,7 +13,7 @@ class WeceemPluginUrlMappings {
         "_weceem/",
         "plugins/",
         "WEB-INF/",
-        "fck",
+        "ck",
         "WeceemFiles/",
         // Admin links
         "${WeceemPluginUrlMappings.ADMIN_PREFIX}/",

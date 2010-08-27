@@ -133,23 +133,7 @@ class WcmEditorService {
         def t = this
         editorInfo[cls.name] ?: Collections.EMPTY_LIST
     }
-    
-    // @todo This should definitely not be here.
-    def configureFCKEditor(){
-        def settings = ConfigurationHolder.config
-        def co = new ConfigObject()
-        co.fckeditor.upload.basedir = "/${org.weceem.files.WcmContentFile.DEFAULT_UPLOAD_DIR}/"
-        co.fckeditor.upload.overwrite = false
-        co.fckeditor.upload.image.browser = true
-        co.fckeditor.upload.image.upload = true
-        co.fckeditor.upload.image.allowed = ['jpg', 'gif', 'jpeg', 'png']
-        co.fckeditor.upload.image.denied = []
-        co.fckeditor.upload.media.browser = true
-        co.fckeditor.upload.media.upload = true
-        co.fckeditor.upload.media.allowed = ['mpg','mpeg','avi','wmv','asf','mov']
-        co.fckeditor.upload.media.denied = []
-        settings.merge(co)
-    }
+
 }
 
 
