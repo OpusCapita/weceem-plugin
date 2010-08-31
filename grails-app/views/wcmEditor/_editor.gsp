@@ -9,16 +9,12 @@ $( function() {
         var form = $(event.target).parents('form');
         form.attr('target', '_preview');
         
-        //$('#preview-action').val('preview');
-        
         // Now submit form using workaround for onsubmit calls
         $('#preview-action-submitter').click()
         
         // Reset the form target so save works as expected
         form.attr('target', '');
     
-        //$('#previewaction').val('');
-        
         // Don't have a double-submit
         event.preventDefault();
         

@@ -68,15 +68,11 @@ class WcmContentController {
         			def pageInfo = WcmContentController.makePageInfo(uri, contentInfo, content)
 
                     def contentClass = content.class
-
-                    // See if it is renderable directly - eg WcmWidget and WcmTemplate are not renderable on their own
-                    if (contentClass.metaClass.hasProperty(contentClass, 'standaloneContent')) {
-                        def canRender = contentClass.standaloneContent
-                        if (!canRender) {
-                            log.warn "Request for [${params.uri}] resulted in content node that is not standalone and cannot be rendered directly"
-                            response.sendError(406 /* Not acceptable */, "WcmContent is not intended for rendering")
-                            return null
-                        }
+                    
+                    if (!wcmContentRepositoryService.contentIsRenderable(content)) {
+                        log.warn "Request for [${params.uri}] resulted in content node that is not standalone and cannot be rendered directly"
+                        response.sendError(406 /* Not acceptable */, "This content is not intended for rendering")
+                        return null
                     }
                     
                     // Make this available to the rest of the request chain
@@ -186,6 +182,10 @@ class WcmContentController {
     }
     
     
+    /**
+     * Render a content node with support for GSP tags and template
+     * @see static method impl
+     */
     void renderGSPContent(WcmContent content, model = null) {
         WcmContentController.renderGSPContent( wcmContentRepositoryService, request, response, content, model)
     }
@@ -307,7 +307,12 @@ class WcmContentController {
         }
         
         // Render the template, this call will handle the content too by passing it in as model to template
-        return renderGSPContent(template, [node: content])
+        return "/beta/count-me-in" {
+            controller = "invitationRequests"
+            action = "requestInvite"
+        }
+        
+        tent(template, [node: content])
     }
     
     def renderFile(File f) {

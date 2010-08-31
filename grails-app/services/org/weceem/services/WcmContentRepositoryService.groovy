@@ -1376,6 +1376,19 @@ class WcmContentRepositoryService implements InitializingBean {
         }
     }
     
+    /** 
+     * Determine if the content node is able to be rendered to visitors.
+     * @return false if this content is not meant to be rendered, and is instead a component of other content
+     */
+    boolean contentIsRenderable(WcmContent content) {
+        // See if it is renderable directly - eg WcmWidget and WcmTemplate are not renderable on their own
+        if (content.metaClass.hasProperty(content.class, 'standaloneContent')) {
+            return content.class.standaloneContent
+        } else { 
+            return true
+        }
+    }
+     
     /**
      * Synchronize given space with file system
      * 
