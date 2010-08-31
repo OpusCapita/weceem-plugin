@@ -17,6 +17,9 @@ class WcmContentDirectory extends WcmContentFile {
         only = ['title', 'status']
     }
 
+    // This cannot be rendered
+    static standaloneContent = false
+    
     Integer filesCount = 0
 
     Boolean canHaveChildren() { true }
