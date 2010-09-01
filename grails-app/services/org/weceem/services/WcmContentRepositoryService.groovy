@@ -1732,6 +1732,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
                 and {
                     eq('publicContent', false)
                     ne('code', unmoderatedStatusCode)
+                    ne('code', archivedStatusCode)
                 }
             }
         }
