@@ -141,7 +141,9 @@ class WcmEditorController {
                         log.warn "Request for [${params.uri}] resulted in content node that is not standalone and cannot be previewed directly"
                         response.sendError(406 /* Not acceptable */, "This content is not intended for rendering")
                     } else {
-                        WcmContentController.renderGSPContent(wcmContentRepositoryService, request, response, content)
+                        println "Redirecting"
+                        request[WcmContentController.REQUEST_ATTRIBUTE_PREVIEWNODE] = content
+                        forward(controller:'wcmContent', action:'preview')
                     }
                     return null
                 }
