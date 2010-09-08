@@ -1,5 +1,6 @@
 package org.weceem.jobs
 
+import org.weceem.content.WcmContent
 
 class AutoPublicationJob {
     def wcmContentRepositoryService
@@ -18,14 +19,27 @@ class AutoPublicationJob {
         if (log.debugEnabled) {
             log.debug "Auto publication job running..."
         }
-        def n = wcmContentRepositoryService.publishPendingContent()
-        if (log.infoEnabled && n) {
-            log.info "Auto-published $n content nodes"
-        }
+        
+        WcmContent.withTransaction { txn ->
+            try {
+                def n = wcmContentRepositoryService.publishPendingContent()
+                if (log.infoEnabled && n) {
+                    log.info "Auto-published $n content nodes"
+                }
 
-        n = wcmContentRepositoryService.archiveStaleContent()
-        if (log.infoEnabled && n) {
-            log.info "Auto-archived $n content nodes"
+                n = wcmContentRepositoryService.archiveStaleContent()
+                if (log.infoEnabled && n) {
+                    log.info "Auto-archived $n content nodes"
+                }
+            } catch (Throwable t) {
+                // Need to discard any modified objects here?
+                txn.setRollbackOnly()
+                throw t
+            }
+        }
+        
+        if (log.debugEnabled) {
+            log.debug "Auto publication job done."
         }
     }
 }
