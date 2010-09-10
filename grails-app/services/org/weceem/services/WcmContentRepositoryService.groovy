@@ -620,6 +620,8 @@ class WcmContentRepositoryService implements InitializingBean {
         requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_EDIT,WeceemSecurityPolicy.PERMISSION_VIEW])        
 
         if (!sourceContent) return false
+
+        // Do an ugly check for unique uris at root
         if (!targetContent){
             def criteria = WcmContent.createCriteria()
             def nodes = criteria {
@@ -642,30 +644,40 @@ class WcmContentRepositoryService implements InitializingBean {
 
         // We need this to invalidate caches
         def originalURI = sourceContent.absoluteURI
-        
-        if (targetContent) {
+
+        def parentChanged = targetContent != sourceContent.parent
+        if (targetContent && parentChanged) {
             success = targetContent.canAcceptChild(sourceContent)
         }
 
-        if (success) {
+        if (success && parentChanged) {
             if (sourceContent.metaClass.respondsTo(sourceContent, "move", WcmContent)){
                 success = sourceContent.move(targetContent)
             }
         }
         
         if (success) {
-            def parent = sourceContent.parent
-            if (parent) {
-                parent.children.remove(sourceContent)
-                sourceContent.parent = null
-                assert parent.save()
+            if (parentChanged) {
+                // Transpose to new parent
+                def parent = sourceContent.parent
+                if (parent) {
+                    parent.children.remove(sourceContent)
+                    sourceContent.parent = null
+                    assert parent.save()
+                }
             }
+            
+            // Update the orderIndexes of target's children
             WcmContent inPoint = WcmContent.findByOrderIndexAndParent(orderIndex, targetContent)
             if (inPoint != null) {
                 shiftNodeChildrenOrderIndex(sourceContent.space, targetContent, orderIndex)
             }
+            
+            // Update ourself to new orderIndex
             sourceContent.orderIndex = orderIndex
-            if (targetContent) {
+            
+            // Add us to the child list
+            if (targetContent && parentChanged) {
                 if (!targetContent.children) targetContent.children = new TreeSet()
                 targetContent.addToChildren(sourceContent)
                 assert targetContent.save()
