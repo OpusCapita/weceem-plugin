@@ -141,6 +141,8 @@ class WcmSpaceController {
             response.addHeader('Content-disposition', contDisp)
             response.outputStream << file.readBytes()
         } catch (Exception e) {
+            log.error "Could not export space ${params.space}", e
+            // This is unlikely to work!
             flash.message = e.message
             redirect(action: exportSpace)
         }

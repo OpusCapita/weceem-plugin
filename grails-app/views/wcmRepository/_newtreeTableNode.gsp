@@ -1,11 +1,7 @@
-<tr id="inserter-before-${c.id}" class="inserter-before ${ c.parent ? 'child-of-content-node-'+c.parent.id : ''} delimeter-${c.id}">
-  <td colspan="5" ><div class="title item"></div></td>
-</tr>
-
-<tr id="content-node-${c.id}" class="${ c.parent ? 'child-of-content-node-'+c.parent.id : ''}">
+<tr id="content-node-${c.id}" class="datarow ${ c.parent ? 'child-of-content-node-'+c.parent.id : ''}">
 	<td>
 	  <div class="item">
-            <wcm:renderContentItemIcon type="${c}" id="content-node-${c.id}" />
+            <wcm:renderContentItemIcon type="${c}" id="content-icon-${c.id  }"/>
 			<h2 orderindex="${c.orderIndex == null ? 0 : c.orderIndex}" type="${c.class.name}" class="title">
 			    <g:link controller="wcmEditor" action="edit" id="${c.id}">
 			     ${c.title.encodeAsHTML()}        <span class="type">( /${c.aliasURI.encodeAsURL().encodeAsHTML()} - <g:message code="content.item.name.${c.class.name}"/>)</span>
@@ -34,10 +30,6 @@
 			<g:if test="${c.changedBy}">, changed <wcm:humanDate date="${c.changedOn}"/> by <g:link action="viewChangesByAuthor" class="author">${c.changedBy.encodeAsHTML()}</g:link></g:if>
 		</div>
 	</td>
-</tr>
-
-<tr id="inserter-after-${c.id}" class="inserter-after ${ c.parent ? 'child-of-content-node-'+c.parent.id : ''} delimeter-${c.id}">
-  <td colspan="5" ><div class="title item"></div></td>
 </tr>
 
 <g:if test="${c.children.size()}">

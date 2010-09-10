@@ -1,14 +1,25 @@
 //variable neede for search
 var cacheParams = {};
 
-//variable for mouse Y coordinate
-var mouseTop = null;
-//variable for hovered item
-var hoverItem = null;
+//variable for the item being dragged
+var currentDraggedItem = null;
+var currentDropTarget = null;
+
+var insertMarkerHalfHeight;
+var treeTableOffset;
+
+var expandTimeout = 1000;
+var currentExpandTimerId;
+var currentDropRefNode;
+var currentDropMode; 
+
+var rootNodeIndent = 10;
+var nodeIndent = 30;
+var DIALOG_WIDTH = '500px';
+
 //variable to detect time when key was pressed in search box
 var timeKeyPressed = null;
 
-var nodeIndent = 25;
 
 function sortByField(fieldname){
     cacheParams["isAsc"] = !cacheParams["isAsc"];
@@ -87,7 +98,6 @@ function updateExpanders(){
             }
             expander.click(function (){
                 $("#"+it.id).toggleBranch();
-                resetInserters();
             })
             $("#"+it.id+">td:first").prepend(expander);
         }
@@ -127,15 +137,16 @@ function getSelectedNodeIds() {
     return nodeIds
 }
 
-function resetInserters(){
-    $("tr[class*=inserter]:visible").css({'display': 'none'});
-    $("tr[class*=inserter-after]").each(function (index, it){
-        var id = getDecId($(it).attr('id'));
-        if ($(".child-of-content-node-"+id).size() > 0){
-            var style = $(".child-of-content-node-"+id+">td").attr('style');
-            $("#inserter-after-"+id+">td").attr('style', style);
-        }
+function hideInserter() {
+    var mrk = $('#insert-marker');
+    mrk.queue('concurrentfx', function() { 
+        mrk.fadeOut( function() {
+            mrk.hide();
+            $('div.table').removeClass('crop-x');
+        });
+        mrk.dequeue('concurrentfx');
     });
+    mrk.dequeue('concurrentfx');
 }
 
 function viewSelected() {
@@ -172,10 +183,12 @@ function errorMessage(str) {
     $('#errorDialogMessage').text(str);
     $('#errorDialog').dialog({ 
         buttons: { "Ok": function() { $(this).dialog("close"); } },
+	    width: DIALOG_WIDTH,
         modal: true 
     });
 }
 
+/*
 function toggleStyle(element, neighbour){
     var reg = new RegExp("child-of-content-node-\\d+");
     var parentClass = null;
@@ -193,6 +206,7 @@ function toggleStyle(element, neighbour){
     $("#" + $(element).attr('id') + " > td:first").attr("style", newstyle);
     return parentClass != null ? /\d+/.exec(parentClass)[0] : null;
 }
+*/
 
 function getParentId(element){
     var reg = new RegExp("child-of-content-node-\\d+");
@@ -209,98 +223,286 @@ function getDecId(htmlid){
     return /\d+/.exec(htmlid)[0];
 }
 
+function debug(s) {
+//    console.log(s);
+}
 
+function showInserterAfter(row, indentedLikeItem) {
+    var item = $('div.item', row);
+    if (!indentedLikeItem || (indentedLikeItem.length == 0)) {
+        indentedLikeItem = row;
+    }
+    var itemForIndent = $('div.item', indentedLikeItem);
+    var indentItemPos = itemForIndent.position();
+    var pos = item.parent().position();
+    var top = pos.top + row.outerHeight(true) - insertMarkerHalfHeight;
+    revealInserter(indentItemPos.left, top);
+}
+
+function showInserterBefore(row) {
+    var item = $('div.item', row);
+    var indentItemPos = item.position();
+    var pos = item.parent().position();
+    var top = pos.top - insertMarkerHalfHeight;
+    revealInserter(indentItemPos.left, top);
+}
+
+function showInserterAsChildOf(row) {
+    var item = $('div.item', row);
+    var itempos = item.position();
+    var pos = item.parent().position();
+    var top = pos.top + row.outerHeight(true) - insertMarkerHalfHeight;
+    var l = itempos.left + nodeIndent;
+    revealInserter(l, top);
+}
+
+function revealInserter(left, top) {
+    var mrk = $('#insert-marker');
+    var curPos = mrk.offset();
+    $('div.table').addClass('crop-x');
+    if ((left != curPos.left) || (top != curPos.top)) {
+        if (mrk.is(':visible')) {
+            // We might have an in-progress move animation already
+            mrk.clearQueue();
+            mrk.dequeue();
+            // Now add the new one
+            mrk.animate( {'left':left, 'top':top}, { duration:50 });
+        } else {
+            mrk.css( {'left':left, 'top':top});
+            mrk.queue('concurrentfx', function() { 
+                mrk.fadeIn();
+                mrk.dequeue('concurrentfx');
+            });
+            mrk.dequeue('concurrentfx');
+        }
+    }
+}
+
+function inserterAtPrecedingSibling(targetItem) {
+    setCurrentDropPoint(targetItem, "before"); // this is effectively a NOP
+    showInserterBefore(targetItem);
+    debug("Insert before");
+}
+
+function getPreviousSiblingRow(targetItem) {
+    var tgt = targetItem;
+    var childclassmatch = /child\-of\-content\-node\-\d+/.exec(tgt.attr('class'));
+    debug('childclassmatch: '+childclassmatch);
+    if (childclassmatch != null) {
+        tgt = tgt.prevAll('.'+childclassmatch[0]+':first:visible');
+    } else {
+        tgt = tgt.prevAll('tr.datarow:not([class*=child-of-content-node-]):first:visible');
+    }
+    // Default to row before current if no smart matching
+    if (!tgt.length) {
+        tgt = targetItem.prev('tr.datarow:visible');
+    }    
+    debug('Previous sibling is: '+tgt+', '+tgt.attr('id'));
+    return tgt;
+}
+
+function getNextSiblingRow(targetItem) {
+    var tgt = targetItem;
+    var childclassmatch = /child\-of\-content\-node\-\d+/.exec(tgt.attr('class'));
+    debug('childclassmatch: '+childclassmatch);
+    if (childclassmatch != null) {
+        tgt = tgt.nextAll('.'+childclassmatch[0]+':first');
+    } else {
+        tgt = tgt.nextAll('tr.datarow:not([class*=child-of-content-node-]):first:visible');
+    }
+    debug('Next sibling is: '+tgt+', '+tgt.attr('id'));
+    return tgt;
+}
+
+function inserterAtFollowingSibling(targetItem) {
+    var childClass = 'child-of-'+targetItem.attr('id')
+    var hasChildren = targetItem.nextAll('tr.'+childClass+":first:visible");
+    // If we have children we need to skip them (can't insert self into child list)
+    if (hasChildren.length > 0) {
+        var tgt = getNextSiblingRow(targetItem);
+        // If there is no next sibling, pick the next non-child row whatever, it will be 
+        // a sibling of the parent
+        debug("following sib: "+tgt.length);
+        var indentTarget
+        if (!tgt.length) {
+            tgt = targetItem.nextAll('tr.datarow:not(.'+childClass+'):first:visible');
+            indentTarget = targetItem;
+            debug("following sib non-child: "+tgt.length);
+        }    
+
+        // If we are the last row in the table...
+        if (!tgt.length) {
+            debug("following sib using after self");
+            tgt = targetItem.nextAll('tr.'+childClass+":last:visible");
+
+            setCurrentDropPoint(targetItem, "after");
+
+            // Indent to targetItem's indent level
+            showInserterAfter(tgt, $(indentTarget));
+        } else {
+            debug("following sib using before: "+tgt);
+
+            setCurrentDropPoint(tgt, "before");
+
+            showInserterBefore($(tgt));
+        }
+    } else {
+        // We have no children so it will go after us
+
+        setCurrentDropPoint(targetItem, "after");
+
+        showInserterAfter($(targetItem));
+    }
+    debug("Insert after");
+}
+
+function inserterAsChild(targetItem) {
+    setCurrentDropPoint(targetItem, "child");
+    showInserterAsChildOf(targetItem);
+    debug("Insert as child");
+}
+
+function setCurrentDropPoint(row, mode) {
+    if ((currentDropRefNode != row) || 
+        (currentDropMode != mode)) {
+        clearExpandTimer();   
+    }
+    currentDropRefNode = row;
+    currentDropMode = mode; 
+}
+
+function showDropInsertionPoint(targetItem, ui) {
+    if (currentDropTarget && currentDropTarget != currentDraggedItem) {
+        debug("Drop target: "+$(currentDropTarget).attr('id'));
+        
+        var dropOffset = currentDropTarget.position();
+        var mouseLeft = ui.position.left; 
+        var mouseY = ui.position.top; // Needs adjusting to be midpoint of draggable?
+        debug("Pos: "+ui.position.left+", "+ui.position.top);
+        var targetItemMidPoint = dropOffset.top + ($(currentDropTarget).height() >> 1);
+        var targetItemLeft = $('div.item', currentDropTarget).position().left;
+        debug("targetItemLeft: "+targetItemLeft+", itemtop "+dropOffset.top+", Midp: "+targetItemMidPoint);
+        var isIndented = mouseLeft >= targetItemLeft+nodeIndent;
+        var isAboveMidPoint = mouseY + (ui.helper.height()>>1) < targetItemMidPoint;
+        // Select previous or next sibling at this parentage level
+        if (isAboveMidPoint && !isIndented) {
+            // This is really a NOP. Hmm.
+            inserterAtPrecedingSibling(currentDropTarget);
+        } else {
+            if (!isIndented) {
+                inserterAtFollowingSibling(currentDropTarget);
+            } else {
+                // @todo We have to see how indented they are, and based on the indent of previous
+                // row allow them to drop it at any supported indent level
+                inserterAsChild(currentDropTarget);
+            }
+        }
+    }
+}
+
+function confirmDragDropOperation(opts) {
+    var dlg = $('#confirmDialog');
+    dlg.data('switch', opts['switch']);
+    dlg.data('source', opts.source);
+    dlg.data('target', opts.target);
+    dlg.dialog('open');
+}
+
+function performDrop(e, ui) {
+    var src = currentDraggedItem.parents('.datarow:first');
+    if (currentDropRefNode) {
+        if ((currentDropMode == 'after') || (currentDropMode == 'before')) {
+            confirmDragDropOperation( {'switch':currentDropMode, 'source':src, 'target':currentDropRefNode} )
+        } else {
+            var type = $('h2.title',currentDropRefNode).attr("type");
+            if (resources["haveChildren"][type]){
+                confirmDragDropOperation( {'switch':currentDropMode, 'source':src, 'target':currentDropRefNode} )
+            }
+        }
+    }
+}
+
+function highlightChangedRow(item) {
+    setSelection(item, true);
+}
+
+function setSelection(item, animate) {
+    clearSelection();
+    item.addClass('selected', animate ? 500 : 0);
+}
+
+function clearSelection() {
+    var rowNodes = $('tr[id*=content-node-]')
+    $('tr[id*=content-node-]').removeClass('selected');
+}
+
+function startDrag(e, ui) {
+    currentDropTarget = null
+    currentDraggedItem = $(e);
+    setSelection(currentDraggedItem)
+}
+
+function stopDrag(e, ui) {
+}
+
+function dragHovering(elem, ui) {
+    showDropInsertionPoint(elem, ui);
+    
+    // Make the droppable branch expand when a draggable node is moved over it AND only if it has children
+    if ( currentDropTarget && 
+            (currentDropTarget != currentDraggedItem) && 
+            !currentDropTarget.is('.expanded') &&
+            (currentDropMode == 'child')) {
+        // set timer to open it
+        // we don't do auto-expand 
+        setTimerToExpand(currentDropTarget);    
+    }
+}
+
+function clearExpandTimer() {
+    clearTimeout(currentExpandTimerId);
+    currentExpandTimerId = null;
+}
+
+function expandRow(row) {
+    row.expand();
+    // Now animate the inserter again at the correct place
+}
+
+function setTimerToExpand(tgt) {
+    clearExpandTimer();
+    currentExpandTimerId = setTimeout("expandRow($('#"+tgt.attr('id')+"'));", expandTimeout);
+}
 
 var draggableConf = {
-        helper: "clone",
-        opacity: .75,
-        refreshPositions: true, // Performance?
-        revert: "invalid",
-        revertDuration: 300,
-        scroll: true,
-        drag: function(e, ui){
-            var hoverItemId = getDecId(hoverItem.id);
-            var itemTop = hoverItem.offsetTop;
-            var itemButtom = itemTop + hoverItem.clientHeight;
-            if (!$(hoverItem).is(".inserter-before") && !$(hoverItem).is(".inserter-after"))
-            if (mouseTop <= (itemTop + 8) ){
-                resetInserters();
-                $("#inserter-before-" + hoverItemId).css('display', '');
-            }else
-            if (mouseTop >= (itemButtom - 8)){
-                resetInserters();
-                var currentPadding = parseInt($("#inserter-after-"+hoverItemId+">td").css('padding-left'), 10);
-                var itemPadding = parseInt($("#content-node-"+hoverItemId+">td").css('padding-left'), 10);
-                if (currentPadding != itemPadding){
-                    $("#inserter-after-"+hoverItemId+">td").css('padding-left', itemPadding);
-                }
-                $("#inserter-after-" + hoverItemId).css('display', '');
-            }else{
-                resetInserters();
-                var currentPadding = parseInt($("#inserter-after-"+hoverItemId+">td").css('padding-left'), 10);
-                var itemPadding = parseInt($("#content-node-"+hoverItemId+">td").css('padding-left'), 10);
-                if (currentPadding == itemPadding){
-                    var padding = currentPadding + nodeIndent;
-                    $("#inserter-after-"+hoverItemId+">td").css('padding-left', padding);
-                }
-                $("#inserter-after-" + hoverItemId).css('display', '');
-            }
-        },
-        start: function(e, ui){
-            $(".selected").removeClass('selected');
-        },
-        stop: function(e, ui){
-            resetInserters();
-        }
-        
+    helper: "clone",
+    opacity: .75,
+    refreshPositions: true, // Performance?
+    revert: "invalid",
+    revertDuration: 300,
+    scroll: true,
+    zIndex: 1000,
+    handle: 'div.ui-content-icon',
+    drag: function(e, ui){
+        dragHovering(this, ui);
+    },
+    start: function(e, ui){
+        startDrag(this, ui);
+    },
+    stop: function(e, ui){
+        stopDrag();
     }
+    
+}
 
 var droppableConf = {
-        accept: "div.ui-content-icon",
-        drop: function(e, ui) { 
-            if ((this.id != "") &&
-                (this.id != "empty-field") && 
-                (getDecId(ui.helper.attr('id')) != getDecId(this.id))
-            ) {
-                var el = $("#" + this.id);
-                if (el.is(".inserter-before") || el.is(".inserter-after")){
-                    var pos = el.is('.inserter-after') ? 'after' : 'before'
-                    if ((pos == 'after') && 
-                        ($("#content-node-"+getDecId(el.attr('id'))).is('.parent'))
-                            ){
-                        pos = "to";
-                        el = $("#content-node-"+getDecId(el.attr('id')));
-                    }else{
-                        var mainElId = getDecId(el.attr('id'));
-                    }
-                    var movable = $($(ui.draggable).parents("tr")[0]);
-                    // @todo clean this up - slow to keep getting the node!
-                    $('#confirmDialog').data('switch', pos);
-                    $('#confirmDialog').data('source', movable);
-                    $('#confirmDialog').data('target', el.first());
-                    $('#confirmDialog').dialog('open');
-                }else{
-                    var type = $("#" + this.id + ">td:first>div>h2.title").attr("type");
-                    if (resources["haveChildren"][type]){
-                        // @todo clean this up - slow to keep getting the node!
-                        $('#confirmDialog').data('switch', 'to');
-                        $('#confirmDialog').data('source', $(ui.draggable).parents("tr")[0]);
-                        $('#confirmDialog').data('target', $(this));
-                        $('#confirmDialog').dialog('open');
-                    }
-                }
-            }
-            //resetInserters();
-        },
-        hoverClass: "accept",
-        over: function(e, ui) {
-          // Make the droppable branch expand when a draggable node is moved over it.
-          if(this.id != ui.draggable.parents("tr")[0].id && !$(this).is(".expanded")) {
-            $(this).expand();
-          }
-          hoverItem = $("#" + this.id)[0];
-          
-        }
+    accept: "div.item",
+    drop: function(e, ui) { 
+        performDrop(e, ui);
+    },
+    over: function(e, ui) {
+        currentDropTarget = $(this);
+    }
 }
 
 function removeNode(id) {
@@ -312,52 +514,43 @@ function removeNode(id) {
 
 /*--------------------------------------------*/
 function initTreeTable() {
+    insertMarkerHalfHeight = parseInt($('#insert-marker img').css('height')) >> 1;
+    var treeTable = $('#treeTable');
+    treeTableOffset = {
+        left:treeTable.outerWidth()-treeTable.width(),
+        top:treeTable.outerHeight()-treeTable.height()
+    };
+    
     // Insert branch into specific position: 
     // target - place to insert item after or before
-    // place - can be 'after' or 'before' or 'to'
+    // place - can be 'after' or 'before' or 'child'
     $.fn.insertBranchTo = function(target, place){
         var node = $(this);
-        var nodeid = getDecId(node.attr("id"));
+        var id = node.attr("id");
+        var nodeid = getDecId(id);
         var trgid = getDecId($(target).attr("id"));
         if (place == "before")
-            $("tr[id$=-"+nodeid+"]").insertBefore(target);
+            node.insertBranchBefore(target);
         else
         if (place == "after")
-            $("tr[id$=-"+nodeid+"]").insertAfter(target);
+            node.insertBranchAfter(target);
         else
-        if (place == "to"){
-            $.each($("tr[id$=-"+nodeid+"]"), function(index, value){
-                $(value).appendBranchTo(target);
-                var curpad = parseInt($("#"+value.id+">td:first").css('padding-left'), 10);
-                var tarpad = parseInt($("#content-node-"+trgid+">td:first").css('padding-left'), 10);
-                $("#"+value.id+">td:first").css('padding-left', tarpad + nodeIndent);
-                $("#inserter-after-"+trgid).insertAfter(target);
-                $(value).removeClass("child-of-undefined").addClass("child-of-content-node-"+trgid);
-            });
-            $(target).addClass("parent");
-            return ;
+        if (place == "child"){
+            node.appendBranchTo($(target));
+            $(target).addClass('parent'); // So we can easily update expanders
+            return;
         }
-        $.each($("tr[id$=-"+nodeid+"]"), function(index, value){
-            toggleStyle($(value), $(target));
-        })
-        $.each($(".child-of-content-node-"+nodeid), function(index, value){
-            $(value).appendBranchTo(node);
-            $(value).removeClass("child-of-undefined").addClass("child-of-content-node-"+nodeid);
-        });
-        node.css("display", "");
     }
+
     // Handle selection of rows with click
     $('tr[id*=content-node-]').live('click', function(){
             var clickedNode = $(this)
-            var rowNodes = $('tr[id*=content-node-]')
             var wasSel = clickedNode.hasClass('selected')
-            $('tr[id*=content-node-]').removeClass('selected');
+            clearSelection();
             if (!wasSel) {
-                clickedNode.addClass('selected');
+                setSelection(clickedNode);
             }
     });
-    
-    
     
     $("#data").keypress(function(e){
         if (timeKeyPressed == null){
@@ -369,19 +562,11 @@ function initTreeTable() {
     });
     
     
-    $().mousemove(function (e){
-        mouseTop = e.pageY - $("#treeTable")[0].offsetTop;
-    });
   	$("#treeTable").treeTable({indent: nodeIndent});
-  	$("span.expander").click(function (){resetInserters()});
-    resetInserters();
-    updateExpanders();
     
-    $('div.ui-content-icon').draggable(draggableConf)
+    $('div.item').draggable(draggableConf);
     
-    $('.title').each(function() {
-        $(this).parents("tr").droppable(droppableConf)
-        });
+    $('#treeTable tr.datarow').droppable(droppableConf);
     
 	$('.ui-icon-info').click( function() { 
 		var icon = $(this)
@@ -392,6 +577,7 @@ function initTreeTable() {
 	})
 	$('#deleteDialog').dialog( {
 		autoOpen: false, 
+	    width: DIALOG_WIDTH,
 		buttons: { 
 			Yes: function () { 
 			    $(this).dialog('close'); 
@@ -400,7 +586,7 @@ function initTreeTable() {
                     {id: nodeId},
                     function(data) {
             		    if (data) {
-            		        if (data.status == 403){
+            		        if (data.status == 403) {
             		            $('#expiredDialog').dialog('open');
             		        } else
         		            if (data.result != 'success') {
@@ -423,6 +609,7 @@ function initTreeTable() {
 	$('#createNewDialog').dialog({
 	    autoOpen: false,
 	    modal: true,
+	    width: DIALOG_WIDTH,
 	    buttons: {
 	        Create : function () {
 	            var parentid = getSelectedNodeIds()
@@ -465,6 +652,7 @@ function initTreeTable() {
 	$("#expiredDialog").dialog({
         autoOpen: false,
         modal: true,
+	    width: DIALOG_WIDTH,
         buttons: { "Ok" : function(){$(this).dialog('close');}}
     });
     
@@ -484,7 +672,7 @@ function initTreeTable() {
                     index = $("#content-node-"+nextid+">td:first>div>h2.title").attr("orderindex");
                 }
                 break;
-            case "to":
+            case "child":
                 var children = $(".child-of-content-node-"+trgid+"[id*=content-node-]>td:first>div>h2.title")
                 index = 0;
                 jQuery.each(children, function(index, value){
@@ -492,7 +680,6 @@ function initTreeTable() {
                         index = $(value).attr('orderindex');
                     }
                 });
-                //index++;
                 break;
         }
         return index;
@@ -501,16 +688,19 @@ function initTreeTable() {
 	$('#confirmDialog').dialog({
 	    autoOpen: false,
 	    modal: true,
-	    width: '400px',
+	    width: DIALOG_WIDTH,
 	    buttons: {
-	        "Cancel" : function(){$(this).dialog('close');},
+	        "Cancel" : function() {
+	            $(this).dialog('close');
+	            hideInserter();
+            },
 	        "Move" : function(){
 	            var swc = $(this).data('switch');
 	            var src = $(this).data('source');
 	            var trg = $(this).data('target');
 	            var parentId = getParentId(trg);
 	            var index = getInsertIndex(trg, swc);
-                var tid = (swc == "to") ? getDecId($(trg).attr('id')) : (parentId == null ? -1 : parentId)
+                var tid = (swc == "child") ? getDecId($(trg).attr('id')) : (parentId == null ? -1 : parentId)
                 $.post(resources["link.movenode"],
                     {sourceId: getDecId($(src).attr('id')), targetId: tid, index: index},
                     function (data){
@@ -519,6 +709,7 @@ function initTreeTable() {
     	                    $('#expiredDialog').dialog('open');
     	                    return ;
         	            }
+                        hideInserter();
     	                if (response['result'] == "failure"){
     	                    errorMessage(response['error']);
     	                }else{
@@ -528,7 +719,7 @@ function initTreeTable() {
                                $("#content-node-" + key + ">td:first>div>h2.title").attr('orderindex', val);
                             });
                             updateExpanders();
-                            resetInserters();
+                            highlightChangedRow(src);
     	                }
 	                }
                 );
@@ -540,7 +731,7 @@ function initTreeTable() {
 	            var trg = $(this).data('target');
 	            var parentId = getParentId(trg);
 	            var index = getInsertIndex(trg, swc);
-	            var tid = (swc == "to") ? getDecId($(trg).attr('id')) : (parentId == null ? -1 : parentId)
+	            var tid = (swc == "child") ? getDecId($(trg).attr('id')) : (parentId == null ? -1 : parentId)
 	            var inserterAfter = $("#inserter-after-" + getDecId($(src).attr('id'))[0]).clone(); 
 	            inserterAfter.appendTo($("#treeTable>tbody"));
                 var inserterBefore = $("#inserter-before-" + getDecId($(src).attr('id'))[0]).clone();
@@ -555,12 +746,12 @@ function initTreeTable() {
         	                    $('#expiredDialog').dialog('open');
         	                    return ;
         	                }
+                            hideInserter();
         	                if (response['result'] == "failure"){
         	                    errorMessage(response['error']);
         	                }else{
-        	                    var srcCopy = $(src).clone(); srcCopy.appendTo($("#treeTable>tbody"));
-        	                    $(inserterAfter).attr('id', 'inserter-after-' + response['id']);
-        	                    $(inserterBefore).attr('id', 'inserter-before-' + response['id']);
+        	                    var srcCopy = $(src).clone(); 
+        	                    srcCopy.appendTo($("#treeTable>tbody"));
         	                    $(srcCopy).attr('id', 'content-node-' + response['id']);
         	                    $(srcCopy).insertBranchTo(trg, swc);
         	                    $('#' + srcCopy.attr('id') + '>td>div>div.ui-content-icon').draggable(draggableConf);
@@ -571,8 +762,8 @@ function initTreeTable() {
                                 jQuery.each(indexes, function(key, val){
                                    $("#content-node-" + key + ">td:first>div>h2.title").attr('orderindex', val);
                                 });
-        	                    resetInserters();
         	                    updateExpanders();
+                                highlightChangedRow(srcCopy);
         	                }
         	            });
     	        $(this).dialog('close');

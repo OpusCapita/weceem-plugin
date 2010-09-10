@@ -49,10 +49,6 @@
 /*  background-image: url(../images/toggle-collapse-light.png);*/
 }
 
-.treeTable tr.inserter-before td, .treeTable tr.inserter-after td{
-    overflow-x: hidden;
-}
-
 .treeTable .ui-draggable-dragging {
   color: #000;
   z-index: 1;
@@ -122,11 +118,4 @@ h2 a{
 
 .ui-content-item{
 
-}
-/*.treeTable .inserter-before td,*/
-/*.treeTable .inserter-after td  { padding-left:0 !important; }*/
-
-.treeTable .inserter-before .title,
-.treeTable .inserter-after .title { 
-  border-top:1px dashed #999999;
 }

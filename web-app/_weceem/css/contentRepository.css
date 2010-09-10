@@ -26,6 +26,33 @@ table.details td.footer {
   text-align: center;
 }
 
+/* 
+Tree table stuff
+*/
+
+td.selected {
+   background-color: #99c2ff;
+}
+
+td.selected-lowlight {
+   background-color: #BB0000;
+}
+
+.crop-x {
+    overflow-x: hidden;
+}
+
+#insert-marker { 
+    position: relative;
+    height: 0;
+    z-index: 500;
+}
+
+#insert-marker img { 
+    height: 7px;
+    position: relative;
+}
+
 .defaultLeaf {
   background: url( ../images/weceem/file_unknown_16.gif ) no-repeat;
 }

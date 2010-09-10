@@ -5,6 +5,7 @@
 	<script type="text/javascript" src="${g.resource(plugin:'weceem', dir: '_weceem/js/treeTable/javascripts', file:'jquery.treeTable.js')}"></script>
 	<script type="text/javascript" src="${g.resource(plugin:'weceem', dir: '_weceem/js/treeTable/javascripts/', file:'core.treeTable.js')}"></script>
 	<link href="${g.resource(plugin:'weceem', dir: '_weceem/js/treeTable/stylesheets', file:'jquery.treeTable.css')}" rel="stylesheet" type="text/css" />
+	<link href="${g.resource(plugin:'weceem', dir: '_weceem/css', file:'contentRepository.css')}" rel="stylesheet" type="text/css" />
 
 <style type="text/css">
 	td span.ui-icon { display: inline;}
@@ -87,6 +88,10 @@ $(function(){
 
             <div id="treeDiv">
               <div class="table">
+                  <div id="insert-marker"  class="ui-helper-hidden">
+                      <img src="${g.resource(plugin:'weceem', dir:'_weceem/images/weceem', file:'inserter.gif')}"/>
+                  </div>
+                  
                 <table id="treeTable">
                   <thead>
                     <tr>
@@ -98,6 +103,8 @@ $(function(){
                     </tr>
                   </thead>
                   <tbody>
+
+                      
                 	<g:each in="${content.sort()}" var="c">
                 		<g:render plugin="weceem" template="newtreeTableNode" model="[c:c]"/>
                 	</g:each>
