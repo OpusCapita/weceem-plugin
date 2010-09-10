@@ -445,6 +445,10 @@ function startDrag(e, ui) {
 function stopDrag(e, ui) {
 }
 
+function cancelDrag() {
+    
+}
+
 function dragHovering(elem, ui) {
     showDropInsertionPoint(elem, ui);
     
@@ -477,7 +481,7 @@ function setTimerToExpand(tgt) {
 var draggableConf = {
     helper: "clone",
     opacity: .75,
-    refreshPositions: true, // Performance?
+    refreshPositions: true,
     revert: "invalid",
     revertDuration: 300,
     scroll: true,
@@ -689,10 +693,12 @@ function initTreeTable() {
 	    autoOpen: false,
 	    modal: true,
 	    width: DIALOG_WIDTH,
+	    close: function () {
+	        hideInserter();
+	    },
 	    buttons: {
 	        "Cancel" : function() {
 	            $(this).dialog('close');
-	            hideInserter();
             },
 	        "Move" : function(){
 	            var swc = $(this).data('switch');
