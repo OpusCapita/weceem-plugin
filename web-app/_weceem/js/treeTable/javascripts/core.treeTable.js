@@ -94,7 +94,7 @@ function updateExpanders(){
             if ($("span.expander").size() > 0){
                 expander = $($("span.expander")[0]).clone();
             }else{
-                expander = $('<span class="expander" style="margin-left: -25px; padding-left: 25px;" />');
+                expander = $('<span class="expander"/>');
             }
             expander.click(function (){
                 $("#"+it.id).toggleBranch();
@@ -484,6 +484,7 @@ var draggableConf = {
     refreshPositions: true,
     revert: "invalid",
     revertDuration: 300,
+    distance: 3,
     scroll: true,
     zIndex: 1000,
     handle: 'div.ui-content-icon',
