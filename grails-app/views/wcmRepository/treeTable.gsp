@@ -87,7 +87,7 @@ $(function(){
             </div>
 
             <div id="treeDiv">
-              <div class="table">
+              <div class="table treeTable">
                   <div id="insert-marker"  class="ui-helper-hidden">
                       <img src="${g.resource(plugin:'weceem', dir:'_weceem/images/weceem', file:'inserter.gif')}"/>
                   </div>

@@ -224,7 +224,7 @@ function getDecId(htmlid){
 }
 
 function debug(s) {
-    //console.log(s);
+//    console.log(s);
 }
 
 function showInserterAfter(row, indentedLikeItem) {
@@ -495,7 +495,7 @@ function setTimerToExpand(tgt) {
 
 var draggableConf = {
     helper: 'clone',
-    appendTo: '#treeDiv div.table table', 
+    appendTo: '#treeDiv div.table', 
     opacity: .75,
     refreshPositions: true,
     revert: "invalid",
