@@ -224,7 +224,7 @@ function getDecId(htmlid){
 }
 
 function debug(s) {
-//    console.log(s);
+    //console.log(s);
 }
 
 function showInserterAfter(row, indentedLikeItem) {
@@ -377,8 +377,22 @@ function showDropInsertionPoint(targetItem, ui) {
         
         var dropOffset = currentDropTarget.position();
         var mouseLeft = ui.position.left; 
-        var mouseY = ui.position.top; // Needs adjusting to be midpoint of draggable?
-        debug("Pos: "+ui.position.left+", "+ui.position.top);
+        var mouseY = ui.position.top; 
+        
+        // Workaround for firefox not setting offsetParent of helper correct
+        if (ui.helper.offsetParent().is('body')) {
+            mouseLeft -= ui.helper.parent().offset().left;
+            mouseY -= ui.helper.parent().offset().top;
+        }
+        
+        debug("Calc'd pos: "+mouseLeft+', '+mouseY);
+        debug("Pos: "+ui.position.left+', '+ui.position.top);
+        debug("Ofs: "+ui.offset.left+', '+ui.offset.top);
+        debug("helper: "+ui.helper);
+        debug("helper pos L: "+$(ui.helper).position().left);
+        debug("helper ofs L: "+$(ui.helper).offset().left);
+        debug("helper parent: "+$(ui.helper).parent().attr('id'));
+        debug("helper ofs parent: "+$(ui.helper).offsetParent().nodeName);
         var targetItemMidPoint = dropOffset.top + ($(currentDropTarget).height() >> 1);
         var targetItemLeft = $('div.item', currentDropTarget).position().left;
         debug("targetItemLeft: "+targetItemLeft+", itemtop "+dropOffset.top+", Midp: "+targetItemMidPoint);
@@ -409,6 +423,7 @@ function confirmDragDropOperation(opts) {
 }
 
 function performDrop(e, ui) {
+    clearExpandTimer(); // make sure elems don't expand while we wait
     var src = currentDraggedItem.parents('.datarow:first');
     if (currentDropRefNode) {
         if ((currentDropMode == 'after') || (currentDropMode == 'before')) {
@@ -479,7 +494,8 @@ function setTimerToExpand(tgt) {
 }
 
 var draggableConf = {
-    helper: "clone",
+    helper: 'clone',
+    appendTo: '#treeDiv div.table table', 
     opacity: .75,
     refreshPositions: true,
     revert: "invalid",
@@ -726,6 +742,7 @@ function initTreeTable() {
                                $("#content-node-" + key + ">td:first>div>h2.title").attr('orderindex', val);
                             });
                             updateExpanders();
+                            currentDropRefNode.expand();
                             highlightChangedRow(src);
     	                }
 	                }
@@ -770,6 +787,7 @@ function initTreeTable() {
                                    $("#content-node-" + key + ">td:first>div>h2.title").attr('orderindex', val);
                                 });
         	                    updateExpanders();
+                                currentDropRefNode.expand();
                                 highlightChangedRow(srcCopy);
         	                }
         	            });
