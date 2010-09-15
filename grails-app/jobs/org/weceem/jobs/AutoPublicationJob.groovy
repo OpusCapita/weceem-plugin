@@ -34,6 +34,9 @@ class AutoPublicationJob {
             } catch (Throwable t) {
                 // Need to discard any modified objects here?
                 txn.setRollbackOnly()
+                if (log.errorEnabled) {
+                    log.error "Auto publication job failed", t
+                }
                 throw t
             }
         }

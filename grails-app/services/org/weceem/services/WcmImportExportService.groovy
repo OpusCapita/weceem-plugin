@@ -33,11 +33,20 @@ class WcmImportExportService {
         } finally {
             searchableService.startMirroring()
         }
+        // Rebuild indexes
         searchableService.reindex()
     }
 
     def exportSpace(WcmSpace space, String exporterName) {
-        getExporters()."${exporterName}"?.execute(space)
+        WcmContent.withTransaction { txn ->
+            try {
+                getExporters()."${exporterName}"?.execute(space)
+            } catch (Throwable t) {
+                txn.setRollbackOnly()
+                t.printStackTrace()
+                log.error(t)
+            }
+        }
     }
 
     def getImporters() {
