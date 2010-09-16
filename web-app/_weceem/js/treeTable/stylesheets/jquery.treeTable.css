@@ -28,7 +28,7 @@
   display:inline;
   padding-top:15px;
   position:relative;
-  left: 25px;
+  left: 35px;
 }
 
 .treeTable tr.collapsed td .expander {
@@ -97,7 +97,7 @@ h2 a{
 .treeTable h2 a:hover  { color:#006699;}
 
 .treeTable .item { 
-  padding-left:35px;
+  padding-left:41px;
   position:relative;
   left: 15px;
 }
@@ -112,8 +112,8 @@ h2 a{
   position:absolute;
   left:5px;
   right:5px;
-  width: 25px;
-  height: 31px;
+  width: 32px;
+  height: 32px;
 }
 
 .ui-content-item{

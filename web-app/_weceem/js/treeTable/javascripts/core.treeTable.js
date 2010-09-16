@@ -13,8 +13,7 @@ var currentExpandTimerId;
 var currentDropRefNode;
 var currentDropMode; 
 
-var rootNodeIndent = 10;
-var nodeIndent = 30;
+var nodeIndent = 36;
 var DIALOG_WIDTH = '500px';
 
 //variable to detect time when key was pressed in search box
@@ -385,7 +384,7 @@ function showDropInsertionPoint(targetItem, ui) {
             mouseY -= ui.helper.parent().offset().top;
         }
         
-        debug("Calc'd pos: "+mouseLeft+', '+mouseY);
+/*        debug("Calc'd pos: "+mouseLeft+', '+mouseY);
         debug("Pos: "+ui.position.left+', '+ui.position.top);
         debug("Ofs: "+ui.offset.left+', '+ui.offset.top);
         debug("helper: "+ui.helper);
@@ -393,6 +392,7 @@ function showDropInsertionPoint(targetItem, ui) {
         debug("helper ofs L: "+$(ui.helper).offset().left);
         debug("helper parent: "+$(ui.helper).parent().attr('id'));
         debug("helper ofs parent: "+$(ui.helper).offsetParent().nodeName);
+*/
         var targetItemMidPoint = dropOffset.top + ($(currentDropTarget).height() >> 1);
         var targetItemLeft = $('div.item', currentDropTarget).position().left;
         debug("targetItemLeft: "+targetItemLeft+", itemtop "+dropOffset.top+", Midp: "+targetItemMidPoint);

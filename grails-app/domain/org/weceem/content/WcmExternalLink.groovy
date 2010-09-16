@@ -10,6 +10,8 @@ class WcmExternalLink extends WcmContent {
     String url
     String description
 
+    static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "ext-link-32.gif"]
+
     static searchable = {
         alias WcmExternalLink.name.replaceAll("\\.", '_')
         

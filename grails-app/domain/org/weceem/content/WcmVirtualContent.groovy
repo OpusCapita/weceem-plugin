@@ -23,6 +23,8 @@ package org.weceem.content
 class WcmVirtualContent extends WcmContent {
     WcmContent target
     
+    static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "virtual-content-32.gif"]
+
     static searchable = {
         alias WcmVirtualContent.name.replaceAll("\\.", '_')
         

@@ -59,6 +59,8 @@ class WcmWidget extends WcmContent {
      */
     public String getContentAsHTML() { content }
         
+    static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "widget-32.gif"]
+
     static mapping = {
         cache usage: 'nonstrict-read-write' 
     }

@@ -28,6 +28,8 @@ class WcmWikiItem extends WcmContent {
         only = ['content', 'keywords', 'title', 'status']
     }
     
+    static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "wiki-32.gif"]
+
     String keywords
     WcmTemplate template
 

@@ -37,6 +37,8 @@ class WcmComment extends WcmContent {
         only = ['content', 'email', 'author', 'title', 'status']
     }
     
+    static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "comment-32.gif"]
+    
     static standaloneContent = false
     
     static publicSubmitProperties = [
