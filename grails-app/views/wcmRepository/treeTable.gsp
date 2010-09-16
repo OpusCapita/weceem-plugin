@@ -99,7 +99,6 @@ $(function(){
                       <th align="left">Status</th>
                       <th align="left">Created by</th>
                       <th align="left">Last changed</th>
-                      <th>&nbsp;</th>
                     </tr>
                   </thead>
                   <tbody>

@@ -137,7 +137,7 @@ class WcmSecurityService implements InitializingBean {
         // If the status is not a "published" status then only those with edit permissions
         // on the url can see it
         if (!content.status.publicContent) {
-            permsRequired << WeceemSecurityPolicy.PERMISSION_EDIT
+            permsRequired = [WeceemSecurityPolicy.PERMISSION_EDIT]
         }
         if (log.debugEnabled) {
             log.debug "User requires permissions $permsRequired to view content ${content.absoluteURI}"

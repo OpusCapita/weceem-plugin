@@ -142,6 +142,14 @@ class WcmContentController {
                     log.debug "Loading content from for uri: ${uri}"
                 }
                 def contentInfo = wcmContentRepositoryService.findContentForPath(uri,space)
+                if (contentInfo) {
+                    if (log.debugEnabled) {
+                        log.debug "Checking user is allowed to view content at $uri"
+                    }
+                    if (!wcmSecurityService.isUserAllowedToViewContent(contentInfo.content)) {
+                        throw new AccessDeniedException("You cannot view this content")
+                    }
+                }
                 request[REQUEST_ATTRIBUTE_CONTENTINFO] = contentInfo
                 
                 // Resolve any virtual nodes

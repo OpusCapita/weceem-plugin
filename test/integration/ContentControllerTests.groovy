@@ -20,7 +20,7 @@ class ContentControllerTests extends GroovyTestCase {
     def template
     def nodeA
     def nodeB
-    def applicationContext
+    def grailsApplication
     
     WcmContentController mockedController() {
         def con = new WcmContentController()
@@ -44,25 +44,26 @@ class ContentControllerTests extends GroovyTestCase {
         con.wcmContentRepositoryService.wcmCacheService = new WcmCacheService()
         con.wcmContentRepositoryService.wcmCacheService.weceemCacheManager = new net.sf.ehcache.CacheManager()
         con.wcmContentRepositoryService.wcmSecurityService = secSvc
+        con.wcmContentRepositoryService.groovyPagesTemplateEngine = grailsApplication.mainContext.groovyPagesTemplateEngine
         con.wcmContentRepositoryService.afterPropertiesSet()
 
         con.wcmSecurityService = secSvc
         return con
     }
 
-    public void setApplicationContext(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext
-    }
-    
     void setUp() {
         def servletContext = new MockServletContext(
                 'test/files/contentRepository', new FileSystemResourceLoader())
-        servletContext.setAttribute(
+/*        servletContext.setAttribute(
                 GrailsApplicationAttributes.APPLICATION_CONTEXT,
                 applicationContext)
+*/
         ServletContextHolder.servletContext = servletContext
         def defStatus = new WcmStatus(code: 400, description: "published", publicContent: true)
         assert defStatus.save(flush:true)
+
+        def draftStatus = new WcmStatus(code: 100, description: "draft", publicContent: false)
+        assert draftStatus.save(flush:true)
 
         def spaceA = new WcmSpace(name: 'jcatalog', aliasURI: 'jcatalog').save(flush: true)
         assert spaceA
@@ -83,7 +84,7 @@ class ContentControllerTests extends GroovyTestCase {
         assert nodeA.save(flush: true)
 
         nodeB = new WcmHTMLContent(title: 'contentB', aliasURI: 'contentB',
-                parent: nodeA, status: defStatus,
+                parent: nodeA, status: draftStatus,
                 content: 'sample B content',
                 createdBy: 'admin', createdOn: new Date(),
                 changedBy: 'admin', changedOn: new Date(),
@@ -124,6 +125,35 @@ class ContentControllerTests extends GroovyTestCase {
                                               space: spaceA, orderIndex: 3)
         assert virtContent2.save(flush:true)
     }
+    
+    void testDraftContentNotViewableByGuest() {
+        def con = mockedController()
+
+        // Clear roles
+        con.wcmSecurityService.securityDelegate.getUserRoles = { -> [] }
+        
+        con.params.uri = "/jcatalog/contentA/contentB"
+        con.show()
+        
+        println con.response.contentAsString
+        assertEquals 403, con.response.status
+    
+    }
+    
+    void testDraftContentIsViewableByAdmin() {
+        def con = mockedController()
+
+        // Set admin
+        con.wcmSecurityService.securityDelegate.getUserRoles = { -> ['ROLE_ADMIN'] }
+        
+        con.params.uri = "/jcatalog/contentA/contentB"
+        con.show()
+        
+        println con.response.contentAsString
+        assertEquals 200, con.response.status
+    
+    }
+
     void testVirtualContentRenderRoot() {
         /*
 
