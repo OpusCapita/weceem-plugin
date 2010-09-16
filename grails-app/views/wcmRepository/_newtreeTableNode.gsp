@@ -23,13 +23,6 @@
 		  <g:message code="message.null.changedOn" encodeAs="HTML"/>
 		</g:else>
 	</td>
-	<td>
-		<div id="infoDialog${c.id}" class="nodeinfoDialog" title="${c.title.encodeAsHTML()}">
-			URI: <g:link controller="wcmContent" action="show" id="${c.id}"><span class="uri">${c.aliasURI.encodeAsHTML()}</span></g:link> 
-			<br/>Created <wcm:humanDate date="${c.createdOn}"/> by <g:link action="viewChangesByAuthor" class="author">${c.createdBy.encodeAsHTML()}</g:link>
-			<g:if test="${c.changedBy}">, changed <wcm:humanDate date="${c.changedOn}"/> by <g:link action="viewChangesByAuthor" class="author">${c.changedBy.encodeAsHTML()}</g:link></g:if>
-		</div>
-	</td>
 </tr>
 
 <g:if test="${c.children.size()}">
