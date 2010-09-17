@@ -53,36 +53,8 @@ td.selected-lowlight {
     position: relative;
 }
 
-.defaultLeaf {
-  background: url( ../images/weceem/file_unknown_16.gif ) no-repeat;
-}
-
-.blockLeaf {
-  background: url( ../images/weceem/file_blocks_16.gif ) no-repeat;
-}
-
-.blogLeaf {
-  background: url( ../images/weceem/file_blog_16.gif ) no-repeat;
-}
-
-.forumLeaf {
-  background: url( ../images/weceem/file_forumentry_16.gif ) no-repeat;
-}
-
-.htmlLeaf {
-  background: url( ../images/weceem/file_html_16.gif ) no-repeat;
-}
-
-.stylesheetLeaf {
-  background: url( ../images/weceem/file_stylesheet_16.gif ) no-repeat;
-}
-
-.wikiLeaf {
-  background: url( ../images/weceem/file_wiki_16.gif ) no-repeat;
-}
-
-.templateLeaf {
-  background: url( ../images/weceem/file_template_16.gif ) no-repeat;
+#treeTable th.page-column {
+    padding-left: 25px;
 }
 
 span.loadingMessage {

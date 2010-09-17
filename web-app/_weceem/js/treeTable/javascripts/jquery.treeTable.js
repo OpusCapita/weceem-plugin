@@ -1,4 +1,10 @@
 /* jQuery treeTable Plugin 2.2.1 - http://ludo.cubicphuse.nl/jquery-plugins/treeTable/ */
+
+/*
+  NOTE! This has been hacked by Weceem developers to achieve what we need. New versions are 
+  NOT a drop in replacement.
+
+ */
 (function($) {
   // Helps to make options available to all functions
   // TODO: This gives problems when there are both expandable and non-expandable
@@ -135,13 +141,23 @@
     if ($(destination).attr('class').match(reg) != null){
         siblingParentageClass = $(destination).attr('class').match(reg)[0];
     }
+
     if (siblingParentageClass) {
         node.addClass( siblingParentageClass );
     }
     
-    move(node, destination); // Recursively move nodes to new location
+    // Calculate correct row to insert *before* to skip all of our current hidden descendents
+    var actualDestination = $(destination).nextAll('.'+siblingParentageClass+':first')
+    if (actualDestination.length && (actualDestination.attr('id') != destination.attr('id')) ) {
+        // Skipped children to next sibling
+        moveBefore(node, actualDestination); // Recursively move nodes to new location
+    } else {
+        // We are last sibling, how to skip all the descendents?
+        move(node, destination); // Recursively move nodes to new location
+        childrenOf(destination).reverse().each(function() { move($(this), destination); });
+    }
     indent(node, ancestorsOf(node).length * options.indent);
-
+    
     return this;
   };
 

@@ -13,8 +13,7 @@ var currentExpandTimerId;
 var currentDropRefNode;
 var currentDropMode; 
 
-var rootNodeIndent = 10;
-var nodeIndent = 30;
+var nodeIndent = 36;
 var DIALOG_WIDTH = '500px';
 
 //variable to detect time when key was pressed in search box
@@ -69,6 +68,7 @@ function sendSearchRequest(searchParams){
                 var statusTd = td.clone();
                 var createTd = td.clone();
                 var changeTd = td.clone();
+                // @todo this is hideous, clone a template div from the page
                 pageTd.html("<div class='item'><div class='ui-content-icon' style='display: inline-block'><img src='"+obj.iconHref+"'/></div>" + 
                 "<h2 class='title'>" + "<a href=" + obj.href + ">" + obj.title + 
                 "&nbsp;<span class='type'>(" + obj.aliasURI + " - " + obj.type + ")</span></a></h2>" + 
@@ -188,26 +188,6 @@ function errorMessage(str) {
     });
 }
 
-/*
-function toggleStyle(element, neighbour){
-    var reg = new RegExp("child-of-content-node-\\d+");
-    var parentClass = null;
-    if ($(neighbour).attr('class').match(reg) != null){
-        parentClass = neighbour.attr('class').match(reg)[0];
-    }
-    if ($(element).attr('class').match(reg) != null){
-        element.removeClass(element.attr('class').match(reg)[0]);
-    }
-    if (parentClass != null){
-        element.addClass(parentClass);
-    }
-    var newstyle = $("#" + $(neighbour).attr('id') + " > td:first").attr('style');
-    if (newstyle == null) newstyle = "";
-    $("#" + $(element).attr('id') + " > td:first").attr("style", newstyle);
-    return parentClass != null ? /\d+/.exec(parentClass)[0] : null;
-}
-*/
-
 function getParentId(element){
     var reg = new RegExp("child-of-content-node-\\d+");
     var elem = $(element).first();
@@ -308,6 +288,8 @@ function getNextSiblingRow(targetItem) {
     if (childclassmatch != null) {
         tgt = tgt.nextAll('.'+childclassmatch[0]+':first');
     } else {
+        // This is flawed, it only selects root level nodes.
+        // Needs to find the next row that is not a descendent of this one
         tgt = tgt.nextAll('tr.datarow:not([class*=child-of-content-node-]):first:visible');
     }
     debug('Next sibling is: '+tgt+', '+tgt.attr('id'));
@@ -385,7 +367,7 @@ function showDropInsertionPoint(targetItem, ui) {
             mouseY -= ui.helper.parent().offset().top;
         }
         
-        debug("Calc'd pos: "+mouseLeft+', '+mouseY);
+/*        debug("Calc'd pos: "+mouseLeft+', '+mouseY);
         debug("Pos: "+ui.position.left+', '+ui.position.top);
         debug("Ofs: "+ui.offset.left+', '+ui.offset.top);
         debug("helper: "+ui.helper);
@@ -393,6 +375,7 @@ function showDropInsertionPoint(targetItem, ui) {
         debug("helper ofs L: "+$(ui.helper).offset().left);
         debug("helper parent: "+$(ui.helper).parent().attr('id'));
         debug("helper ofs parent: "+$(ui.helper).offsetParent().nodeName);
+*/
         var targetItemMidPoint = dropOffset.top + ($(currentDropTarget).height() >> 1);
         var targetItemLeft = $('div.item', currentDropTarget).position().left;
         debug("targetItemLeft: "+targetItemLeft+", itemtop "+dropOffset.top+", Midp: "+targetItemMidPoint);
@@ -429,7 +412,7 @@ function performDrop(e, ui) {
         if ((currentDropMode == 'after') || (currentDropMode == 'before')) {
             confirmDragDropOperation( {'switch':currentDropMode, 'source':src, 'target':currentDropRefNode} )
         } else {
-            var type = $('h2.title',currentDropRefNode).attr("type");
+            var type = $(currentDropRefNode).data("type");
             if (resources["haveChildren"][type]){
                 confirmDragDropOperation( {'switch':currentDropMode, 'source':src, 'target':currentDropRefNode} )
             }
@@ -682,25 +665,26 @@ function initTreeTable() {
         var index;
         switch (position){
             case "before":
-                index = $("#content-node-" + trgid + ">td:first>div>h2.title").attr("orderindex");
+                index = $("#content-node-" + trgid).data("orderindex");
                 break;
             case "after":
                 if (!$("#"+$(target).attr('id')+"+tr").size()) {
-                    index = parseInt($("#content-node-" + trgid + ">td:first>div>h2.title").
-                    attr("orderindex")) + 1;
+                    index = $("#content-node-" + trgid).data("orderindex") + 1;
                 }else{
                     var nextid = getDecId($("#"+$(target).attr('id')+"+tr").attr('id'))
-                    index = $("#content-node-"+nextid+">td:first>div>h2.title").attr("orderindex");
+                    index = $("#content-node-"+nextid).data("orderindex");
                 }
                 break;
             case "child":
-                var children = $(".child-of-content-node-"+trgid+"[id*=content-node-]>td:first>div>h2.title")
+                var children = $("tr.child-of-content-node-"+trgid)
                 index = 0;
+                /*
+                // Find the last index, add it to the end
                 jQuery.each(children, function(index, value){
-                    if ($(value).attr('orderindex') >= index){
-                        index = $(value).attr('orderindex');
+                    if ($(value).data('orderindex') >= index){
+                        index = $(value).data('orderindex');
                     }
-                });
+                });*/
                 break;
         }
         return index;
@@ -739,10 +723,13 @@ function initTreeTable() {
     	                    $(src).insertBranchTo(trg, swc);
                             var indexes = response['indexes'];
                             jQuery.each(indexes, function(key, val){
-                               $("#content-node-" + key + ">td:first>div>h2.title").attr('orderindex', val);
+                               $("#content-node-" + key).data('orderindex', val);
                             });
                             updateExpanders();
-                            currentDropRefNode.expand();
+                            // Open the child list if dropping as child
+                            if (swc == 'child') {
+                                currentDropRefNode.expand();
+                            }
                             highlightChangedRow(src);
     	                }
 	                }
@@ -778,16 +765,19 @@ function initTreeTable() {
         	                    srcCopy.appendTo($("#treeTable>tbody"));
         	                    $(srcCopy).attr('id', 'content-node-' + response['id']);
         	                    $(srcCopy).insertBranchTo(trg, swc);
-        	                    $('#' + srcCopy.attr('id') + '>td>div>div.ui-content-icon').draggable(draggableConf);
-        	                    $('#' + srcCopy.attr('id') + '>td>div>h2.title').attr('type', response['ctype']);
+        	                    $('#' + srcCopy.attr('id') + ' div.ui-content-icon').draggable(draggableConf);
+        	                    $('#' + srcCopy.attr('id')).data('type', response['ctype']);
         	                    srcCopy.droppable(droppableConf);
-        	                    $('#' + srcCopy.attr('id') + '>td>div>h2>a>span.type').html(' (Virtual Content)');
+        	                    $('#' + srcCopy.attr('id') + ' span.type').html(' (Virtual Content)');
                                 var indexes = response['indexes'];
                                 jQuery.each(indexes, function(key, val){
-                                   $("#content-node-" + key + ">td:first>div>h2.title").attr('orderindex', val);
+                                   $("#content-node-" + key).data('orderindex', val);
                                 });
         	                    updateExpanders();
-                                currentDropRefNode.expand();
+                                // Open the child list if dropping as child
+                                if (swc == 'child') {
+                                    currentDropRefNode.expand();
+                                }
                                 highlightChangedRow(srcCopy);
         	                }
         	            });

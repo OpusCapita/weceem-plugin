@@ -25,6 +25,8 @@ class WcmJavaScript extends WcmContent {
 
     String content
 
+    static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "js-file-32.png"]
+
     static searchable = {
         alias WcmJavaScript.name.replaceAll("\\.", '_')
         only = ['content', 'title', 'status']
