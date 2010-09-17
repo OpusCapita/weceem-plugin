@@ -68,6 +68,7 @@ function sendSearchRequest(searchParams){
                 var statusTd = td.clone();
                 var createTd = td.clone();
                 var changeTd = td.clone();
+                // @todo this is hideous, clone a template div from the page
                 pageTd.html("<div class='item'><div class='ui-content-icon' style='display: inline-block'><img src='"+obj.iconHref+"'/></div>" + 
                 "<h2 class='title'>" + "<a href=" + obj.href + ">" + obj.title + 
                 "&nbsp;<span class='type'>(" + obj.aliasURI + " - " + obj.type + ")</span></a></h2>" + 
@@ -411,7 +412,7 @@ function performDrop(e, ui) {
         if ((currentDropMode == 'after') || (currentDropMode == 'before')) {
             confirmDragDropOperation( {'switch':currentDropMode, 'source':src, 'target':currentDropRefNode} )
         } else {
-            var type = $('h2.title',currentDropRefNode).attr("type");
+            var type = $(currentDropRefNode).data("type");
             if (resources["haveChildren"][type]){
                 confirmDragDropOperation( {'switch':currentDropMode, 'source':src, 'target':currentDropRefNode} )
             }
@@ -664,25 +665,26 @@ function initTreeTable() {
         var index;
         switch (position){
             case "before":
-                index = $("#content-node-" + trgid + ">td:first>div>h2.title").attr("orderindex");
+                index = $("#content-node-" + trgid).data("orderindex");
                 break;
             case "after":
                 if (!$("#"+$(target).attr('id')+"+tr").size()) {
-                    index = parseInt($("#content-node-" + trgid + ">td:first>div>h2.title").
-                    attr("orderindex")) + 1;
+                    index = $("#content-node-" + trgid).data("orderindex") + 1;
                 }else{
                     var nextid = getDecId($("#"+$(target).attr('id')+"+tr").attr('id'))
-                    index = $("#content-node-"+nextid+">td:first>div>h2.title").attr("orderindex");
+                    index = $("#content-node-"+nextid).data("orderindex");
                 }
                 break;
             case "child":
-                var children = $(".child-of-content-node-"+trgid+"[id*=content-node-]>td:first>div>h2.title")
+                var children = $("tr.child-of-content-node-"+trgid)
                 index = 0;
+                /*
+                // Find the last index, add it to the end
                 jQuery.each(children, function(index, value){
-                    if ($(value).attr('orderindex') >= index){
-                        index = $(value).attr('orderindex');
+                    if ($(value).data('orderindex') >= index){
+                        index = $(value).data('orderindex');
                     }
-                });
+                });*/
                 break;
         }
         return index;
@@ -721,10 +723,13 @@ function initTreeTable() {
     	                    $(src).insertBranchTo(trg, swc);
                             var indexes = response['indexes'];
                             jQuery.each(indexes, function(key, val){
-                               $("#content-node-" + key + ">td:first>div>h2.title").attr('orderindex', val);
+                               $("#content-node-" + key).data('orderindex', val);
                             });
                             updateExpanders();
-                            currentDropRefNode.expand();
+                            // Open the child list if dropping as child
+                            if (swc == 'child') {
+                                currentDropRefNode.expand();
+                            }
                             highlightChangedRow(src);
     	                }
 	                }
@@ -760,16 +765,19 @@ function initTreeTable() {
         	                    srcCopy.appendTo($("#treeTable>tbody"));
         	                    $(srcCopy).attr('id', 'content-node-' + response['id']);
         	                    $(srcCopy).insertBranchTo(trg, swc);
-        	                    $('#' + srcCopy.attr('id') + '>td>div>div.ui-content-icon').draggable(draggableConf);
-        	                    $('#' + srcCopy.attr('id') + '>td>div>h2.title').attr('type', response['ctype']);
+        	                    $('#' + srcCopy.attr('id') + ' div.ui-content-icon').draggable(draggableConf);
+        	                    $('#' + srcCopy.attr('id')).data('type', response['ctype']);
         	                    srcCopy.droppable(droppableConf);
-        	                    $('#' + srcCopy.attr('id') + '>td>div>h2>a>span.type').html(' (Virtual Content)');
+        	                    $('#' + srcCopy.attr('id') + ' span.type').html(' (Virtual Content)');
                                 var indexes = response['indexes'];
                                 jQuery.each(indexes, function(key, val){
-                                   $("#content-node-" + key + ">td:first>div>h2.title").attr('orderindex', val);
+                                   $("#content-node-" + key).data('orderindex', val);
                                 });
         	                    updateExpanders();
-                                currentDropRefNode.expand();
+                                // Open the child list if dropping as child
+                                if (swc == 'child') {
+                                    currentDropRefNode.expand();
+                                }
                                 highlightChangedRow(srcCopy);
         	                }
         	            });
