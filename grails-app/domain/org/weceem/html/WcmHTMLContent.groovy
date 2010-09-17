@@ -104,7 +104,7 @@ class WcmHTMLContent extends WcmContent {
 
     static transients = WcmContent.transients + [ 'summary']
 
-    static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "html-file-32.gif"]
+    static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "html-file-32.png"]
 
     /**
      * Overriden to return caption for menu items, if supplied

@@ -20,7 +20,7 @@ class WcmContentDirectory extends WcmContentFile {
     // This cannot be rendered
     static standaloneContent = false
     
-    static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "server-folder-32.gif"]
+    static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "server-folder-32.png"]
 
     Integer filesCount = 0
 

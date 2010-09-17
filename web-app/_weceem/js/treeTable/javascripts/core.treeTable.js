@@ -187,26 +187,6 @@ function errorMessage(str) {
     });
 }
 
-/*
-function toggleStyle(element, neighbour){
-    var reg = new RegExp("child-of-content-node-\\d+");
-    var parentClass = null;
-    if ($(neighbour).attr('class').match(reg) != null){
-        parentClass = neighbour.attr('class').match(reg)[0];
-    }
-    if ($(element).attr('class').match(reg) != null){
-        element.removeClass(element.attr('class').match(reg)[0]);
-    }
-    if (parentClass != null){
-        element.addClass(parentClass);
-    }
-    var newstyle = $("#" + $(neighbour).attr('id') + " > td:first").attr('style');
-    if (newstyle == null) newstyle = "";
-    $("#" + $(element).attr('id') + " > td:first").attr("style", newstyle);
-    return parentClass != null ? /\d+/.exec(parentClass)[0] : null;
-}
-*/
-
 function getParentId(element){
     var reg = new RegExp("child-of-content-node-\\d+");
     var elem = $(element).first();
@@ -307,6 +287,8 @@ function getNextSiblingRow(targetItem) {
     if (childclassmatch != null) {
         tgt = tgt.nextAll('.'+childclassmatch[0]+':first');
     } else {
+        // This is flawed, it only selects root level nodes.
+        // Needs to find the next row that is not a descendent of this one
         tgt = tgt.nextAll('tr.datarow:not([class*=child-of-content-node-]):first:visible');
     }
     debug('Next sibling is: '+tgt+', '+tgt.attr('id'));

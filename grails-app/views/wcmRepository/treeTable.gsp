@@ -95,7 +95,7 @@ $(function(){
                 <table id="treeTable">
                   <thead>
                     <tr>
-                      <th align="left">Page</th>
+                      <th align="left" class="page-column">Page</th>
                       <th align="left">Status</th>
                       <th align="left">Created by</th>
                       <th align="left">Last changed</th>

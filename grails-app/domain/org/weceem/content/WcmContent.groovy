@@ -44,7 +44,7 @@ class WcmContent implements Comparable, Taggable {
          status component: [prefix:'status_']
     }
     
-    static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "html-file-32.gif"]
+    static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "html-file-32.png"]
     
     // that is also the subject for forums
     String title

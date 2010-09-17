@@ -30,7 +30,7 @@ class WcmBlogEntry extends WcmContent {
         only = ['content', 'keywords', 'summary', 'title']
     }
     
-    static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "blog-entry-32.gif"]
+    static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "blog-entry-32.png"]
 
     String keywords
     String summary

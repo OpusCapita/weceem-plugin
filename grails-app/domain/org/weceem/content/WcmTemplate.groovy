@@ -52,7 +52,7 @@ class WcmTemplate extends WcmContent {
      */
     public String getContentAsHTML() { content }
     
-    static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "template-32.gif"]
+    static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "template-32.png"]
 
     static constraints = {
         content(nullable: false, maxSize: 65536)

@@ -11,7 +11,7 @@ class WcmBlog extends WcmContent {
     Integer maxEntriesToDisplay
     String commentMarkup = ""
     
-    static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "blog-32.gif"]
+    static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "blog-32.png"]
 
     static searchable = {
         alias WcmBlog.name.replaceAll("\\.", '_')

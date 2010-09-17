@@ -12,7 +12,7 @@ class WcmStyleSheet extends WcmContent {
     // 64Kb Unicode text with HTML/Wiki Markup
     String content
 
-    static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "css-file-32.gif"]
+    static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "css-file-32.png"]
 
     static searchable = {
         alias WcmStyleSheet.name.replaceAll("\\.", '_')
