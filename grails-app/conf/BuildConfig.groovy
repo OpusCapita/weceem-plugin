@@ -23,6 +23,10 @@ grails.project.dependency.resolution = {
     }
 
 	plugins { 
+	    /* 
+	    
+	    No support for > * so forget it, this kills ppl using newer versions
+	    
 		runtime ':searchable:0.5.5'
 		runtime ':navigation:1.1.1'
 		runtime ':bean-fields:1.0-RC3'
@@ -32,6 +36,7 @@ grails.project.dependency.resolution = {
 		runtime ':taggable:0.6.2'
 		runtime ':ckeditor:3.4.0'
 		runtime ':blueprint:0.9.1.1'
+		*/
 	}
 }
 

@@ -11,7 +11,7 @@
         </div>
         <div id="tabs-${name}-2">
             <ckeditor:editor id="fckeditor" userSpace="${content.space.name}" name="${name}" 
-                width="700" height="420" showThumbs="true" toolbar="Basic">${value}</cckeditor:editor>
+                width="700" height="420" showThumbs="true" toolbar="Basic">${value}</ckeditor:editor>
         </div>
     </div>  
 </bean:customField>
