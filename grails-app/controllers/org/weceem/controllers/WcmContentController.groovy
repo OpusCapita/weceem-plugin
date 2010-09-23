@@ -300,13 +300,12 @@ class WcmContentController {
             }
         } else {
             StringWriter evaluatedContent = new StringWriter()
-            evaluatedContent << evaluateGSPContent(wcmContentRepositoryService, content, model)
-            request[REQUEST_PRERENDERED_CONTENT] = evaluatedContent.toString()
             request[REQUEST_ATTRIBUTE_NODE] = content
             model.node = content
+            evaluatedContent << evaluateGSPContent(wcmContentRepositoryService, content, model)
+            request[REQUEST_PRERENDERED_CONTENT] = evaluatedContent.toString()
         }
         
-
         // See if there is a template for the content
         def template = isTemplate ? content : wcmContentRepositoryService.getTemplateForContent(content)
         if (template) {
