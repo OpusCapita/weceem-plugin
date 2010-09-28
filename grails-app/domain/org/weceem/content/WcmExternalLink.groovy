@@ -8,7 +8,6 @@ package org.weceem.content
 class WcmExternalLink extends WcmContent {
 
     String url
-    String description
 
     static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "ext-link-32.png"]
 
@@ -36,14 +35,13 @@ class WcmExternalLink extends WcmContent {
     
     Map getVersioningProperties() { 
         def r = super.getVersioningProperties() + [ 
-            description:description
+            url:url
         ] 
         return r
     }
 
     static constraints = {
         url(url:true, nullable: false, maxSize: 1000)
-        description(nullable: true, blank: true, maxSize: 200)
     }
     
     static transients = WcmContent.transients
