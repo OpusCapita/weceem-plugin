@@ -29,6 +29,7 @@ class WeceemTagLib {
     static ATTR_ID = "id"
     static ATTR_NODE = "node"
     static ATTR_TYPE = "type"
+    static ATTR_TYPES = "types"
     static ATTR_MAX = "max"
     static ATTR_SORT = "sort"
     static ATTR_ORDER = "order"
@@ -317,6 +318,7 @@ class WeceemTagLib {
         def lastClass = attrs[ATTR_LAST_CLASS] ?: 'weceem-menu-last'
         def levelClassPrefix = attrs[ATTR_LEVEL_CLASS_PREFIX] ?: 'weceem-menu-level'
 
+        def types = attrs[ATTR_TYPES] ?: [org.weceem.html.WcmHTMLContent]
         def custom = attrs[ATTR_CUSTOM]?.toString()?.toBoolean()
         def levels = attrs[ATTR_LEVELS]?.toString()?.toInteger() ?: 2
         def bodyToUse = body
@@ -331,7 +333,7 @@ class WeceemTagLib {
         def levelnodes
         def args = [
             status:WcmContentRepositoryService.STATUS_ANY_PUBLISHED,
-            type: org.weceem.html.WcmHTMLContent,
+            type: types.size() == 1 ? types[0] : org.weceem.content.WcmContent,
             params:[sort:'orderIndex']
         ]
             
@@ -355,6 +357,13 @@ class WeceemTagLib {
             levelnodes = [activeNode]
         }
             
+        // Filter the nodes if we did a promiscuous query due to multiple types
+        if (types.size() > 1) {
+            levelnodes = levelnodes.findAll { n -> 
+                types.find { cls -> cls.isAssignableFrom(n.class) }
+            }
+        }
+        
         def first = true
         def last = false
         def lastIndex = levelnodes.size()-1
