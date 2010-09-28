@@ -201,7 +201,7 @@ class WcmContentRepositoryService implements InitializingBean {
                 }
 
                 if (templateName) {
-                    importSpaceTemplate('default', s)
+                    importSpaceTemplate(templateName, s)
                 }
             } else {
                 log.error "Unable to create space with properties: ${params} - errors occurred: ${s.errors}"
@@ -338,8 +338,8 @@ class WcmContentRepositoryService implements InitializingBean {
         return results
     }
     
-    WcmContent newContentInstance(String typename, WcmSpace space = null) {
-        def cls = getContentClassForType(typename)
+    WcmContent newContentInstance(type, WcmSpace space = null) {
+        def cls = getContentClassForType(type)
         def c = cls.newInstance()
         if (space) {
             c.space = space

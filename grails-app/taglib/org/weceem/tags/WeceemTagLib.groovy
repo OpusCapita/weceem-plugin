@@ -286,7 +286,18 @@ class WeceemTagLib {
         }
         out << node.titleForMenu.encodeAsHTML()
     }
-    
+
+    static DEFAULT_MENU_BODY = { args -> 
+        def o = args.out
+
+        o << "<li class=\"${args.levelClassPrefix}${args.level} ${args.active ? activeClass : ''} ${args.first ? args.firstClass : ''} ${args.last ? args.lastClass : ''}\">"
+        o << link(node:args.node) {
+            args.node.titleForMenu.encodeAsHTML() 
+        } 
+        o << args.nested
+        o << "</li>"
+    }
+
     /**
      * Render a menu based on the content hierarchy
      * Attributes:
@@ -295,6 +306,7 @@ class WeceemTagLib {
      *      first, last, active, link and node variables. The link is the href to the content, node is the content node of that menu item
      */
     def menu = { attrs, body ->
+        def rootNodeSpecified = attrs.node ? true : false
         def node = attrs.node ?: request[WcmContentController.REQUEST_ATTRIBUTE_NODE]
         def lineage = request[WcmContentController.REQUEST_ATTRIBUTE_PAGE].lineage
 
@@ -309,18 +321,11 @@ class WeceemTagLib {
         def levels = attrs[ATTR_LEVELS]?.toString()?.toInteger() ?: 2
         def bodyToUse = body
         if (!custom) {
-            bodyToUse = { args -> 
-                def o = new StringBuilder()
-
-                o << "<li class=\"$levelClassPrefix${args.level} ${args.active ? activeClass : ''} ${args.first ? firstClass : ''} ${args.last ? lastClass : ''}\">"
-                o << link(node:args.node) {
-                    out << args.node.titleForMenu.encodeAsHTML() 
-                } 
-                o << "</li>"
-                return o.toString()
-            }
+            bodyToUse = DEFAULT_MENU_BODY.clone()
+            bodyToUse.delegate = delegate
         }
                 
+        // Where is the current request's page in this hierarchy
         def activeNode = lineage ? lineage[currentLevel] : null
 
         def levelnodes
@@ -331,35 +336,76 @@ class WeceemTagLib {
         ]
             
         if (siblings) {
-            if (currentLevel == 0) {
+            if ((currentLevel == 0) && !rootNodeSpecified) {
+                if (log.debugEnabled) {
+                    log.debug "Locating root nodes: ${args}"
+                }
                 levelnodes = wcmContentRepositoryService.findAllRootContent(node.space, args)
             } else {
+                if (log.debugEnabled) {
+                    log.debug "Locating child nodes of ${node}: ${args}"
+                }
                 levelnodes = wcmContentRepositoryService.findChildren(node, args)
             }
         } else {
+            if (log.debugEnabled) {
+                log.debug "Locating menu nodes using active node: ${activeNode}"
+            }
+
             levelnodes = [activeNode]
         }
             
         def first = true
         def last = false
         def lastIndex = levelnodes.size()-1
+
+        if (log.debugEnabled) {
+            log.debug "Rendering menu for level [$currentLevel] nodes: ${levelnodes}"
+        }
+
+        def o = out
         levelnodes?.eachWithIndex { n, i -> 
             if (!custom && first) {
-                out << "<ul>"
+                o << "<ul>"
             }
             last = i == lastIndex
-            out << bodyToUse(first:first, active:n == activeNode, level:currentLevel, last: last, 
-                link:custom ? createLink(node:n, { out << n.titleForMenu.encodeAsHTML()}) : '', node:n)
-            if (currentLevel+1 < levels) {
+            
+            def bodyargs = [
+                first:first,
+                active:n == activeNode,
+                custom:custom,
+                level:currentLevel,
+                last: last, 
+                firstClass: firstClass,
+                lastClass: lastClass,
+                levelClassPrefix: levelClassPrefix,
+                levels: levels-1,
+                link: createLink(node:n, { o << n.titleForMenu.encodeAsHTML()}),
+                node:n
+            ]
+
+            def nestedOutput = ''
+            if (currentLevel+1 <= levels) {
                 request['_weceem_menu_level'] = currentLevel+1
-                out << menu([custom:true, node:n], bodyToUse)
+                def attribs = 
+                nestedOutput = menu(bodyargs, bodyToUse).toString()
                 request['_weceem_menu_level'] = currentLevel // back to where we were
             }
+            bodyargs.nested = nestedOutput
+            
+            if (!custom) {
+                bodyargs.out = out
+            }
+
+            // Render item
+            o << bodyToUse(bodyargs)
+
             first = false
             if (!custom && last) {
-                out << "</ul>"
+                o << "</ul>"
             }
         }
+        return null // we don't want any accidental output
     }
 
     /**
@@ -372,7 +418,7 @@ class WeceemTagLib {
      * levels - the number of levels
      * id - id of the menu
      */
-    def treeMenu = {attrs ->
+/*    def treeMenu = {attrs ->
         def node = attrs.node
         int levels = attrs.levels ? attrs.levels.toInteger() : 2
         def id = attrs.id
@@ -405,11 +451,11 @@ class WeceemTagLib {
             tmenu(wcmContentRepositoryService.findAllRootContent(request[WcmContentController.REQUEST_ATTRIBUTE_SPACE], args))
         }
     }
-
+*/
 
     def link = { attrs, body -> 
         def o = out
-        o << "<a href=\"${createLink(attrs)}\""
+        o << "<a href=\"${wcm.createLink(attrs)}\""
         o << attrs.collect {k, v -> " $k=\"$v\"" }.join('')
         o << '>'
         o << body()
@@ -432,7 +478,7 @@ class WeceemTagLib {
             }
         }
 
-        def content = attrs[ATTR_NODE]
+        def content = attrs.remove(ATTR_NODE)
         if (content && !(content instanceof WcmContent)) {
             throwTagError "Tag invoked with [$ATTR_NODE] attribute but the value is not a Content instance"
         }
@@ -441,7 +487,7 @@ class WeceemTagLib {
             if (!contentInfo?.content) {
                 log.error ("Tag [wcm:createLink] cannot create a link to the content at path ${attrs[ATTR_PATH]} as "+
                     "there is no content node at that URI")
-                out << g.createLink(controller:'wcmContent', action:'notFound', params:[path:attrs[ATTR_PATH]])
+                out << g.createLink(controller:'wcmContent', action:'notFound', params:[path:attrs.remove(ATTR_PATH)])
                 return
             }
             content = contentInfo.content
