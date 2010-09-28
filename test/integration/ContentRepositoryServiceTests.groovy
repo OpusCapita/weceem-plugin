@@ -657,4 +657,25 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     
     }
 
+    void testCreateNodeFailsForInvalidContent() {
+        def content = new WcmHTMLContent()
+        content.space = spaceA
+        assertFalse content.validate()
+        assertFalse wcmContentRepositoryService.createNode(content, null)
+    }
+
+    void testCreateFolderInEmptySpace() {
+        def space = new WcmSpace(name:'dummy', aliasURI:'dummy')
+        assert space.save()
+        def content = new WcmFolder(title:'testing')
+        content.space = space
+        content.status = wcmContentRepositoryService.allPublicStatuses[0]
+        def ok = wcmContentRepositoryService.createNode(content, null)
+        println "content errors: ${content.errors}"
+        assertTrue ok
+    }
+
+    void testCreateNodeFailsForInvalidParams() {
+        assertTrue wcmContentRepositoryService.createNode('org.weceem.html.WcmHTMLContent', [space:spaceA]).hasErrors()
+    }
 }

@@ -44,7 +44,7 @@ class WcmContent implements Comparable, Taggable {
          status component: [prefix:'status_']
     }
     
-    public static icon = [plugin: "weceem", dir: "_weceem/images/weceem", file: "virtual-page.png"]
+    static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "html-file-32.png"]
     
     // that is also the subject for forums
     String title
@@ -167,7 +167,7 @@ class WcmContent implements Comparable, Taggable {
         // NOTE: the orderIndex == a.orderIndex returning -1 is REQUIRED with Grails 1.1.1 to workaround
         // issues where orderIndex for children is not unique - returning 0 stops a node being returned in the set!
         if (!o || (o.orderIndex == null) || (o.orderIndex == orderIndex)) return -1
-        this.orderIndex?.compareTo(o.orderIndex)
+        this.orderIndex <=> o.orderIndex
     }
 
     Boolean canHaveChildren() { true }

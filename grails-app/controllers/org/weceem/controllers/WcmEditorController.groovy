@@ -137,7 +137,14 @@ class WcmEditorController {
                     if (log.debugEnabled) {
                         log.debug "Not updating content, preview mode for: ${content}"
                     }
-                    WcmContentController.renderGSPContent(wcmContentRepositoryService, request, response, content)
+                    if (!wcmContentRepositoryService.contentIsRenderable(content)) {
+                        log.warn "Request for [${params.uri}] resulted in content node that is not standalone and cannot be previewed directly"
+                        response.sendError(406 /* Not acceptable */, "This content is not intended for rendering")
+                    } else {
+                        println "Redirecting"
+                        request[WcmContentController.REQUEST_ATTRIBUTE_PREVIEWNODE] = content
+                        forward(controller:'wcmContent', action:'preview')
+                    }
                     return null
                 }
             } else if (notFound) {

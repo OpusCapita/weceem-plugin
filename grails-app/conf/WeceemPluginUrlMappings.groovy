@@ -13,7 +13,7 @@ class WeceemPluginUrlMappings {
         "_weceem/",
         "plugins/",
         "WEB-INF/",
-        "fck",
+        "ck",
         "WeceemFiles/",
         // Admin links
         "${WeceemPluginUrlMappings.ADMIN_PREFIX}/",
@@ -34,6 +34,8 @@ class WeceemPluginUrlMappings {
                 
         delegate.(adminURI+"/editor/$action?/$id?")(controller: 'wcmEditor')
         
+        delegate.(adminURI+"/editor/preview")(controller: 'wcmEditor', action:'update')
+
         delegate.(adminURI+"/administration/synchronization/$action?/$id?")(controller: 'wcmSynchronization')
 
         delegate.(adminURI+"/versions/$action?/$id?")(controller: 'wcmVersion')

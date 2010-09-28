@@ -51,7 +51,7 @@ class WcmWidget extends WcmContent {
      * Must be overriden by content types that can represent their content as text.
      * Used for search results and versioning
      */
-    public String getContentAsText() { ContentUtils.htmlToText(content) }
+    public String getContentAsText() { content }
 
     /**
      * Should be overriden by content types that can represent their content as HTML.
@@ -59,6 +59,8 @@ class WcmWidget extends WcmContent {
      */
     public String getContentAsHTML() { content }
         
+    static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "widget-32.png"]
+
     static mapping = {
         cache usage: 'nonstrict-read-write' 
     }

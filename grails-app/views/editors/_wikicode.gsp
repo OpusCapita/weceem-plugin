@@ -3,7 +3,7 @@
         $('#tabs-${name}').tabs({
             select: function(event, ui){
                 var tabid = ui.tab.id;
-                var richEditor = FCKeditorAPI.GetInstance("${name}");
+                var richEditor = CKeditorAPI.GetInstance("${name}");
                 switch (tabid){
                     case "tab-${name}-1":
                         $.post("${createLink(action: 'convertToWiki', controller: 'wcmEditor')}",

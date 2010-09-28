@@ -44,7 +44,7 @@ class WcmTemplate extends WcmContent {
      * Must be overriden by content types that can represent their content as text.
      * Used for search results and versioning
      */
-    public String getContentAsText() { ContentUtils.htmlToText(content) }
+    public String getContentAsText() { content }
 
     /**
      * Should be overriden by content types that can represent their content as HTML.
@@ -52,6 +52,8 @@ class WcmTemplate extends WcmContent {
      */
     public String getContentAsHTML() { content }
     
+    static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "template-32.png"]
+
     static constraints = {
         content(nullable: false, maxSize: 65536)
     }

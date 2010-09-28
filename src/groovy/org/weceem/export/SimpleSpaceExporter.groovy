@@ -29,11 +29,11 @@ class SimpleSpaceExporter implements SpaceExporter {
         def writer = new StringWriter()
         def xml = new MarkupBuilder(writer)
         
-        def contentList = WcmContent.findAll(
-                "from WcmContent c where c.space=? ", spc)
+        def contentList = WcmContent.findAllBySpace(spc)
         //Building XML structure
         xml.content(){
             for (cnt in contentList){
+                
                 "${cnt.class.name}"(){
                     id("class": cnt.id.class.name, "${cnt.id}")
                     //Getting Grails Domain object properties

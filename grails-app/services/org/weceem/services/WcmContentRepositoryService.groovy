@@ -201,7 +201,7 @@ class WcmContentRepositoryService implements InitializingBean {
                 }
 
                 if (templateName) {
-                    importSpaceTemplate('default', s)
+                    importSpaceTemplate(templateName, s)
                 }
             } else {
                 log.error "Unable to create space with properties: ${params} - errors occurred: ${s.errors}"
@@ -338,8 +338,8 @@ class WcmContentRepositoryService implements InitializingBean {
         return results
     }
     
-    WcmContent newContentInstance(String typename, WcmSpace space = null) {
-        def cls = getContentClassForType(typename)
+    WcmContent newContentInstance(type, WcmSpace space = null) {
+        def cls = getContentClassForType(type)
         def c = cls.newInstance()
         if (space) {
             c.space = space
@@ -426,8 +426,9 @@ class WcmContentRepositoryService implements InitializingBean {
         if (postInit) {
             postInit(content)
         }
+        // Ignore result here, we need the content's errors
         createNode(content, content.parent)
-        return content
+        return content // has the errors set on it
     }
 
     /**
@@ -437,7 +438,12 @@ class WcmContentRepositoryService implements InitializingBean {
      * @param parentContent
      */
     Boolean createNode(WcmContent content, WcmContent parentContent = null) {
-        requirePermissions(parentContent ?: content.space, [WeceemSecurityPolicy.PERMISSION_CREATE])        
+        if (parentContent) { 
+            requirePermissions(parentContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
+        } else {
+            assert content.space
+            requirePermissions(content.space, [WeceemSecurityPolicy.PERMISSION_CREATE])        
+        }
 
         if (parentContent == null) parentContent = content.parent
 
@@ -490,43 +496,54 @@ class WcmContentRepositoryService implements InitializingBean {
                 parentContent.addToChildren(content)
             }
 
-            // We complete the AliasURI, AFTER handling the create() event which may need to affect title/aliasURI
-            if (!content.aliasURI) {
-                content.createAliasURI(parentContent)
-            }
-            
-            // Auto-set publishFrom to now if content is created as public but no publishFrom specified
-            // Required for blogs and sort by publishFrom to work
-            if (content.status.publicContent && (content.publishFrom == null)) {
-                content.publishFrom = new Date()
-            }
-            
-            // We must have generated aliasURI and set parent here to be sure that the uri is unique
-            boolean saved = false
-            int attempts = 0
-            while (!saved && (attempts++ < 100)) {
-                try {
-                    if (content.save(flush:true)) {
-                        saved = true
-                    }
-                } catch (ConstraintViolationException cve) {
-                    // See if we get a new aliasURI from the content, and if so try again
-                    def oldAliasURI = content.aliasURI
-                    content.createAliasURI(parentContent)
-                    if (oldAliasURI != content.aliasURI) {
-                        if (log.warnEnabled) {
-                            log.warn "Failed to create new content ${content.dump()} due to constraint violation, trying again with a new aliasURI"
-                        }
-                    } else {
-                        log.error "Failed to create new content ${content.dump()} due to constraint violation, giving up as aliasURI is invariant"
-                        result = false
-                        break;
-                    }
+            // Short circuit out of here if not valid now
+            def valid = content.validate()
+            if (!valid) {
+                // If its not just a blank aliasURI error, get out now
+                if (!(content.errors.errorCount == 1 && content.errors.getFieldErrors('aliasURI').size() == 1)) {
+                    result = false
                 }
             }
 
+            if (result) {
+                // We complete the AliasURI, AFTER handling the create() event which may need to affect title/aliasURI
+                if (!content.aliasURI) {
+                    content.createAliasURI(parentContent)
+                }
+            
+                // Auto-set publishFrom to now if content is created as public but no publishFrom specified
+                // Required for blogs and sort by publishFrom to work
+                if (content.status.publicContent && (content.publishFrom == null)) {
+                    content.publishFrom = new Date()
+                }
+            
+                // We must have generated aliasURI and set parent here to be sure that the uri is unique
+                boolean saved = false
+                int attempts = 0
+                while (!saved && (attempts++ < 100)) {
+                    try {
+                        if (content.save(flush:true)) {
+                            saved = true
+                        }
+                    } catch (ConstraintViolationException cve) {
+                        // See if we get a new aliasURI from the content, and if so try again
+                        def oldAliasURI = content.aliasURI
+                        content.createAliasURI(parentContent)
+                        if (oldAliasURI != content.aliasURI) {
+                            if (log.warnEnabled) {
+                                log.warn "Failed to create new content ${content.dump()} due to constraint violation, trying again with a new aliasURI"
+                            }
+                        } else {
+                            log.error "Failed to create new content ${content.dump()} due to constraint violation, giving up as aliasURI is invariant"
+                            result = false
+                            break;
+                        }
+                    }
+                }
+            }
+            
             if (!result) {
-                parent.discard() // revert the changes we made to parent
+                parentContent?.discard() // revert the changes we made to parent
             }
         }
         
@@ -603,6 +620,8 @@ class WcmContentRepositoryService implements InitializingBean {
         requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_EDIT,WeceemSecurityPolicy.PERMISSION_VIEW])        
 
         if (!sourceContent) return false
+
+        // Do an ugly check for unique uris at root
         if (!targetContent){
             def criteria = WcmContent.createCriteria()
             def nodes = criteria {
@@ -625,30 +644,40 @@ class WcmContentRepositoryService implements InitializingBean {
 
         // We need this to invalidate caches
         def originalURI = sourceContent.absoluteURI
-        
-        if (targetContent) {
+
+        def parentChanged = targetContent != sourceContent.parent
+        if (targetContent && parentChanged) {
             success = targetContent.canAcceptChild(sourceContent)
         }
 
-        if (success) {
+        if (success && parentChanged) {
             if (sourceContent.metaClass.respondsTo(sourceContent, "move", WcmContent)){
                 success = sourceContent.move(targetContent)
             }
         }
         
         if (success) {
-            def parent = sourceContent.parent
-            if (parent) {
-                parent.children.remove(sourceContent)
-                sourceContent.parent = null
-                assert parent.save()
+            if (parentChanged) {
+                // Transpose to new parent
+                def parent = sourceContent.parent
+                if (parent) {
+                    parent.children.remove(sourceContent)
+                    sourceContent.parent = null
+                    assert parent.save()
+                }
             }
+            
+            // Update the orderIndexes of target's children
             WcmContent inPoint = WcmContent.findByOrderIndexAndParent(orderIndex, targetContent)
             if (inPoint != null) {
                 shiftNodeChildrenOrderIndex(sourceContent.space, targetContent, orderIndex)
             }
+            
+            // Update ourself to new orderIndex
             sourceContent.orderIndex = orderIndex
-            if (targetContent) {
+            
+            // Add us to the child list
+            if (targetContent && parentChanged) {
                 if (!targetContent.children) targetContent.children = new TreeSet()
                 targetContent.addToChildren(sourceContent)
                 assert targetContent.save()
@@ -1376,6 +1405,19 @@ class WcmContentRepositoryService implements InitializingBean {
         }
     }
     
+    /** 
+     * Determine if the content node is able to be rendered to visitors.
+     * @return false if this content is not meant to be rendered, and is instead a component of other content
+     */
+    boolean contentIsRenderable(WcmContent content) {
+        // See if it is renderable directly - eg WcmWidget and WcmTemplate are not renderable on their own
+        if (content.metaClass.hasProperty(content.class, 'standaloneContent')) {
+            return content.class.standaloneContent
+        } else { 
+            return true
+        }
+    }
+     
     /**
      * Synchronize given space with file system
      * 
@@ -1702,6 +1744,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
                 and {
                     eq('publicContent', false)
                     ne('code', unmoderatedStatusCode)
+                    ne('code', archivedStatusCode)
                 }
             }
         }

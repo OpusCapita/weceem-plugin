@@ -236,4 +236,5 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         
         assertEquals "Parent A|", taglib.out.toString()
     }
+
 }

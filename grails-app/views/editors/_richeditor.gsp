@@ -1,3 +1,7 @@
 <bean:customField beanName="content" property="${name}" labelKey="${'content.label.'+name}" noLabel="true">
-    <fckeditor:editor userSpace="${content.space.makeUploadName()}" name="${name}" width="700" height="420" toolbar="Default" fileBrowser="default">${value}</fckeditor:editor>
+    <ckeditor:editor userSpace="${content.space.makeUploadName()}" 
+        name="${name}" 
+        width="700" height="420"
+        showThumbs="true" 
+        toolbar="HTMLEditor">${value}</ckeditor:editor>
 </bean:customField>

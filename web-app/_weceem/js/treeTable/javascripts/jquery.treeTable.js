@@ -1,4 +1,10 @@
 /* jQuery treeTable Plugin 2.2.1 - http://ludo.cubicphuse.nl/jquery-plugins/treeTable/ */
+
+/*
+  NOTE! This has been hacked by Weceem developers to achieve what we need. New versions are 
+  NOT a drop in replacement.
+
+ */
 (function($) {
   // Helps to make options available to all functions
   // TODO: This gives problems when there are both expandable and non-expandable
@@ -65,7 +71,8 @@
     var node = $(this);
     var parent = parentOf(node);
     
-    var ancestorNames = $.map(ancestorsOf($(destination)), function(a) { return a.id; });
+    var ancs = ancestorsOf($(destination));
+    var ancestorNames = $.map(ancs, function(a) { return $(a).attr('id'); });
       
     // Conditions:
     // 1: +node+ should not be inserted in a location in a branch if this would
@@ -74,12 +81,15 @@
     //    same as +node+'s current parent (this last condition prevents +node+
     //    from being moved to the same location where it already is).
     // 3: +node+ should not be inserted as a child of +node+ itself.
-    if($.inArray(node[0].id, ancestorNames) == -1 && (!parent || (destination.id != parent[0].id)) && destination.id != node[0].id) {
+    if($.inArray($(node).attr('id'), ancestorNames) == -1 && 
+        (!parent || (destination.attr('id') != $(parent).attr('id'))) && 
+        destination.attr('id') != $(node).attr('id')) {
+    
       indent(node, ancestorsOf(node).length * options.indent * -1); // Remove indentation
       
-      if(parent) { node.removeClass(options.childPrefix + parent[0].id); }
+      if(parent) { node.removeClass(options.childPrefix + parent.attr('id')); }
       
-      node.addClass(options.childPrefix + destination.id);
+      node.addClass(options.childPrefix + destination.attr('id'));
       move(node, destination); // Recursively move nodes to new location
       indent(node, ancestorsOf(node).length * options.indent);
     }
@@ -87,6 +97,70 @@
     return this;
   };
   
+  // Insert entire branch before destination (as a sibling)
+  $.fn.insertBranchBefore = function(destination) {
+    var node = $(this);
+    var parent = parentOf(node);
+    
+    var ancs = ancestorsOf($(destination));
+    var ancestorNames = $.map(ancs, function(a) { return $(a).attr('id'); });
+      
+    indent(node, ancestorsOf(node).length * options.indent * -1); // Remove indentation
+      
+    if(parent) { node.removeClass(options.childPrefix + parent.attr('id')); }
+    // Now correct the parentage class
+    var reg = new RegExp("child-of-content-node-\\d+");
+    var siblingParentageClass 
+    if ($(destination).attr('class').match(reg) != null){
+        siblingParentageClass = $(destination).attr('class').match(reg)[0];
+    }
+    if (siblingParentageClass) {
+        node.addClass( siblingParentageClass );
+    }
+    
+    moveBefore(node, destination); // Recursively move nodes to new location
+    indent(node, ancestorsOf(node).length * options.indent);
+
+    return this;
+  };  
+  
+  // Insert entire branch after destination (as a sibling)
+  $.fn.insertBranchAfter = function(destination) {
+    var node = $(this);
+    var parent = parentOf(node);
+    
+    var ancs = ancestorsOf($(destination));
+    var ancestorNames = $.map(ancs, function(a) { return $(a).attr('id'); });
+      
+    indent(node, ancestorsOf(node).length * options.indent * -1); // Remove indentation
+      
+    if(parent) { node.removeClass(options.childPrefix + parent.attr('id')); }
+    // Now correct the parentage class
+    var reg = new RegExp("child-of-content-node-\\d+");
+    var siblingParentageClass 
+    if ($(destination).attr('class').match(reg) != null){
+        siblingParentageClass = $(destination).attr('class').match(reg)[0];
+    }
+
+    if (siblingParentageClass) {
+        node.addClass( siblingParentageClass );
+    }
+    
+    // Calculate correct row to insert *before* to skip all of our current hidden descendents
+    var actualDestination = $(destination).nextAll('.'+siblingParentageClass+':first')
+    if (actualDestination.length && (actualDestination.attr('id') != destination.attr('id')) ) {
+        // Skipped children to next sibling
+        moveBefore(node, actualDestination); // Recursively move nodes to new location
+    } else {
+        // We are last sibling, how to skip all the descendents?
+        move(node, destination); // Recursively move nodes to new location
+        childrenOf(destination).reverse().each(function() { move($(this), destination); });
+    }
+    indent(node, ancestorsOf(node).length * options.indent);
+    
+    return this;
+  };
+
   // Add reverse() function from JS Arrays
   $.fn.reverse = function() {
     return this.pushStack(this.get().reverse(), arguments);
@@ -116,7 +190,7 @@
   };
   
   function childrenOf(node) {
-    return $("table.treeTable tbody tr." + options.childPrefix + node[0].id);
+    return $("table.treeTable tbody tr." + options.childPrefix + node.attr('id'));
   };
 
   function indent(node, value) {
@@ -172,6 +246,11 @@
     childrenOf(node).reverse().each(function() { move($(this), node[0]); });
   };
   
+  function moveBefore(node, destination) {
+    node.insertBefore(destination);
+    childrenOf(node).reverse().each(function() { move($(this), node[0]); });
+  };
+
   function parentOf(node) {
     var classNames = node[0].className.split(' ');
     

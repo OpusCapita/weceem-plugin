@@ -26,36 +26,35 @@ table.details td.footer {
   text-align: center;
 }
 
-.defaultLeaf {
-  background: url( ../images/weceem/file_unknown_16.gif ) no-repeat;
+/* 
+Tree table stuff
+*/
+
+td.selected {
+   background-color: #99c2ff;
 }
 
-.blockLeaf {
-  background: url( ../images/weceem/file_blocks_16.gif ) no-repeat;
+td.selected-lowlight {
+   background-color: #BB0000;
 }
 
-.blogLeaf {
-  background: url( ../images/weceem/file_blog_16.gif ) no-repeat;
+.crop-x {
+    overflow-x: hidden;
 }
 
-.forumLeaf {
-  background: url( ../images/weceem/file_forumentry_16.gif ) no-repeat;
+#insert-marker { 
+    position: relative;
+    height: 0;
+    z-index: 500;
 }
 
-.htmlLeaf {
-  background: url( ../images/weceem/file_html_16.gif ) no-repeat;
+#insert-marker img { 
+    height: 7px;
+    position: relative;
 }
 
-.stylesheetLeaf {
-  background: url( ../images/weceem/file_stylesheet_16.gif ) no-repeat;
-}
-
-.wikiLeaf {
-  background: url( ../images/weceem/file_wiki_16.gif ) no-repeat;
-}
-
-.templateLeaf {
-  background: url( ../images/weceem/file_template_16.gif ) no-repeat;
+#treeTable th.page-column {
+    padding-left: 25px;
 }
 
 span.loadingMessage {

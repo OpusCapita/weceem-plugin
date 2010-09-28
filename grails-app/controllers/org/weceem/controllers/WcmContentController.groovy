@@ -27,7 +27,9 @@ class WcmContentController {
     static String REQUEST_ATTRIBUTE_USER = "weceem.user"
     static String REQUEST_ATTRIBUTE_NODE = "weceem.node"
     static String REQUEST_ATTRIBUTE_SPACE = "weceem.space"
+    static String REQUEST_ATTRIBUTE_CONTENTINFO = "weceem.content.info"
     static String REQUEST_ATTRIBUTE_PREPARED_MODEL = "weceem.prepared.model"
+    static String REQUEST_ATTRIBUTE_PREVIEWNODE = "weceem.preview.node"
     static String REQUEST_PRERENDERED_CONTENT = "weceem.prerendered.content"
     static String UI_MESSAGE = 'weceem.message'
     
@@ -36,6 +38,88 @@ class WcmContentController {
     def wcmContentRepositoryService
     def wcmSecurityService
     def wcmCacheService
+    
+    
+    /** 
+     * Do the full default render pipeline on the supplied content instance.
+     * NOTE: Only this exact instance will be rendered, so it must be pre-resolved if it is a WcmVirtualContent node
+     * 
+     * @todo Should we move this to ContentRepo service? Still requires a delegate that has all controller-style methods
+     * but could be reusable in a non-request context e.g. jobs that produce PDFs or sending HTML emails from CMS
+     */
+    static renderPipeline = { content ->
+        // Make this available to the rest of the request chain
+        request[WcmContentController.REQUEST_ATTRIBUTE_NODE] = content 
+
+        // This may have been supplied from content resolution if not we have to fake it
+        def contentInfo = request[WcmContentController.REQUEST_ATTRIBUTE_CONTENTINFO]
+        def req = request
+        if (!contentInfo) {
+            contentInfo = [:]
+            contentInfo.with {
+                parentURI = content.parent ? content.parent.absoluteURI : ''
+                lineage = content.lineage
+                content = req[WcmContentController.REQUEST_ATTRIBUTE_NODE]
+            }
+        }
+        
+		def pageInfo = WcmContentController.makePageInfo(content.absoluteURI, contentInfo, content)
+        request[REQUEST_ATTRIBUTE_PAGE] = pageInfo
+
+        def contentClass = content.class
+        
+        if (!wcmContentRepositoryService.contentIsRenderable(content)) {
+            log.warn "Request for [${params.uri}] resulted in content node that is not standalone and cannot be rendered directly"
+            response.sendError(406 /* Not acceptable */, "This content is not intended for rendering")
+            return null
+        }
+
+        // Set mime type if there is one
+        if (content.mimeType) {
+            response.contentType = content.mimeType
+        }
+
+        // See if the content will handle rendering itself
+        if (contentClass.metaClass.hasProperty(contentClass, 'handleRequest')) {
+            if (log.debugEnabled) {
+                log.debug "Content of type ${contentClass} at uri ${params.uri} is handling its own rendering"
+                
+                assert contentClass.handleRequest instanceof Closure
+            }
+            
+            def handler = contentClass.handleRequest.clone()
+            handler.delegate = delegate // The controller
+            handler.resolveStrategy = Closure.DELEGATE_FIRST
+            log.debug "Calling handler with delegate: ${handler.delegate}"
+            try {
+                return handler.call(content)
+            } catch (Throwable t) {
+                // Make sure error page is served as HTML 
+                response.contentType = "text/html"
+                throw t
+            }
+        } else {
+
+            // Fall back to standard rendering
+            return renderContent(content)
+        }
+    }
+    
+    static showContent(controllerDelegate, content) {
+        // Clone the rendering closure and pass it the content
+        Closure c = renderPipeline.clone()
+        c.delegate = controllerDelegate
+        c.resolveStrategy = Closure.DELEGATE_FIRST
+        c(content)
+    }
+    
+    def preview = {
+        if (!request[REQUEST_ATTRIBUTE_PREVIEWNODE]) {
+            response.sendError(500, "No preview node set")
+        } else {
+            WcmContentController.showContent(this, request[REQUEST_ATTRIBUTE_PREVIEWNODE])
+        }
+    }
     
     def show = { 
         try {
@@ -52,10 +136,23 @@ class WcmContentController {
             }
 
             if (space) {
+                request[REQUEST_ATTRIBUTE_SPACE] = space
+
                 if (log.debugEnabled) {
                     log.debug "Loading content from for uri: ${uri}"
                 }
                 def contentInfo = wcmContentRepositoryService.findContentForPath(uri,space)
+                if (contentInfo) {
+                    if (log.debugEnabled) {
+                        log.debug "Checking user is allowed to view content at $uri"
+                    }
+                    if (!wcmSecurityService.isUserAllowedToViewContent(contentInfo.content)) {
+                        throw new AccessDeniedException("You cannot view this content")
+                    }
+                }
+                request[REQUEST_ATTRIBUTE_CONTENTINFO] = contentInfo
+                
+                // Resolve any virtual nodes
                 def content = resolveActualContent(contentInfo?.content)
             
                 if (log.debugEnabled) {
@@ -63,57 +160,10 @@ class WcmContentController {
                 }
             
                 def activeUser = wcmSecurityService.userName
+                request[REQUEST_ATTRIBUTE_USER] = activeUser
             
                 if (content) {
-        			def pageInfo = WcmContentController.makePageInfo(uri, contentInfo, content)
-
-                    def contentClass = content.class
-
-                    // See if it is renderable directly - eg WcmWidget and WcmTemplate are not renderable on their own
-                    if (contentClass.metaClass.hasProperty(contentClass, 'standaloneContent')) {
-                        def canRender = contentClass.standaloneContent
-                        if (!canRender) {
-                            log.warn "Request for [${params.uri}] resulted in content node that is not standalone and cannot be rendered directly"
-                            response.sendError(406 /* Not acceptable */, "WcmContent is not intended for rendering")
-                            return null
-                        }
-                    }
-                    
-                    // Make this available to the rest of the request chain
-                    request[REQUEST_ATTRIBUTE_NODE] = content
-                    request[REQUEST_ATTRIBUTE_USER] = activeUser
-                    request[REQUEST_ATTRIBUTE_PAGE] = pageInfo
-                    request[REQUEST_ATTRIBUTE_SPACE] = space
-
-                    // Set mime type if there is one
-                    if (content.mimeType) {
-                        response.contentType = content.mimeType
-                    }
-
-                    // See if the content will handle rendering itself
-                    if (contentClass.metaClass.hasProperty(contentClass, 'handleRequest')) {
-                        if (log.debugEnabled) {
-                            log.debug "Content of type ${contentClass} at uri ${params.uri} is handling its own rendering"
-                            
-                            assert contentClass.handleRequest instanceof Closure
-                        }
-                        
-                        def handler = contentClass.handleRequest.clone()
-                        handler.delegate = this // The controller
-                        handler.resolveStrategy = Closure.DELEGATE_FIRST
-                        log.debug "Calling handler with delegate: ${handler.delegate}"
-                        try {
-                            return handler.call(content)
-                        } catch (Throwable t) {
-                            // Make sure error page is served as HTML 
-                            response.contentType = "text/html"
-                            throw t
-                        }
-                    } else {
-
-                        // Fall back to standard rendering
-                        return renderContent(content)
-                    }
+                    WcmContentController.showContent(this, content)
                 } else {
                     response.sendError 404, "No content found for this URI"
                     return null
@@ -186,6 +236,10 @@ class WcmContentController {
     }
     
     
+    /**
+     * Render a content node with support for GSP tags and template
+     * @see static method impl
+     */
     void renderGSPContent(WcmContent content, model = null) {
         WcmContentController.renderGSPContent( wcmContentRepositoryService, request, response, content, model)
     }
@@ -246,13 +300,12 @@ class WcmContentController {
             }
         } else {
             StringWriter evaluatedContent = new StringWriter()
-            evaluatedContent << evaluateGSPContent(wcmContentRepositoryService, content, model)
-            request[REQUEST_PRERENDERED_CONTENT] = evaluatedContent.toString()
             request[REQUEST_ATTRIBUTE_NODE] = content
             model.node = content
+            evaluatedContent << evaluateGSPContent(wcmContentRepositoryService, content, model)
+            request[REQUEST_PRERENDERED_CONTENT] = evaluatedContent.toString()
         }
         
-
         // See if there is a template for the content
         def template = isTemplate ? content : wcmContentRepositoryService.getTemplateForContent(content)
         if (template) {
