@@ -115,7 +115,7 @@ function updateExpanders(){
 }
 
 function loadPage(url) {
-    window.location.reload(true);
+//    window.location.reload(true);
     window.location.href = url
 }
 
@@ -142,6 +142,7 @@ function hideInserter() {
     mrk.queue('concurrentfx', function() { 
         mrk.fadeOut( function() {
             mrk.hide();
+            mrk.removeClass('showing')
             $('div.table').removeClass('crop-x');
         });
         mrk.dequeue('concurrentfx');
@@ -241,7 +242,7 @@ function revealInserter(left, top) {
     var curPos = mrk.offset();
     $('div.table').addClass('crop-x');
     if ((left != curPos.left) || (top != curPos.top)) {
-        if (mrk.is(':visible')) {
+        if (mrk.hasClass('showing')) {
             // We might have an in-progress move animation already
             mrk.clearQueue();
             mrk.dequeue();
@@ -251,6 +252,7 @@ function revealInserter(left, top) {
             mrk.css( {'left':left, 'top':top});
             mrk.queue('concurrentfx', function() { 
                 mrk.fadeIn();
+                mrk.addClass('showing')
                 mrk.dequeue('concurrentfx');
             });
             mrk.dequeue('concurrentfx');
@@ -261,13 +263,13 @@ function revealInserter(left, top) {
 function inserterAtPrecedingSibling(targetItem) {
     setCurrentDropPoint(targetItem, "before"); // this is effectively a NOP
     showInserterBefore(targetItem);
-    debug("Insert before");
+    //debug("Insert before");
 }
 
 function getPreviousSiblingRow(targetItem) {
     var tgt = targetItem;
     var childclassmatch = /child\-of\-content\-node\-\d+/.exec(tgt.attr('class'));
-    debug('childclassmatch: '+childclassmatch);
+    //debug('childclassmatch: '+childclassmatch);
     if (childclassmatch != null) {
         tgt = tgt.prevAll('.'+childclassmatch[0]+':first:visible');
     } else {
@@ -277,14 +279,14 @@ function getPreviousSiblingRow(targetItem) {
     if (!tgt.length) {
         tgt = targetItem.prev('tr.datarow:visible');
     }    
-    debug('Previous sibling is: '+tgt+', '+tgt.attr('id'));
+    //debug('Previous sibling is: '+tgt+', '+tgt.attr('id'));
     return tgt;
 }
 
 function getNextSiblingRow(targetItem) {
     var tgt = targetItem;
     var childclassmatch = /child\-of\-content\-node\-\d+/.exec(tgt.attr('class'));
-    debug('childclassmatch: '+childclassmatch);
+    //debug('childclassmatch: '+childclassmatch);
     if (childclassmatch != null) {
         tgt = tgt.nextAll('.'+childclassmatch[0]+':first');
     } else {
@@ -292,7 +294,7 @@ function getNextSiblingRow(targetItem) {
         // Needs to find the next row that is not a descendent of this one
         tgt = tgt.nextAll('tr.datarow:not([class*=child-of-content-node-]):first:visible');
     }
-    debug('Next sibling is: '+tgt+', '+tgt.attr('id'));
+    //debug('Next sibling is: '+tgt+', '+tgt.attr('id'));
     return tgt;
 }
 
@@ -304,17 +306,17 @@ function inserterAtFollowingSibling(targetItem) {
         var tgt = getNextSiblingRow(targetItem);
         // If there is no next sibling, pick the next non-child row whatever, it will be 
         // a sibling of the parent
-        debug("following sib: "+tgt.length);
+        //debug("following sib: "+tgt.length);
         var indentTarget
         if (!tgt.length) {
             tgt = targetItem.nextAll('tr.datarow:not(.'+childClass+'):first:visible');
             indentTarget = targetItem;
-            debug("following sib non-child: "+tgt.length);
+            //debug("following sib non-child: "+tgt.length);
         }    
 
         // If we are the last row in the table...
         if (!tgt.length) {
-            debug("following sib using after self");
+            //debug("following sib using after self");
             tgt = targetItem.nextAll('tr.'+childClass+":last:visible");
 
             setCurrentDropPoint(targetItem, "after");
@@ -322,7 +324,7 @@ function inserterAtFollowingSibling(targetItem) {
             // Indent to targetItem's indent level
             showInserterAfter(tgt, $(indentTarget));
         } else {
-            debug("following sib using before: "+tgt);
+            //debug("following sib using before: "+tgt);
 
             setCurrentDropPoint(tgt, "before");
 
@@ -335,13 +337,13 @@ function inserterAtFollowingSibling(targetItem) {
 
         showInserterAfter($(targetItem));
     }
-    debug("Insert after");
+    //debug("Insert after");
 }
 
 function inserterAsChild(targetItem) {
     setCurrentDropPoint(targetItem, "child");
     showInserterAsChildOf(targetItem);
-    debug("Insert as child");
+    //debug("Insert as child");
 }
 
 function setCurrentDropPoint(row, mode) {
@@ -355,16 +357,17 @@ function setCurrentDropPoint(row, mode) {
 
 function showDropInsertionPoint(targetItem, ui) {
     if (currentDropTarget && currentDropTarget != currentDraggedItem) {
-        debug("Drop target: "+$(currentDropTarget).attr('id'));
+        //debug("Drop target: "+$(currentDropTarget).attr('id'));
         
         var dropOffset = currentDropTarget.position();
         var mouseLeft = ui.position.left; 
         var mouseY = ui.position.top; 
         
         // Workaround for firefox not setting offsetParent of helper correct
-        if (ui.helper.offsetParent().is('body')) {
-            mouseLeft -= ui.helper.parent().offset().left;
-            mouseY -= ui.helper.parent().offset().top;
+        if (ui.helper.offsetParent().tagName == 'body') {
+            var offset = ui.helper.parent().offset()
+            mouseLeft -= offset.left;
+            mouseY -= offset.top;
         }
         
 /*        debug("Calc'd pos: "+mouseLeft+', '+mouseY);
@@ -378,7 +381,7 @@ function showDropInsertionPoint(targetItem, ui) {
 */
         var targetItemMidPoint = dropOffset.top + ($(currentDropTarget).height() >> 1);
         var targetItemLeft = $('div.item', currentDropTarget).position().left;
-        debug("targetItemLeft: "+targetItemLeft+", itemtop "+dropOffset.top+", Midp: "+targetItemMidPoint);
+        //debug("targetItemLeft: "+targetItemLeft+", itemtop "+dropOffset.top+", Midp: "+targetItemMidPoint);
         var isIndented = mouseLeft >= targetItemLeft+nodeIndent;
         var isAboveMidPoint = mouseY + (ui.helper.height()>>1) < targetItemMidPoint;
         // Select previous or next sibling at this parentage level
@@ -453,7 +456,7 @@ function dragHovering(elem, ui) {
     // Make the droppable branch expand when a draggable node is moved over it AND only if it has children
     if ( currentDropTarget && 
             (currentDropTarget != currentDraggedItem) && 
-            !currentDropTarget.is('.expanded') &&
+            !currentDropTarget.hasClass('expanded') &&
             (currentDropMode == 'child')) {
         // set timer to open it
         // we don't do auto-expand 
