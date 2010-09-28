@@ -1,4 +1,4 @@
-<tr id="content-node-${c.id}" class="datarow ${ c.parent ? 'child-of-content-node-'+c.parent.id : ''}">
+<tr id="content-node-${c.id}" class="datarow ${ c.parent ? 'child-of-content-node-'+c.parent.id : ''} ${ c.parent == null ? '' : 'ui-helper-hidden'}">
 	<td>
 	  <div class="item">
             <wcm:renderContentItemIcon type="${c}" id="content-icon-${c.id  }"/>
