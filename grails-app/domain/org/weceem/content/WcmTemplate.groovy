@@ -44,7 +44,7 @@ class WcmTemplate extends WcmContent {
      * Must be overriden by content types that can represent their content as text.
      * Used for search results and versioning
      */
-    public String getContentAsText() { ContentUtils.htmlToText(content) }
+    public String getContentAsText() { content }
 
     /**
      * Should be overriden by content types that can represent their content as HTML.
