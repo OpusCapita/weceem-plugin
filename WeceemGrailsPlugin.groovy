@@ -5,7 +5,7 @@ class WeceemGrailsPlugin {
     def _log = LogFactory.getLog('org.weceem.WeceemGrailsPlugin')
 
     // the plugin version
-    def version = "0.9.2-FINAL-RC"
+    def version = "0.9.2"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.2.2 > *"
     
@@ -23,8 +23,6 @@ class WeceemGrailsPlugin {
     ]
     def observe = ["hibernate", 'services']
     
-//    def loadAfter = ['logging']
-
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
         "grails-app/views/error.gsp",
