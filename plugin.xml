@@ -1,4 +1,4 @@
-<plugin name='weceem' version='0.9.2-FINAL-RC' grailsVersion='1.2.2 &gt; *'>
+<plugin name='weceem' version='0.9.2' grailsVersion='1.2.2 &gt; *'>
   <author>jCatalog AG</author>
   <authorEmail>info@weceem.org</authorEmail>
   <title>Weceem CMS</title>
