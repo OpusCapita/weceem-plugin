@@ -1825,7 +1825,6 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
 
     def filterToTypes(listOfContent, String typeNames) {
         def types = typeNames.tokenize(',').collect { n -> grailsApplication.getClassForName(n.trim()) }
-        println "Types are $types"
         listOfContent.findAll { c -> types.any { t -> t.isAssignableFrom(c.class) } }
     }
 
@@ -1891,7 +1890,6 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
 
         // Filter by type if required
         if (args.types) {
-            println "Result types are: ${results.results*.class}"
             results.results = filterToTypes(results.results, args.types)
         }
         
