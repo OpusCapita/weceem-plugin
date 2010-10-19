@@ -117,6 +117,7 @@ class WcmContentController {
         if (!request[REQUEST_ATTRIBUTE_PREVIEWNODE]) {
             response.sendError(500, "No preview node set")
         } else {
+            cache false // never allow browser to cache this
             WcmContentController.showContent(this, request[REQUEST_ATTRIBUTE_PREVIEWNODE])
         }
     }
@@ -150,6 +151,7 @@ class WcmContentController {
                         throw new AccessDeniedException("You cannot view this content")
                     }
                 }
+                
                 request[REQUEST_ATTRIBUTE_CONTENTINFO] = contentInfo
                 
                 // Resolve any virtual nodes
@@ -159,14 +161,35 @@ class WcmContentController {
                     log.debug "Content after resolving virtual content for uri: ${uri} is: ${content?.dump()}"
                 }
             
-                def activeUser = wcmSecurityService.userName
-                request[REQUEST_ATTRIBUTE_USER] = activeUser
+                withCacheHeaders { 
+                    etag {
+                        def et = content.version.encodeAsSHA1();
+                        println "Etag is: "+et
+                        return et
+                    }
+                    
+                    lastModified {
+                        println "In ETag lastmod closure"
+                        (content.changedOn ?: content.createdOn)
+                    }
+                    
+                    generate {
+                        println "In ETag generate closure"
+                        def activeUser = wcmSecurityService.userName
+                        request[REQUEST_ATTRIBUTE_USER] = activeUser
             
-                if (content) {
-                    WcmContentController.showContent(this, content)
-                } else {
-                    response.sendError 404, "No content found for this URI"
-                    return null
+                        if (content) {
+                            response.setDateHeader('Last-Modified', (content.changedOn ?: content.createdOn).time )
+                    
+                            println "In ETag closure, with content"
+                            cache validFor: 1, shared:true  // 1 second caching, just makes sure some OK headers are sent for proxies
+                            WcmContentController.showContent(this, content)
+                        } else {
+                            println "In ETag closure, no content"
+                            response.sendError 404, "No content found for this URI"
+                            return null
+                        }
+                    }
                 }
             } else {
                 response.sendError 404, "No space specified"
