@@ -42,7 +42,7 @@ class WcmContentController {
     
     /** 
      * Do the full default render pipeline on the supplied content instance.
-     * NOTE: Only this exact instance will be rendered, so it must be pre-resolved if it is a WcmVirtualContent node
+     * NOTE: Only this exact instance will be rendered, `so it must be pre-resolved if it is a WcmVirtualContent node
      * 
      * @todo Should we move this to ContentRepo service? Still requires a delegate that has all controller-style methods
      * but could be reusable in a non-request context e.g. jobs that produce PDFs or sending HTML emails from CMS

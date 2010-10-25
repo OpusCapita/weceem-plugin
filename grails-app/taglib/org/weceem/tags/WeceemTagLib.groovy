@@ -291,7 +291,7 @@ class WeceemTagLib {
     static DEFAULT_MENU_BODY = { args -> 
         def o = args.out
 
-        o << "<li class=\"${args.levelClassPrefix}${args.level} ${args.active ? activeClass : ''} ${args.first ? args.firstClass : ''} ${args.last ? args.lastClass : ''}\">"
+        o << "<li class=\"${args.levelClassPrefix}${args.level} ${args.active ? args.activeClass : ''} ${args.first ? args.firstClass : ''} ${args.last ? args.lastClass : ''}\">"
         o << link(node:args.node) {
             args.node.titleForMenu.encodeAsHTML() 
         } 
@@ -308,7 +308,9 @@ class WeceemTagLib {
      */
     def menu = { attrs, body ->
         def rootNodeSpecified = attrs.node ? true : false
+        println "RNS: ${rootNodeSpecified}"
         def node = attrs.node ?: request[WcmContentController.REQUEST_ATTRIBUTE_NODE]
+        println "Node: ${node}"
         def lineage = request[WcmContentController.REQUEST_ATTRIBUTE_PAGE].lineage
 
         def currentLevel = request['_weceem_menu_level'] == null ? 0 : request['_weceem_menu_level']
@@ -327,8 +329,8 @@ class WeceemTagLib {
             bodyToUse.delegate = delegate
         }
                 
-        // Where is the current request's page in this hierarchy
-        def activeNode = lineage ? lineage[currentLevel] : null
+        // Which node is considered "active"
+        def activeNode = attrs.activeNode ?: request[WcmContentController.REQUEST_ATTRIBUTE_NODE]
 
         def levelnodes
         def args = [
@@ -338,7 +340,7 @@ class WeceemTagLib {
         ]
             
         if (siblings) {
-            if ((currentLevel == 0) && !rootNodeSpecified) {
+            if ((currentLevel == 0) && (!rootNodeSpecified || node.parent == null)) {
                 if (log.debugEnabled) {
                     log.debug "Locating root nodes: ${args}"
                 }
@@ -381,7 +383,7 @@ class WeceemTagLib {
             
             def bodyargs = [
                 first:first,
-                active:n == activeNode,
+                active: (n.ident() == activeNode.ident()) || (lineage.find { it.ident() == n.ident() }),
                 custom:custom,
                 level:currentLevel,
                 last: last, 
