@@ -110,7 +110,7 @@ class WcmSynchronizationController {
         if (content && tokens.size() > 1) {
             if (content.space.name == tokens[0]) {
                 def file = grailsApplication.parentContext.getResource(
-                        "${WcmContentFile.DEFAULT_UPLOAD_DIR}/${params.path}").file
+                        "${WcmContentFile.uploadDir}/${params.path}").file
                 if (((content instanceof WcmContentDirectory) && file.directory)
                         || (content.class == WcmContentFile && file.file)) {
                     def dstPath = ''
@@ -126,14 +126,14 @@ class WcmSynchronizationController {
                     def srcDir = file.absolutePath.replace('\\', '/')
                     srcDir = srcDir.substring(0, srcDir.size() - file.name.size() - 1)
                     def dstDir = grailsApplication.parentContext.getResource(
-                            "${WcmContentFile.DEFAULT_UPLOAD_DIR}/${content.space.name}${dstPath}").file
+                            "${WcmContentFile.uploadDir}/${content.space.name}${dstPath}").file
                     if (srcDir != dstDir.absolutePath.replace('\\', '/')) {
                         FileUtils.moveToDirectory file, dstDir, true
                     }
                     def src = grailsApplication.parentContext.getResource(
-                            "${WcmContentFile.DEFAULT_UPLOAD_DIR}/${content.space.name}${dstPath}/${file.name}").file
+                            "${WcmContentFile.uploadDir}/${content.space.name}${dstPath}/${file.name}").file
                     def dst = grailsApplication.parentContext.getResource(
-                            "${WcmContentFile.DEFAULT_UPLOAD_DIR}/${content.space.name}${dstPath}/${content.title}").file
+                            "${WcmContentFile.uploadDir}/${content.space.name}${dstPath}/${content.title}").file
                     src.renameTo(dst)
                     content.save()
                     render([success: true] as JSON)

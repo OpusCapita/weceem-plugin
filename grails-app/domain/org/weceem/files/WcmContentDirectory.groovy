@@ -35,13 +35,13 @@ class WcmContentDirectory extends WcmContentFile {
         if (parentContent && (parentContent instanceof WcmContentDirectory)) {
             def path = getPathTo(parentContent)
             def p = ServletContextHolder.servletContext.getRealPath(
-                "/${WcmContentFile.DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}${path}/${title}")
+                "/${WcmContentFile.uploadDir}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}${path}/${title}")
             log.debug "Creating directory path [$p]"
             f = new File(p)
             def r = f.mkdirs()
         } else {
             def p = ServletContextHolder.servletContext.getRealPath(
-                "/${DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}/${title}")
+                "/${uploadDir}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}/${title}")
             log.debug "Creating directory path [$p]"
             f = new File(p)
             def r = f.mkdirs()
@@ -71,7 +71,7 @@ class WcmContentDirectory extends WcmContentFile {
     Boolean deleteContent() {
         def path = getPathTo(this.parent)
         def file = new File(ServletContextHolder.servletContext.getRealPath(
-                "/${DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}${path}/${title}"))
+                "/${uploadDir}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}${path}/${title}"))
         if (!file.exists()) return true
         if (FileUtils.deleteQuietly(file)) {
             def childrenList = new ArrayList(this.children)

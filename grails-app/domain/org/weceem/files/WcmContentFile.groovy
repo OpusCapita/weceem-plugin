@@ -4,6 +4,7 @@ import org.springframework.web.multipart.MultipartFile
 import org.apache.commons.io.FileUtils
 
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 import org.weceem.content.*
 
@@ -21,7 +22,10 @@ class WcmContentFile extends WcmContent {
 
     static final String EMPTY_ALIAS_URI = "_ROOT"
     
-    static final String DEFAULT_UPLOAD_DIR = 'WeceemFiles'
+    static String getUploadDir() {
+        def d = ConfigurationHolder.config.weceem.upload.dir
+        return d instanceof String ? d : "TESTDATA"
+    }
 
     // @todo This needs to be configurable
     static final MIME_TYPES = [
@@ -137,10 +141,10 @@ class WcmContentFile extends WcmContent {
             path = getPathTo(parentContent)
         }
         new File(ServletContextHolder.servletContext.getRealPath(
-                "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}${path}")).mkdirs()
+                "/${uploadDir}/${space.makeUploadName()}${path}")).mkdirs()
         try {
             def f = new File(ServletContextHolder.servletContext.getRealPath(
-                "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}${path}/${uploadedFile.originalFilename}"))
+                "/${uploadDir}/${space.makeUploadName()}${path}/${uploadedFile.originalFilename}"))
             uploadedFile.transferTo(f)
             fileMimeType = uploadedFile.contentType ?: WcmContentFile.getDefaultMimeType(uploadedFile.originalFilename)
             fileSize = f.length()
@@ -158,9 +162,9 @@ class WcmContentFile extends WcmContent {
             path = getPathTo(parent)
         }
         def oldFile = new File(ServletContextHolder.servletContext.getRealPath(
-                "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}${path}/${oldTitle}"))
+                "/${uploadDir}/${space.makeUploadName()}${path}/${oldTitle}"))
         def newFile = new File(ServletContextHolder.servletContext.getRealPath(
-                "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}${path}/${title}"))
+                "/${uploadDir}/${space.makeUploadName()}${path}/${title}"))
         oldFile.renameTo(newFile)
         createAliasURI(this.parent)
     }
@@ -189,9 +193,9 @@ class WcmContentFile extends WcmContent {
             
             if (srcPath || dstPath) {
                 def file = new File(ServletContextHolder.servletContext.getRealPath(
-                        "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/${srcPath}"))
+                        "/${uploadDir}/${space.makeUploadName()}/${srcPath}"))
                 def targetDir = new File(ServletContextHolder.servletContext.getRealPath(
-                        "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/${dstPath}"))
+                        "/${uploadDir}/${space.makeUploadName()}/${dstPath}"))
                 log.info "Moving file ${file} to ${targetDir}"
                 try {
                     FileUtils.moveToDirectory file, targetDir, true
@@ -218,7 +222,7 @@ class WcmContentFile extends WcmContent {
         }
 
         def file = new File(ServletContextHolder.servletContext.getRealPath(
-                "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}${path}/${title}"))
+                "/${uploadDir}/${space.makeUploadName()}${path}/${title}"))
         if (!file.exists()) return true
         return FileUtils.deleteQuietly(file)
     }
@@ -259,7 +263,7 @@ class WcmContentFile extends WcmContent {
      */
     public String toResourcePath() {
         def path = toRelativePath()
-        return "/${DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}${path}"
+        return "/${uploadDir}/${space.makeUploadName()}${path}"
     }
     
     /** 

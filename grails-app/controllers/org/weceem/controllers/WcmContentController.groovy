@@ -160,32 +160,26 @@ class WcmContentController {
                 if (log.debugEnabled) {
                     log.debug "Content after resolving virtual content for uri: ${uri} is: ${content?.dump()}"
                 }
-            
+                
                 withCacheHeaders { 
                     etag {
-                        def et = content.version.encodeAsSHA1();
-                        println "Etag is: "+et
-                        return et
+                        content ? "${content.ident()}:${content.version}".encodeAsSHA1() : null
                     }
                     
                     lastModified {
-                        println "In ETag lastmod closure"
-                        (content.changedOn ?: content.createdOn)
+                        content ? (content.changedOn ?: content.createdOn) : null
                     }
                     
                     generate {
-                        println "In ETag generate closure"
                         def activeUser = wcmSecurityService.userName
                         request[REQUEST_ATTRIBUTE_USER] = activeUser
             
                         if (content) {
-                            response.setDateHeader('Last-Modified', (content.changedOn ?: content.createdOn).time )
+                            lastModified (content.changedOn ?: content.createdOn)
                     
-                            println "In ETag closure, with content"
                             cache validFor: 1, shared:true  // 1 second caching, just makes sure some OK headers are sent for proxies
                             WcmContentController.showContent(this, content)
                         } else {
-                            println "In ETag closure, no content"
                             response.sendError 404, "No content found for this URI"
                             return null
                         }

@@ -195,7 +195,7 @@ class WcmContentRepositoryService implements InitializingBean {
             if (s.save()) {
                 // Create the filesystem folder for the space
                 def spaceDir = grailsApplication.parentContext.getResource(
-                    "${WcmContentFile.DEFAULT_UPLOAD_DIR}/${s.makeUploadName()}").file
+                    "${WcmContentFile.uploadDir}/${s.makeUploadName()}").file
                 if (!spaceDir.exists()) {
                     spaceDir.mkdirs()
                 }
@@ -854,10 +854,10 @@ class WcmContentRepositoryService implements InitializingBean {
             hackedBindData(space, params)
             if (!space.hasErrors() && space.save()) {
                 def oldFile = new File(ServletContextHolder.servletContext.getRealPath(
-                        "/${WcmContentFile.DEFAULT_UPLOAD_DIR}/${oldAliasURI}"))
+                        "/${WcmContentFile.uploadDir}/${oldAliasURI}"))
                 if (oldFile.exists()) {
                     def newFile = new File(ServletContextHolder.servletContext.getRealPath(
-                        "/${WcmContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}"))
+                        "/${WcmContentFile.uploadDir}/${space.makeUploadName()}"))
                     oldFile.renameTo(newFile)
                 }
                 return [space: space]
@@ -1429,7 +1429,7 @@ class WcmContentRepositoryService implements InitializingBean {
         def existingFiles = new TreeSet()
         def createdContent = []
         def spaceDir = grailsApplication.parentContext.getResource(
-                "${WcmContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}").file
+                "${WcmContentFile.uploadDir}/${space.makeUploadName()}").file
         if (!spaceDir.exists()) spaceDir.mkdirs()
         spaceDir.eachFileRecurse {file ->
             def relativePath = file.absolutePath.substring(
@@ -1476,7 +1476,7 @@ class WcmContentRepositoryService implements InitializingBean {
             parents.eachWithIndex(){ obj, i ->
                 def parentPath = "${parents[0..i].join('/')}"
                 def file = grailsApplication.parentContext.getResource(
-                        "${WcmContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/${parentPath}").file
+                        "${WcmContentFile.uploadDir}/${space.makeUploadName()}/${parentPath}").file
                 content = findContentForPath(parentPath, space)?.content
                 if (!content){
                     if (file.isDirectory()){

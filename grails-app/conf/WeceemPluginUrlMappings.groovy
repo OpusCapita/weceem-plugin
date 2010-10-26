@@ -1,5 +1,7 @@
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
+import org.weceem.files.WcmContentFile
+
 class WeceemPluginUrlMappings {
     static CONTENT_PREFIX = ((ConfigurationHolder.config.weceem.content.prefix instanceof String) ? 
         ConfigurationHolder.config.weceem.content.prefix : '')
@@ -14,7 +16,7 @@ class WeceemPluginUrlMappings {
         "plugins/",
         "WEB-INF/",
         "ck",
-        "WeceemFiles/",
+        WcmContentFile.uploadDir,
         // Admin links
         "${WeceemPluginUrlMappings.ADMIN_PREFIX}/",
         "${WeceemPluginUrlMappings.TOOLS_PREFIX}/"
@@ -65,6 +67,7 @@ class WeceemPluginUrlMappings {
         // This is tricky
         def contentURI = (WeceemPluginUrlMappings.CONTENT_PREFIX ? '/' : '')+"${WeceemPluginUrlMappings.CONTENT_PREFIX}/$uri**"
         
+        println "URL MAPPINGS - FORBIDDEN: ${WeceemPluginUrlMappings.FORBIDDEN_SPACE_URIS}"
         invokeMethod(contentURI, {
             controller = "wcmContent"
             action = "show"

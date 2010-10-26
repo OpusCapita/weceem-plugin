@@ -575,7 +575,7 @@ class WeceemTagLib {
         def aliasURI = space.aliasURI ?: WcmContentFile.EMPTY_ALIAS_URI
         
         // Don't specify plugin:'weceem' here!
-        out << g.resource(dir:"${WcmContentFile.DEFAULT_UPLOAD_DIR}/${aliasURI}", file:attrs[ATTR_PATH])
+        out << g.resource(dir:"${WcmContentFile.uploadDir}/${aliasURI}", file:attrs[ATTR_PATH])
     }
 
     def humanDate = { attrs ->

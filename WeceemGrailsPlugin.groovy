@@ -19,7 +19,7 @@ class WeceemGrailsPlugin {
         beanFields:'1.0-RC3 > *',
         blueprint:'0.9.1.1 > *',
         jqueryUi:'1.8.4.3 > *',
-        cacheHeaders:'1.1 > *',
+        cacheHeaders:'1.1.2 > *',
         taggable:'0.6.2 > *'
     ]
     def observe = ["hibernate", 'services']
@@ -27,7 +27,7 @@ class WeceemGrailsPlugin {
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
         "grails-app/views/error.gsp",
-        "web-app/${org.weceem.files.WcmContentFile.DEFAULT_UPLOAD_DIR}/**/*"
+        "web-app/${org.weceem.files.WcmContentFile.uploadDir}/**/*"
     ]
 
     // TODO Fill in these fields
@@ -84,7 +84,7 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     def configureCKEditor(){
         def settings = ConfigurationHolder.config
         def co = new ConfigObject()
-        co.ckeditor.upload.basedir = "/${org.weceem.files.WcmContentFile.DEFAULT_UPLOAD_DIR}/"
+        co.ckeditor.upload.basedir = "/${org.weceem.files.WcmContentFile.uploadDir}/"
         co.ckeditor.upload.overwrite = false
         co.ckeditor.defaultFileBrowser = "ofm"
         co.ckeditor.upload.image.browser = true

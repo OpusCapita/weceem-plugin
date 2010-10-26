@@ -30,6 +30,8 @@ log4j = {
 environments {
     development {
         grails.serverURL = 'http://localhost:8080/weceem'
+        
+        weceem.upload.dir="/tmp/weceem/bullshit"
     }
     
     test {

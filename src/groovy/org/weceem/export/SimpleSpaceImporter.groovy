@@ -79,7 +79,7 @@ class SimpleSpaceImporter implements SpaceImporter {
             }
         }
         def filesDir = new File(ApplicationHolder.application.mainContext.servletContext.getRealPath(
-                "/${WcmContentFile.DEFAULT_UPLOAD_DIR}"))
+                "/${WcmContentFile.uploadDir}"))
         ant.copy(todir: "${filesDir.absolutePath}/${space.makeUploadName()}", failonerror: false) {
             fileset(dir: "${tmpDir.absolutePath}/files")
         }

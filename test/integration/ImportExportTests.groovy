@@ -62,12 +62,12 @@ class ImportExportTests extends GroovyTestCase
 
         // check unpacked files
         assertTrue new File(servletContext.getRealPath(
-                "/${WcmContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/test_dir")).exists()
+                "/${WcmContentFile.uploadDir}/${space.makeUploadName()}/test_dir")).exists()
         assertTrue new File(servletContext.getRealPath(
-                "/${WcmContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/test_dir/test_file.txt")).exists()
+                "/${WcmContentFile.uploadDir}/${space.makeUploadName()}/test_dir/test_file.txt")).exists()
 
         def ant = new AntBuilder()
-        ant.delete(dir: servletContext.getRealPath("/${WcmContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}"))
+        ant.delete(dir: servletContext.getRealPath("/${WcmContentFile.uploadDir}/${space.makeUploadName()}"))
     }
 */    
     void testSimpleImport() {
@@ -96,12 +96,12 @@ class ImportExportTests extends GroovyTestCase
 
         // check unpacked files
         assertTrue new File(servletContext.getRealPath(
-                "/${WcmContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/test_dir")).exists()
+                "/${WcmContentFile.uploadDir}/${space.makeUploadName()}/test_dir")).exists()
         assertTrue new File(servletContext.getRealPath(
-                "/${WcmContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/test_dir/test_file.txt")).exists()
+                "/${WcmContentFile.uploadDir}/${space.makeUploadName()}/test_dir/test_file.txt")).exists()
 
         def ant = new AntBuilder()
-        ant.delete(dir: servletContext.getRealPath("/${WcmContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}"))
+        ant.delete(dir: servletContext.getRealPath("/${WcmContentFile.uploadDir}/${space.makeUploadName()}"))
     }
     
     void testSimpleExport() {

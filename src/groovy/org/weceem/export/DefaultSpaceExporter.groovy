@@ -17,7 +17,7 @@ class DefaultSpaceExporter implements SpaceExporter {
     File execute(WcmSpace space) {
         def ts = new SimpleDateFormat('yyMMddHHmmssSSS').format(new Date())
         def filesDir = new File(ApplicationHolder.application.mainContext.servletContext.getRealPath(
-                "/${WcmContentFile.DEFAULT_UPLOAD_DIR}"))
+                "/${WcmContentFile.uploadDir}"))
 
         def baseDir = new File("${filesDir.absolutePath}/export-${ts}")
         baseDir.mkdir()
