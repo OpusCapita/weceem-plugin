@@ -143,8 +143,7 @@ class RepositoryControllerTests extends GroovyTestCase {
 
         // check created directory (also on the file system)
         assert WcmContentDirectory.findByTitleAndSpace('sample_dir', spaceA)
-        def dir = new File(servletContext.getRealPath(
-                "/${WcmContentFile.uploadDir}/jcatalog/sample_dir"))
+        def dir = org.weceem.services.WcmContentRepositoryService.getUploadPath(spaceA, 'sample_dir')
         assert dir.exists()
         assert dir.directory
 
@@ -168,8 +167,7 @@ class RepositoryControllerTests extends GroovyTestCase {
         assertNotNull testDir.children?.find { it.id == loadedDir.id }
         
         // Now check filesystem dir exists
-        def dir = new File(servletContext.getRealPath(
-                "/${WcmContentFile.uploadDir}/jcatalog/test_dir/sample_dir"))
+        def dir = org.weceem.services.WcmContentRepositoryService.getUploadPath(spaceA, 'test_dir/sample_dir')
         assert dir.exists()
         assert dir.directory
 
@@ -190,8 +188,7 @@ class RepositoryControllerTests extends GroovyTestCase {
         assertNotNull parent.children?.find { it.id == loadedDir.id }
         
         // Check directory created correctly
-        def dir = new File(servletContext.getRealPath(
-                "/${WcmContentFile.uploadDir}/jcatalog/sample_dir"))
+        def dir = org.weceem.services.WcmContentRepositoryService.getUploadPath(spaceA, 'sample_dir')
         assert dir.exists()
         assert dir.directory
 

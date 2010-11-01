@@ -380,15 +380,11 @@ class WcmContentController {
         return renderGSPContent(template, [node: content])
     }
     
-    def renderFile(File f) {
-        throw new RuntimeException("Not implemented yet")
-    }
-    
     /**
-     * Use the servlet container to return the file - more optimal
+     * Render a file
      */
-    def renderAppResource(String path) {
-        request.getRequestDispatcher(path).forward(request, response)
+    def renderFile(File f) {
+        response.outputStream << f.newInputStream()
         return null
     }
     

@@ -20,13 +20,6 @@ class WcmContentFile extends WcmContent {
         only = ['title', 'status']
     }
 
-    static final String EMPTY_ALIAS_URI = "_ROOT"
-    
-    static String getUploadDir() {
-        def d = ConfigurationHolder.config.weceem.upload.dir
-        return d instanceof String ? d : "TESTDATA"
-    }
-
     // @todo This needs to be configurable
     static final MIME_TYPES = [
         html: 'text/html',
@@ -118,7 +111,7 @@ class WcmContentFile extends WcmContent {
     static handleRequest = { content ->
         def mt = content.fileMimeType ?: getDefaultMimeType(content.aliasURI)
         response.setContentType(mt)
-        renderAppResource(content.toResourcePath())
+        renderFile(content.toFile())
     }
     
     Boolean canHaveChildren() { false }
@@ -140,11 +133,9 @@ class WcmContentFile extends WcmContent {
             assert parentContent.save()
             path = getPathTo(parentContent)
         }
-        new File(ServletContextHolder.servletContext.getRealPath(
-                "/${uploadDir}/${space.makeUploadName()}${path}")).mkdirs()
+        org.weceem.services.WcmContentRepositoryService.getUploadPath(space, path).mkdirs()
         try {
-            def f = new File(ServletContextHolder.servletContext.getRealPath(
-                "/${uploadDir}/${space.makeUploadName()}${path}/${uploadedFile.originalFilename}"))
+            def f = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, "$path/${uploadedFile.originalFilename}")
             uploadedFile.transferTo(f)
             fileMimeType = uploadedFile.contentType ?: WcmContentFile.getDefaultMimeType(uploadedFile.originalFilename)
             fileSize = f.length()
@@ -161,10 +152,8 @@ class WcmContentFile extends WcmContent {
         if (parent && (parent instanceof WcmContentDirectory)) {
             path = getPathTo(parent)
         }
-        def oldFile = new File(ServletContextHolder.servletContext.getRealPath(
-                "/${uploadDir}/${space.makeUploadName()}${path}/${oldTitle}"))
-        def newFile = new File(ServletContextHolder.servletContext.getRealPath(
-                "/${uploadDir}/${space.makeUploadName()}${path}/${title}"))
+        def oldFile = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, "${path}/${oldTitle}")
+        def newFile = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, "${path}/${title}")
         oldFile.renameTo(newFile)
         createAliasURI(this.parent)
     }
@@ -192,10 +181,8 @@ class WcmContentFile extends WcmContent {
             srcPath = getPathTo(this)
             
             if (srcPath || dstPath) {
-                def file = new File(ServletContextHolder.servletContext.getRealPath(
-                        "/${uploadDir}/${space.makeUploadName()}/${srcPath}"))
-                def targetDir = new File(ServletContextHolder.servletContext.getRealPath(
-                        "/${uploadDir}/${space.makeUploadName()}/${dstPath}"))
+                def file = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, srcPath)
+                def targetDir = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, dstPath)
                 log.info "Moving file ${file} to ${targetDir}"
                 try {
                     FileUtils.moveToDirectory file, targetDir, true
@@ -221,8 +208,7 @@ class WcmContentFile extends WcmContent {
             assert parentContent.save()
         }
 
-        def file = new File(ServletContextHolder.servletContext.getRealPath(
-                "/${uploadDir}/${space.makeUploadName()}${path}/${title}"))
+        def file = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, "${path}/${title}")
         if (!file.exists()) return true
         return FileUtils.deleteQuietly(file)
     }
@@ -256,20 +242,10 @@ class WcmContentFile extends WcmContent {
         return getPathTo(this)
     }
     
-    /**
-     * Get the resource path IF and only if it is in the web-app folder.
-     * @todo need to remove this later when files are not under webapp, we will have to just 
-     * use File and copy the response to the user
-     */
-    public String toResourcePath() {
-        def path = toRelativePath()
-        return "/${uploadDir}/${space.makeUploadName()}${path}"
-    }
-    
     /** 
      * Get filesystem path to file, IF and only if it is in the web-app folder.
      */
     File toFile() {
-        new File(ServletContextHolder.servletContext.getRealPath(toResourcePath()))
+        org.weceem.services.WcmContentRepositoryService.getUploadPath(space, toRelativePath())
     }
 }

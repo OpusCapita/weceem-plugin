@@ -27,7 +27,7 @@ class WeceemGrailsPlugin {
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
         "grails-app/views/error.gsp",
-        "web-app/${org.weceem.files.WcmContentFile.uploadDir}/**/*"
+        "web-app/WeceemFiles/**/*"
     ]
 
     // TODO Fill in these fields
@@ -74,17 +74,43 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
                 applicationContext.navigationService.registerItem( 'weceem.plugin.admin', item)
         }
 
-        applicationContext.wcmEditorService.cacheEditorInfo()
-        configureCKEditor()
+        def repSvc = applicationContext.wcmContentRepositoryService
+        def uploadDir = ConfigurationHolder.config.weceem.upload.dir
+        uploadDir = uploadDir instanceof String ? uploadDir : "WeceemFiles"
 
-        applicationContext.wcmContentRepositoryService.createDefaultStatuses()
-        applicationContext.wcmContentRepositoryService.createDefaultSpace()
+        if (!uploadDir.startsWith('file:')) {
+            repSvc.uploadInWebapp = true
+            repSvc.uploadDir = applicationContext.getResource("/$uploadDir/").file
+            repSvc.uploadUrl = "/${uploadDir}/"
+        } else {
+            def f = new File(new URI(uploadDir))
+            if (!f.exists()) {
+                def ok = f.mkdirs()
+                if (!ok) {
+                    throw new RuntimeException("Cannot start Weceem - upload directory is set to [${uploadDir}] but cannot make the directory and it doesn't exist")
+                }
+            }
+            repSvc.uploadInWebapp = false
+            repSvc.uploadDir = f
+            repSvc.uploadUrl = '/uploads/'
+        }
+
+        applicationContext.wcmEditorService.cacheEditorInfo()
+        configureCKEditor(repSvc.uploadInWebapp, repSvc.uploadDir, repSvc.uploadUrl)
+
+        repSvc.createDefaultStatuses()
+        repSvc.createDefaultSpace()
     }
 
-    def configureCKEditor(){
+    def configureCKEditor(uploadInWebapp, dir, url){
         def settings = ConfigurationHolder.config
         def co = new ConfigObject()
-        co.ckeditor.upload.basedir = "/${org.weceem.files.WcmContentFile.uploadDir}/"
+        if (uploadInWebapp) {
+            co.ckeditor.upload.basedir = dir
+        } else {
+            co.ckeditor.upload.basedir = dir
+            co.ckeditor.upload.baseurl = url
+        }
         co.ckeditor.upload.overwrite = false
         co.ckeditor.defaultFileBrowser = "ofm"
         co.ckeditor.upload.image.browser = true

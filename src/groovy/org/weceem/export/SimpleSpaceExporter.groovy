@@ -5,6 +5,8 @@ import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 import groovy.xml.MarkupBuilder
 
+import org.weceem.services.WcmContentRepositoryService
+
 import org.weceem.content.*
 
 import org.weceem.files.*
@@ -18,14 +20,14 @@ class SimpleSpaceExporter implements SpaceExporter {
     
     File execute(WcmSpace spc) {
         def ts = new SimpleDateFormat('yyMMddHHmmssSSS').format(new Date())
-        def filesDir = new File(ApplicationHolder.application.mainContext.servletContext.getRealPath(
-                "/${WcmContentFile.uploadDir}"))
+        def filesDir = new File( System.getProperty('java.io.tmpdir'), "weceem-temp"+System.nanoTime() )
+        filesDir.mkdirs()
 
-        def baseDir = new File("${filesDir.absolutePath}/export-${ts}")
-        baseDir.mkdir()
+        def baseDir = new File(filesDir, "export-${ts}")
+        baseDir.mkdirs()
 
-        def file = new File("${baseDir.absolutePath}/content.xml")
-        
+        def file = new File(baseDir, "content.xml")
+                
         def writer = new StringWriter()
         def xml = new MarkupBuilder(writer)
         
@@ -73,7 +75,7 @@ class SimpleSpaceExporter implements SpaceExporter {
         def ant = new AntBuilder()
 
         ant.copy(todir: "${baseDir.absolutePath}/files", failonerror: false) {
-            fileset(dir: "${filesDir.absolutePath}/${spc.makeUploadName()}")
+            fileset(dir: WcmContentRepositoryService.getUploadPath(spc))
         }
 
         def tmp = File.createTempFile("export", ".zip")

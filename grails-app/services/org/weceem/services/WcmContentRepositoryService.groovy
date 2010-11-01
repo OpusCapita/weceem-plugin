@@ -29,6 +29,8 @@ import org.codehaus.groovy.grails.web.context.ServletContextHolder
  */
 class WcmContentRepositoryService implements InitializingBean {
 
+    static final String EMPTY_ALIAS_URI = "_ROOT"
+    
     static final CONTENT_CLASS = WcmContent.class.name
     static final STATUS_ANY_PUBLISHED = 'published'
     
@@ -49,6 +51,10 @@ class WcmContentRepositoryService implements InitializingBean {
     
     def archivedStatusCode
     def unmoderatedStatusCode
+    
+    static uploadDir
+    static uploadUrl
+    static uploadInWebapp
     
     static DEFAULT_ARCHIVED_STATUS_CODE = 500
     static DEFAULT_UNMODERATED_STATUS_CODE = 150
@@ -73,6 +79,28 @@ class WcmContentRepositoryService implements InitializingBean {
             ConfigurationHolder.config.weceem.archived.status : DEFAULT_ARCHIVED_STATUS_CODE
         unmoderatedStatusCode = ConfigurationHolder.config.weceem.unmoderated.status instanceof Number ? 
             ConfigurationHolder.config.weceem.unmoderated.status : DEFAULT_UNMODERATED_STATUS_CODE
+    }
+    
+    /**
+     * Workaround for replaceAll problems with \ in Java
+     */
+    static String makeFileSystemPathFromURI(uri) {
+        def chars = uri.chars
+        chars.eachWithIndex { c, i ->
+            if (c == '/') {
+                chars[i] = File.separatorChar
+            }
+        }
+        new String(chars)
+    }
+
+    static File getUploadPath(WcmSpace space, path = null) {
+        if (File.separatorChar != '/') {
+            path = makeFileSystemPathFromURI(path)
+        }
+        def spcf = new File(WcmContentRepositoryService.uploadDir, 
+            space.makeUploadName() ?: EMPTY_ALIAS_URI)
+        return path ? new File(spcf, path) : spcf
     }
     
     void createDefaultSpace() {
@@ -194,8 +222,7 @@ class WcmContentRepositoryService implements InitializingBean {
             s = new WcmSpace(params)
             if (s.save()) {
                 // Create the filesystem folder for the space
-                def spaceDir = grailsApplication.parentContext.getResource(
-                    "${WcmContentFile.uploadDir}/${s.makeUploadName()}").file
+                def spaceDir = getUploadPath(s)
                 if (!spaceDir.exists()) {
                     spaceDir.mkdirs()
                 }
@@ -853,11 +880,9 @@ class WcmContentRepositoryService implements InitializingBean {
             def oldAliasURI = space.makeUploadName()
             hackedBindData(space, params)
             if (!space.hasErrors() && space.save()) {
-                def oldFile = new File(ServletContextHolder.servletContext.getRealPath(
-                        "/${WcmContentFile.uploadDir}/${oldAliasURI}"))
+                def oldFile = WcmContentRepositoryService.getUploadPath(space, oldAliasURI)
                 if (oldFile.exists()) {
-                    def newFile = new File(ServletContextHolder.servletContext.getRealPath(
-                        "/${WcmContentFile.uploadDir}/${space.makeUploadName()}"))
+                    def newFile = WcmContentRepositoryService.getUploadPath(space)
                     oldFile.renameTo(newFile)
                 }
                 return [space: space]
@@ -1428,8 +1453,7 @@ class WcmContentRepositoryService implements InitializingBean {
 
         def existingFiles = new TreeSet()
         def createdContent = []
-        def spaceDir = grailsApplication.parentContext.getResource(
-                "${WcmContentFile.uploadDir}/${space.makeUploadName()}").file
+        def spaceDir = WcmContentRepositoryService.getUploadPath(space.makeUploadName)
         if (!spaceDir.exists()) spaceDir.mkdirs()
         spaceDir.eachFileRecurse {file ->
             def relativePath = file.absolutePath.substring(
@@ -1475,8 +1499,7 @@ class WcmContentRepositoryService implements InitializingBean {
             def createdContent = []
             parents.eachWithIndex(){ obj, i ->
                 def parentPath = "${parents[0..i].join('/')}"
-                def file = grailsApplication.parentContext.getResource(
-                        "${WcmContentFile.uploadDir}/${space.makeUploadName()}/${parentPath}").file
+                def file = WcmContentRepositoryService.getUploadPath(space, parentPath)
                 content = findContentForPath(parentPath, space)?.content
                 if (!content){
                     if (file.isDirectory()){

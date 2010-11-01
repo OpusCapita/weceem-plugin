@@ -31,23 +31,18 @@ class WcmContentDirectory extends WcmContentFile {
     }
 
     Boolean create(WcmContent parentContent) {
-        def f
+        def p
         if (parentContent && (parentContent instanceof WcmContentDirectory)) {
             def path = getPathTo(parentContent)
-            def p = ServletContextHolder.servletContext.getRealPath(
-                "/${WcmContentFile.uploadDir}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}${path}/${title}")
+            p = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, "/$path/$title")
             log.debug "Creating directory path [$p]"
-            f = new File(p)
-            def r = f.mkdirs()
+            p.mkdirs()
         } else {
-            def p = ServletContextHolder.servletContext.getRealPath(
-                "/${uploadDir}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}/${title}")
+            p = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, title)
             log.debug "Creating directory path [$p]"
-            f = new File(p)
-            def r = f.mkdirs()
-            assert r
+            p.mkdirs()
         }
-        return f.exists() && f.isDirectory()
+        return p.exists() && p.isDirectory()
     }
 
     static editors = {
@@ -70,8 +65,7 @@ class WcmContentDirectory extends WcmContentFile {
     // we need to delete all content children here (recursively)
     Boolean deleteContent() {
         def path = getPathTo(this.parent)
-        def file = new File(ServletContextHolder.servletContext.getRealPath(
-                "/${uploadDir}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}${path}/${title}"))
+        def file = org.weceem.services.WcmContentRepositoryService.getUploadPath(space.aliasURI, "$path/$title")
         if (!file.exists()) return true
         if (FileUtils.deleteQuietly(file)) {
             def childrenList = new ArrayList(this.children)

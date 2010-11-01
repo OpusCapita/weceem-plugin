@@ -109,8 +109,7 @@ class WcmSynchronizationController {
         List tokens = params.path.replace('\\', '/').split('/')
         if (content && tokens.size() > 1) {
             if (content.space.name == tokens[0]) {
-                def file = grailsApplication.parentContext.getResource(
-                        "${WcmContentFile.uploadDir}/${params.path}").file
+                def file = WcmContentRepositoryService.getUploadPath(content.space, params.path)
                 if (((content instanceof WcmContentDirectory) && file.directory)
                         || (content.class == WcmContentFile && file.file)) {
                     def dstPath = ''
@@ -125,15 +124,12 @@ class WcmSynchronizationController {
                     }
                     def srcDir = file.absolutePath.replace('\\', '/')
                     srcDir = srcDir.substring(0, srcDir.size() - file.name.size() - 1)
-                    def dstDir = grailsApplication.parentContext.getResource(
-                            "${WcmContentFile.uploadDir}/${content.space.name}${dstPath}").file
+                    def dstDir =  WcmContentRepositoryService.getUploadPath(content.space, dstPath)
                     if (srcDir != dstDir.absolutePath.replace('\\', '/')) {
                         FileUtils.moveToDirectory file, dstDir, true
                     }
-                    def src = grailsApplication.parentContext.getResource(
-                            "${WcmContentFile.uploadDir}/${content.space.name}${dstPath}/${file.name}").file
-                    def dst = grailsApplication.parentContext.getResource(
-                            "${WcmContentFile.uploadDir}/${content.space.name}${dstPath}/${content.title}").file
+                    def src = WcmContentRepositoryService.getUploadPath(content.space,"$dstPath/${file.name}")
+                    def dst = WcmContentRepositoryService.getUploadPath(content.space,"$dstPath/${content.title}")
                     src.renameTo(dst)
                     content.save()
                     render([success: true] as JSON)

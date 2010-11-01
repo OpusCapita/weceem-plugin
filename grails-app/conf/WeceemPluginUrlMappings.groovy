@@ -16,7 +16,8 @@ class WeceemPluginUrlMappings {
         "plugins/",
         "WEB-INF/",
         "ck",
-        WcmContentFile.uploadDir,
+        //org.weceem.services.WcmContentRepositoryService.uploadDir,
+        'uploads',
         // Admin links
         "${WeceemPluginUrlMappings.ADMIN_PREFIX}/",
         "${WeceemPluginUrlMappings.TOOLS_PREFIX}/"

@@ -23,11 +23,12 @@ class WcmImportExportService {
                 try {
                     grailsApplication.mainContext.wcmContentRepositoryService.deleteSpaceContent(space)
                     grailsApplication.mainContext.wcmContentRepositoryService.invalidateCachingForSpace(space)
-                    getImporters()."${importerName}"?.execute(space, file)
+                    return getImporters()."${importerName}"?.execute(space, file)
                 } catch (Throwable t) {
                     txn.setRollbackOnly()
                     t.printStackTrace()
                     log.error(t)
+                    return null
                 }
             }
         } finally {
@@ -40,11 +41,12 @@ class WcmImportExportService {
     def exportSpace(WcmSpace space, String exporterName) {
         WcmContent.withTransaction { txn ->
             try {
-                getExporters()."${exporterName}"?.execute(space)
+                return getExporters()."${exporterName}"?.execute(space)
             } catch (Throwable t) {
                 txn.setRollbackOnly()
                 t.printStackTrace()
                 log.error(t)
+                return null
             }
         }
     }
