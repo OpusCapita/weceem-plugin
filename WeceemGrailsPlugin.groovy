@@ -14,7 +14,7 @@ class WeceemGrailsPlugin {
         searchable:'0.5.5 > *', 
         quartz:'0.4.2 > *', 
         navigation:'1.1.1 > *',
-        ckeditor:'3.4.0.2 > *',
+        ckeditor:'3.4.1 > *',
         feeds:'1.5 > *',
         beanFields:'1.0-RC3 > *',
         blueprint:'0.9.1.1 > *',
@@ -23,6 +23,8 @@ class WeceemGrailsPlugin {
         taggable:'0.6.2 > *'
     ]
     def observe = ["hibernate", 'services']
+    
+    def loadAfter = ['ckeditor']
     
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
@@ -75,26 +77,7 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         }
 
         def repSvc = applicationContext.wcmContentRepositoryService
-        def uploadDir = ConfigurationHolder.config.weceem.upload.dir
-        uploadDir = uploadDir instanceof String ? uploadDir : "WeceemFiles"
-
-        if (!uploadDir.startsWith('file:')) {
-            repSvc.uploadInWebapp = true
-            repSvc.uploadDir = applicationContext.getResource("/$uploadDir/").file
-            repSvc.uploadUrl = "/${uploadDir}/"
-        } else {
-            def f = new File(new URI(uploadDir))
-            if (!f.exists()) {
-                def ok = f.mkdirs()
-                if (!ok) {
-                    throw new RuntimeException("Cannot start Weceem - upload directory is set to [${uploadDir}] but cannot make the directory and it doesn't exist")
-                }
-            }
-            repSvc.uploadInWebapp = false
-            repSvc.uploadDir = f
-            repSvc.uploadUrl = '/uploads/'
-        }
-
+        repSvc.loadConfig()
         applicationContext.wcmEditorService.cacheEditorInfo()
         configureCKEditor(repSvc.uploadInWebapp, repSvc.uploadDir, repSvc.uploadUrl)
 
@@ -106,10 +89,10 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         def settings = ConfigurationHolder.config
         def co = new ConfigObject()
         if (uploadInWebapp) {
-            co.ckeditor.upload.basedir = dir
+            co.ckeditor.upload.basedir = dir.toString()
         } else {
-            co.ckeditor.upload.basedir = dir
-            co.ckeditor.upload.baseurl = url
+            co.ckeditor.upload.basedir = dir.toString()
+            co.ckeditor.upload.baseurl = url.toString()
         }
         co.ckeditor.upload.overwrite = false
         co.ckeditor.defaultFileBrowser = "ofm"

@@ -9,8 +9,6 @@ import grails.util.Environment
 import org.codehaus.groovy.grails.web.metaclass.BindDynamicMethod
 import org.hibernate.exception.ConstraintViolationException
 
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
-
 import org.weceem.content.*
 
 //@todo design smell!
@@ -75,10 +73,12 @@ class WcmContentRepositoryService implements InitializingBean {
         gspClassCache = wcmCacheService.getCache(CACHE_NAME_GSP_CACHE)
         assert gspClassCache
 
-        archivedStatusCode = ConfigurationHolder.config.weceem.archived.status instanceof Number ? 
-            ConfigurationHolder.config.weceem.archived.status : DEFAULT_ARCHIVED_STATUS_CODE
-        unmoderatedStatusCode = ConfigurationHolder.config.weceem.unmoderated.status instanceof Number ? 
-            ConfigurationHolder.config.weceem.unmoderated.status : DEFAULT_UNMODERATED_STATUS_CODE
+        archivedStatusCode = grailsApplication.config.weceem.archived.status instanceof Number ? 
+            grailsApplication.config.weceem.archived.status : DEFAULT_ARCHIVED_STATUS_CODE
+        unmoderatedStatusCode = grailsApplication.config.weceem.unmoderated.status instanceof Number ? 
+            grailsApplication.config.weceem.unmoderated.status : DEFAULT_UNMODERATED_STATUS_CODE
+            
+        loadConfig()
     }
     
     /**
@@ -101,6 +101,29 @@ class WcmContentRepositoryService implements InitializingBean {
         def spcf = new File(WcmContentRepositoryService.uploadDir, 
             space.makeUploadName() ?: EMPTY_ALIAS_URI)
         return path ? new File(spcf, path) : spcf
+    }
+    
+    void loadConfig() {
+        def uploadDirConf = grailsApplication.config.weceem.upload.dir
+        uploadDirConf = (uploadDirConf instanceof String) && uploadDirConf ? uploadDirConf : "WeceemFiles"
+
+        if (!uploadDirConf.startsWith('file:')) {
+            uploadInWebapp = true
+            uploadDir = grailsApplication.mainContext.getResource("/$uploadDirConf/").file
+            uploadUrl = "/${uploadDirConf}/"
+        } else {
+            def f = new File(new URI(uploadDirConf))
+            if (!f.exists()) {
+                def ok = f.mkdirs()
+                if (!ok) {
+                    throw new RuntimeException("Cannot start Weceem - upload directory is set to [${uploadDirConf}] but cannot make the directory and it doesn't exist")
+                }
+            }
+            uploadInWebapp = false
+            uploadDir = f
+            uploadUrl = '/uploads/'
+        }
+        log.info "Weceem will use [${uploadDir}] as the directory for static uploaded files, and the url [${uploadUrl}] to serve them, files are inside webapp? [${uploadInWebapp}]"
     }
     
     void createDefaultSpace() {
@@ -1492,7 +1515,7 @@ class WcmContentRepositoryService implements InitializingBean {
         
         List tokens = path.replace('\\', '/').split('/')
         if (tokens.size() > 1) {
-            def space = WcmSpace.findByAliasURI((tokens[0] == WcmContentFile.EMPTY_ALIAS_URI) ? '' : tokens[0])
+            def space = WcmSpace.findByAliasURI((tokens[0] == EMPTY_ALIAS_URI) ? '' : tokens[0])
             def parents = tokens[1..(tokens.size() - 1)]
             def ancestor = null
             def content = null

@@ -15,6 +15,7 @@
 package org.weceem.content
 
 import org.weceem.files.*
+import org.weceem.services.*
 
 /**
  * WcmSpace class describes a user space.
@@ -46,6 +47,6 @@ class WcmSpace {
     }
     
     public String makeUploadName(){
-        return (aliasURI == "") ? WcmContentFile.EMPTY_ALIAS_URI : aliasURI
+        return (aliasURI == "") ? WcmContentRepositoryService.EMPTY_ALIAS_URI : aliasURI
     }
 }

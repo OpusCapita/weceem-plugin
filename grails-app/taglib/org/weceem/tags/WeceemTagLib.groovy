@@ -498,7 +498,7 @@ class WeceemTagLib {
             if (!contentInfo?.content) {
                 log.error ("Tag [wcm:createLink] cannot create a link to the content at path ${attrs[ATTR_PATH]} as "+
                     "there is no content node at that URI")
-                out << g.createLink(controller:'wcmContent', action:'notFound', params:[path:attrs.remove(ATTR_PATH)])
+                out << g.createLink(controller:'wcmContent', action:'notFound', params:[path:path])
                 return
             }
             content = contentInfo.content
@@ -568,14 +568,14 @@ class WeceemTagLib {
     
     def createLinkToFile = { attrs ->
         def space = attrs.space ? WcmSpace.findByAliasURI(attrs.space) : request[WcmContentController.REQUEST_ATTRIBUTE_SPACE]
-        if (!space) {throwTagError("Space ${attrs.space} not found")}
+        if (!space) { throwTagError("Space [${attrs.space}] not found") }
         if (!attrs[ATTR_PATH]) {
             throwTagError("Attribute [${ATTR_PATH}] must be specified, eg the path to the file: images/icon.png")
         }
-        def aliasURI = space.aliasURI ?: WcmContentFile.EMPTY_ALIAS_URI
+        def aliasURI = space.aliasURI ?: WcmContentRepositoryService.EMPTY_ALIAS_URI
         
         // Don't specify plugin:'weceem' here!
-        out << g.resource(dir:"${org.weceem.services.WcmContentRepositoryService.uploadUrl}/${aliasURI}", file:attrs[ATTR_PATH])
+        out << g.resource(dir:"${org.weceem.services.WcmContentRepositoryService.uploadUrl}${aliasURI}", file:attrs[ATTR_PATH])
     }
 
     def humanDate = { attrs ->
