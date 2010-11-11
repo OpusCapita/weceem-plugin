@@ -109,8 +109,8 @@ class WcmContentRepositoryService implements InitializingBean {
 
         if (!uploadDirConf.startsWith('file:')) {
             uploadInWebapp = true
-            uploadDir = grailsApplication.mainContext.getResource("/$uploadDirConf/").file
-            uploadUrl = "/${uploadDirConf}/"
+            uploadDir = grailsApplication.mainContext.getResource("$uploadDirConf").file
+            uploadUrl = uploadDirConf
         } else {
             def f = new File(new URI(uploadDirConf))
             if (!f.exists()) {

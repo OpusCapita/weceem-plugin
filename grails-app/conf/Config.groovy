@@ -31,7 +31,7 @@ environments {
     development {
         grails.serverURL = 'http://localhost:8080/weceem'
         
-        weceem.upload.dir="file:/tmp/weceem/testing"
+        weceem.upload.dir="/testing/"
     }
     
     test {
