@@ -24,7 +24,7 @@ class WeceemGrailsPlugin {
     ]
     def observe = ["hibernate", 'services']
     
-    def loadAfter = ['ckeditor']
+//    def loadAfter = ['ckeditor']
     
     // resources that are excluded from plugin packaging
     def pluginExcludes = [

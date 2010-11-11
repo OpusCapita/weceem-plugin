@@ -1,6 +1,5 @@
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
-
-import org.weceem.files.WcmContentFile
+import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 class WeceemPluginUrlMappings {
     static CONTENT_PREFIX = ((ConfigurationHolder.config.weceem.content.prefix instanceof String) ? 
@@ -16,8 +15,6 @@ class WeceemPluginUrlMappings {
         "plugins/",
         "WEB-INF/",
         "ck",
-        //org.weceem.services.WcmContentRepositoryService.uploadDir,
-        'uploads',
         // Admin links
         "${WeceemPluginUrlMappings.ADMIN_PREFIX}/",
         "${WeceemPluginUrlMappings.TOOLS_PREFIX}/"
@@ -65,6 +62,17 @@ class WeceemPluginUrlMappings {
             action = "search"
         }
         
+        def wcmContentRepositoryService = ApplicationHolder.application.mainContext.wcmContentRepositoryService
+
+        println "WcmCoReSvc: ${wcmContentRepositoryService}"
+
+        def u = wcmContentRepositoryService.uploadUrl
+        println "u: ${u}"
+        delegate.(u+'$uri**') {
+            controller = "wcmContent"
+            action = "showUploadedFile"
+        }
+        
         // This is tricky
         def contentURI = (WeceemPluginUrlMappings.CONTENT_PREFIX ? '/' : '')+"${WeceemPluginUrlMappings.CONTENT_PREFIX}/$uri**"
         
@@ -75,8 +83,9 @@ class WeceemPluginUrlMappings {
             constraints {
                 // @todo this is very ugly, clean up
                 uri(validator: { v ->
-                    !WeceemPluginUrlMappings.FORBIDDEN_SPACE_URIS.find { pref -> 
-                        return v?.startsWith(pref) 
+                    def uploadsPath = ApplicationHolder.application.mainContext.wcmContentRepositoryService.uploadUrl - '/'
+                    return !v?.startsWith(uploadsPath) && !WeceemPluginUrlMappings.FORBIDDEN_SPACE_URIS.find { p -> 
+                        return v?.startsWith(p) 
                     }
                 })
             }

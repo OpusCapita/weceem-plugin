@@ -22,6 +22,8 @@ import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
 import org.codehaus.groovy.grails.web.pages.GSPResponseWriter
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 
+import org.weceem.util.MimeUtils
+
 class WcmContentController {
     static String REQUEST_ATTRIBUTE_PAGE = "weceem.page"
     static String REQUEST_ATTRIBUTE_USER = "weceem.user"
@@ -120,6 +122,12 @@ class WcmContentController {
             cache false // never allow browser to cache this
             WcmContentController.showContent(this, request[REQUEST_ATTRIBUTE_PREVIEWNODE])
         }
+    }
+    
+    def showUploadedFile = {
+        def f = new File(wcmContenRepositoryService.uploadDir, params.uri)
+        println "Rendering file $f"
+        renderFile(f, null)
     }
     
     def show = { 
@@ -383,7 +391,10 @@ class WcmContentController {
     /**
      * Render a file
      */
-    def renderFile(File f) {
+    def renderFile(File f, String mimeType) {
+        def mt = mimeType ?: MimeUtils.getDefaultMimeType(f.name)
+        response.setContentType(mt)    
+        // @todo is this fast enough?    
         response.outputStream << f.newInputStream()
         return null
     }
