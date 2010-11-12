@@ -1,5 +1,7 @@
 import org.springframework.context.ApplicationContext
 
+import groovy.mock.interceptor.*
+
 import org.weceem.controllers.*
 import org.weceem.content.*
 import org.weceem.html.*
@@ -25,29 +27,10 @@ class ContentControllerTests extends GroovyTestCase {
     WcmContentController mockedController() {
         def con = new WcmContentController()
 
-        def secSvc = new WcmSecurityService()
-        secSvc.with {
-            grailsApplication = [
-                config: [
-                    weceem: [
-                        security: [
-                            policy: [
-                                path: ''
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-            afterPropertiesSet()
-        }
-        con.wcmContentRepositoryService = new WcmContentRepositoryService()
-        con.wcmContentRepositoryService.wcmCacheService = new WcmCacheService()
-        con.wcmContentRepositoryService.wcmCacheService.weceemCacheManager = new net.sf.ehcache.CacheManager()
-        con.wcmContentRepositoryService.wcmSecurityService = secSvc
-        con.wcmContentRepositoryService.groovyPagesTemplateEngine = grailsApplication.mainContext.groovyPagesTemplateEngine
-        con.wcmContentRepositoryService.afterPropertiesSet()
-
-        con.wcmSecurityService = secSvc
+        def app = grailsApplication
+        
+        con.wcmContentRepositoryService = app.mainContext.wcmContentRepositoryService
+        con.wcmSecurityService = app.mainContext.wcmSecurityService
         return con
     }
 

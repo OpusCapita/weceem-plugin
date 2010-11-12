@@ -67,7 +67,6 @@ class WeceemPluginUrlMappings {
         println "WcmCoReSvc: ${wcmContentRepositoryService}"
 
         def u = wcmContentRepositoryService.uploadUrl
-        println "u: ${u}"
         delegate.(u+'$uri**') {
             controller = "wcmContent"
             action = "showUploadedFile"

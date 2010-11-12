@@ -22,7 +22,9 @@ class SecurityServiceTests extends grails.test.GrailsUnitTestCase {
                             policy: [
                                 path: ''
                             ]
-                        ]
+                        ],
+                        archived: [ status: ''],
+                        unmoderated: [ status: '']
                     ]
                 ]
             ]

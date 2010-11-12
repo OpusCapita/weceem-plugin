@@ -33,7 +33,9 @@ class ContentSubmissionControllerTests extends GroovyTestCase {
                             policy: [
                                 path: ''
                             ]
-                        ]
+                        ],
+                        archived: [ status: ''],
+                        unmoderated: [ status: '']
                     ]
                 ]
             ]

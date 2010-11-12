@@ -22,7 +22,9 @@ abstract class AbstractWeceemIntegrationTest extends GroovyTestCase {
                             policy: [
                                 path: ''
                             ]
-                        ]
+                        ],
+                        archived: [ status: ''],
+                        unmoderated: [ status: '']
                     ]
                 ]
             ]

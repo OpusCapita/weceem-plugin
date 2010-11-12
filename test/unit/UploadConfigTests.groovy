@@ -46,7 +46,7 @@ class UploadConfigTests extends grails.test.GrailsUnitTestCase {
                 config: [
                     weceem: [
                         upload: [
-                            dir: 'uploaded-files'
+                            dir: '/uploaded-files/'
                         ]
                     ]
                 ],

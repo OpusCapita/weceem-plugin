@@ -73,10 +73,11 @@ class WcmContentRepositoryService implements InitializingBean {
         gspClassCache = wcmCacheService.getCache(CACHE_NAME_GSP_CACHE)
         assert gspClassCache
 
-        archivedStatusCode = grailsApplication.config.weceem.archived.status instanceof Number ? 
-            grailsApplication.config.weceem.archived.status : DEFAULT_ARCHIVED_STATUS_CODE
-        unmoderatedStatusCode = grailsApplication.config.weceem.unmoderated.status instanceof Number ? 
-            grailsApplication.config.weceem.unmoderated.status : DEFAULT_UNMODERATED_STATUS_CODE
+        def wcmconf = grailsApplication.config.weceem
+        def code = wcmconf?.archived.status
+        archivedStatusCode = code instanceof Number ? code : DEFAULT_ARCHIVED_STATUS_CODE
+        code = wcmconf?.umoderated.status
+        unmoderatedStatusCode = code instanceof Number ? code : DEFAULT_UNMODERATED_STATUS_CODE
             
         loadConfig()
     }
@@ -105,7 +106,7 @@ class WcmContentRepositoryService implements InitializingBean {
     
     void loadConfig() {
         def uploadDirConf = grailsApplication.config.weceem.upload.dir
-        uploadDirConf = (uploadDirConf instanceof String) && uploadDirConf ? uploadDirConf : "WeceemFiles"
+        uploadDirConf = (uploadDirConf instanceof String) && uploadDirConf ? uploadDirConf : "/WeceemFiles/"
 
         if (!uploadDirConf.startsWith('file:')) {
             uploadInWebapp = true
