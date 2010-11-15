@@ -3,8 +3,7 @@
 	  <div class="item">
             <wcm:renderContentItemIcon type="${c}" id="content-icon-${c.id  }"/>
 			<h2 class="title">
-			    <g:link controller="wcmEditor" action="edit" id="${c.id}">
-			     ${c.title.encodeAsHTML()}        <span class="type">( /${c.aliasURI.encodeAsURL().encodeAsHTML()} - <g:message code="content.item.name.${c.class.name}"/>)</span>
+			    <g:link controller="wcmEditor" action="edit" id="${c.id}">${c.title.encodeAsHTML()} <span class="type">(/${c.aliasURI.encodeAsURL().encodeAsHTML()} - <g:message code="content.item.name.${c.class.name}"/>)</span>
 			    </g:link>
 			</h2>
 		</div>		
@@ -18,7 +17,7 @@
 	<td>
 	  <g:if test="${c.changedOn}">
 	    <wcm:humanDate date="${c.changedOn}"/>
-		</g:if>
+		</g:if> 
 		<g:else>
 		  <g:message code="message.null.changedOn" encodeAs="HTML"/>
 		</g:else>

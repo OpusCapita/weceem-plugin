@@ -124,7 +124,9 @@ class WcmContentRepositoryService implements InitializingBean {
             uploadDir = f
             uploadUrl = '/uploads/'
         }
-        log.info "Weceem will use [${uploadDir}] as the directory for static uploaded files, and the url [${uploadUrl}] to serve them, files are inside webapp? [${uploadInWebapp}]"
+        if (metaClass.hasProperty(this, 'log')) {
+            log.info "Weceem will use [${uploadDir}] as the directory for static uploaded files, and the url [${uploadUrl}] to serve them, files are inside webapp? [${uploadInWebapp}]"
+        }
     }
     
     void createDefaultSpace() {

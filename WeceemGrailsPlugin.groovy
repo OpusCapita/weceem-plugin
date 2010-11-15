@@ -90,7 +90,7 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         def settings = ConfigurationHolder.config
         def co = new ConfigObject()
         if (uploadInWebapp) {
-            co.ckeditor.upload.basedir = dir.toString()
+            co.ckeditor.upload.basedir = url.toString()
         } else {
             co.ckeditor.upload.basedir = dir.toString()
             co.ckeditor.upload.baseurl = url.toString()
