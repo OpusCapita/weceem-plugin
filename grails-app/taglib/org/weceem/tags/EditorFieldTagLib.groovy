@@ -13,8 +13,14 @@ class EditorFieldTagLib {
     
     TagLibraryLookup gspTagLibraryLookup // Tag lookup bean from Grails injection
     
+    def editorLabel = { attrs ->
+        def args = argsWithRequiredOverride(attrs, [beanName:'content', property:attrs.property, labelKey:'content.label.'+attrs.property])
+        out << bean.label(args)
+    }
+
     def editorFieldString = { attrs ->
-        out << bean.input(beanName:'content', property:attrs.property, noLabel:true)
+        def args = argsWithRequiredOverride(attrs, [beanName:'content', property:attrs.property, noLabel:true])
+        out << bean.input(args)
     }
 
     def editorFieldSelectInList = { attrs ->
@@ -29,8 +35,22 @@ class EditorFieldTagLib {
         out << bean.checkBox(beanName:'content', property:attrs.property, noLabel:true)
     }
 
+    def argsWithRequiredOverride(attrs, args) {
+        def con = pageScope.content
+        if (con.metaClass.hasProperty(con.class, 'overrideRequired')) {
+            def r = con.overrideRequired[attrs.property]
+            if (r != null) {
+                if (!r) {
+                    args.requiredField = ' '
+                }
+            }
+        }
+        args
+    }
+
     def editorFieldTitle = { attrs ->
-        out << bean.input(beanName:'content', property:attrs.property, noLabel:true, 'class':"big")
+        def args = argsWithRequiredOverride(attrs, [beanName:'content', property:attrs.property, noLabel:true, 'class':"big"])
+        out << bean.input(args)
     }
 
     def editorFieldTags = { attrs ->

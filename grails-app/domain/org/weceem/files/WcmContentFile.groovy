@@ -32,6 +32,8 @@ class WcmContentFile extends WcmContent {
 
     static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "server-file-32.png"]
 
+    static overrideRequired = [ 'title': false ]
+    
     static constraints = {
         // @todo this is ugly, WcmContentDirectory should never have one, and all files SHOULD
         fileMimeType(nullable:true, blank:true)
