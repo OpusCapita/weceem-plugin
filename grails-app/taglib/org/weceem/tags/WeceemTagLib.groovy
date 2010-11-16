@@ -59,6 +59,8 @@ class WeceemTagLib {
     static ATTR_TITLE = "title"
     static ATTR_VERSION = "version"
     static ATTR_RESULTSPATH = "resultsPath"
+    static ATTR_GPATH = "gpath"
+    static ATTR_URL = "url"
 
     static namespace = "wcm"
     
@@ -779,6 +781,49 @@ class WeceemTagLib {
             params:[uri:WeceemTagLib.makeFullContentURI(path)] )
     }
 
+    def dataFeed = { attrs, body -> 
+        def type = attrs.remove(ATTR_TYPE) ?: 'rss'
+        def max = attrs.int(ATTR_MAX) ?: 5
+        
+        def custom = attrs.boolean(ATTR_CUSTOM)
+        def bodyClosure = custom ? body : null
+        if (!custom) { 
+            bodyClosure = { args ->
+                out << "<li><a href=\"${args.item.link.encodeAsHTML()}\">${args.item.title.encodeAsHTML()}</a></li>"
+            }
+        }
+        
+        def gpath
+        switch (type) {
+            case 'rss': 
+                gpath = 'channel.item'
+                break
+            case 'atom': 
+                gpath = 'entry'
+                break
+            default:
+                gpath = attrs.remove(ATTR_GPATH)
+                break
+        }
+        
+        def feedData = new URL(attrs.remove(ATTR_URL)).text
+        def feedDOM = new XmlSlurper().parseText(feedData)
+        def nodeSet = feedDOM
+        gpath.tokenize('.').each { t ->
+            nodeSet = nodeSet."$t"
+        }
+        
+        if (!custom) {
+            out << '<ul>'
+        }
+        nodeSet[0..max-1].each { n ->
+            custom ? out << bodyClosure(item:n) : bodyClosure(item:n)
+        }
+        if (!custom) {
+            out << '</ul>'
+        }
+    }
+    
     def join = { attrs, body ->
         def items = attrs.in?.collect { item ->
             def vars = attrs.var ? [(attrs.var):item] : item
