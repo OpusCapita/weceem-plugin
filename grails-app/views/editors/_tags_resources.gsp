@@ -12,9 +12,7 @@ $(function() {
     
     styleButtons();
 
-    $('button.addTag').button({icons: {
-        primary: 'ui-icon-plus'
-    }});
+    $('button.addTag').button();
     
     $('#tagsfield_${name} .addTag').click( function(event) {
         event.preventDefault();

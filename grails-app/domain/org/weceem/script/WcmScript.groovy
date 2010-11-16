@@ -12,7 +12,6 @@ class WcmScript extends WcmContent {
     static standaloneContent = false
 
     String content
-    String description // Human explanation of it
     
     /**
      * Must be overriden by content types that can represent their content as text.
@@ -32,6 +31,6 @@ class WcmScript extends WcmContent {
     
     static constraints = {
         content(nullable: false, maxSize: 65536)
-        description(maxSize:200)
+        description(maxSize:200, nullable: true, blank: true)
     }
 }

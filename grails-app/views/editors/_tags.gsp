@@ -5,7 +5,7 @@
         </g:each>
     </div>
     <div>
-        <input name="newTags_${name}" value=""/><button class="addTag" style="float:none;display:inline">Add tags</button>
+        <input name="newTags_${name}" value=""/><button class="addTag" style="float:none;display:inline">Add</button>
         <input name="${name}" type="hidden" value="${content[name]?.join(',').encodeAsHTML()},"/><!-- leave extra comma in -->
     </div>
 </div>
