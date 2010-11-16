@@ -295,12 +295,13 @@ class WeceemTagLib {
         def o = args.out
 
         o << "<li class=\"${args.levelClassPrefix}${args.level} ${args.active ? args.activeClass : ''} ${args.first ? args.firstClass : ''} ${args.last ? args.lastClass : ''}\">"
-        def n = args.node
+        def n = args.menuNode
         o << wcm.link(node:n) { ->
             n.titleForMenu.encodeAsHTML() 
         } 
         o << args.nested
         o << "</li>"
+        return null
     }
 
     WcmContent resolveNode(attrs) {
@@ -326,8 +327,6 @@ class WeceemTagLib {
             if (nodePath) {
                 def contentInfo = wcmContentRepositoryService.findContentForPath(nodePath, space)
                 node = contentInfo.content
-            } else {
-                node = request[WcmContentController.REQUEST_ATTRIBUTE_NODE]
             }
         }
         
@@ -348,6 +347,9 @@ class WeceemTagLib {
     def menu = { attrs, body ->
         def node = resolveNode(attrs)
         def rootNodeSpecified = node ? true : false
+        if (node == null) {
+            node = request[WcmContentController.REQUEST_ATTRIBUTE_NODE]
+        }
         def lineage = request[WcmContentController.REQUEST_ATTRIBUTE_PAGE].lineage
 
         def currentLevel = request['_weceem_menu_level'] == null ? 0 : request['_weceem_menu_level']
@@ -435,18 +437,20 @@ class WeceemTagLib {
             def nestedOutput = ''
             if (currentLevel+1 <= levels) {
                 request['_weceem_menu_level'] = currentLevel+1
-                def attribs = 
-                nestedOutput = menu(bodyargs, bodyToUse).toString()
+                def attribs = bodyargs.clone()
+                attribs.node = n // node attrib needed
+                nestedOutput = menu(attribs, bodyToUse).toString()
                 request['_weceem_menu_level'] = currentLevel // back to where we were
             }
             bodyargs.nested = nestedOutput
             
-            if (!custom) {
-                bodyargs.out = out
-            }
-
             // Render item
-            o << bodyToUse(bodyargs)
+            if (custom) {
+                o << bodyToUse(bodyargs)
+            } else {
+                bodyargs.out = out
+                bodyToUse(bodyargs)
+            }
 
             first = false
             if (!custom && last) {

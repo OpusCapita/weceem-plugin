@@ -162,13 +162,13 @@ class MenuTagTests extends AbstractWeceemIntegrationTest {
         def r = taglib.menu(custom:true) { args ->
             def s = new StringBuilder()
             if (args.first) {
-                s << "[FIRST-${args.level}]\n"
+                s << "|FIRST-${args.level}|\n"
             }
-            s << "NODE: ${args.node.titleForHTML}\n"
+            s << "NODE: ${args.menuNode.titleForHTML}\n"
             s << "ACTIVE: ${args.active}\n"
             s << args.nested
             if (args.last) {
-                s << "[LAST-${args.level}]\n"
+                s << "|LAST-${args.level}|\n"
             }
             s
         } 
@@ -177,18 +177,18 @@ class MenuTagTests extends AbstractWeceemIntegrationTest {
         
         println "Menu tag yielded: ${r}"
         
-        assertEquals """[FIRST-0]
+        assertEquals """|FIRST-0|
 NODE: Parent A
 ACTIVE: true
-[FIRST-1]
+|FIRST-1|
 NODE: Child A1
 ACTIVE: false
 NODE: Child A2
 ACTIVE: false
-[LAST-1]
+|LAST-1|
 NODE: Parent B
 ACTIVE: false
-[LAST-0]
+|LAST-0|
 """, r
         
     }
@@ -242,13 +242,13 @@ ACTIVE: false
         def r = taglib.menu(custom:true) { args ->
             def s = new StringBuilder()
             if (args.first) {
-                s << "[FIRST-${args.level}]\n"
+                s << "|FIRST-${args.level}|\n"
             }
-            s << "NODE: ${args.node.titleForHTML}\n"
+            s << "NODE: ${args.menuNode.titleForHTML}\n"
             s << "ACTIVE: ${args.active}\n"
             s << args.nested
             if (args.last) {
-                s << "[LAST-${args.level}]\n"
+                s << "|LAST-${args.level}|\n"
             }
             s
         } 
@@ -257,18 +257,18 @@ ACTIVE: false
 
         println "Menu tag yielded: ${r}"
 
-        assertEquals """[FIRST-0]
+        assertEquals """|FIRST-0|
 NODE: Parent A
 ACTIVE: false
-[FIRST-1]
+|FIRST-1|
 NODE: Child A1
 ACTIVE: false
 NODE: Child A2
 ACTIVE: true
-[LAST-1]
+|LAST-1|
 NODE: Parent B
 ACTIVE: false
-[LAST-0]
+|LAST-0|
 """, r
 
         def pi = WcmContentController.makePageInfo(parentA.aliasURI, childA1)
@@ -283,13 +283,13 @@ ACTIVE: false
         r = taglib.menu(custom:true, node:parentA) { args ->
             def s = new StringBuilder()
             if (args.first) {
-                s << "[FIRST-${args.level}]\n"
+                s << "|FIRST-${args.level}|\n"
             }
-            s << "NODE: ${args.node.titleForHTML}\n"
+            s << "NODE: ${args.menuNode.titleForHTML}\n"
             s << "ACTIVE: ${args.active}\n"
             s << args.nested
             if (args.last) {
-                s << "[LAST-${args.level}]\n"
+                s << "|LAST-${args.level}|\n"
             }
             s
         } 
@@ -298,18 +298,12 @@ ACTIVE: false
 
         println "Menu tag yielded: ${r}"
 
-        assertEquals """[FIRST-0]
-NODE: Parent A
-ACTIVE: true
-[FIRST-1]
+        assertEquals """|FIRST-0|
 NODE: Child A1
 ACTIVE: true
 NODE: Child A2
 ACTIVE: false
-[LAST-1]
-NODE: Parent B
-ACTIVE: false
-[LAST-0]
+|LAST-0|
 """, r
     }
 
