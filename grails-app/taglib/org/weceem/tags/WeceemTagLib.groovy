@@ -295,13 +295,49 @@ class WeceemTagLib {
         def o = args.out
 
         o << "<li class=\"${args.levelClassPrefix}${args.level} ${args.active ? args.activeClass : ''} ${args.first ? args.firstClass : ''} ${args.last ? args.lastClass : ''}\">"
-        o << link(node:args.node) {
-            args.node.titleForMenu.encodeAsHTML() 
+        def n = args.node
+        o << wcm.link(node:n) { ->
+            n.titleForMenu.encodeAsHTML() 
         } 
         o << args.nested
         o << "</li>"
     }
 
+    WcmContent resolveNode(attrs) {
+        def space = attrs.remove(ATTR_SPACE)
+        if (space != null) {
+            if (!(space instanceof WcmSpace)) {
+                space = WcmSpace.findByAliasURI(space)
+                if (!space) {
+                    throwTagError "Tag invoked with space attribute value [${space}] but no space could be found with that aliasURI"
+                }
+            }
+        } else {
+            space = request[WcmContentController.REQUEST_ATTRIBUTE_SPACE]
+            if (!space) {
+                throwTagError "Tag invoked from outside a Weceem request requires the [${ATTR_SPACE}] attribute to be set to the aliasURI of the space or a space instance"
+            }
+        }
+
+        def nodePath = attrs.remove(ATTR_PATH)
+        def node = attrs.remove(ATTR_NODE)
+        def rootNodeSpecified = nodePath || node
+        if (!node) {
+            if (nodePath) {
+                def contentInfo = wcmContentRepositoryService.findContentForPath(nodePath, space)
+                node = contentInfo.content
+            } else {
+                node = request[WcmContentController.REQUEST_ATTRIBUTE_NODE]
+            }
+        }
+        
+        if (node && !(node instanceof WcmContent)) {
+            throwTagError "Tag invoked with [$ATTR_NODE] or [$ATTR_PATH] attribute but the value it results in is not a WcmContent instance"
+        }
+
+        node
+    }
+    
     /**
      * Render a menu based on the content hierarchy
      * Attributes:
@@ -310,10 +346,8 @@ class WeceemTagLib {
      *      first, last, active, link and node variables. The link is the href to the content, node is the content node of that menu item
      */
     def menu = { attrs, body ->
-        def rootNodeSpecified = attrs.node ? true : false
-        println "RNS: ${rootNodeSpecified}"
-        def node = attrs.node ?: request[WcmContentController.REQUEST_ATTRIBUTE_NODE]
-        println "Node: ${node}"
+        def node = resolveNode(attrs)
+        def rootNodeSpecified = node ? true : false
         def lineage = request[WcmContentController.REQUEST_ATTRIBUTE_PAGE].lineage
 
         def currentLevel = request['_weceem_menu_level'] == null ? 0 : request['_weceem_menu_level']
@@ -343,7 +377,7 @@ class WeceemTagLib {
         ]
             
         if (siblings) {
-            if ((currentLevel == 0) && (!rootNodeSpecified || node.parent == null)) {
+            if ((currentLevel == 0) && !rootNodeSpecified) {
                 if (log.debugEnabled) {
                     log.debug "Locating root nodes: ${args}"
                 }
@@ -394,8 +428,8 @@ class WeceemTagLib {
                 lastClass: lastClass,
                 levelClassPrefix: levelClassPrefix,
                 levels: levels-1,
-                link: createLink(node:n, { o << n.titleForMenu.encodeAsHTML()}),
-                node:n
+                link: createLink(node:n),
+                menuNode:n
             ]
 
             def nestedOutput = ''

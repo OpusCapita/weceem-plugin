@@ -152,7 +152,7 @@ class WcmSecurityService implements InitializingBean {
     /**
      * Called to find out if the current user is allowed perform administrative actions eg manipulate spaces
      */
-    boolean isUserAdministrator(WcmSpace) {
+    boolean isUserAdministrator(WcmSpace space) {
         hasPermissions(space, [WeceemSecurityPolicy.PERMISSION_ADMIN])
     }
     
