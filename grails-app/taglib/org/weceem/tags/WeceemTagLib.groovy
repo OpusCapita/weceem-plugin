@@ -67,6 +67,7 @@ class WeceemTagLib {
     def wcmContentRepositoryService
     def wcmSecurityService
     def pluginManager
+    def wcmCacheService
     
     private extractCodec(attrs) {
         attrs[ATTR_CODEC] == null ? 'HTML' : attrs[ATTR_CODEC]        
@@ -806,7 +807,20 @@ class WeceemTagLib {
                 break
         }
         
-        def feedData = new URL(attrs.remove(ATTR_URL)).text
+        def url = attrs[ATTR_URL]
+        def _log = log
+        def feedData = wcmCacheService.getOrPutValue('dataFeeds', url, {
+            if (_log.infoEnabled) {
+                _log.info "Retrieving feed ${url}"
+            }
+            new URL(url).text
+        })
+        
+        if (feedData == null) {
+            out << "Unable to retrieve data feed ${url}"
+            return
+        }
+        
         def feedDOM = new XmlSlurper().parseText(feedData)
         def nodeSet = feedDOM
         gpath.tokenize('.').each { t ->

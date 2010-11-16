@@ -16,7 +16,7 @@ class CacheTagLib {
     def cache = { attrs, body ->
         def cacheName = attrs.name ?: 'contentCache'
         if ((Environment.current != Environment.PRODUCTION) && params.refresh) {
-            cacheService.clearCache(cacheName)
+            wcmCacheService.clearCache(cacheName)
         } 
         def key = attrs.key
         if (!key) {
@@ -31,7 +31,7 @@ class CacheTagLib {
                 log.warn "Auto-generating cache key for ${request[WcmContentController.REQUEST_ATTRIBUTE_PAGE].URI}"
             }
         }
-        def content = cacheService.getOrPutValue(cacheName, key, body)
+        def content = wcmCacheService.getOrPutValue(cacheName, key, body)
         def model = attrs.model
         if (model) {
              content = expandModel(content, model)
