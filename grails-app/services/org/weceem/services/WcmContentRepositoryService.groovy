@@ -1481,7 +1481,7 @@ class WcmContentRepositoryService implements InitializingBean {
 
         def existingFiles = new TreeSet()
         def createdContent = []
-        def spaceDir = WcmContentRepositoryService.getUploadPath(space.makeUploadName)
+        def spaceDir = WcmContentRepositoryService.getUploadPath(space, space.makeUploadName())
         if (!spaceDir.exists()) spaceDir.mkdirs()
         spaceDir.eachFileRecurse {file ->
             def relativePath = file.absolutePath.substring(
