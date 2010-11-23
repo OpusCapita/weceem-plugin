@@ -18,7 +18,7 @@ class WeceemGrailsPlugin {
         feeds:'1.5 > *',
         beanFields:'1.0-RC3 > *',
         blueprint:'0.9.1.1 > *',
-        jqueryUi:'1.8.4.3 > *',
+        jqueryUi:'1.8.6.1 > *',
         cacheHeaders:'1.1.2 > *',
         taggable:'0.6.2 > *'
     ]

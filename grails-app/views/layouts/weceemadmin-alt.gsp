@@ -20,7 +20,7 @@
 
     <nav:resources/>
     <g:javascript library="jquery" plugin="jquery"/>
-    <jqui:resources theme="cupertino" themeDir="_weceem/jquery-ui/themes/" plugin="weceem"/>
+    <jqui:resources themeCss="${g.resource(dir:'_weceem/jquery-ui/themes/cupertino', file:'jquery-ui-1.8.4.custom.css', plugin:'weceem')}"/>
     <blueprint:resources plugins="buttons"/>
 
 	<!-- Blueprint CSS -->

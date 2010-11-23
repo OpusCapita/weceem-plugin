@@ -183,8 +183,6 @@ class WcmContentController {
                         request[REQUEST_ATTRIBUTE_USER] = activeUser
             
                         if (content) {
-                            lastModified (content.changedOn ?: content.createdOn)
-                    
                             cache validFor: 1, shared:true  // 1 second caching, just makes sure some OK headers are sent for proxies
                             WcmContentController.showContent(this, content)
                         } else {
