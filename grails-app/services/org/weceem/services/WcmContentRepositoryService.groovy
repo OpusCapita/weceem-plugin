@@ -598,6 +598,8 @@ class WcmContentRepositoryService implements InitializingBean {
             if (!result) {
                 parentContent?.discard() // revert the changes we made to parent
             }
+            
+            invalidateCachingForURI(content.space, content.absoluteURI)
         }
         
         if (result) {
