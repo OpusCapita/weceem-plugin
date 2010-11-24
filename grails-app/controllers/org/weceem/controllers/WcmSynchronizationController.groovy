@@ -30,8 +30,8 @@ class WcmSynchronizationController {
         def missedFiles = result.missed
         def dirnum = createdContent.findAll{c-> c instanceof WcmContentDirectory}.size()
         def filenum = createdContent.size() - dirnum
-        render (view: "fileList", model: [result: missedFiles, createdContent: createdContent, 
-        space: space, dirnum: dirnum, filenum: filenum])
+        render (view: "fileList", model: [missingFiles: missedFiles, createdContent: createdContent, 
+            space: space, dirnum: dirnum, filenum: filenum])
     }
     
     /**

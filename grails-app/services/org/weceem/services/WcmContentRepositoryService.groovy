@@ -1481,27 +1481,39 @@ class WcmContentRepositoryService implements InitializingBean {
 
         def existingFiles = new TreeSet()
         def createdContent = []
-        def spaceDir = WcmContentRepositoryService.getUploadPath(space, space.makeUploadName())
+        def spaceDir = WcmContentRepositoryService.getUploadPath(space)
         if (!spaceDir.exists()) spaceDir.mkdirs()
-        spaceDir.eachFileRecurse {file ->
-            def relativePath = file.absolutePath.substring(
-                    spaceDir.absolutePath.size() + 1)
+        log.info "Synchronizing filesystem with repository for space /${space.aliasURI} (server dir: ${spaceDir.absolutePath})"
+        spaceDir.eachFileRecurse { file ->
+            def relativePath = file.absolutePath.substring(spaceDir.absolutePath.size() + 1)
+            log.info "Checking for existing content node in space /${space.aliasURI} for server file ${relativePath}"
             def content = findContentForPath(relativePath, space, false)?.content
             //if content wasn't found then create new
-            if (!content){
-                createdContent += createContentFile("${spaceDir.name}/${relativePath}")
-                content = findContentForPath(relativePath, space, false)?.content
-                while (content){
-                    existingFiles << content
+            if (!content) {
+                log.info "Creating new content node in space /${space.aliasURI} for server file ${relativePath}"
+                def newFileContent = createContentFile(space, relativePath)
+                createdContent << newFileContent
+                existingFiles.add(newFileContent)
+                content = newFileContent.parent
+                while (content) {
+                    if (!existingFiles.find { c -> c.absoluteURIuteURI == content.absoluteURI } ) {
+                        existingFiles.add(content)
+                    }
                     content = content.parent
                 }
             }else{
-                existingFiles << content
+                log.info "Skipping server file ${relativePath}, already has content node"
+                existingFiles.add(content)
             }
         }
         def allFiles = WcmContentFile.findAllBySpace(space);
-        def missedFiles = allFiles.findAll(){f->
-            !(f.id in existingFiles*.id)
+        def existingIds = existingFiles*.id
+        def missedFiles = allFiles.findAll { f ->
+            def adding = !existingIds.contains(f.id)
+            if (adding) {
+                log.info "Adding ${f.absoluteURI} to list of orphaned files who have no content node"
+            }
+            return adding
         }
         
         return ["created": createdContent, "missed": missedFiles]
@@ -1511,30 +1523,33 @@ class WcmContentRepositoryService implements InitializingBean {
      * Creates WcmContentFile/WcmContentDirectory from specified <code>path</code>
      * on the file system.
      *
+     * @param space
      * @param path
+     * @return the new content node, if any
      */
-    def createContentFile(path) {
+    def createContentFile(space, path) {
         if (log.debugEnabled) {
             log.debug "Creating content node for server file at [$path]"
         }
         
         List tokens = path.replace('\\', '/').split('/')
         if (tokens.size() > 1) {
-            def space = WcmSpace.findByAliasURI((tokens[0] == EMPTY_ALIAS_URI) ? '' : tokens[0])
-            def parents = tokens[1..(tokens.size() - 1)]
-            def ancestor = null
-            def content = null
-            def createdContent = []
+            def parents = tokens
+            def ancestor
+            def content
+            def createdContent
             parents.eachWithIndex(){ obj, i ->
-                def parentPath = "${parents[0..i].join('/')}"
-                def file = WcmContentRepositoryService.getUploadPath(space, parentPath)
+                def parentPath = parents[0..i].join('/')
+                log.debug "Creating content for file path $path, checking to see if node exists for ${parentPath}"
                 content = findContentForPath(parentPath, space)?.content
                 if (!content){
+                    def file = WcmContentRepositoryService.getUploadPath(space, parentPath)
                     if (file.isDirectory()){
                         content = new WcmContentDirectory(title: file.name,
                             content: '', filesCount: 0, space: space, orderIndex: 0,
                             mimeType: '', fileSize: 0, status: WcmStatus.findByPublicContent(true))
                     }else{
+                        // @todo This is bugged if x.y.z in filename use our MimeUtils
                         def mimeType = ServletContextHolder.servletContext.getMimeType(file.name)
                         content = new WcmContentFile(title: file.name,
                             content: '', space: space, orderIndex: 0, 
@@ -1550,7 +1565,7 @@ class WcmContentRepositoryService implements InitializingBean {
                         log.error "Failed to save content ${content} - errors: ${content.errors}"
                         assert false
                     } else {
-                        createdContent << content
+                        createdContent = content
                     }
                 }
                 if (ancestor){

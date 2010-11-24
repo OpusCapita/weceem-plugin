@@ -809,14 +809,16 @@ class WeceemTagLib {
     
     def createFeedLink = { attrs ->
         def path = attributeToContent(attrs[ATTR_PATH])
-        out << g.createLink(mapping:'feeds', action:attrs[ATTR_TYPE], params:[uri:WeceemTagLib.makeFullContentURI(path)])
+        def type = attrs[ATTR_TYPE] ?: 'rss'
+        out << g.createLink(mapping:'feeds', action:type, params:[uri:WeceemTagLib.makeFullContentURI(path)])
     }
 
     def feedLink = { attrs ->
         def path = attributeToContent(attrs[ATTR_PATH])
-        out << feed.meta( kind:attrs[ATTR_TYPE], version:attrs[ATTR_VERSION] ?: '',
+        def type = attrs[ATTR_TYPE] ?: 'rss'
+        out << feed.meta( kind:type, version:attrs[ATTR_VERSION] ?: '',
             mapping:'feed', 
-            action:attrs[ATTR_TYPE], 
+            action:type, 
             params:[uri:WeceemTagLib.makeFullContentURI(path)] )
     }
 

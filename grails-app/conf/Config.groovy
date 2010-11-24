@@ -15,13 +15,14 @@ log4j = {
         info 'stdout'
     }
     
-    error  'org.codehaus.groovy.grails.web.servlet',  //  controllers
-	       'org.codehaus.groovy.grails.web.pages' //  GSP
+    
     info   'grails.app'
 
     debug   'grails.app.controller',
             'grails.app.service',
             'grails.app.task',
+            'org.codehaus.groovy.grails.web.servlet',  //  controllers
+    	    'org.codehaus.groovy.grails.web.pages', //  GSP
             'grails.app.domain'
 //            'org.codehaus.groovy.grails.web.mapping' // URL mapping
     

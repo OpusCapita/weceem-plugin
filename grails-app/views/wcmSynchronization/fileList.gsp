@@ -36,7 +36,7 @@
                 </table>
             </div>
         </g:if>
-        <g:if test="${result.size()}">
+        <g:if test="${missingFiles.size()}">
         
             <div class="message span-22 prepend-1 append-1 prepent-top append-bottom last ui-state-highlight ui-corner-all">
                 The following nodes were found referencing files that no longer exist in the filesystem. To remove nodes click the checkboxes and then press Delete.
@@ -51,7 +51,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                         <g:each var="cont" in="${result}">
+                         <g:each var="cont" in="${missingFiles}">
                             <tr>
                                 <td>${cont.title}</td>
                                 <td>${cont.toRelativePath()}</td>
