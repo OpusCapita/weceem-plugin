@@ -42,7 +42,12 @@ class WcmContentDirectory extends WcmContentFile {
             log.debug "Creating directory path [$p]"
             p.mkdirs()
         }
-        return p.exists() && p.isDirectory()
+        def done = p.exists() && p.isDirectory()
+        if (done) {
+            parentContent.filesCount += 1
+        }
+        
+        return done
     }
 
     static editors = {

@@ -853,7 +853,7 @@ class WeceemTagLib {
             if (_log.infoEnabled) {
                 _log.info "Retrieving feed ${url}"
             }
-            new URL(url).text
+            new URL(url).getText('utf-8')
         })
         
         if (feedData == null) {
