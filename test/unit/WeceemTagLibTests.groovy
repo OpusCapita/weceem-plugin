@@ -90,7 +90,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
       taglib.eachChild([path:"some/path", node: parent], {})
       fail "Expected exception with path and node attributes"
     } catch(e) {
-      assert e.message =~ "can not specify ${WeceemTagLib.ATTR_NODE} and ${WeceemTagLib.ATTR_PATH} attributes"
+      assert e.message =~ "You cannot specify both node and path attributes"
     }
 
     taglib.eachChild([node: parent], {})
@@ -236,5 +236,5 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         
         assertEquals "Parent A|", taglib.out.toString()
     }
-
+    
 }

@@ -37,13 +37,15 @@ class WcmContentDirectory extends WcmContentFile {
             p = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, "/$path/$title")
             log.debug "Creating directory path [$p]"
             p.mkdirs()
-        } else {
+        } else if (!parentContent) {
             p = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, title)
             log.debug "Creating directory path [$p]"
             p.mkdirs()
+        } else {
+            throw new IllegalArgumentException("Cannot create server directory nodes under content of type ${parentContent.class}")
         }
         def done = p.exists() && p.isDirectory()
-        if (done) {
+        if (done && parentContent) {
             parentContent.filesCount += 1
         }
         

@@ -174,25 +174,11 @@ class RepositoryControllerTests extends GroovyTestCase {
         new AntBuilder().delete(dir: dir.absolutePath)
     }
 
-    void testCreateDirectoryWithHtmlParent() {
-        createDirectory([dirname: 'sample_dir', 'space.id': spaceA.ident(),
-                parentPath: "${spaceA.ident()}/HTMLContent/${nodeA.ident()}", statuscode: defStatus.code])
-
-        // check created directory (also on the file system)
-        // check parent:child mappings
-        def loadedDir = WcmContentDirectory.findByTitle('sample_dir')
-        assertNotNull loadedDir
-        def parent = WcmHTMLContent.findByTitle('contentA')
-        assertNotNull parent
-        assertEquals parent, loadedDir.parent
-        assertNotNull parent.children?.find { it.id == loadedDir.id }
-        
-        // Check directory created correctly
-        def dir = org.weceem.services.WcmContentRepositoryService.getUploadPath(spaceA, 'sample_dir')
-        assert dir.exists()
-        assert dir.directory
-
-        new AntBuilder().delete(dir: dir.absolutePath)
+    void testCannotCreateDirectoryWithHtmlParent() {
+        shouldFail {
+            createDirectory([dirname: 'sample_dir', 'space.id': spaceA.ident(),
+                    parentPath: "${spaceA.ident()}/HTMLContent/${nodeA.ident()}", statuscode: defStatus.code])
+        }
     }
 
     public void setApplicationContext(ApplicationContext applicationContext) {
