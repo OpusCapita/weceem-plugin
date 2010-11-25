@@ -1496,7 +1496,7 @@ class WcmContentRepositoryService implements InitializingBean {
                 existingFiles.add(newFileContent)
                 content = newFileContent.parent
                 while (content) {
-                    if (!existingFiles.find { c -> c.absoluteURIuteURI == content.absoluteURI } ) {
+                    if (!existingFiles.find { c -> c.absoluteURI == content.absoluteURI } ) {
                         existingFiles.add(content)
                     }
                     content = content.parent
@@ -1532,8 +1532,11 @@ class WcmContentRepositoryService implements InitializingBean {
             log.debug "Creating content node for server file at [$path]"
         }
         
+        def publicStatus = allPublicStatuses[0]
+        assert publicStatus
+        
         List tokens = path.replace('\\', '/').split('/')
-        if (tokens.size() > 1) {
+        if (tokens.size()) {
             def parents = tokens
             def ancestor
             def content
@@ -1547,44 +1550,24 @@ class WcmContentRepositoryService implements InitializingBean {
                     if (file.isDirectory()){
                         content = new WcmContentDirectory(title: file.name,
                             content: '', filesCount: 0, space: space, orderIndex: 0,
-                            mimeType: '', fileSize: 0, status: WcmStatus.findByPublicContent(true))
+                            mimeType: '', fileSize: 0, status: publicStatus)
                     }else{
                         // @todo This is bugged if x.y.z in filename use our MimeUtils
                         def mimeType = ServletContextHolder.servletContext.getMimeType(file.name)
                         content = new WcmContentFile(title: file.name,
                             content: '', space: space, orderIndex: 0, 
                             mimeType: (mimeType ? mimeType : ''), fileSize: file.length(),
-                            status: WcmStatus.findByPublicContent(true))
+                            status: publicStatus)
                     }
-                    // @todo this needs fixing, we don't know the parent yet!
-                    content.createAliasURI(content.parent)
 
-                    requirePermissions(content.parent ?: space, [WeceemSecurityPolicy.PERMISSION_CREATE])        
-
+                    createNode(content, ancestor)
+                    
                     if (!content.save()) {
                         log.error "Failed to save content ${content} - errors: ${content.errors}"
                         assert false
                     } else {
                         createdContent = content
                     }
-                }
-                if (ancestor){
-                    if (ancestor.children == null) ancestor.children = new TreeSet()
-                    ancestor.children << content
-                    if (ancestor instanceof WcmContentDirectory)
-                        ancestor.filesCount += 1
-                    if (log.debugEnabled) {
-                        log.debug "Updated parent node of new file node [${ancestor.dump()}]"
-                    }
-                    assert ancestor.save(flush: true)
-                    content.parent = ancestor
-                    if (log.debugEnabled) {
-                        log.debug "Saving content node of new file node [${content.dump()}]"
-                    }
-                    if (log.debugEnabled && !content.validate()) {
-                        log.debug "Saving content node of new file node is about to fail. Node: [${content.dump()}], Errors: [${content.errors}]"
-                    }
-                    assert content.save(flush: true)
                 }
                 ancestor = content
             }

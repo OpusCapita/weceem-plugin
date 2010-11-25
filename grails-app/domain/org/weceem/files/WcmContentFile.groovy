@@ -68,27 +68,30 @@ class WcmContentFile extends WcmContent {
      */
     Boolean create(WcmContent parentContent) {
         if (!title) {
-            title = uploadedFile.originalFilename
+            title = uploadedFile?.originalFilename
         }
-        aliasURI = uploadedFile.originalFilename
+        aliasURI = uploadedFile?.originalFilename
         assert title
         def path = ''
         if (parentContent && (parentContent instanceof WcmContentDirectory)) {
-            //@todo surely this is redundant, we can just count children?
-            parentContent.filesCount += 1
             assert parentContent.save()
             path = getPathTo(parentContent)
+            //@todo surely this is redundant, we can just count children?
+            parentContent.filesCount += 1
         }
         org.weceem.services.WcmContentRepositoryService.getUploadPath(space, path).mkdirs()
-        try {
+        
+        if (uploadedFile) {
             def f = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, "$path/${uploadedFile.originalFilename}")
-            uploadedFile.transferTo(f)
-            fileMimeType = uploadedFile.contentType ?: MimeUtils.getDefaultMimeType(uploadedFile.originalFilename)
-            fileSize = f.length()
-        } catch (Exception e) {
-            return false
+            try {
+                uploadedFile.transferTo(f)
+                fileMimeType = uploadedFile.contentType ?: MimeUtils.getDefaultMimeType(uploadedFile.originalFilename)
+                fileSize = f.length()
+            } catch (Exception e) {
+                return false
+            }
         }
-
+        
         return true
     }
 
