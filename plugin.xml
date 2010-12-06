@@ -71,7 +71,7 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     <plugin name='feeds' version='1.5 &gt; *' />
     <plugin name='beanFields' version='1.0-RC3 &gt; *' />
     <plugin name='blueprint' version='0.9.1.1 &gt; *' />
-    <plugin name='jqueryUi' version='1.8.4.3 &gt; *' />
+    <plugin name='jqueryUi' version='1.8.6.1 &gt; *' />
     <plugin name='cacheHeaders' version='1.1.2 &gt; *' />
     <plugin name='taggable' version='0.6.2 &gt; *' />
   </dependencies>

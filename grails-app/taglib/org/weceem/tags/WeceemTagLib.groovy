@@ -293,27 +293,30 @@ class WeceemTagLib {
         }
         def rootNodeSpecified = nodePath || node
         if (!node && nodePath) {
-            def space = attrs.remove(ATTR_SPACE)
-            if (space != null) {
-                if (!(space instanceof WcmSpace)) {
-                    space = WcmSpace.findByAliasURI(space)
+            if (nodePath instanceof WcmContent) {
+                node = nodePath
+            } else {
+                def space = attrs.remove(ATTR_SPACE)
+                if (space != null) {
+                    if (!(space instanceof WcmSpace)) {
+                        space = WcmSpace.findByAliasURI(space)
+                        if (!space) {
+                            throwTagError "Tag invoked with space attribute value [${space}] but no space could be found with that aliasURI"
+                        }
+                    }
+                } else {
+                    space = request[WcmContentController.REQUEST_ATTRIBUTE_SPACE]
                     if (!space) {
-                        throwTagError "Tag invoked with space attribute value [${space}] but no space could be found with that aliasURI"
+                        throwTagError "Tag invoked from outside a Weceem request requires the [${ATTR_SPACE}] attribute to be set to the aliasURI of the space or a space instance"
                     }
                 }
-            } else {
-                space = request[WcmContentController.REQUEST_ATTRIBUTE_SPACE]
-                if (!space) {
-                    throwTagError "Tag invoked from outside a Weceem request requires the [${ATTR_SPACE}] attribute to be set to the aliasURI of the space or a space instance"
+
+                def contentInfo = wcmContentRepositoryService.findContentForPath(nodePath, space)
+                if (!contentInfo.content) {
+                    throwTagError "Tag cannot locate a content node specified in [$ATTR_PATH] attribute with value [$nodePath]"
                 }
+                node = contentInfo.content
             }
-
-            def contentInfo = wcmContentRepositoryService.findContentForPath(nodePath, space)
-            if (!contentInfo.content) {
-                throwTagError "Tag cannot locate a content node specified in [$ATTR_PATH] attribute with value [$nodePath]"
-            }
-
-            node = contentInfo.content
         }
         
         if (node && !(node instanceof WcmContent)) {
