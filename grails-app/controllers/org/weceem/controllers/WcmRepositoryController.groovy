@@ -306,43 +306,6 @@ class WcmRepositoryController {
     }
 
     /**
-     * Creates and save node.
-     * Creates reference according to 'parentId' parameter.
-     */
-/* @todo I think this is obsolete
-    def insertNode = {
-
-        def space = WcmSpace.get(params['space.id']?.toLong())
-        
-        def insertedContent = wcmContentRepositoryService.newContentInstance(params.contentType, space)
-        // Using bindData to work around Grails 1.2m2 bugs, change to .properties when 1.2-RC1 is live
-        bindData(insertedContent, params)
-
-        def parent = params.parentPath ? getContent(params.parentPath, space) : null
-        if (parent && (!parent.canHaveChildren() || (parent instanceof WcmContentDirectory))) {
-            parent = null
-        }
-        if (!insertedContent.aliasURI && insertedContent.title) {
-            insertedContent.createAliasURI(wcmContentRepositoryService)
-        }
-
-        wcmContentRepositoryService.createNode(insertedContent, parent)
-
-        if (insertedContent.hasErrors() || !insertedContent.save()) {
-            log.debug("Unable to create new content: ${insertedContent.errors}")
-            
-            def editorToUse = getEditorName(params.contentType)
-            
-            render(view: 'newContent', model: [content: insertedContent,
-                    contentType: params.contentType, parentPath: params.parentPath,
-                    editor: editorToUse ])
-        } else {
-            redirect(action: treeTable)
-        }
-    }
-*
-
-    /**
      * @param dirname
      * @param space
      * @param parentPath

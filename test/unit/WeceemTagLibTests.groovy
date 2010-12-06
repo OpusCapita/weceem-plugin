@@ -240,18 +240,19 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         assertEquals "Parent A|", taglib.out.toString()
     }
 
+    
     void testSummarize() {
-        mockTagLib(WeceemTagLib)
 
         def testData = [
             [40, 'Immigration Help For Grails Developers', "Immigration Help For Grails Developers"],
             [10, 'Immigration Help For Grails Developers', "Immigra..."],
             [5, 'Immigration Help For Grails Developers', "Im..."],
-            [40, 'Immigration Help For Grails Developers XXXXXXXXXX', "Immigration Help For Grails Developers..."],
+            [40, 'Immigration Help For Grails Developers XXXXXXXXXX', "Immigration Help For Grails ..."],
             [40, 'Immigration', "Immigration"]
         ]
         
         testData.each { d ->
+            mockTagLib(WeceemTagLib)
             def taglib = new WeceemTagLib()
             taglib.summarize(length:d[0], { d[1] })
             def o = taglib.out.toString()

@@ -73,7 +73,6 @@ class WeceemPluginUrlMappings {
         // This is tricky
         def contentURI = (WeceemPluginUrlMappings.CONTENT_PREFIX ? '/' : '')+"${WeceemPluginUrlMappings.CONTENT_PREFIX}/$uri**"
         
-        println "URL MAPPINGS - FORBIDDEN: ${WeceemPluginUrlMappings.FORBIDDEN_SPACE_URIS}"
         invokeMethod(contentURI, {
             controller = "wcmContent"
             action = "show"
