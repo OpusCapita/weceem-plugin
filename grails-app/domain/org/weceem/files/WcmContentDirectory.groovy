@@ -72,7 +72,7 @@ class WcmContentDirectory extends WcmContentFile {
     // we need to delete all content children here (recursively)
     Boolean deleteContent() {
         def path = getPathTo(this.parent)
-        def file = org.weceem.services.WcmContentRepositoryService.getUploadPath(space.aliasURI, "$path/$title")
+        def file = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, "$path/$title")
         if (!file.exists()) return true
         if (FileUtils.deleteQuietly(file)) {
             def childrenList = new ArrayList(this.children)
