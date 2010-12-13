@@ -64,6 +64,8 @@ class WeceemTagLib {
 
     static namespace = "wcm"
     
+    static returnObjectForTags = ['findNode', 'ancestorOfType']
+    
     def wcmContentRepositoryService
     def wcmSecurityService
     def pluginManager
@@ -554,6 +556,13 @@ class WeceemTagLib {
     }
     
     def find = { attrs, body -> 
+        def c = findNode(attrs)
+        if (c) {
+            out << body(var ? [(var):c] : c)
+        }
+    }
+    
+    def findNode = { attrs -> 
         def params = makeFindParams(attrs)
         def id = attrs[ATTR_ID]
         def title = attrs[ATTR_TITLE]
@@ -567,11 +576,8 @@ class WeceemTagLib {
             c = wcmContentRepositoryService.findContentForPath(path, 
                 request[WcmContentController.REQUEST_ATTRIBUTE_SPACE])?.content
         } else throwTagError("One of [id], [title] or [path] must be specified")
-        def var = attrs[ATTR_VAR] ?: null
         
-        if (c) {
-            out << body(var ? [(var):c] : c)
-        }
+        return c
     }
     
     /**
@@ -965,5 +971,20 @@ ${node.content}
         if (s) {
             out << body(message:s)
         }
+    }
+    
+    def ancestorOfType = { attrs ->
+        def node = resolveNode(attrs)
+        def type = attrs[ATTR_TYPE]
+        if (!type) {
+            throwTagError("The [$ATTR_TYPE] attribute is required")
+        }
+        def typeClass = wcmContentRepositoryService.getContentClassForType(type)
+        
+        while (node && !typeClass.isAssignableFrom(node.class)) {
+            node = node.parent
+        }
+        
+        return node
     }
 }
