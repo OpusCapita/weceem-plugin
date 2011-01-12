@@ -52,7 +52,8 @@ class WcmSecurityService implements InitializingBean {
     }
     
     def getUserRoles() {
-        def roles = securityDelegate.getUserRoles().clone()
+        def roles = []
+        roles.addAll(securityDelegate.getUserRoles())
         roles << ["USER_${userName}"]
         return roles
     }
