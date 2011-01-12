@@ -648,6 +648,10 @@ class WeceemTagLib {
         out << wcmSecurityService.userName?.encodeAsHTML()
     }
     
+    def loggedInUserEmail = { attrs ->
+        out << wcmSecurityService.userEmail?.encodeAsHTML()
+    }
+    
     def ifUserCanEdit = { attrs, body ->
         def node = resolveNode(attrs)
 
