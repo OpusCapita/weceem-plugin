@@ -86,6 +86,9 @@ class WcmContentRepositoryService implements InitializingBean {
      * Workaround for replaceAll problems with \ in Java
      */
     static String makeFileSystemPathFromURI(uri) {
+        if (uri == null) {
+            return ''
+        }
         def chars = uri.chars
         chars.eachWithIndex { c, i ->
             if (c == '/') {
