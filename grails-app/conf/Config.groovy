@@ -38,7 +38,7 @@ environments {
     test {
         log4j = {
             root {
-                info 'stdout'
+                debug 'stdout'
             }
 
             warn  'org.codehaus.groovy.grails.web.servlet',  //  controllers

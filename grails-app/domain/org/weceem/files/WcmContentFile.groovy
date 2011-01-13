@@ -66,7 +66,7 @@ class WcmContentFile extends WcmContent {
      * Handle the create event to copy the file from the upload form into the filesystem
      * Files are *not* stored in the repository database
      */
-    Boolean create(WcmContent parentContent) {
+    Boolean contentShouldBeCreated(WcmContent parentContent) {
         if (!title) {
             title = uploadedFile?.originalFilename
         }
@@ -95,7 +95,7 @@ class WcmContentFile extends WcmContent {
         return true
     }
 
-    Boolean rename(String oldTitle) {
+    Boolean contentDidChangeTitle(String oldTitle) {
         def path = ''
         def parent = this.parent
         if (parent && (parent instanceof WcmContentDirectory)) {
@@ -107,7 +107,7 @@ class WcmContentFile extends WcmContent {
         createAliasURI(this.parent)
     }
 
-    Boolean move(WcmContent targetParent) {
+    Boolean contentDidMove(WcmContent targetParent) {
         if (!targetParent || (targetParent instanceof WcmContentDirectory)) {
 
             def srcPath = ''
@@ -147,7 +147,7 @@ class WcmContentFile extends WcmContent {
         return false // Move was not possible
     }
 
-    Boolean deleteContent() {
+    Boolean contentWillBeDeleted() {
         def path = getPathTo(this.parent)
 
         def parentContent = this.parent ? WcmContent.get(this.parent.id) : this.parent

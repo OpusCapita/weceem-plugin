@@ -30,7 +30,7 @@ class WcmContentDirectory extends WcmContentFile {
         newChild.instanceOf(WcmContentFile)
     }
 
-    Boolean create(WcmContent parentContent) {
+    Boolean contentShouldBeCreated(WcmContent parentContent) {
         def p
         if (parentContent && (parentContent instanceof WcmContentDirectory)) {
             def path = getPathTo(parentContent)
@@ -70,7 +70,7 @@ class WcmContentDirectory extends WcmContentFile {
      
      
     // we need to delete all content children here (recursively)
-    Boolean deleteContent() {
+    Boolean contentWillBeDeleted() {
         def path = getPathTo(this.parent)
         def file = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, "$path/$title")
         if (!file.exists()) return true
