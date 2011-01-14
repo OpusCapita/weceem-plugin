@@ -24,6 +24,9 @@ import org.weceem.services.WcmContentRepositoryService
 import org.weceem.util.ContentUtils
 import org.weceem.content.WcmSpace
 
+import org.weceem.css.WcmStyleSheet
+import org.weceem.js.WcmJavaScript
+
 class WeceemTagLib {
     
     static ATTR_ID = "id"
@@ -990,5 +993,26 @@ ${node.content}
         }
         
         return node
+    }
+    
+    def resource = { attrs -> 
+        def node = resolveNode(attrs)
+        if (!attrs[ATTR_TYPE]) { 
+            switch (node.class) {
+                case WcmStyleSheet: 
+                    attrs[ATTR_TYPE] = "css"
+                    break;
+                case WcmJavaScript: 
+                    attrs[ATTR_TYPE] = 'js'
+                    break;
+            }
+        }
+        
+        if (!attrs[ATTR_TYPE]) {
+            throwTagError("The [$ATTR_TYPE] attribute is required to indicate what kind of resource you are linking to")
+        }
+
+        attrs.url = node.absoluteURI
+        out << jqui.resourceLink(attrs)
     }
 }
