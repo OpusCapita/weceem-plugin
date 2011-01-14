@@ -477,15 +477,18 @@ class WcmContentRepositoryService implements InitializingBean {
      */
     def createNode(String type, def params, Closure postInit = null) {
         def content = newContentInstance(type)
+        def tags = params.remove('tags')
         hackedBindData(content, params)
-        if (params.tags != null) {
-            content.setTags(params.tags.tokenize(',').collect { it.trim().toLowerCase()} )
-        }
         if (postInit) {
             postInit(content)
         }
         // Ignore result here, we need the content's errors
         createNode(content, content.parent)
+        // Set these after create, even if error - can't set them before instance exists
+        // and need them on the object in the case of error or they get lost
+        if (tags != null) {
+            content.setTags(tags.tokenize(',').collect { it.trim().toLowerCase()} )
+        }
         return content // has the errors set on it
     }
 
