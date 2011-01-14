@@ -102,10 +102,15 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         co.ckeditor.upload.image.upload = true
         co.ckeditor.upload.image.allowed = ['jpg', 'gif', 'jpeg', 'png']
         co.ckeditor.upload.image.denied = []
-        co.ckeditor.upload.media.browser = true
+        co.ckeditor.upload.link.browser = true
+        co.ckeditor.upload.link.upload	= true
+        co.ckeditor.upload.link.allowed = ['pdf', 'doc', 'docx', 'zip', 'jpg', 'jpeg', 'png']
         co.ckeditor.upload.media.upload = true
         co.ckeditor.upload.media.allowed = ['mpg','mpeg','avi','wmv','asf','mov']
         co.ckeditor.upload.media.denied = []
+        co.ckeditor.upload.flash.upload = true
+        co.ckeditor.upload.flash.allowed = ['swf']
+        co.ckeditor.upload.flash.denied = []
         settings.merge(co)
     }
     
