@@ -200,9 +200,14 @@ class WeceemSecurityPolicy {
             return explicitMatch != null 
         }
         
-        // See if we need to fallback to space defaults
+        // See if we need to fallback to space defaults, there's nothing URI specific
         if ((explicitMatch == null) && (uri != DEFAULT_POLICY_URI)) {
             explicitMatch = hasPermission(spaceAlias, DEFAULT_POLICY_URI, roleList, permissionList)
+        }
+
+        // See if we need to fallback to global space defaults
+        if ((explicitMatch == null) && (spaceAlias != ANY_SPACE_ALIAS)) {
+            explicitMatch = hasPermission(ANY_SPACE_ALIAS, DEFAULT_POLICY_URI, roleList, permissionList)
         }
         return explicitMatch
     }

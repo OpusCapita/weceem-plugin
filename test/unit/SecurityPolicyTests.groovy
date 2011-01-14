@@ -124,6 +124,26 @@ class SecurityPolicyTests extends grails.test.GrailsUnitTestCase {
             ['spaceA_guest'], [WeceemSecurityPolicy.PERMISSION_VIEW])
     }
     
+    void testRoleSpecificSpaceDefaultsDoNotAffectSpaceDefaultsOfOtherRoles() {
+        policy.setDefaultPermissionForSpaceAndRole(WeceemSecurityPolicy.PERMISSION_ADMIN, true, 'spaceA', "admin")
+        policy.setDefaultPermissionForSpaceAndRole(WeceemSecurityPolicy.PERMISSION_ADMIN, false, 'spaceA', "user")
+        
+        policy.dumpPermissions()
+        
+        assertFalse policy.hasPermission('spaceA', '/anything', ['user'], [WeceemSecurityPolicy.PERMISSION_ADMIN])
+        assertTrue policy.hasPermission('spaceA', '/anything', ['admin'], [WeceemSecurityPolicy.PERMISSION_ADMIN])
+    }
+    
+    void testRoleSpecificSpaceDefaultsDoNotAffectGlobalSpaceDefaultsOfOtherRoles() {    
+        policy.setDefaultPermissionForSpaceAndRole(WeceemSecurityPolicy.PERMISSION_ADMIN, true, '*', "admin")
+        policy.setDefaultPermissionForSpaceAndRole(WeceemSecurityPolicy.PERMISSION_ADMIN, false, 'site1', "user")
+        
+        policy.dumpPermissions()
+
+        assertFalse policy.hasPermission('site1', '/anything', ['user'], [WeceemSecurityPolicy.PERMISSION_ADMIN])
+        assertTrue policy.hasPermission('site1', '/anything', ['admin'], [WeceemSecurityPolicy.PERMISSION_ADMIN])
+    }
+    
     void testTypeSpecificAccessControl() {
         policy.setURIPermissionForSpaceAndRole("/", WeceemSecurityPolicy.PERMISSION_ADMIN, true, 'spaceA', "spaceA_admin")
         policy.setURIPermissionForSpaceAndRole("/", WeceemSecurityPolicy.PERMISSION_EDIT, true, 'spaceA', "spaceA_admin")
