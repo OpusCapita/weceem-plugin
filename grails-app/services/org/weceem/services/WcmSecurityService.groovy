@@ -107,8 +107,8 @@ class WcmSecurityService implements InitializingBean {
      * specified content node.
      * Allows applications to implement ACLs
      */
-    boolean isUserAllowedToCreateContent(WcmContent parent, Class<WcmContent> type) {
-        hasPermissions(parent, [WeceemSecurityPolicy.PERMISSION_CREATE], type)
+    boolean isUserAllowedToCreateContent(WcmSpace space, WcmContent parent, Class<WcmContent> type) {
+        hasPermissions(parent ?: space, [WeceemSecurityPolicy.PERMISSION_CREATE], type)
     }
 
     /**
