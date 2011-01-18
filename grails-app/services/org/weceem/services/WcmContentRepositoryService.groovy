@@ -540,18 +540,18 @@ class WcmContentRepositoryService implements InitializingBean {
      */
     def triggerDomainEvent(WcmContent content, WeceemEvent event, argumentTypes = null, arguments = []) {
         if (log.debugEnabled) {
-            log.debug "Attempting to trigger domain event [$eventName] on node ${content.dump()}"
+            log.debug "Attempting to trigger domain event [$event] on node ${content.dump()}"
         }
         def eventName = event.toString()
         if (content.metaClass.respondsTo(content, eventName, *argumentTypes)) {
             if (log.debugEnabled) {
-                log.debug "Trigger domain event [$eventName] as it is supported on node ${content.dump()}"
+                log.debug "Trigger domain event [$event] as it is supported on node ${content.dump()}"
             }
             // Call the event so that nodes can perform post-creation tasks
             return content."${eventName}"(*arguments)
         } else {
             if (log.debugEnabled) {
-                log.debug "Node does not support [$eventName] event, skipping"
+                log.debug "Node does not support [$event] event, skipping"
             }
             return true
         }

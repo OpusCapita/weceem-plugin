@@ -33,7 +33,7 @@ class WcmEventService {
      */
     void event(WeceemEvent event, WcmContent contentNode) {
         if (log.debugEnabled) {
-            log.debug "Triggering notification event: ${event} for ${contentMode.absoluteURI}"
+            log.debug "Triggering notification event: ${event} for ${contentNode.absoluteURI}"
         }
         
         def listenerList
