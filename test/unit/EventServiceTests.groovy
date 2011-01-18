@@ -10,6 +10,7 @@ class EventServiceTests extends grails.test.GrailsUnitTestCase {
 
     protected void setUp() {
         super.setUp()
+        mockLogging(WcmEventService)
         eventService = new WcmEventService()
         listenerCalled = false
     }
