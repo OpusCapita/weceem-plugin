@@ -1,6 +1,8 @@
 import org.apache.commons.logging.LogFactory
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
+import org.weceem.services.WcmContentRepositoryService
+
 class WeceemGrailsPlugin {
     def _log = LogFactory.getLog('org.weceem.WeceemGrailsPlugin')
 
@@ -114,8 +116,35 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         settings.merge(co)
     }
     
-    def doWithWebDescriptor = { xml ->
+    def doWithWebDescriptor = { webXml ->
         // TODO Implement additions to web.xml (optional)
+        
+        // Install filter for /$uploadUrl that
+        // extracts space URI part, converts back to space
+        // asks sec svc if current user can view that uri
+        // returns file if so
+        
+        log.info("Adding servlet filter")
+        
+        //def repSvc = applicationContext.wcmContentRepositoryService
+        def uploadUrl = WcmContentRepositoryService.getUploadUrlFromConfig(ConfigurationHolder.config)
+        log.info("Uploaded file filter will be at ${uploadUrl}")
+        
+        def filters = webXml.filter[0]
+        filters + {
+            'filter' {
+                'filter-name'("WeceemFileFilter")
+                'filter-class'("org.weceem.filter.UploadedFileFilter")
+            }
+        }
+        def mappings = webXml.'filter-mapping' // this does only yield 2 filter mappings
+        mappings + {
+            'filter-mapping' {
+                'filter-name'("WeceemFileFilter")
+                'url-pattern'("${uploadUrl}*")
+            }
+        }
+        
     }
 
     def doWithDynamicMethods = { ctx ->

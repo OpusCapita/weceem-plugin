@@ -32,7 +32,10 @@ class WcmEventService {
      * Call the event handler on any listeners
      */
     void event(WeceemEvent event, WcmContent contentNode) {
-        println "Event: ${event} on ${contentNode}"
+        if (log.debugEnabled) {
+            log.debug "Triggering notification event: ${event} for ${contentMode.absoluteURI}"
+        }
+        
         def listenerList
         synchronized (listeners) {
             listenerList = listeners.toArray()
@@ -40,9 +43,7 @@ class WcmEventService {
         
         def eventName = event.toString()
         listenerList.each { l ->
-            println "Event: ${event} listener $l"
             if (l.metaClass.respondsTo(l, eventName, WcmContent)) {
-                println "Event: ${event} listener $l responds"
                 l."$eventName"(contentNode)
             }
         }

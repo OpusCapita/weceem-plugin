@@ -107,15 +107,31 @@ class WcmContentRepositoryService implements InitializingBean {
             space.makeUploadName() ?: EMPTY_ALIAS_URI)
         return path ? new File(spcf, path) : spcf
     }
+
+    static getUploadDirFromConfig(configObject) {
+        def uploadDirConf = configObject.weceem.upload.dir
+        (uploadDirConf instanceof String) && uploadDirConf ? uploadDirConf : "/WeceemFiles/"
+    }
     
+    static getUploadUrlFromConfig(configObject) {
+        def uploadDirConf = getUploadDirFromConfig(configObject)
+
+        if (!uploadDirConf.startsWith('file:')) {
+            if (!uploadDirConf.startsWith('/')) uploadDirConf = '/'+uploadDirConf
+            if (!uploadDirConf.endsWith('/')) uploadDirConf += '/'
+            
+            return uploadDirConf
+        } else {
+            return '/uploads/'
+        }
+    }
+
     void loadConfig() {
-        def uploadDirConf = grailsApplication.config.weceem.upload.dir
-        uploadDirConf = (uploadDirConf instanceof String) && uploadDirConf ? uploadDirConf : "/WeceemFiles/"
+        def uploadDirConf = getUploadDirFromConfig(grailsApplication.config)
 
         if (!uploadDirConf.startsWith('file:')) {
             uploadInWebapp = true
             uploadDir = grailsApplication.mainContext.getResource("$uploadDirConf").file
-            uploadUrl = uploadDirConf
         } else {
             def f = new File(new URI(uploadDirConf))
             if (!f.exists()) {
@@ -126,11 +142,11 @@ class WcmContentRepositoryService implements InitializingBean {
             }
             uploadInWebapp = false
             uploadDir = f
-            uploadUrl = '/uploads/'
         }
-        if (metaClass.hasProperty(this, 'log')) {
-            log.info "Weceem will use [${uploadDir}] as the directory for static uploaded files, and the url [${uploadUrl}] to serve them, files are inside webapp? [${uploadInWebapp}]"
-        }
+
+        uploadUrl = WcmContentRepositoryService.getUploadUrlFromConfig(grailsApplication.config)
+
+        log?.info "Weceem will use [${uploadDir}] as the directory for static uploaded files, and the url [${uploadUrl}] to serve them, files are inside webapp? [${uploadInWebapp}]"
     }
     
     void createDefaultSpace() {
@@ -186,10 +202,20 @@ class WcmContentRepositoryService implements InitializingBean {
         WcmSpace.findByAliasURI(uri, [cache:true])
     }
     
+    Map resolveSpaceAndURIOfUploadedFile(String url) {
+        def u = url - uploadUrl
+        if (u.startsWith(EMPTY_ALIAS_URI)) {
+            u -= EMPTY_ALIAS_URI
+        }
+        resolveSpaceAndURI( u)
+        
+    }
+    
     Map resolveSpaceAndURI(String uri) {
         def spaceName
         def space
         
+        // This is pretty horrible stuff. Beware.
         if (uri?.startsWith('/')) {
             if (uri.length() > 1) {
                 uri = uri[1..uri.length()-1]
@@ -511,14 +537,11 @@ class WcmContentRepositoryService implements InitializingBean {
      *
      */
     def triggerDomainEvent(WcmContent content, WeceemEvent event, argumentTypes = null, arguments = []) {
-        println "Triggering event: $event on ${content} with arg types $argumentTypes and args $arguments"
         if (log.debugEnabled) {
             log.debug "Attempting to trigger domain event [$eventName] on node ${content.dump()}"
         }
         def eventName = event.toString()
-        println "x"
         if (content.metaClass.respondsTo(content, eventName, *argumentTypes)) {
-            println "content responds to $eventName"
             if (log.debugEnabled) {
                 log.debug "Trigger domain event [$eventName] as it is supported on node ${content.dump()}"
             }

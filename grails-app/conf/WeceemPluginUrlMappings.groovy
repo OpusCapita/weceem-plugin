@@ -64,12 +64,6 @@ class WeceemPluginUrlMappings {
         
         def wcmContentRepositoryService = ApplicationHolder.application.mainContext.wcmContentRepositoryService
 
-        def u = wcmContentRepositoryService.uploadUrl
-        delegate.(u+'$uri**') {
-            controller = "wcmContent"
-            action = "showUploadedFile"
-        }
-        
         // This is tricky
         def contentURI = (WeceemPluginUrlMappings.CONTENT_PREFIX ? '/' : '')+"${WeceemPluginUrlMappings.CONTENT_PREFIX}/$uri**"
         
@@ -79,7 +73,7 @@ class WeceemPluginUrlMappings {
             constraints {
                 // @todo this is very ugly, clean up
                 uri(validator: { v ->
-                    def uploadsPath = ApplicationHolder.application.mainContext.wcmContentRepositoryService.uploadUrl - '/'
+                    def uploadsPath = wcmContentRepositoryService.uploadUrl - '/'
                     return !v?.startsWith(uploadsPath) && !WeceemPluginUrlMappings.FORBIDDEN_SPACE_URIS.find { p -> 
                         return v?.startsWith(p) 
                     }
