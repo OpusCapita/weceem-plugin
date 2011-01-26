@@ -170,12 +170,10 @@ class WcmContent implements Comparable, Taggable {
         this.orderIndex <=> o.orderIndex
     }
 
-    Boolean canHaveChildren() { true }
+    boolean contentShouldAcceptChildren() { true }
 
-    Boolean canAcceptChild(WcmContent newChild) { true }
+    boolean contentShouldAcceptChild(WcmContent newChild) { true }
 
-    Boolean canHaveMultipleParents() { true }
-    
     String getMimeType() { "text/plain" }
     
     /**

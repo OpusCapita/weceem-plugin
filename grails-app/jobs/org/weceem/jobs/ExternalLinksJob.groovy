@@ -39,7 +39,7 @@ class ExternalLinksJob {
     static group = 'weceem'
     
     def execute(){
-
+        /* @todo this is not ready to use
         WcmRelatedContent.findAllWhere("isInternal": false).each() {
             // open connection to external link
             def url = new URL(it.toContent)
@@ -56,5 +56,6 @@ class ExternalLinksJob {
             it.lastCheckedOn = new Date()
             it.save()
         }
+        */
     }
 }

@@ -24,9 +24,9 @@ class WcmContentDirectory extends WcmContentFile {
 
     Integer filesCount = 0
 
-    Boolean canHaveChildren() { true }
+    boolean contentShouldAcceptChildren() { true }
     
-    Boolean canAcceptChild(WcmContent newChild) { 
+    boolean contentShouldAcceptChild(WcmContent newChild) { 
         newChild.instanceOf(WcmContentFile)
     }
 

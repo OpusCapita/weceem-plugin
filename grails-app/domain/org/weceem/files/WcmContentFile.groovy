@@ -60,7 +60,11 @@ class WcmContentFile extends WcmContent {
         renderFile(content.toFile(), content.fileMimeType)
     }
     
-    Boolean canHaveChildren() { false }
+    String getMimeType() { 
+        fileMimeType
+    }
+    
+    boolean contentShouldAcceptChildren() { false }
 
     /**
      * Handle the create event to copy the file from the upload form into the filesystem

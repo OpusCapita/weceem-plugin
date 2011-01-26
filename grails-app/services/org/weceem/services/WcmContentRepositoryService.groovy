@@ -373,7 +373,9 @@ class WcmContentRepositoryService implements InitializingBean {
     def getGSPTemplate(content) {
         def absURI = content.absoluteURI
         def k = makeURICacheKey(content.space, absURI)
+        println "Key for GSP content $absURI is $k"
         wcmCacheService.getOrPutObject(CACHE_NAME_GSP_CACHE, k) {
+            println "Creating GSP template for $absURI / $k"
             if (log.debugEnabled) {
                 log.debug "Creating GSP template class for $absURI"
             }
@@ -580,7 +582,7 @@ class WcmContentRepositoryService implements InitializingBean {
         def result = true
 
         if (parentContent) {
-            result = parentContent.canAcceptChild(content)
+            result = triggerDomainEvent(parentContent, WeceemEvent.contentShouldAcceptChild, [WcmContent], [content])
         }
         
         if (result) {
@@ -765,7 +767,7 @@ class WcmContentRepositoryService implements InitializingBean {
 
         def parentChanged = targetContent != sourceContent.parent
         if (targetContent && parentChanged) {
-            success = targetContent.canAcceptChild(sourceContent)
+            success = triggerDomainEvent(targetContent, WeceemEvent.contentShouldAcceptChild, [WcmContent], [sourceContent])
         }
 
         if (success && parentChanged) {
@@ -909,6 +911,7 @@ class WcmContentRepositoryService implements InitializingBean {
         // we need to delete all virtual contents that reference sourceContent
         def copies = WcmVirtualContent.findAllWhere(target: sourceContent)
         copies?.each() {
+           // @todo We should be using deleteNode here, recursing
            if (it.parent) {
                parent = WcmContent.get(it.parent.id)
                parent.children.remove(it)
@@ -1514,11 +1517,11 @@ class WcmContentRepositoryService implements InitializingBean {
         // Can't impl this yet
     }
     
-    def getTemplateForContent(def content){
-        def template = (content.metaClass.hasProperty(content, 'template')) ? content.template : null
-        if ((template == null) && (content.parent != null)){
+    def getTemplateForContent(def content) {
+        def template = content.metaClass.hasProperty(content, 'template') ? content.template : null
+        if ((template == null) && (content.parent != null)) {
             return getTemplateForContent(content.parent)
-        }else{
+        } else {
             return template
         }
     }

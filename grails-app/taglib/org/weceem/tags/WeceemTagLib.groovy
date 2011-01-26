@@ -44,9 +44,11 @@ class WeceemTagLib {
     static ATTR_SPACE = "space"
     static ATTR_COUNTER = "counter"
     static ATTR_VAR = "var"
+    static ATTR_IN = "in"
     static ATTR_VALUE = "value"
     static ATTR_SIBLINGS = "siblings"
     static ATTR_LEVELS = "levels"
+    static ATTR_LENGTH = "length"
     static ATTR_CUSTOM = "custom"
     static ATTR_ACTIVE_CLASS = "activeClass"
     static ATTR_FIRST_CLASS = "firstClass"
@@ -874,8 +876,8 @@ class WeceemTagLib {
     }
     
     def join = { attrs, body ->
-        def items = attrs.in?.collect { item ->
-            def vars = attrs.var ? [(attrs.var):item] : item
+        def items = attrs[ATTR_IN]?.collect { item ->
+            def vars = attrs.var ? [(attrs[ATTR_VAR]):item] : item
             return body(vars).trim()
         } 
         if (items) {
@@ -949,7 +951,7 @@ ${node.content}
     }
     
     def summarize = { attrs, body ->
-        int maxLen = (attrs.length ?: 100).toInteger()
+        int maxLen = (attrs[ATTR_LENGTH] ?: 100).toInteger()
         def codec = attrs.encodeAs
         def ellipsis = attrs.ellipsis ?: '...'
         def s = ContentUtils.summarize(body().toString(), maxLen, ellipsis)

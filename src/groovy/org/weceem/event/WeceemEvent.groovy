@@ -1,16 +1,19 @@
 package org.weceem.event
 
 public enum WeceemEvent {
-     contentShouldBeCreated,
-     contentDidGetCreated,
+     /* boolean */ contentShouldBeCreated /* (WcmContent parentNodeOrNull) */, 
+     /* void */ contentDidGetCreated /* () */,
 
-     contentShouldBeDeleted,
-     contentWillBeDeleted,
-     contentDidGetDeleted,
+     /* boolean */ contentShouldBeDeleted /* () */,
+     /* void */ contentWillBeDeleted,
+     /* void */ contentDidGetDeleted,
 
-     contentDidChangeTitle,
-     contentDidGetUpdated,
+     /* void */ contentDidChangeTitle /* (String previousTitle) */,
+     /* void */ contentDidGetUpdated /* () */,
 
-     contentShouldMove,
-     contentDidMove
+     /* boolean */ contentShouldMove /* (WcmContent targetParent) */,
+     /* void */ contentDidMove /* () */,
+     
+     /* boolean */ contentShouldAcceptChildren /* () */,
+     /* boolean */ contentShouldAcceptChild /* (WcmContent possibleChild) */
 }

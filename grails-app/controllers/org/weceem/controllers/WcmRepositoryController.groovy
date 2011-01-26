@@ -29,6 +29,7 @@ import org.weceem.content.*
 // Design smell
 import org.weceem.files.*
 import org.weceem.html.*
+import org.weceem.event.WeceemEvent
 
 /**
  */
@@ -111,7 +112,7 @@ class WcmRepositoryController {
             def haveChildren = [:]
             for (domainClass in wcmContentRepositoryService.listContentClasses()){
                 def dcInst = domainClass.newInstance()
-                haveChildren.put(domainClass.name, dcInst.canHaveChildren())
+                haveChildren.put(domainClass.name, wcmContentRepositoryService.triggerDomainEvent(dcInst, WeceemEvent.contentShouldAcceptChildren))
             }
             return [content:nodes, contentTypes:wcmContentRepositoryService.listContentClassNames(), 
                 'haveChildren':haveChildren, space: params.space, spaces: WcmSpace.listOrderByName() ]
@@ -298,9 +299,8 @@ class WcmRepositoryController {
                 getContent(params.contentPath, space), space).collect {
             [path: "${params.contentPath}/${it.id}",
                 label: it.title, type: it.class.name,
-                hasChildren: it.children?.size() > 0 ? true: false,
-                canHaveChildren: it.canHaveChildren(),
-                canHaveMultipleParents: it.canHaveMultipleParents()]
+                hasChildren: it.children ? true : false,
+                canHaveChildren: wcmContentRepositoryService.triggerDomainEvent(it, WeceemEvent.contentShouldAcceptChildren)]
         }
         render children as JSON
     }
@@ -538,9 +538,9 @@ class WcmRepositoryController {
         def result = rootNodes.collect { content ->
             [path: generateContentName(space.id, contentType, content.id),
                 label: content.title, type: content.class.name,
-                hasChildren: (content.children && content.children.size()) ? true : false,
-                canHaveChildren: content.canHaveChildren(),
-                canHaveMultipleParents: content.canHaveMultipleParents()]
+                hasChildren: content.children ? true : false,
+                canHaveChildren: wcmContentRepositoryService.triggerDomainEvent(content, WeceemEvent.contentShouldAcceptChildren)
+            ]
         }
         return result
     }
@@ -550,9 +550,9 @@ class WcmRepositoryController {
         def result = items.collect {
              [path: generateContentName(space.id, 'Files', it.id),
                     label: it.title, type: it.class.name,
-                    hasChildren: (it.children && it.children.size() > 0) ? true : false,
-                    canHaveChildren: it.canHaveChildren(),
-                    canHaveMultipleParents: it.canHaveMultipleParents()]
+                    hasChildren: it.children ? true : false,
+                    canHaveChildren: wcmContentRepositoryService.triggerDomainEvent(it, WeceemEvent.contentShouldAcceptChildren)
+             ]
         }
         return result
     }
