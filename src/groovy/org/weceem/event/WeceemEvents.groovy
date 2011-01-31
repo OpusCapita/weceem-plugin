@@ -3,15 +3,15 @@ package org.weceem.event
 import org.weceem.content.WcmContent
 
 class WeceemEvents {
-    final static protocol = {
-        contentDidGetCreated(WcmContent /*node*/)
+    static events = {
+        contentDidGetCreated { WcmContent node -> }
 
-        contentWillBeDeleted(WcmContent /*node*/)
-        contentDidGetDeleted(WcmContent /*node*/)
+        contentWillBeDeleted { WcmContent node -> }
+        contentDidGetDeleted { WcmContent node -> }
         
-        contentDidGetUpdated(WcmContent /*node*/)
+        contentDidGetUpdated { WcmContent node -> }
         
-        contentDidMove(WcmContent /*node*/)
+        contentDidMove { WcmContent node -> }
     }
     
     static {

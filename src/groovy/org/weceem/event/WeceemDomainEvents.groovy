@@ -3,7 +3,7 @@ package org.weceem.event
 import org.weceem.content.WcmContent
 
 class WeceemDomainEvents {
-    final static protocol = {
+    static events = {
         contentDidGetCreated()
 
         contentWillBeDeleted()
@@ -13,15 +13,15 @@ class WeceemDomainEvents {
         
         contentDidMove()
 
-        contentShouldBeCreated(WcmContent /* newNode */)
+        contentShouldBeCreated { WcmContent newNode -> }
         contentShouldBeDeleted()
 
-        contentDidChangeTitle(String /* previousTitle */)
+        contentDidChangeTitle { String previousTitle -> }
 
-        contentShouldMove(WcmContent)
+        contentShouldMove { WcmContent newParent -> }
 
         contentShouldAcceptChildren()
-        contentShouldAcceptChild(WcmContent /* possibleChild */)
+        contentShouldAcceptChild { WcmContent possibleChild -> }
     }
     
     static {

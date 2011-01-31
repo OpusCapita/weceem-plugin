@@ -1,8 +1,14 @@
 package org.weceem.event
 
+import org.apache.commons.logging.LogFactory
+import org.apache.commons.logging.Log
+
 import grails.util.GrailsNameUtils
 
 abstract class EventManager {
+    
+    static Log log = LogFactory.getLog(EventManager)
+
     private static initialized
     
     static init() {
@@ -23,13 +29,13 @@ abstract class EventManager {
             init()
         }
         
-        def declarations = c.protocol
+        def declarations = c.events
         declarations.delegate = new EventManagerDelegate(clazz:c)
         declarations()
         
         declarations.delegate.meths.each { protoMeth ->
             def mn = GrailsNameUtils.getClassNameRepresentation(protoMeth.name)
-            println "Registering method: get${mn}"
+            log.debug "Registering method: get${mn} on ${c}"
             c.metaClass.static."get${mn}" = { -> protoMeth }
         }
         
@@ -42,7 +48,15 @@ class EventManagerDelegate {
     Class clazz
     
     def methodMissing(String name, args) {
-        assert args.every { a -> a instanceof Class }
-        meths << new EventMethod(name, clazz, args as Class[])
+        assert args.size() <= 1
+        def argTypes 
+        if (args.size() == 1) {
+            assert args[0] instanceof Closure
+            
+            argTypes = args[0].parameterTypes
+        } else {
+            argTypes = []
+        }
+        meths << new EventMethod(name, clazz, argTypes as Class[])
     }
 }
