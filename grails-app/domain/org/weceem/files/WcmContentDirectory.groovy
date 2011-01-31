@@ -30,7 +30,7 @@ class WcmContentDirectory extends WcmContentFile {
         newChild.instanceOf(WcmContentFile)
     }
 
-    Boolean contentShouldBeCreated(WcmContent parentContent) {
+    boolean contentShouldBeCreated(WcmContent parentContent) {
         def p
         if (parentContent && (parentContent instanceof WcmContentDirectory)) {
             def path = getPathTo(parentContent)

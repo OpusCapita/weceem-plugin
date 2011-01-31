@@ -7,6 +7,7 @@ import grails.util.Environment
 
 // This is for a hack, remove later
 import org.codehaus.groovy.grails.web.metaclass.BindDynamicMethod
+import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.hibernate.exception.ConstraintViolationException
 
 import org.weceem.content.*
@@ -14,10 +15,11 @@ import org.weceem.content.*
 //@todo design smell!
 import org.weceem.files.*
 import org.weceem.script.WcmScript
-import org.weceem.event.WeceemEvent
 
+import org.weceem.event.EventMethod
+import org.weceem.event.WeceemEvents
+import org.weceem.event.WeceemDomainEvents
 import org.weceem.security.*
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
 
 /**
  * WcmContentRepositoryService class provides methods for WcmContent Repository tree
@@ -528,8 +530,10 @@ class WcmContentRepositoryService implements InitializingBean {
      * Not suitable for events that are confirmation "can this happen" callbacks, this if for
      * things that have already happened.
      */
-    def triggerEvent(WcmContent content, WeceemEvent event, argumentTypes = null, arguments = []) {
-        def outcome = triggerDomainEvent(content, event, argumentTypes, arguments)
+    def triggerEvent(WcmContent content, EventMethod event, arguments = null) {
+        assert event.definedIn(WeceemEvents)
+
+        def outcome = triggerDomainEvent(content, WeceemDomainEvents[event.name], arguments)
         if (outcome) {
             wcmEventService.event(event, content)
         }
@@ -540,17 +544,19 @@ class WcmContentRepositoryService implements InitializingBean {
      * Trigger an event on the domain class only.
      *
      */
-    def triggerDomainEvent(WcmContent content, WeceemEvent event, argumentTypes = null, arguments = []) {
+    def triggerDomainEvent(WcmContent content, EventMethod event, arguments = null) {
+        assert event.definedIn(WeceemDomainEvents)
+        
         if (log.debugEnabled) {
             log.debug "Attempting to trigger domain event [$event] on node ${content.dump()}"
         }
         def eventName = event.toString()
-        if (content.metaClass.respondsTo(content, eventName, *argumentTypes)) {
+        if (content.conformsTo(event)) {
             if (log.debugEnabled) {
                 log.debug "Trigger domain event [$event] as it is supported on node ${content.dump()}"
             }
             // Call the event so that nodes can perform post-creation tasks
-            return content."${eventName}"(*arguments)
+            return event.invokeOn(content, arguments)
         } else {
             if (log.debugEnabled) {
                 log.debug "Node does not support [$event] event, skipping"
@@ -582,11 +588,11 @@ class WcmContentRepositoryService implements InitializingBean {
         def result = true
 
         if (parentContent) {
-            result = triggerDomainEvent(parentContent, WeceemEvent.contentShouldAcceptChild, [WcmContent], [content])
+            result = triggerDomainEvent(parentContent, WeceemDomainEvents.contentShouldAcceptChild, [content])
         }
         
         if (result) {
-            result = triggerDomainEvent(content, WeceemEvent.contentShouldBeCreated, [WcmContent], [parentContent])
+            result = triggerDomainEvent(content, WeceemDomainEvents.contentShouldBeCreated, [parentContent])
         }
 
         if (result) {
@@ -660,7 +666,7 @@ class WcmContentRepositoryService implements InitializingBean {
             }
             
             if (result) {
-                triggerEvent(content, WeceemEvent.contentDidGetCreated)
+                triggerEvent(content, WeceemEvents.contentDidGetCreated)
             }
 
             if (!result) {
@@ -767,11 +773,11 @@ class WcmContentRepositoryService implements InitializingBean {
 
         def parentChanged = targetContent != sourceContent.parent
         if (targetContent && parentChanged) {
-            success = triggerDomainEvent(targetContent, WeceemEvent.contentShouldAcceptChild, [WcmContent], [sourceContent])
+            success = triggerDomainEvent(targetContent, WeceemDomainEvents.contentShouldAcceptChild, [sourceContent])
         }
 
         if (success && parentChanged) {
-            success = triggerDomainEvent(sourceContent, WeceemEvent.contentShouldMove, [WcmContent], [targetContent])
+            success = triggerDomainEvent(sourceContent, WeceemDomainEvents.contentShouldMove, [targetContent])
         }
         
         if (success) {
@@ -806,7 +812,7 @@ class WcmContentRepositoryService implements InitializingBean {
 
             success = sourceContent.save(flush: true)
             if (success) {
-                triggerEvent(sourceContent, WeceemEvent.contentDidMove)
+                triggerEvent(sourceContent, WeceemEvents.contentDidMove)
             }
             return success
         } else {
@@ -891,11 +897,11 @@ class WcmContentRepositoryService implements InitializingBean {
         // Create a versioning entry
         sourceContent.saveRevision(sourceContent.title, sourceContent.space.name)
         
-        if (!triggerDomainEvent(sourceContent, WeceemEvent.contentShouldBeDeleted)) {
+        if (!triggerDomainEvent(sourceContent, WeceemDomainEvents.contentShouldBeDeleted)) {
             return false
         }
 
-        triggerEvent(sourceContent, WeceemEvent.contentWillBeDeleted)
+        triggerEvent(sourceContent, WeceemEvents.contentWillBeDeleted)
 
         // Do this now before absoluteURI gets trashed by changing the parent
         invalidateCachingForURI(sourceContent.space, sourceContent.absoluteURI)
@@ -933,7 +939,7 @@ class WcmContentRepositoryService implements InitializingBean {
         removeAllTagsFrom(sourceContent)
         sourceContent.delete(flush: true)
 
-        triggerEvent(sourceContent, WeceemEvent.contentDidGetDeleted)
+        triggerEvent(sourceContent, WeceemEvents.contentDidGetDeleted)
 
         return true
     }
@@ -1085,7 +1091,7 @@ class WcmContentRepositoryService implements InitializingBean {
             if (params.tags != null) {
                 content.setTags(params.tags.tokenize(',').collect { it.trim().toLowerCase()} )
             }
-            triggerEvent(content, WeceemEvent.contentDidChangeTitle, [String], [oldTitle])
+            triggerDomainEvent(content, WeceemDomainEvents.contentDidChangeTitle, [oldTitle])
             
             if (log.debugEnabled) {
                 log.debug("Updated node with id ${content.id}, properties are now: ${content.dump()}")
@@ -1111,7 +1117,7 @@ class WcmContentRepositoryService implements InitializingBean {
             
                 invalidateCachingForURI(content.space, oldAbsURI)
 
-                triggerEvent(content, WeceemEvent.contentDidGetUpdated)
+                triggerEvent(content, WeceemEvents.contentDidGetUpdated)
 
                 return [content:content]
             }

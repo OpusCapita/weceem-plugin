@@ -1,7 +1,8 @@
 package org.weceem.services
 
 import org.weceem.content.WcmContent
-import org.weceem.event.WeceemEvent
+import org.weceem.event.WeceemEvents
+import org.weceem.event.EventMethod
 
 /*
  * A service to send events to hooks used by plugins/internally
@@ -18,6 +19,7 @@ class WcmEventService {
      * Register a listener with a callback method
      */
     void addListener(listener) {
+        assert listener.conformsTo(WeceemEvents)
         listeners << listener
     }
 
@@ -31,7 +33,9 @@ class WcmEventService {
     /**
      * Call the event handler on any listeners
      */
-    void event(WeceemEvent event, WcmContent contentNode) {
+    void event(EventMethod event, WcmContent contentNode) {
+        assert event.definedIn(WeceemEvents)
+        
         if (log.debugEnabled) {
             log.debug "Triggering notification event: ${event} for ${contentNode.absoluteURI}"
         }
@@ -41,10 +45,10 @@ class WcmEventService {
             listenerList = listeners.toArray()
         }
         
-        def eventName = event.toString()
+        def eventName = event
         listenerList.each { l ->
-            if (l.metaClass.respondsTo(l, eventName, WcmContent)) {
-                l."$eventName"(contentNode)
+            if (l.conformsTo(event)) {
+                event.invokeOn(l, [contentNode])
             }
         }
     }

@@ -1,5 +1,6 @@
 import org.weceem.services.WcmEventService
-import org.weceem.event.WeceemEvent
+import org.weceem.event.WeceemEvents
+import org.weceem.event.EventManager
 
 import org.weceem.content.WcmContent
 
@@ -11,8 +12,10 @@ class EventServiceTests extends grails.test.GrailsUnitTestCase {
     protected void setUp() {
         super.setUp()
         mockLogging(WcmEventService)
+
+        EventManager.init()
+
         eventService = new WcmEventService()
-        listenerCalled = false
     }
 
     protected void tearDown() {
@@ -20,24 +23,28 @@ class EventServiceTests extends grails.test.GrailsUnitTestCase {
     }
 
     void testEventWithNoListeners() {
-        eventService.event(WeceemEvent.contentDidGetCreated, new WcmContent())
+        eventService.event(WeceemEvents.contentDidGetCreated, new WcmContent())
     }
     
     void testContentDidGetCreatedEvent() {
         // then test with a listener
-        eventService.addListener(this)
-        eventService.event(WeceemEvent.contentDidGetCreated, new WcmContent())
-        assertTrue listenerCalled
+        def l = new TestListener()
+        eventService.addListener(l)
+        eventService.event(WeceemEvents.contentDidGetCreated, new WcmContent())
+        assertTrue l.called
 
         // remove listener and test again
-        eventService.removeListener(this)
-        listenerCalled = false
-        eventService.event(WeceemEvent.contentDidGetCreated, new WcmContent())
-        assertFalse listenerCalled
-    }
-
-    void contentDidGetCreated(WcmContent content) {
-        listenerCalled = true
+        eventService.removeListener(l)
+        l.called = false
+        eventService.event(WeceemEvents.contentDidGetCreated, new WcmContent())
+        assertFalse l.called
     }
 }
 
+class TestListener {
+    boolean called
+
+    void contentDidGetCreated(WcmContent content) {
+        called = true
+    }
+}

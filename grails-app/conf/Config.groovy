@@ -18,7 +18,7 @@ log4j = {
     
     info   'grails.app'
 
-    info   'grails.app.controller',
+    debug   'grails.app.controller',
             'grails.app.service',
             'grails.app.task',
             'org.codehaus.groovy.grails.web.servlet',  //  controllers

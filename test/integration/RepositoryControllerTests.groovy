@@ -108,6 +108,10 @@ class RepositoryControllerTests extends GroovyTestCase {
         //   ----d
         //       ----b (3)
     }
+
+    void testNothing() {
+        
+    }
 /*    
     void testInsertNode() {
         def controller = new WcmRepositoryController()
@@ -137,74 +141,7 @@ class RepositoryControllerTests extends GroovyTestCase {
         assertNotNull parent.children?.find { it.id == node.id }
     }
 */
-
-    void testCreateDirectory() {
-        createDirectory([dirname: 'sample_dir', 'space.id': spaceA.ident(), statuscode: defStatus.code])
-
-        // check created directory (also on the file system)
-        assert WcmContentDirectory.findByTitleAndSpace('sample_dir', spaceA)
-        def dir = org.weceem.services.WcmContentRepositoryService.getUploadPath(spaceA, 'sample_dir')
-        assert dir.exists()
-        assert dir.directory
-
-        new AntBuilder().delete(dir: dir.absolutePath)
-    }
-
-    void testCreateDirectoryWithParent() {
-        def testDir = new WcmContentDirectory(title: 'test_dir', aliasURI: 'test_dir',
-                content: '', filesCount: 0, space: spaceA,
-                mimeType: '', fileSize: 0, status: defStatus)
-        testDir.save(flush: true)
-        createDirectory([dirname: 'sample_dir', 'space.id': spaceA.ident(),
-                parentPath: "${spaceA.ident()}/Files/${testDir.ident()}", statuscode: defStatus.code])
-
-        // check parent:child mappings
-        def loadedDir = WcmContentDirectory.findByTitleAndSpace('sample_dir', spaceA)
-        assertNotNull loadedDir
-        testDir = WcmContentDirectory.findByTitle('test_dir')
-        assertNotNull testDir
-        assertEquals testDir, loadedDir.parent
-        assertNotNull testDir.children?.find { it.id == loadedDir.id }
-        
-        // Now check filesystem dir exists
-        def dir = org.weceem.services.WcmContentRepositoryService.getUploadPath(spaceA, 'test_dir/sample_dir')
-        assert dir.exists()
-        assert dir.directory
-
-        new AntBuilder().delete(dir: dir.absolutePath)
-    }
-
-    void testCannotCreateDirectoryWithHtmlParent() {
-        shouldFail {
-            createDirectory([dirname: 'sample_dir', 'space.id': spaceA.ident(),
-                    parentPath: "${spaceA.ident()}/HTMLContent/${nodeA.ident()}", statuscode: defStatus.code])
-        }
-    }
-
     public void setApplicationContext(ApplicationContext applicationContext) {
         this.applicationContext = applicationContext
-    }
-
-    private void createDirectory(params) {
-        def controller = new WcmRepositoryController()
-        controller.wcmContentRepositoryService = wcmContentRepositoryService
-        controller.grailsApplication = grailsApplication
-        controller.params.putAll(params)
-        controller.createDirectory()
-    }
-
-    private void uploadFile(path, originalFilename, mimeType, params) {
-        def file = new File(servletContext.getRealPath(path))
-        def multipartFile = new MockMultipartFile('file', originalFilename,
-                mimeType, new FileInputStream(file))
-        def multipartRequest = new MockMultipartHttpServletRequest()
-        multipartRequest.addFile multipartFile
-
-        def controller = new WcmRepositoryController()
-        WcmRepositoryController.metaClass.getRequest = { -> multipartRequest }
-        controller.wcmContentRepositoryService = wcmContentRepositoryService
-        controller.grailsApplication = grailsApplication
-        controller.params.putAll(params)
-        controller.uploadFile()
     }
 }

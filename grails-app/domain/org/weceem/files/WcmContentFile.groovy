@@ -70,7 +70,7 @@ class WcmContentFile extends WcmContent {
      * Handle the create event to copy the file from the upload form into the filesystem
      * Files are *not* stored in the repository database
      */
-    Boolean contentShouldBeCreated(WcmContent parentContent) {
+    boolean contentShouldBeCreated(WcmContent parentContent) {
         if (!title) {
             title = uploadedFile?.originalFilename
         }

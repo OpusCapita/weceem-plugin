@@ -26,10 +26,12 @@ import com.lowagie.text.pdf.PdfWriter
 import java.text.SimpleDateFormat
 
 import org.weceem.content.*
+
 // Design smell
 import org.weceem.files.*
 import org.weceem.html.*
-import org.weceem.event.WeceemEvent
+
+import org.weceem.event.WeceemDomainEvents
 
 /**
  */
@@ -112,7 +114,7 @@ class WcmRepositoryController {
             def haveChildren = [:]
             for (domainClass in wcmContentRepositoryService.listContentClasses()){
                 def dcInst = domainClass.newInstance()
-                haveChildren.put(domainClass.name, wcmContentRepositoryService.triggerDomainEvent(dcInst, WeceemEvent.contentShouldAcceptChildren))
+                haveChildren.put(domainClass.name, wcmContentRepositoryService.triggerDomainEvent(dcInst, WeceemDomainEvents.contentShouldAcceptChildren))
             }
             return [content:nodes, contentTypes:wcmContentRepositoryService.listContentClassNames(), 
                 'haveChildren':haveChildren, space: params.space, spaces: WcmSpace.listOrderByName() ]
@@ -300,72 +302,9 @@ class WcmRepositoryController {
             [path: "${params.contentPath}/${it.id}",
                 label: it.title, type: it.class.name,
                 hasChildren: it.children ? true : false,
-                canHaveChildren: wcmContentRepositoryService.triggerDomainEvent(it, WeceemEvent.contentShouldAcceptChildren)]
+                canHaveChildren: wcmContentRepositoryService.triggerDomainEvent(it, WeceemDomainEvents.contentShouldAcceptChildren)]
         }
         render children as JSON
-    }
-
-    /**
-     * @param dirname
-     * @param space
-     * @param parentPath
-     */
-    def createDirectory = {
-        def space = WcmSpace.get(params['space.id']?.toLong())
-        def parent = params.parentPath ? getContent(params.parentPath, space) : null
-
-        if (!contentFileExists(params.dirname, parent, space)) {
-            def contentDirectory = new WcmContentDirectory(title: params.dirname,
-                    content: '', filesCount: 0, space: space,
-                    mimeType: '', fileSize: 0, status: WcmStatus.findByCode(params.statuscode))
-            contentDirectory.createAliasURI((parent && (parent instanceof WcmContentDirectory)) ? parent : null)
-            if (contentDirectory.save()) {
-                if (!wcmContentRepositoryService.createNode(contentDirectory, parent)) {
-                    flash.error = message(code: 'error.contentRepository.fileSystem')
-                }
-            } else {
-                flash.contentNode = contentDirectory
-            }
-        } else {
-            flash.error = message(code: 'error.contentRepository.fileExists')
-        }
-
-        redirect(action: treeTable)
-    }
-
-    /**
-     * @param file
-     * @param filename
-     * @param space
-     * @param parentPath
-     */
-    def uploadFile = {
-        assert !"This obsolete?"
-        
-        def space = WcmSpace.get(params['space.id']?.toLong())
-        def parent = params.parentPath ? getContent(params.parentPath, space) : null
-        def file = request.getFile('file')
-        def title = params.filename ? params.filename : file.originalFilename
-
-        if (!contentFileExists(title, parent, space)) {
-            // todo: fix when "file.contentType" returns null
-            def contentFile = new WcmContentFile(title: title,
-                    content: '', space: space,
-                    mimeType: file.contentType, fileSize: file.size, status: WcmStatus.findByCode(params.statuscode))
-            contentFile.createAliasURI((parent && (parent instanceof WcmContentDirectory)) ? parent : null)
-            contentFile.uploadedFile = file
-            if (contentFile.save()) {
-                if (!wcmContentRepositoryService.createNode(contentFile, parent)) {
-                    flash.error = message(code: 'error.contentRepository.fileSystem')
-                }
-            } else {
-                flash.contentNode = contentFile
-            }
-        } else {
-            flash.error = message(code: 'error.contentRepository.fileExists')
-        }
-
-        redirect(action: treeTable)
     }
 
     /**
@@ -539,7 +478,7 @@ class WcmRepositoryController {
             [path: generateContentName(space.id, contentType, content.id),
                 label: content.title, type: content.class.name,
                 hasChildren: content.children ? true : false,
-                canHaveChildren: wcmContentRepositoryService.triggerDomainEvent(content, WeceemEvent.contentShouldAcceptChildren)
+                canHaveChildren: wcmContentRepositoryService.triggerDomainEvent(content, WeceemDomainEvents.contentShouldAcceptChildren)
             ]
         }
         return result
@@ -551,7 +490,7 @@ class WcmRepositoryController {
              [path: generateContentName(space.id, 'Files', it.id),
                     label: it.title, type: it.class.name,
                     hasChildren: it.children ? true : false,
-                    canHaveChildren: wcmContentRepositoryService.triggerDomainEvent(it, WeceemEvent.contentShouldAcceptChildren)
+                    canHaveChildren: wcmContentRepositoryService.triggerDomainEvent(it, WeceemDomainEvents.contentShouldAcceptChildren)
              ]
         }
         return result
