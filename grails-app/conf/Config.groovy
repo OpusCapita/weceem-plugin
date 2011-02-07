@@ -9,6 +9,7 @@ org.weceem.plugin.standalone="true"
 //weceem.admin.prefix="cms/admin"
 //weceem.tools.prefix="cms/tools"
 //weceem.admin.layout="weceemadmin-alt"
+//weceem.create.default.space = false
 
 log4j = {
     root {
