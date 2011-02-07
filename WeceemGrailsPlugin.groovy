@@ -69,8 +69,11 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         
         applicationContext.navigationService.registerItem( 'weceem', 
             [controller:'wcmRepository', action:'treeTable', title:'content', path:'contentrepo', order:0])
+
         applicationContext.navigationService.registerItem( 'weceem', 
             [controller:'wcmPortal', action:'administration', title:'administration', path:'admin',order:2])
+
+        // Register the standard admin sections
         [
             [controller:'wcmSpace', action:'list', title:'spaces', path:'admin/spaces', order: 0],
             [controller:'wcmSynchronization', action:'list', title:'synchronize', path:'admin/files/synchronize', order: 1],
