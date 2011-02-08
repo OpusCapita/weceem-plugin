@@ -103,9 +103,37 @@ class WeceemSecurityPolicy {
         
         def permEvaluatingClosure
         switch (permGranted) {
-            case Boolean: permEvaluatingClosure = { args -> permGranted }; break; 
-            case Map: if (permGranted.types) {
-                    permEvaluatingClosure = { args -> args?.type ? permGranted.types?.contains(args.type) : false } 
+            case Boolean: 
+                permEvaluatingClosure = { args -> permGranted }; 
+                break; 
+            case Map: 
+                if (permGranted.types) {
+                    // Convert to a map of Type:Constraints map
+                    def typesInfo = [:]
+                    if (permGranted.types instanceof Map) {
+                        typesInfo += permGranted.types
+                    } else if (permGranted.types instanceof List) {
+                        permGranted.types.each { t ->
+                            typesInfo[t] = Collections.EMPTY_MAP
+                        }
+                    } else {
+                        throw new IllegalArgumentException("The types argument for a permission must be a list of types or a map of type to map of property restrictions")
+                    }
+                    permEvaluatingClosure = { args -> 
+                        println "Checking perm granted args ${args} - restriction info: ${typesInfo}"
+                        if (args?.type) {
+                            def ti = typesInfo[args.type]  
+                            println "Checking perm ti: $ti"
+                            if (ti != null) {
+                                return (ti.size() == 0) || (args.content && ti.every { k, v -> 
+                                    println "Checking $k/$v on ${args.content.dump()}"
+                                    args.content[k] == v 
+                                })
+                            } else {
+                                return false // not in permitted types list
+                            }
+                        }
+                    } 
                 }
                 break
             default:
@@ -152,7 +180,7 @@ class WeceemSecurityPolicy {
         }
         
         // If the uri is null this means we are checking for permissions to access the SPACE rather than a URI in the space
-        // eg we use the default permissions for the space 
+        // eg we use the default permissions for the space` 
         if (uri == null) {
             uri = DEFAULT_POLICY_URI
         }

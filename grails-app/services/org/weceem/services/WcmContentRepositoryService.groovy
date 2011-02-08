@@ -322,14 +322,14 @@ class WcmContentRepositoryService implements InitializingBean {
         log.info "Successfully imported space template [${templateName}] into space [${space.name}]"
     }
     
-    void requirePermissions(WcmSpace space, permissionList, Class<WcmContent> type = null) throws AccessDeniedException {
+    void requirePermissions(WcmSpace space, List permissionList, Class<WcmContent> type = null) throws AccessDeniedException {
         if (!wcmSecurityService.hasPermissions(space, permissionList, type)) {
             throw new AccessDeniedException("User [${wcmSecurityService.userName}] with roles [${wcmSecurityService.userRoles}] does not have the permissions [$permissionList] to access space [${space.name}]")
         }
     }       
     
-    void requirePermissions(WcmContent content, permissionList, Class<WcmContent> type = null) throws AccessDeniedException {
-        if (!wcmSecurityService.hasPermissions(content, permissionList, type)) {
+    void requirePermissions(WcmContent content, permissionList) throws AccessDeniedException {
+        if (!wcmSecurityService.hasPermissions(content, permissionList)) {
             throw new AccessDeniedException("User [${wcmSecurityService.userName}] with roles [${wcmSecurityService.userRoles}] does not have the permissions [$permissionList] to access content at [${content.absoluteURI}] in space [${content.space.name}]")
         }
     }       
@@ -572,12 +572,7 @@ class WcmContentRepositoryService implements InitializingBean {
      * @param parentContent
      */
     Boolean createNode(WcmContent content, WcmContent parentContent = null) {
-        if (parentContent) { 
-            requirePermissions(parentContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
-        } else {
-            assert content.space
-            requirePermissions(content.space, [WeceemSecurityPolicy.PERMISSION_CREATE])        
-        }
+        requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_CREATE])        
 
         if (parentContent == null) parentContent = content.parent
 
@@ -740,9 +735,6 @@ class WcmContentRepositoryService implements InitializingBean {
         if (log.debugEnabled) {
             log.debug "Moving content ${sourceContent} to ${targetContent} at order index $orderIndex"
         }
-        if (targetContent) {
-            requirePermissions(targetContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
-        }
         requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_EDIT,WeceemSecurityPolicy.PERMISSION_VIEW])        
 
         if (!sourceContent) return false
@@ -804,7 +796,14 @@ class WcmContentRepositoryService implements InitializingBean {
             if (targetContent && parentChanged) {
                 if (!targetContent.children) targetContent.children = new TreeSet()
                 targetContent.addToChildren(sourceContent)
+
+                // Check we can be saved there
+                requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
+                
                 assert targetContent.save()
+            } else {
+                // Check we can be saved there
+                requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
             }
 
             // Invalidate the caches 
@@ -820,12 +819,12 @@ class WcmContentRepositoryService implements InitializingBean {
         }
      }
      
-    def shiftNodeChildrenOrderIndex(WcmSpace space, parent, shiftedOrderIndex){
+    def shiftNodeChildrenOrderIndex(WcmSpace space, WcmContent parent, shiftedOrderIndex){
         if (log.debugEnabled) {
             log.debug "Updating node order indexes in space ${space} for parent ${parent}"
         }
-        // Can't do this until space is supplied
-        //requirePermissions(parent, [WeceemSecurityPolicy.PERMISSION_EDIT])        
+        requirePermissions(parent ?: space, [WeceemSecurityPolicy.PERMISSION_EDIT])        
+        
         // @todo this is probably flushing the session with incomplete changes - use withNewSession?
         def criteria = WcmContent.createCriteria()
         def nodes = criteria {
@@ -947,10 +946,9 @@ class WcmContentRepositoryService implements InitializingBean {
     /**
      * Deletes content reference 
      *
-     * @todo Update the naming of this, "link" is not correct terminology. 
-     *
      * @param child
      * @param parent
+     * @deprecated This is old tat
      */
     void deleteLink(WcmContent child, WcmContent parent) {
         requirePermissions(parent, [WeceemSecurityPolicy.PERMISSION_EDIT])        
@@ -1251,7 +1249,6 @@ class WcmContentRepositoryService implements InitializingBean {
 
         requirePermissions(sourceNode, [WeceemSecurityPolicy.PERMISSION_VIEW])        
         
-        
         // @todo replace this with smarter queries on children instead of requiring loading of all child objects
         def typeRestriction = getContentClassForType(args.type)
         if (log.debugEnabled) {
@@ -1265,10 +1262,13 @@ class WcmContentRepositoryService implements InitializingBean {
             }
             cache true
         }
-        
-        return children
+                    
+        return onlyNodesWithPermissions(children, [WeceemSecurityPolicy.PERMISSION_VIEW])        
     }
 
+    def onlyNodesWithPermissions(srcList, List permissionsNeeded) {
+        srcList?.findAll { c -> wcmSecurityService.hasPermissions(c, permissionsNeeded) }
+    }
 
     /**
      * Sort function for queries that cannot be sorted in the database, i.e. aggregated data
@@ -1343,7 +1343,8 @@ class WcmContentRepositoryService implements InitializingBean {
                 parents << it
             }
         }
-        return sortNodes(parents, args.params?.sort, args.params?.order)
+        return onlyNodesWithPermissions(sortNodes(parents, args.params?.sort, args.params?.order), 
+            [WeceemSecurityPolicy.PERMISSION_VIEW])        
     }
 
     /**
@@ -1375,11 +1376,12 @@ class WcmContentRepositoryService implements InitializingBean {
         if (log.debugEnabled) {
             log.debug "findAllRootContent $space, $args"
         }
-        doCriteria(getContentClassForType(args.type), args.status, args.params) {
+        def res = doCriteria(getContentClassForType(args.type), args.status, args.params) {
             isNull('parent')
             eq('space', space)
             cache true
         }
+        return onlyNodesWithPermissions(res, [WeceemSecurityPolicy.PERMISSION_VIEW])        
     }
     
     /**
@@ -1390,10 +1392,11 @@ class WcmContentRepositoryService implements InitializingBean {
         if (log.debugEnabled) {
             log.debug "findAllContent $space, $args"
         }
-        doCriteria(getContentClassForType(args.type), args.status, args.params) {
+        def res = doCriteria(getContentClassForType(args.type), args.status, args.params) {
             eq('space', space)
             cache true
         }
+        return onlyNodesWithPermissions(res, [WeceemSecurityPolicy.PERMISSION_VIEW])        
     }
     
     /**
@@ -1503,6 +1506,9 @@ class WcmContentRepositoryService implements InitializingBean {
         }
     }
     
+    /**
+     * @deprecated Use normal content methods since 0.9
+     */
     def findFileRootContentByURI(String aliasURI, WcmSpace space, Map args = Collections.EMPTY_MAP) {
         if (log.debugEnabled) {
             log.debug "findFileRootContentByURI: aliasURI $aliasURI, space ${space?.name}, args ${args}"
@@ -1670,9 +1676,7 @@ class WcmContentRepositoryService implements InitializingBean {
         def unmoderatedStat = getStatusByCode(unmoderatedStatusCode)
         
         Class contentClass = getContentClassForType(type)
-        // check CREATE permission on the uri & user
-        def n = parent ?: space
-        requirePermissions(n, [WeceemSecurityPolicy.PERMISSION_CREATE], contentClass)
+
         // create content and populate
 
         // Prevent setting status and other internal values
@@ -1695,6 +1699,10 @@ class WcmContentRepositoryService implements InitializingBean {
             // We should convention-ize this so they can have different fields
             c.ipAddress = request.remoteAddr
         }
+
+        // check CREATE permission on the new node
+        requirePermissions(newContent, [WeceemSecurityPolicy.PERMISSION_CREATE])
+
         // Check for binding errors
         return newContent.hasErrors() ? newContent : newContent.save() // it might not work, but hasErrors will be set if not
     }
@@ -1760,7 +1768,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
             cache true
         }
         
-        return children
+        return onlyNodesWithPermissions(children, [WeceemSecurityPolicy.PERMISSION_VIEW])        
     }
     
     /**
