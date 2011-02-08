@@ -210,6 +210,7 @@ class WeceemSecurityPolicy {
                     def grant = permsForRole?.get(permission)
                     if (grant != null) {
                         if ( explicitGrant != null) { 
+                            // This makes sure all required permissions are met
                             explicitGrant &= grant.granted(args)
                         } else {
                             explicitGrant = grant.granted(args)
@@ -217,9 +218,10 @@ class WeceemSecurityPolicy {
                     }
                 }
                 
+                // If we have any outcome store it, and keep going - another role may have it
                 if (explicitGrant != null) {
                     explicitMatch = explicitGrant
-                    return true
+                    return explicitGrant
                 } else {
                     return false
                 }
