@@ -259,7 +259,6 @@ class SimpleSpaceImporter implements SpaceImporter {
         def c = grailsApp.getDomainClass(className)
         if (!c) {
             def newName = convertLegacyClassNames(className)
-            println "Trying to get artefact for legacy class: ${className} using modified name ${newName}"
             c = grailsApp.getDomainClass(newName)
         }
         return c

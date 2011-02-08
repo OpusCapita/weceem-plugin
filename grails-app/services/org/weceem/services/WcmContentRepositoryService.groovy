@@ -375,9 +375,7 @@ class WcmContentRepositoryService implements InitializingBean {
     def getGSPTemplate(content) {
         def absURI = content.absoluteURI
         def k = makeURICacheKey(content.space, absURI)
-        println "Key for GSP content $absURI is $k"
         wcmCacheService.getOrPutObject(CACHE_NAME_GSP_CACHE, k) {
-            println "Creating GSP template for $absURI / $k"
             if (log.debugEnabled) {
                 log.debug "Creating GSP template class for $absURI"
             }

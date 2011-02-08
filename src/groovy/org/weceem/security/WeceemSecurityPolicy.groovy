@@ -120,13 +120,10 @@ class WeceemSecurityPolicy {
                         throw new IllegalArgumentException("The types argument for a permission must be a list of types or a map of type to map of property restrictions")
                     }
                     permEvaluatingClosure = { args -> 
-                        println "Checking perm granted args ${args} - restriction info: ${typesInfo}"
                         if (args?.type) {
                             def ti = typesInfo[args.type]  
-                            println "Checking perm ti: $ti"
                             if (ti != null) {
                                 return (ti.size() == 0) || (args.content && ti.every { k, v -> 
-                                    println "Checking $k/$v on ${args.content.dump()}"
                                     args.content[k] == v 
                                 })
                             } else {

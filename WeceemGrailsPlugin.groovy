@@ -15,7 +15,7 @@ class WeceemGrailsPlugin {
     def dependsOn = [
         searchable:'0.5.5 > *', 
         quartz:'0.4.2 > *', 
-        navigation:'1.1.1 > *',
+        navigation:'1.2 > *',
         ckeditor:'3.4.1 > *',
         feeds:'1.5 > *',
         beanFields:'1.0-RC3 > *',

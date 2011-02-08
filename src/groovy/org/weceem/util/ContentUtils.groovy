@@ -17,7 +17,6 @@ class ContentUtils {
         def bi = BreakIterator.getWordInstance()
         bi.setText(s)
         int breakpoint = bi.preceding(maxLen)
-        println "Break point for $s is ${breakpoint}"
         def result = new StringBuilder()
         if (breakpoint > 0) {
             result << s[0..breakpoint-1]
