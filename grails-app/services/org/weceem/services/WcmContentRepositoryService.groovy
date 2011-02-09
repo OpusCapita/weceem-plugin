@@ -1880,11 +1880,13 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
         def count = 0
         pendingContent?.each { content ->
             // Find the next status (in code order) that is public content, after the content's current status
-            def status = WcmStatus.findByPublicContentAndCodeGreaterThan(true, content.status.code)
+            def status
+            WcmStatus.withNewSession { status = WcmStatus.findByPublicContentAndCodeGreaterThan(true, content.status.code) }
+
             if (!status) {
                 log.error "Tried to publish content ${content} with status [${content.status.dump()}] but found no public status with a code higher than it"
             } else if (log.debugEnabled) {
-                log.debug "Transitioning content ${content} from status [${content.status.code}] to [${status.code}]"
+                log.debug "Publish: Transitioning content ${content} from status [${content.status.code}] to [${status.code}]"
             }
             content.status = status
             count++
@@ -1905,11 +1907,24 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
         def staleContent = WcmContent.withCriteria {
             isNotNull('publishUntil')
             le('publishUntil', now)
+            status {
+                and {
+                    eq('publicContent', true)
+                    ne('code', archivedStatusCode)
+                }
+            }
         }
         def count = 0
+        def archivedCode
+        WcmStatus.withNewSession { 
+            archivedCode = getStatusByCode(archivedStatusCode) 
+        }
+        
         staleContent?.each { content ->
-            // Find the next status (in code order) that is public content, after the content's current status
-            content.status = getStatusByCode(archivedStatusCode)
+            if (log.debugEnabled) {
+                log.debug "Archive: Transitioning content ${content} from status [${content.status.code}] to [${archivedCode.code}]"
+            }
+            content.status = archivedCode
             count++
         }
         return count
