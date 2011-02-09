@@ -561,6 +561,7 @@ class WeceemTagLib {
     }
     
     def find = { attrs, body -> 
+        def var = attrs.remove(ATTR_VAR)
         def c = findNode(attrs)
         if (c) {
             out << body(var ? [(var):c] : c)
@@ -877,7 +878,7 @@ class WeceemTagLib {
     
     def join = { attrs, body ->
         def items = attrs[ATTR_IN]?.collect { item ->
-            def vars = attrs.var ? [(attrs[ATTR_VAR]):item] : item
+            def vars = attrs[ATTR_VAR] ? [(attrs[ATTR_VAR]):item] : item
             return body(vars).trim()
         } 
         if (items) {
