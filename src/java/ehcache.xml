@@ -16,8 +16,8 @@
      <cache name="weceem.gspCache"
          maxElementsInMemory="5000"
          eternal="false"
-         timeToIdleSeconds="1"
-         timeToLiveSeconds="1"
+         timeToIdleSeconds="3600"
+         timeToLiveSeconds="3600"
          overflowToDisk="false"
          memoryStoreEvictionPolicy="LFU"/>
 
