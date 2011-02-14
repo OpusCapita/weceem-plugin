@@ -1299,7 +1299,7 @@ class WcmContentRepositoryService implements InitializingBean {
         if (status == null) {
             return true
         } else if (status == WcmContentRepositoryService.STATUS_ANY_PUBLISHED) {
-            return WcmStatus.findAllByPublicContent(true).find { it == node.status }
+            return WcmStatus.findAllByPublicContent(true, [cache:true]).find { it == node.status }
         } else if (status instanceof Collection) {
             // NOTE: This assumes collection is a collection of codes, not WcmStatus objects
             return status.find { it == node.status.code }  
