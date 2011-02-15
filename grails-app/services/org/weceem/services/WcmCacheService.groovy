@@ -26,7 +26,7 @@ class WcmCacheService implements InitializingBean {
     }
     
     def getCache(String name) {
-        def c = weceemCacheManager.getCache(name)
+        def c = weceemCacheManager.getCache('weceem.'+name)
         if (!c) {
             log.warn "Tried to get cache with name [$name] but wasn't found - check ehcache.xml config"
         }

@@ -52,7 +52,8 @@ class WcmSecurityService implements InitializingBean {
     }
     
     def getUserRoles() {
-        def roles = securityDelegate.getUserRoles().clone()
+        def roles = []
+        roles.addAll(securityDelegate.getUserRoles())
         roles << ["USER_${userName}"]
         return roles
     }
@@ -66,10 +67,11 @@ class WcmSecurityService implements InitializingBean {
             space.aliasURI, 
             null,  
             getUserRoles(), 
-            permList)
+            permList,
+            [type:type])
     }
 
-    boolean hasPermissions(WcmContent content, permList, Class<WcmContent> type = null) {
+    boolean hasPermissions(WcmContent content, permList) {
         if (log.debugEnabled) {
             log.debug "Checking if user $userName with roles $userRoles has permissions $permList on content at ${content.aliasURI}"
         }
@@ -78,7 +80,8 @@ class WcmSecurityService implements InitializingBean {
             content.space.aliasURI, 
             content.absoluteURI, 
             getUserRoles(), 
-            permList)
+            permList,
+            [type:content.class, content:content])
     }
 
     boolean hasPermissions(WcmSpace space, String uri, permList, Class<WcmContent> type = null) {
@@ -89,7 +92,8 @@ class WcmSecurityService implements InitializingBean {
             space.aliasURI, 
             uri, 
             getUserRoles(), 
-            permList)
+            permList,
+            [type:type])
     }
     
     /**
@@ -106,8 +110,8 @@ class WcmSecurityService implements InitializingBean {
      * specified content node.
      * Allows applications to implement ACLs
      */
-    boolean isUserAllowedToCreateContent(WcmContent parent, Class<WcmContent> type) {
-        hasPermissions(parent, [WeceemSecurityPolicy.PERMISSION_CREATE], type)
+    boolean isUserAllowedToCreateContent(WcmSpace space, WcmContent parent, Class<WcmContent> type) {
+        hasPermissions(parent ?: space, [WeceemSecurityPolicy.PERMISSION_CREATE], type)
     }
 
     /**
@@ -152,8 +156,8 @@ class WcmSecurityService implements InitializingBean {
     /**
      * Called to find out if the current user is allowed perform administrative actions eg manipulate spaces
      */
-    boolean isUserAdministrator() {
-        hasPermissions(content, [WeceemSecurityPolicy.PERMISSION_ADMIN])
+    boolean isUserAdministrator(WcmSpace space) {
+        hasPermissions(space, [WeceemSecurityPolicy.PERMISSION_ADMIN])
     }
     
     def getUserPrincipal() {

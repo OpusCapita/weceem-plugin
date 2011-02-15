@@ -24,6 +24,9 @@ import org.weceem.services.WcmContentRepositoryService
 import org.weceem.util.ContentUtils
 import org.weceem.content.WcmSpace
 
+import org.weceem.css.WcmStyleSheet
+import org.weceem.js.WcmJavaScript
+
 class WeceemTagLib {
     
     static ATTR_ID = "id"
@@ -41,9 +44,11 @@ class WeceemTagLib {
     static ATTR_SPACE = "space"
     static ATTR_COUNTER = "counter"
     static ATTR_VAR = "var"
+    static ATTR_IN = "in"
     static ATTR_VALUE = "value"
     static ATTR_SIBLINGS = "siblings"
     static ATTR_LEVELS = "levels"
+    static ATTR_LENGTH = "length"
     static ATTR_CUSTOM = "custom"
     static ATTR_ACTIVE_CLASS = "activeClass"
     static ATTR_FIRST_CLASS = "firstClass"
@@ -59,12 +64,17 @@ class WeceemTagLib {
     static ATTR_TITLE = "title"
     static ATTR_VERSION = "version"
     static ATTR_RESULTSPATH = "resultsPath"
+    static ATTR_GPATH = "gpath"
+    static ATTR_URL = "url"
 
     static namespace = "wcm"
+    
+    static returnObjectForTags = ['findNode', 'ancestorOfType']
     
     def wcmContentRepositoryService
     def wcmSecurityService
     def pluginManager
+    def wcmCacheService
     
     private extractCodec(attrs) {
         attrs[ATTR_CODEC] == null ? 'HTML' : attrs[ATTR_CODEC]        
@@ -129,15 +139,8 @@ class WeceemTagLib {
     
     def eachChild = { attrs, body -> 
         def params = makeFindParams(attrs)
-        if (attrs[ATTR_NODE] && attrs[ATTR_PATH]) {
-          throwTagError("can not specify ${ATTR_NODE} and ${ATTR_PATH} attributes")
-        }
-        def baseNode = attrs[ATTR_NODE] ?: request[WcmContentController.REQUEST_ATTRIBUTE_NODE]
+        def baseNode = resolveNode(attrs)
         def status = attrs[ATTR_STATUS] ?: WcmContentRepositoryService.STATUS_ANY_PUBLISHED
-        if (attrs[ATTR_PATH]) {
-            baseNode = wcmContentRepositoryService.findContentForPath(attrs[ATTR_PATH], 
-                request[WcmContentController.REQUEST_ATTRIBUTE_SPACE])?.content
-        }
         def children = wcmContentRepositoryService.findChildren(baseNode, [type:attrs[ATTR_TYPE], status:status, params:params])
         if (attrs[ATTR_FILTER]) children = children?.findAll(attrs[ATTR_FILTER])
         def var = attrs[ATTR_VAR] ?: null
@@ -156,19 +159,7 @@ class WeceemTagLib {
     }
     
     def countChildren = { attrs ->
-       if (attrs[ATTR_NODE] && attrs[ATTR_PATH]) {
-          throwTagError("You cannot specify both ${ATTR_NODE} and ${ATTR_PATH} attributes")
-       }
-
-        def baseNode = attrs[ATTR_NODE]
-        if (!baseNode) {
-            if (attrs[ATTR_PATH]) {
-                baseNode = wcmContentRepositoryService.findContentForPath(attrs[ATTR_PATH], 
-                    request[WcmContentController.REQUEST_ATTRIBUTE_SPACE])?.content
-            } else {
-                baseNode = request[WcmContentController.REQUEST_ATTRIBUTE_NODE]
-            }
-        }
+        def baseNode = resolveNode(attrs)
         def status = attrs[ATTR_STATUS] ?: WcmContentRepositoryService.STATUS_ANY_PUBLISHED
         out << wcmContentRepositoryService.countChildren(baseNode, [type:attrs[ATTR_TYPE], status:status])
     }
@@ -291,14 +282,60 @@ class WeceemTagLib {
     static DEFAULT_MENU_BODY = { args -> 
         def o = args.out
 
-        o << "<li class=\"${args.levelClassPrefix}${args.level} ${args.active ? activeClass : ''} ${args.first ? args.firstClass : ''} ${args.last ? args.lastClass : ''}\">"
-        o << link(node:args.node) {
-            args.node.titleForMenu.encodeAsHTML() 
+        o << "<li class=\"${args.levelClassPrefix}${args.level} ${args.active ? args.activeClass : ''} ${args.first ? args.firstClass : ''} ${args.last ? args.lastClass : ''}\">"
+        def n = args.menuNode
+        o << wcm.link(node:n) { ->
+            n.titleForMenu.encodeAsHTML() 
         } 
         o << args.nested
         o << "</li>"
+        return null
     }
 
+    WcmContent resolveNode(Map attrs, defaultToCurrentNode = true) {
+        def nodePath = attrs.remove(ATTR_PATH)
+        def node = attrs.remove(ATTR_NODE)
+        if (node && nodePath) {
+            throwTagError("You cannot specify both ${ATTR_NODE} and ${ATTR_PATH} attributes")
+        }
+        def rootNodeSpecified = nodePath || node
+        if (!node && nodePath) {
+            if (nodePath instanceof WcmContent) {
+                node = nodePath
+            } else {
+                def space = attrs.remove(ATTR_SPACE)
+                if (space != null) {
+                    if (!(space instanceof WcmSpace)) {
+                        space = WcmSpace.findByAliasURI(space)
+                        if (!space) {
+                            throwTagError "Tag invoked with space attribute value [${space}] but no space could be found with that aliasURI"
+                        }
+                    }
+                } else {
+                    space = request[WcmContentController.REQUEST_ATTRIBUTE_SPACE]
+                    if (!space) {
+                        throwTagError "Tag invoked from outside a Weceem request requires the [${ATTR_SPACE}] attribute to be set to the aliasURI of the space or a space instance"
+                    }
+                }
+
+                def contentInfo = wcmContentRepositoryService.findContentForPath(nodePath, space)
+                if (!contentInfo.content) {
+                    throwTagError "Tag cannot locate a content node specified in [$ATTR_PATH] attribute with value [$nodePath]"
+                }
+                node = contentInfo.content
+            }
+        }
+        
+        if (node && !(node instanceof WcmContent)) {
+            throwTagError "Tag invoked with [$ATTR_NODE] or [$ATTR_PATH] attribute but the value it results in is not a WcmContent instance"
+        }
+
+        if (!node && defaultToCurrentNode) {
+            node = request[WcmContentController.REQUEST_ATTRIBUTE_NODE]
+        }
+        node
+    }
+    
     /**
      * Render a menu based on the content hierarchy
      * Attributes:
@@ -307,8 +344,12 @@ class WeceemTagLib {
      *      first, last, active, link and node variables. The link is the href to the content, node is the content node of that menu item
      */
     def menu = { attrs, body ->
-        def rootNodeSpecified = attrs.node ? true : false
-        def node = attrs.node ?: request[WcmContentController.REQUEST_ATTRIBUTE_NODE]
+        // We need to know whether or not one was specified
+        def node = resolveNode(attrs, false)        
+        def rootNodeSpecified = node ? true : false
+        if (node == null) {
+            node = request[WcmContentController.REQUEST_ATTRIBUTE_NODE]
+        }
         def lineage = request[WcmContentController.REQUEST_ATTRIBUTE_PAGE].lineage
 
         def currentLevel = request['_weceem_menu_level'] == null ? 0 : request['_weceem_menu_level']
@@ -327,8 +368,8 @@ class WeceemTagLib {
             bodyToUse.delegate = delegate
         }
                 
-        // Where is the current request's page in this hierarchy
-        def activeNode = lineage ? lineage[currentLevel] : null
+        // Which node is considered "active"
+        def activeNode = attrs.activeNode ?: request[WcmContentController.REQUEST_ATTRIBUTE_NODE]
 
         def levelnodes
         def args = [
@@ -381,7 +422,7 @@ class WeceemTagLib {
             
             def bodyargs = [
                 first:first,
-                active:n == activeNode,
+                active: (n.ident() == activeNode.ident()) || (lineage.find { it.ident() == n.ident() }),
                 custom:custom,
                 level:currentLevel,
                 last: last, 
@@ -389,25 +430,27 @@ class WeceemTagLib {
                 lastClass: lastClass,
                 levelClassPrefix: levelClassPrefix,
                 levels: levels-1,
-                link: createLink(node:n, { o << n.titleForMenu.encodeAsHTML()}),
-                node:n
+                link: createLink(node:n),
+                menuNode:n
             ]
 
             def nestedOutput = ''
             if (currentLevel+1 <= levels) {
                 request['_weceem_menu_level'] = currentLevel+1
-                def attribs = 
-                nestedOutput = menu(bodyargs, bodyToUse).toString()
+                def attribs = bodyargs.clone()
+                attribs.node = n // node attrib needed
+                nestedOutput = menu(attribs, bodyToUse).toString()
                 request['_weceem_menu_level'] = currentLevel // back to where we were
             }
             bodyargs.nested = nestedOutput
             
-            if (!custom) {
-                bodyargs.out = out
-            }
-
             // Render item
-            o << bodyToUse(bodyargs)
+            if (custom) {
+                o << bodyToUse(bodyargs)
+            } else {
+                bodyargs.out = out
+                bodyToUse(bodyargs)
+            }
 
             first = false
             if (!custom && last) {
@@ -473,7 +516,6 @@ class WeceemTagLib {
     
     def createLink = { attrs, body -> 
         def space = attrs.remove(ATTR_SPACE)
-        def path = attrs.remove(ATTR_PATH)
         
         if (space != null) {
             space = WcmSpace.findByAliasURI(space)
@@ -487,19 +529,11 @@ class WeceemTagLib {
             }
         }
 
-        def content = attrs.remove(ATTR_NODE)
-        if (content && !(content instanceof WcmContent)) {
-            throwTagError "Tag invoked with [$ATTR_NODE] attribute but the value is not a Content instance"
-        }
+        def content = resolveNode(attrs)
         if (!content) {
-            def contentInfo = wcmContentRepositoryService.findContentForPath(path, space)
-            if (!contentInfo?.content) {
-                log.error ("Tag [wcm:createLink] cannot create a link to the content at path ${attrs[ATTR_PATH]} as "+
-                    "there is no content node at that URI")
-                out << g.createLink(controller:'wcmContent', action:'notFound', params:[path:attrs.remove(ATTR_PATH)])
-                return
-            }
-            content = contentInfo.content
+            log.error ("Tag [wcm:createLink] cannot create a link to the content as "+
+                "there is no content node at that URI")
+            out << g.createLink(controller:'wcmContent', action:'notFound', params:[path:path])
         }
         
         attrs.params = [uri:WeceemTagLib.makeFullContentURI(content)]
@@ -527,6 +561,14 @@ class WeceemTagLib {
     }
     
     def find = { attrs, body -> 
+        def var = attrs.remove(ATTR_VAR)
+        def c = findNode(attrs)
+        if (c) {
+            out << body(var ? [(var):c] : c)
+        }
+    }
+    
+    def findNode = { attrs -> 
         def params = makeFindParams(attrs)
         def id = attrs[ATTR_ID]
         def title = attrs[ATTR_TITLE]
@@ -540,11 +582,8 @@ class WeceemTagLib {
             c = wcmContentRepositoryService.findContentForPath(path, 
                 request[WcmContentController.REQUEST_ATTRIBUTE_SPACE])?.content
         } else throwTagError("One of [id], [title] or [path] must be specified")
-        def var = attrs[ATTR_VAR] ?: null
         
-        if (c) {
-            out << body(var ? [(var):c] : c)
-        }
+        return c
     }
     
     /**
@@ -566,14 +605,14 @@ class WeceemTagLib {
     
     def createLinkToFile = { attrs ->
         def space = attrs.space ? WcmSpace.findByAliasURI(attrs.space) : request[WcmContentController.REQUEST_ATTRIBUTE_SPACE]
-        if (!space) {throwTagError("Space ${attrs.space} not found")}
+        if (!space) { throwTagError("Space [${attrs.space}] not found") }
         if (!attrs[ATTR_PATH]) {
             throwTagError("Attribute [${ATTR_PATH}] must be specified, eg the path to the file: images/icon.png")
         }
-        def aliasURI = space.aliasURI ?: WcmContentFile.EMPTY_ALIAS_URI
+        def aliasURI = space.aliasURI ?: WcmContentRepositoryService.EMPTY_ALIAS_URI
         
         // Don't specify plugin:'weceem' here!
-        out << g.resource(dir:"${WcmContentFile.DEFAULT_UPLOAD_DIR}/${aliasURI}", file:attrs[ATTR_PATH])
+        out << g.resource(dir:"${wcmContentRepositoryService.uploadUrl}${aliasURI}", file:attrs[ATTR_PATH])
     }
 
     def humanDate = { attrs ->
@@ -615,9 +654,12 @@ class WeceemTagLib {
         out << wcmSecurityService.userName?.encodeAsHTML()
     }
     
+    def loggedInUserEmail = { attrs ->
+        out << wcmSecurityService.userEmail?.encodeAsHTML()
+    }
+    
     def ifUserCanEdit = { attrs, body ->
-        def node = attrs[ATTR_NODE]
-        if (!node) node = request[WcmContentController.REQUEST_ATTRIBUTE_NODE]
+        def node = resolveNode(attrs)
 
         if (wcmSecurityService.isUserAllowedToEditContent(node)) {
             out << body()
@@ -625,8 +667,7 @@ class WeceemTagLib {
     }
     
     def ifUserCanView = { attrs, body ->
-        def node = attrs[ATTR_NODE]
-        if (!node) node = request[WcmContentController.REQUEST_ATTRIBUTE_NODE]
+        def node = resolveNode(attrs)
 
         if (wcmSecurityService.isUserAllowedToViewContent(node)) {
             out << body()
@@ -744,14 +785,14 @@ class WeceemTagLib {
      */
     def archiveList = { attrs, body ->
         def type = attrs[ATTR_TYPE] ?: org.weceem.blog.WcmBlogEntry
-        def parent = attributeToContent(attrs[ATTR_PATH]) 
-        if (!parent) {
-            throwTagError( "archiveList tag requires [$ATTR_PATH] attribute")
+        def node = resolveNode(attrs)
+        if (!node) {
+            throwTagError( "archiveList tag requires a node")
         }
-        def monthsWithContent = wcmContentRepositoryService.findMonthsWithContent(parent, type)
+        def monthsWithContent = wcmContentRepositoryService.findMonthsWithContent(node, type)
         monthsWithContent.each { entry ->
             out << body(month:entry.month, year:entry.year, 
-                link:g.createLink(mapping:'archive', params:[uri:WeceemTagLib.makeFullContentURI(parent)+"/${entry.year}/${entry.month}"]) )
+                link:g.createLink(mapping:'archive', params:[uri:WeceemTagLib.makeFullContentURI(node)+"/${entry.year}/${entry.month}"]) )
         }
     }
     
@@ -765,21 +806,79 @@ class WeceemTagLib {
     }
     
     def createFeedLink = { attrs ->
-        def path = attributeToContent(attrs[ATTR_PATH])
-        out << g.createLink(mapping:'feeds', action:attrs[ATTR_TYPE], params:[uri:WeceemTagLib.makeFullContentURI(path)])
+        def node = resolveNode(attrs)
+        def type = attrs[ATTR_TYPE] ?: 'rss'
+        out << g.createLink(mapping:'feeds', action:type, params:[uri:WeceemTagLib.makeFullContentURI(node)])
     }
 
     def feedLink = { attrs ->
-        def path = attributeToContent(attrs[ATTR_PATH])
-        out << feed.meta( kind:attrs[ATTR_TYPE], version:attrs[ATTR_VERSION] ?: '',
+        def node = resolveNode(attrs)
+        def type = attrs[ATTR_TYPE] ?: 'rss'
+        out << feed.meta( kind:type, version:attrs[ATTR_VERSION] ?: '',
             mapping:'feed', 
-            action:attrs[ATTR_TYPE], 
-            params:[uri:WeceemTagLib.makeFullContentURI(path)] )
+            action:type, 
+            params:[uri:WeceemTagLib.makeFullContentURI(node)] )
     }
 
+    def dataFeed = { attrs, body -> 
+        def type = attrs.remove(ATTR_TYPE) ?: 'rss'
+        def max = attrs.int(ATTR_MAX) ?: 5
+        
+        def custom = attrs.boolean(ATTR_CUSTOM)
+        def bodyClosure = custom ? body : null
+        if (!custom) { 
+            bodyClosure = { args ->
+                out << "<li><a href=\"${args.item.link.encodeAsHTML()}\">${args.item.title.encodeAsHTML()}</a></li>"
+            }
+        }
+        
+        def gpath
+        switch (type) {
+            case 'rss': 
+                gpath = 'channel.item'
+                break
+            case 'atom': 
+                gpath = 'entry'
+                break
+            default:
+                gpath = attrs.remove(ATTR_GPATH)
+                break
+        }
+        
+        def url = attrs[ATTR_URL]
+        def _log = log
+        def feedData = wcmCacheService.getOrPutValue('dataFeeds', url, {
+            if (_log.infoEnabled) {
+                _log.info "Retrieving feed ${url}"
+            }
+            new URL(url).getText('utf-8')
+        })
+        
+        if (feedData == null) {
+            out << "Unable to retrieve data feed ${url}"
+            return
+        }
+        
+        def feedDOM = new XmlSlurper().parseText(feedData)
+        def nodeSet = feedDOM
+        gpath.tokenize('.').each { t ->
+            nodeSet = nodeSet."$t"
+        }
+        
+        if (!custom) {
+            out << '<ul>'
+        }
+        nodeSet[0..max-1].each { n ->
+            custom ? out << bodyClosure(item:n) : bodyClosure(item:n)
+        }
+        if (!custom) {
+            out << '</ul>'
+        }
+    }
+    
     def join = { attrs, body ->
-        def items = attrs.in?.collect { item ->
-            def vars = attrs.var ? [(attrs.var):item] : item
+        def items = attrs[ATTR_IN]?.collect { item ->
+            def vars = attrs[ATTR_VAR] ? [(attrs[ATTR_VAR]):item] : item
             return body(vars).trim()
         } 
         if (items) {
@@ -853,7 +952,7 @@ ${node.content}
     }
     
     def summarize = { attrs, body ->
-        int maxLen = (attrs.length ?: 100).toInteger()
+        int maxLen = (attrs[ATTR_LENGTH] ?: 100).toInteger()
         def codec = attrs.encodeAs
         def ellipsis = attrs.ellipsis ?: '...'
         def s = ContentUtils.summarize(body().toString(), maxLen, ellipsis)
@@ -882,5 +981,41 @@ ${node.content}
         if (s) {
             out << body(message:s)
         }
+    }
+    
+    def ancestorOfType = { attrs ->
+        def node = resolveNode(attrs)
+        def type = attrs[ATTR_TYPE]
+        if (!type) {
+            throwTagError("The [$ATTR_TYPE] attribute is required")
+        }
+        def typeClass = wcmContentRepositoryService.getContentClassForType(type)
+        
+        while (node && !typeClass.isAssignableFrom(node.class)) {
+            node = node.parent
+        }
+        
+        return node
+    }
+    
+    def resource = { attrs -> 
+        def node = resolveNode(attrs)
+        if (!attrs[ATTR_TYPE]) { 
+            switch (node.class) {
+                case WcmStyleSheet: 
+                    attrs[ATTR_TYPE] = "css"
+                    break;
+                case WcmJavaScript: 
+                    attrs[ATTR_TYPE] = 'js'
+                    break;
+            }
+        }
+        
+        if (!attrs[ATTR_TYPE]) {
+            throwTagError("The [$ATTR_TYPE] attribute is required to indicate what kind of resource you are linking to")
+        }
+
+        attrs.url = node.absoluteURI
+        out << jqui.resourceLink(attrs)
     }
 }

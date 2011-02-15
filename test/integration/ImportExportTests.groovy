@@ -62,12 +62,12 @@ class ImportExportTests extends GroovyTestCase
 
         // check unpacked files
         assertTrue new File(servletContext.getRealPath(
-                "/${WcmContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/test_dir")).exists()
+                "/${org.weceem.services.WcmContentRepositoryService.uploadDir}/${space.makeUploadName()}/test_dir")).exists()
         assertTrue new File(servletContext.getRealPath(
-                "/${WcmContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/test_dir/test_file.txt")).exists()
+                "/${org.weceem.services.WcmContentRepositoryService.uploadDir}/${space.makeUploadName()}/test_dir/test_file.txt")).exists()
 
         def ant = new AntBuilder()
-        ant.delete(dir: servletContext.getRealPath("/${WcmContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}"))
+        ant.delete(dir: servletContext.getRealPath("/${org.weceem.services.WcmContentRepositoryService.uploadDir}/${space.makeUploadName()}"))
     }
 */    
     void testSimpleImport() {
@@ -95,33 +95,40 @@ class ImportExportTests extends GroovyTestCase
         assertTrue WcmContentDirectory.findByAliasURIAndSpace('test_dir', space).children.size() != 0
 
         // check unpacked files
-        assertTrue new File(servletContext.getRealPath(
-                "/${WcmContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/test_dir")).exists()
-        assertTrue new File(servletContext.getRealPath(
-                "/${WcmContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/test_dir/test_file.txt")).exists()
+        assertTrue org.weceem.services.WcmContentRepositoryService.getUploadPath(space, 'test_dir').exists()
+        assertTrue org.weceem.services.WcmContentRepositoryService.getUploadPath(space, '/test_dir/test_file.txt').exists()
 
         def ant = new AntBuilder()
-        ant.delete(dir: servletContext.getRealPath("/${WcmContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}"))
+        ant.delete(dir: 
+            org.weceem.services.WcmContentRepositoryService.getUploadPath(space))
     }
     
     void testSimpleExport() {
         initDefaultData()
         def servletContext = ServletContextHolder.servletContext
 
+        // Fudge the file needed for the node
+        def f = WcmContentFile.findByAliasURI('test_file.txt').toFile()
+        println "File upload location is ${f}"
+        f.parentFile.mkdirs()
+        f << "Hello world"
+        
         def file = wcmImportExportService.exportSpace(
                 WcmSpace.findByName('testSpace'), 'simpleSpaceExporter')
+        println "Exported testSpace to ${file}"
         assert file
         assert file.exists()
 
         def ant = new AntBuilder()
 
-        def tmpDir = new File(servletContext.getRealPath('/unzip'))
+        def tmpDir = new File("./export-test-${System.nanoTime()}")
         tmpDir.mkdir()
         ant.unzip(src: file.absolutePath, dest: tmpDir.absolutePath)
 
-        assert new File(servletContext.getRealPath('/unzip/content.xml')).exists()
-        assert new File(servletContext.getRealPath('/unzip/files/test_dir')).exists()
-        assert new File(servletContext.getRealPath('/unzip/files/test_dir/test_file.txt')).exists()
+        assert new File(tmpDir, 'content.xml').exists()
+        def td = new File(new File(tmpDir, 'files'), 'test_dir')
+        assert td.exists()
+        assert new File(td, 'test_file.txt').exists()
 
         def xmlFile = new File(servletContext.getRealPath('/unzip/content.xml'))
         def result = new XmlSlurper().parseText(xmlFile.text)
@@ -130,7 +137,7 @@ class ImportExportTests extends GroovyTestCase
         assertEquals 'org.weceem.content.WcmVirtualContent', result.children()[4].name().toString()
         
         assertEquals 'testTemplate', result.children()[0].aliasURI.toString()
-        assertEquals 'test_file', result.children()[3].aliasURI.toString()
+        assertEquals 'test_file.txt', result.children()[3].aliasURI.toString()
 
         assertEquals 'virt_cont', result.children()[4].aliasURI.toString()
         assert result.children()[4].parent.toString().length() != 0 
@@ -174,8 +181,9 @@ class ImportExportTests extends GroovyTestCase
         def changedDate = createdDate + 1
         def defStatus = new WcmStatus(code: 400, description: "published", publicContent: true)
         assert defStatus.save(flush: true)
+        def spc = WcmSpace.findByName('testSpace')
         new WcmTemplate(title: 'testTemplate', aliasURI: 'testTemplate',
-                space: WcmSpace.findByName('testSpace'), status: defStatus,
+                space: spc, status: defStatus,
                 createdBy: 'admin', createdOn: createdDate,
                 changedBy: 'admin', changedOn: changedDate,
                 content: 'template content').save(flush: true)
@@ -183,31 +191,31 @@ class ImportExportTests extends GroovyTestCase
                 content: "html content", status: defStatus,
                 createdBy: 'admin', createdOn: createdDate,
                 changedBy: 'admin', changedOn: changedDate,
-                space: WcmSpace.findByName('testSpace'),
+                space: spc,
                 keywords: 'keywords',
                 template: WcmTemplate.findByAliasURI('testTemplate')).save(flush: true)
         def cont_dir = new WcmContentDirectory(title: 'test_dir', aliasURI: 'test_dir',
                 content: '', filesCount: 1, status: defStatus,
                 createdBy: 'admin', createdOn: createdDate,
                 changedBy: 'admin', changedOn: changedDate,
-                space: WcmSpace.findByName('testSpace'),
+                space: spc,
                 mimeType: '', fileSize: 0)
         assert cont_dir.save(flush: true)
-        new WcmContentFile(title: 'test_file.txt', aliasURI: 'test_file',
-                content: '', space: WcmSpace.findByName('testSpace'),
+        new WcmContentFile(title: 'test_file.txt', aliasURI: 'test_file.txt',
+                content: '', space: spc,
                 createdBy: 'admin', createdOn: createdDate,
                 changedBy: 'admin', changedOn: changedDate,
                 mimeType: 'text/plain', fileSize: 17, 
                 status: defStatus).save(flush: true)
         def test_dir = WcmContentDirectory.findByAliasURI('test_dir')
-        test_dir.addToChildren(WcmContentFile.findByAliasURI('test_file'))
+        test_dir.addToChildren(WcmContentFile.findByAliasURI('test_file.txt'))
         test_dir.save(flush: true)
         def virt_cont = new WcmVirtualContent(title: 'Virtual WcmContent', aliasURI: 'virt_cont',
-                content: '', space: WcmSpace.findByName('testSpace'),
+                content: '', space: spc,
                 createdBy: 'admin', createdOn: createdDate, status: defStatus,
                 changedBy: 'admin', changedOn: changedDate,
                 mimeType: 'text/plain', fileSize: 17, 
-                target: WcmContentFile.findByAliasURI("test_file")).save(flush: true)
+                target: WcmContentFile.findByAliasURI("test_file.txt")).save(flush: true)
         test_cont.addToChildren(virt_cont)
         test_cont.save(flush: true)
         

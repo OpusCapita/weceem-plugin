@@ -103,9 +103,34 @@ class WeceemSecurityPolicy {
         
         def permEvaluatingClosure
         switch (permGranted) {
-            case Boolean: permEvaluatingClosure = { args -> permGranted }; break; 
-            case Map: if (permGranted.types) {
-                    permEvaluatingClosure = { args -> args?.type ? permGranted.types?.contains(args.type) : false } 
+            case Boolean: 
+                permEvaluatingClosure = { args -> permGranted }; 
+                break; 
+            case Map: 
+                if (permGranted.types) {
+                    // Convert to a map of Type:Constraints map
+                    def typesInfo = [:]
+                    if (permGranted.types instanceof Map) {
+                        typesInfo += permGranted.types
+                    } else if (permGranted.types instanceof List) {
+                        permGranted.types.each { t ->
+                            typesInfo[t] = Collections.EMPTY_MAP
+                        }
+                    } else {
+                        throw new IllegalArgumentException("The types argument for a permission must be a list of types or a map of type to map of property restrictions")
+                    }
+                    permEvaluatingClosure = { args -> 
+                        if (args?.type) {
+                            def ti = typesInfo[args.type]  
+                            if (ti != null) {
+                                return (ti.size() == 0) || (args.content && ti.every { k, v -> 
+                                    args.content[k] == v 
+                                })
+                            } else {
+                                return false // not in permitted types list
+                            }
+                        }
+                    } 
                 }
                 break
             default:
@@ -152,7 +177,7 @@ class WeceemSecurityPolicy {
         }
         
         // If the uri is null this means we are checking for permissions to access the SPACE rather than a URI in the space
-        // eg we use the default permissions for the space 
+        // eg we use the default permissions for the space` 
         if (uri == null) {
             uri = DEFAULT_POLICY_URI
         }
@@ -182,6 +207,7 @@ class WeceemSecurityPolicy {
                     def grant = permsForRole?.get(permission)
                     if (grant != null) {
                         if ( explicitGrant != null) { 
+                            // This makes sure all required permissions are met
                             explicitGrant &= grant.granted(args)
                         } else {
                             explicitGrant = grant.granted(args)
@@ -189,9 +215,10 @@ class WeceemSecurityPolicy {
                     }
                 }
                 
+                // If we have any outcome store it, and keep going - another role may have it
                 if (explicitGrant != null) {
                     explicitMatch = explicitGrant
-                    return true
+                    return explicitGrant
                 } else {
                     return false
                 }
@@ -200,9 +227,14 @@ class WeceemSecurityPolicy {
             return explicitMatch != null 
         }
         
-        // See if we need to fallback to space defaults
+        // See if we need to fallback to space defaults, there's nothing URI specific
         if ((explicitMatch == null) && (uri != DEFAULT_POLICY_URI)) {
             explicitMatch = hasPermission(spaceAlias, DEFAULT_POLICY_URI, roleList, permissionList)
+        }
+
+        // See if we need to fallback to global space defaults
+        if ((explicitMatch == null) && (spaceAlias != ANY_SPACE_ALIAS)) {
+            explicitMatch = hasPermission(ANY_SPACE_ALIAS, DEFAULT_POLICY_URI, roleList, permissionList)
         }
         return explicitMatch
     }

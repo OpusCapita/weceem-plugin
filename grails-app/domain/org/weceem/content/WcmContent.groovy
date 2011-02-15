@@ -170,12 +170,10 @@ class WcmContent implements Comparable, Taggable {
         this.orderIndex <=> o.orderIndex
     }
 
-    Boolean canHaveChildren() { true }
+    boolean contentShouldAcceptChildren() { true }
 
-    Boolean canAcceptChild(WcmContent newChild) { true }
+    boolean contentShouldAcceptChild(WcmContent newChild) { true }
 
-    Boolean canHaveMultipleParents() { true }
-    
     String getMimeType() { "text/plain" }
     
     /**
@@ -252,7 +250,10 @@ class WcmContent implements Comparable, Taggable {
     }
     
     def beforeInsert = {
-        def by = wcmSecurityService?.userName
+        def by
+        WcmContent.withNewSession {
+            by = wcmSecurityService?.userName
+        }
         if (by == null) by = "system"
         //assert by != null
         
@@ -265,7 +266,12 @@ class WcmContent implements Comparable, Taggable {
         
         changedOn = new Date()
         
-        changedBy = wcmSecurityService?.userName
+        def by
+        WcmContent.withNewSession {
+            by = wcmSecurityService?.userName
+        }
+        
+        changedBy = by
         if (changedBy == null) {
             changedBy = "system"
         }

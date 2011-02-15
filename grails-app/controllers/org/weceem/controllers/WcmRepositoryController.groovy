@@ -26,9 +26,12 @@ import com.lowagie.text.pdf.PdfWriter
 import java.text.SimpleDateFormat
 
 import org.weceem.content.*
+
 // Design smell
 import org.weceem.files.*
 import org.weceem.html.*
+
+import org.weceem.event.WeceemDomainEvents
 
 /**
  */
@@ -111,7 +114,7 @@ class WcmRepositoryController {
             def haveChildren = [:]
             for (domainClass in wcmContentRepositoryService.listContentClasses()){
                 def dcInst = domainClass.newInstance()
-                haveChildren.put(domainClass.name, dcInst.canHaveChildren())
+                haveChildren.put(domainClass.name, wcmContentRepositoryService.triggerDomainEvent(dcInst, WeceemDomainEvents.contentShouldAcceptChildren))
             }
             return [content:nodes, contentTypes:wcmContentRepositoryService.listContentClassNames(), 
                 'haveChildren':haveChildren, space: params.space, spaces: WcmSpace.listOrderByName() ]
@@ -298,111 +301,10 @@ class WcmRepositoryController {
                 getContent(params.contentPath, space), space).collect {
             [path: "${params.contentPath}/${it.id}",
                 label: it.title, type: it.class.name,
-                hasChildren: it.children?.size() > 0 ? true: false,
-                canHaveChildren: it.canHaveChildren(),
-                canHaveMultipleParents: it.canHaveMultipleParents()]
+                hasChildren: it.children ? true : false,
+                canHaveChildren: wcmContentRepositoryService.triggerDomainEvent(it, WeceemDomainEvents.contentShouldAcceptChildren)]
         }
         render children as JSON
-    }
-
-    /**
-     * Creates and save node.
-     * Creates reference according to 'parentId' parameter.
-     */
-/* @todo I think this is obsolete
-    def insertNode = {
-
-        def space = WcmSpace.get(params['space.id']?.toLong())
-        
-        def insertedContent = wcmContentRepositoryService.newContentInstance(params.contentType, space)
-        // Using bindData to work around Grails 1.2m2 bugs, change to .properties when 1.2-RC1 is live
-        bindData(insertedContent, params)
-
-        def parent = params.parentPath ? getContent(params.parentPath, space) : null
-        if (parent && (!parent.canHaveChildren() || (parent instanceof WcmContentDirectory))) {
-            parent = null
-        }
-        if (!insertedContent.aliasURI && insertedContent.title) {
-            insertedContent.createAliasURI(wcmContentRepositoryService)
-        }
-
-        wcmContentRepositoryService.createNode(insertedContent, parent)
-
-        if (insertedContent.hasErrors() || !insertedContent.save()) {
-            log.debug("Unable to create new content: ${insertedContent.errors}")
-            
-            def editorToUse = getEditorName(params.contentType)
-            
-            render(view: 'newContent', model: [content: insertedContent,
-                    contentType: params.contentType, parentPath: params.parentPath,
-                    editor: editorToUse ])
-        } else {
-            redirect(action: treeTable)
-        }
-    }
-*
-
-    /**
-     * @param dirname
-     * @param space
-     * @param parentPath
-     */
-    def createDirectory = {
-        def space = WcmSpace.get(params['space.id']?.toLong())
-        def parent = params.parentPath ? getContent(params.parentPath, space) : null
-
-        if (!contentFileExists(params.dirname, parent, space)) {
-            def contentDirectory = new WcmContentDirectory(title: params.dirname,
-                    content: '', filesCount: 0, space: space,
-                    mimeType: '', fileSize: 0, status: WcmStatus.findByCode(params.statuscode))
-            contentDirectory.createAliasURI((parent && (parent instanceof WcmContentDirectory)) ? parent : null)
-            if (contentDirectory.save()) {
-                if (!wcmContentRepositoryService.createNode(contentDirectory, parent)) {
-                    flash.error = message(code: 'error.contentRepository.fileSystem')
-                }
-            } else {
-                flash.contentNode = contentDirectory
-            }
-        } else {
-            flash.error = message(code: 'error.contentRepository.fileExists')
-        }
-
-        redirect(action: treeTable)
-    }
-
-    /**
-     * @param file
-     * @param filename
-     * @param space
-     * @param parentPath
-     */
-    def uploadFile = {
-        assert !"This obsolete?"
-        
-        def space = WcmSpace.get(params['space.id']?.toLong())
-        def parent = params.parentPath ? getContent(params.parentPath, space) : null
-        def file = request.getFile('file')
-        def title = params.filename ? params.filename : file.originalFilename
-
-        if (!contentFileExists(title, parent, space)) {
-            // todo: fix when "file.contentType" returns null
-            def contentFile = new WcmContentFile(title: title,
-                    content: '', space: space,
-                    mimeType: file.contentType, fileSize: file.size, status: WcmStatus.findByCode(params.statuscode))
-            contentFile.createAliasURI((parent && (parent instanceof WcmContentDirectory)) ? parent : null)
-            contentFile.uploadedFile = file
-            if (contentFile.save()) {
-                if (!wcmContentRepositoryService.createNode(contentFile, parent)) {
-                    flash.error = message(code: 'error.contentRepository.fileSystem')
-                }
-            } else {
-                flash.contentNode = contentFile
-            }
-        } else {
-            flash.error = message(code: 'error.contentRepository.fileExists')
-        }
-
-        redirect(action: treeTable)
     }
 
     /**
@@ -575,9 +477,9 @@ class WcmRepositoryController {
         def result = rootNodes.collect { content ->
             [path: generateContentName(space.id, contentType, content.id),
                 label: content.title, type: content.class.name,
-                hasChildren: (content.children && content.children.size()) ? true : false,
-                canHaveChildren: content.canHaveChildren(),
-                canHaveMultipleParents: content.canHaveMultipleParents()]
+                hasChildren: content.children ? true : false,
+                canHaveChildren: wcmContentRepositoryService.triggerDomainEvent(content, WeceemDomainEvents.contentShouldAcceptChildren)
+            ]
         }
         return result
     }
@@ -587,9 +489,9 @@ class WcmRepositoryController {
         def result = items.collect {
              [path: generateContentName(space.id, 'Files', it.id),
                     label: it.title, type: it.class.name,
-                    hasChildren: (it.children && it.children.size() > 0) ? true : false,
-                    canHaveChildren: it.canHaveChildren(),
-                    canHaveMultipleParents: it.canHaveMultipleParents()]
+                    hasChildren: it.children ? true : false,
+                    canHaveChildren: wcmContentRepositoryService.triggerDomainEvent(it, WeceemDomainEvents.contentShouldAcceptChildren)
+             ]
         }
         return result
     }

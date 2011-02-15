@@ -24,30 +24,32 @@ class WcmContentDirectory extends WcmContentFile {
 
     Integer filesCount = 0
 
-    Boolean canHaveChildren() { true }
+    boolean contentShouldAcceptChildren() { true }
     
-    Boolean canAcceptChild(WcmContent newChild) { 
+    boolean contentShouldAcceptChild(WcmContent newChild) { 
         newChild.instanceOf(WcmContentFile)
     }
 
-    Boolean create(WcmContent parentContent) {
-        def f
+    boolean contentShouldBeCreated(WcmContent parentContent) {
+        def p
         if (parentContent && (parentContent instanceof WcmContentDirectory)) {
             def path = getPathTo(parentContent)
-            def p = ServletContextHolder.servletContext.getRealPath(
-                "/${WcmContentFile.DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}${path}/${title}")
+            p = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, "/$path/$title")
             log.debug "Creating directory path [$p]"
-            f = new File(p)
-            def r = f.mkdirs()
+            p.mkdirs()
+        } else if (!parentContent) {
+            p = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, title)
+            log.debug "Creating directory path [$p]"
+            p.mkdirs()
         } else {
-            def p = ServletContextHolder.servletContext.getRealPath(
-                "/${DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}/${title}")
-            log.debug "Creating directory path [$p]"
-            f = new File(p)
-            def r = f.mkdirs()
-            assert r
+            throw new IllegalArgumentException("Cannot create server directory nodes under content of type ${parentContent.class}")
         }
-        return f.exists() && f.isDirectory()
+        def done = p.exists() && p.isDirectory()
+        if (done && parentContent) {
+            parentContent.filesCount += 1
+        }
+        
+        return done
     }
 
     static editors = {
@@ -68,10 +70,9 @@ class WcmContentDirectory extends WcmContentFile {
      
      
     // we need to delete all content children here (recursively)
-    Boolean deleteContent() {
+    Boolean contentWillBeDeleted() {
         def path = getPathTo(this.parent)
-        def file = new File(ServletContextHolder.servletContext.getRealPath(
-                "/${DEFAULT_UPLOAD_DIR}/${(space.aliasURI == '') ? EMPTY_ALIAS_URI : space.aliasURI}${path}/${title}"))
+        def file = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, "$path/$title")
         if (!file.exists()) return true
         if (FileUtils.deleteQuietly(file)) {
             def childrenList = new ArrayList(this.children)

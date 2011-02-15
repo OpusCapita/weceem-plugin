@@ -43,6 +43,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         taglib.wcmContentRepositoryService = [findContentForPath : { path, space -> [content: node]}]
         taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_SPACE, node.space)
         taglib.createLink(path: 'someNode', null)
+        // @todo Need to test the output!!!?
     }
 
   void testCountChildren() {
@@ -66,6 +67,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         // we wanted an exception
     }
 
+    // @todo Need to test the output!!!?
     taglib.countChildren([node: parent])
   }
 
@@ -90,9 +92,10 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
       taglib.eachChild([path:"some/path", node: parent], {})
       fail "Expected exception with path and node attributes"
     } catch(e) {
-      assert e.message =~ "can not specify ${WeceemTagLib.ATTR_NODE} and ${WeceemTagLib.ATTR_PATH} attributes"
+      assert e.message =~ "You cannot specify both node and path attributes"
     }
 
+    // @todo Need to test the output!!!?
     taglib.eachChild([node: parent], {})
   }
 
@@ -237,4 +240,26 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         assertEquals "Parent A|", taglib.out.toString()
     }
 
+    
+    void testSummarize() {
+
+        def testData = [
+            [40, 'Immigration Help For Grails Developers', "Immigration Help For Grails Developers"],
+            [10, 'Immigration Help For Grails Developers', "Immigra..."],
+            [5, 'Immigration Help For Grails Developers', "Im..."],
+            [40, 'Immigration Help For Grails Developers XXXXXXXXXX', "Immigration Help For Grails ..."],
+            [40, 'Immigration', "Immigration"]
+        ]
+        
+        testData.each { d ->
+            mockTagLib(WeceemTagLib)
+            def taglib = new WeceemTagLib()
+            taglib.summarize(length:d[0], { d[1] })
+            def o = taglib.out.toString()
+            println "Testing with data: ${d}"
+            println "Tag output is $o (length: ${o.size()})"
+            assertTrue d[0] >= o.size()
+            assertEquals d[2], o
+        }
+    }
 }

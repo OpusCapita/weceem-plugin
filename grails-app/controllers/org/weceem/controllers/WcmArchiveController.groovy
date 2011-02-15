@@ -83,6 +83,6 @@ class WcmArchiveController {
             log.debug "Archive rendering results page with params: ${params}"
         }
         
-        forward(controller:'wcmContent', action:'show', params:params)
+        forward(controller:'wcmContent', action:'show', params:new LinkedHashMap(params))
     }
 }

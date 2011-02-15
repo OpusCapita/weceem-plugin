@@ -20,7 +20,7 @@
     <link rel="shortcut icon" href="${g.resource(plugin:'weceem', dir:'_weceem/images/favicon.ico')}"/>
     <nav:resources/>
     <g:javascript library="jquery" plugin="jquery"/>
-    <jqui:resources theme="cupertino" themeDir="_weceem/jquery-ui/themes/" plugin="weceem"/>
+    <jqui:resources themeCss="${g.resource(dir:'_weceem/jquery-ui/themes/cupertino', file:'jquery-ui-1.8.4.custom.css', plugin:'weceem')}"/>
     <blueprint:resources plugins="buttons"/>
 
 	<link href="${g.resource(plugin:'weceem', dir:'_weceem/js/fg-menu', file:'fg.menu.css')}" rel="stylesheet" type="text/css" />

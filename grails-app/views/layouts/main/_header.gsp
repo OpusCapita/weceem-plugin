@@ -3,7 +3,7 @@
     
     <div id="iconbar" class="span-10 last prepend-top" style="text-align: right">
         <span title="Current User">
-          Welcome, <wcm:loggedInUserName/>
+          Welcome, ${wcm.loggedInUserName().encodeAsHTML()} (${wcm.loggedInUserEmail().encodeAsHTML()})
         </span>
         <g:link url="${wcm.userProfileEditUrl().encodeAsHTML()}">Profile</g:link> |
         <a href="http://www.weceem.org/">Help</a> |
@@ -16,7 +16,7 @@
 
     
     <g:if test="${flash.message}">
-      <div class="message span-22 prepend-1 append-1 prepent-top append-bottom last ui-state-highlight ui-corner-all">${flash.message.encodeAsHTML()}</div>
+      <div class="message span-22 prepend-1 append-1 prepent-top append-bottom last ui-state-highlight ui-corner-all"><g:message code="${flash.message}" encodeAs="HTML"/></div>
     </g:if>
     <g:if test="${flash.error}">
       <div class="message span-22 prepend-1 append-1 prepent-top append-bottom last ui-state-error ui-corner-all">${flash.error}</div>

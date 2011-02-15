@@ -22,6 +22,8 @@ import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
 import org.codehaus.groovy.grails.web.pages.GSPResponseWriter
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 
+import org.weceem.util.MimeUtils
+
 class WcmContentController {
     static String REQUEST_ATTRIBUTE_PAGE = "weceem.page"
     static String REQUEST_ATTRIBUTE_USER = "weceem.user"
@@ -42,7 +44,7 @@ class WcmContentController {
     
     /** 
      * Do the full default render pipeline on the supplied content instance.
-     * NOTE: Only this exact instance will be rendered, so it must be pre-resolved if it is a WcmVirtualContent node
+     * NOTE: Only this exact instance will be rendered, `so it must be pre-resolved if it is a WcmVirtualContent node
      * 
      * @todo Should we move this to ContentRepo service? Still requires a delegate that has all controller-style methods
      * but could be reusable in a non-request context e.g. jobs that produce PDFs or sending HTML emails from CMS
@@ -117,8 +119,15 @@ class WcmContentController {
         if (!request[REQUEST_ATTRIBUTE_PREVIEWNODE]) {
             response.sendError(500, "No preview node set")
         } else {
+            cache false // never allow browser to cache this
             WcmContentController.showContent(this, request[REQUEST_ATTRIBUTE_PREVIEWNODE])
         }
+    }
+    
+    def showUploadedFile = {
+        // @todo See if content node exists for file, if so use that for meta info like mod date
+        def f = new File(wcmContentRepositoryService.uploadDir, params.uri)
+        renderFile(f, null)
     }
     
     def show = { 
@@ -150,6 +159,7 @@ class WcmContentController {
                         throw new AccessDeniedException("You cannot view this content")
                     }
                 }
+                
                 request[REQUEST_ATTRIBUTE_CONTENTINFO] = contentInfo
                 
                 // Resolve any virtual nodes
@@ -158,15 +168,28 @@ class WcmContentController {
                 if (log.debugEnabled) {
                     log.debug "Content after resolving virtual content for uri: ${uri} is: ${content?.dump()}"
                 }
+                
+                withCacheHeaders { 
+                    etag {
+                        content ? "${content.ident()}:${content.version}".encodeAsSHA1() : null
+                    }
+                    
+                    lastModified {
+                        content ? (content.changedOn ?: content.createdOn) : null
+                    }
+                    
+                    generate {
+                        def activeUser = wcmSecurityService.userName
+                        request[REQUEST_ATTRIBUTE_USER] = activeUser
             
-                def activeUser = wcmSecurityService.userName
-                request[REQUEST_ATTRIBUTE_USER] = activeUser
-            
-                if (content) {
-                    WcmContentController.showContent(this, content)
-                } else {
-                    response.sendError 404, "No content found for this URI"
-                    return null
+                        if (content) {
+                            cache validFor: 1, shared:true  // 1 second caching, just makes sure some OK headers are sent for proxies
+                            WcmContentController.showContent(this, content)
+                        } else {
+                            response.sendError 404, "No content found for this URI"
+                            return null
+                        }
+                    }
                 }
             } else {
                 response.sendError 404, "No space specified"
@@ -363,15 +386,15 @@ class WcmContentController {
         return renderGSPContent(template, [node: content])
     }
     
-    def renderFile(File f) {
-        throw new RuntimeException("Not implemented yet")
-    }
-    
     /**
-     * Use the servlet container to return the file - more optimal
+     * Render a file
      */
-    def renderAppResource(String path) {
-        request.getRequestDispatcher(path).forward(request, response)
+    def renderFile(File f, String mimeType) {
+        def mt = mimeType ?: MimeUtils.getDefaultMimeType(f.name)
+        response.setContentType(mt)    
+        // @todo set caching headers just as for normal content
+        // @todo is this fast enough?    
+        response.outputStream << f.newInputStream()
         return null
     }
     

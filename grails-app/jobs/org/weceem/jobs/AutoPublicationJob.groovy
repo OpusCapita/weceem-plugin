@@ -6,6 +6,7 @@ class AutoPublicationJob {
     def wcmContentRepositoryService
 
     static triggers = {
+//        simple name: 'autopub', startDelay: 60000, repeatInterval: 500  
         simple name: 'autopub', startDelay: 60000, repeatInterval: 60000  
     }
       

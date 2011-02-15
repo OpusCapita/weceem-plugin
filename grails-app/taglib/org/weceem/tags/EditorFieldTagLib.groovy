@@ -13,8 +13,14 @@ class EditorFieldTagLib {
     
     TagLibraryLookup gspTagLibraryLookup // Tag lookup bean from Grails injection
     
+    def editorLabel = { attrs ->
+        def args = argsWithRequiredOverride(attrs, [beanName:'content', property:attrs.property, labelKey:'content.label.'+attrs.property])
+        out << bean.label(args)
+    }
+
     def editorFieldString = { attrs ->
-        out << bean.input(beanName:'content', property:attrs.property, noLabel:true)
+        def args = argsWithRequiredOverride(attrs, [beanName:'content', property:attrs.property, noLabel:true])
+        out << bean.input(args)
     }
 
     def editorFieldSelectInList = { attrs ->
@@ -29,8 +35,22 @@ class EditorFieldTagLib {
         out << bean.checkBox(beanName:'content', property:attrs.property, noLabel:true)
     }
 
+    def argsWithRequiredOverride(attrs, args) {
+        def con = pageScope.content
+        if (con.metaClass.hasProperty(con.class, 'overrideRequired')) {
+            def r = con.overrideRequired[attrs.property]
+            if (r != null) {
+                if (!r) {
+                    args.requiredField = ' '
+                }
+            }
+        }
+        args
+    }
+
     def editorFieldTitle = { attrs ->
-        out << bean.input(beanName:'content', property:attrs.property, noLabel:true, 'class':"big")
+        def args = argsWithRequiredOverride(attrs, [beanName:'content', property:attrs.property, noLabel:true, 'class':"big"])
+        out << bean.input(args)
     }
 
     def editorFieldTags = { attrs ->
@@ -212,36 +232,66 @@ class EditorFieldTagLib {
 
     def editorFieldHtmlCode = { attrs ->
         // Workaround for Grails 1.1.x bug invoking tags with body as method - have to use a template instead
-        out << g.render(template:'/editors/codeeditor', plugin:'weceem', 
+        out << g.render(template:'/editors/codemirror', plugin:'weceem', 
             model:[name:attrs.property, value:pageScope.content[attrs.property]])
+        
+        out << """
+        <script language="javascript" type="text/javascript">
+        var editor_${attrs.property} = CodeMirror.fromTextArea("editor_${attrs.property.encodeAsJavaScript()}", {
+          parserfile: ["parsexml.js"],
+          path: "${g.resource(plugin:'weceem', dir:'_weceem/codemirror/js/').encodeAsJavaScript()}",
+          stylesheet: "${g.resource(plugin:'weceem', dir:'_weceem/codemirror/css', file:'xmlcolors.css').encodeAsJavaScript()}",
+          textWrapping: false
+        });
+        </script>
+        """
     }
 
     def editorFieldJSCode = { attrs ->
         // Workaround for Grails 1.1.x bug invoking tags with body as method - have to use a template instead
-        out << g.render(template:'/editors/codeeditor', plugin:'weceem', 
+        out << g.render(template:'/editors/codemirror', plugin:'weceem', 
             model:[name:attrs.property, value:pageScope.content[attrs.property]])
+        
+        out << """
+        <script language="javascript" type="text/javascript">
+        var editor_${attrs.property} = CodeMirror.fromTextArea("editor_${attrs.property.encodeAsJavaScript()}", {
+          parserfile: ["tokenizejavascript.js", "parsejavascript.js"],
+          path: "${g.resource(plugin:'weceem', dir:'_weceem/codemirror/js/').encodeAsJavaScript()}",
+          stylesheet: "${g.resource(plugin:'weceem', dir:'_weceem/codemirror/css', file:'jscolors.css').encodeAsJavaScript()}",
+          textWrapping: false
+        });
+        </script>
+        """
     }
     
     def editorFieldGroovyCode = { attrs ->
         // Workaround for Grails 1.1.x bug invoking tags with body as method - have to use a template instead
-        out << g.render(template:'/editors/codeeditor', plugin:'weceem', 
+        out << g.render(template:'/editors/codemirror', plugin:'weceem', 
             model:[name:attrs.property, value:pageScope.content[attrs.property]])
-    }
-    
-    def editorResourcesHtmlCode = { attrs ->
-        includeEditArea()
+        
         out << """
         <script language="javascript" type="text/javascript">
-          editAreaLoader.init({
-              id : "editor_${attrs.property.encodeAsJavaScript()}",
-              syntax: "html",
-              allow_toggle: false,
-              start_highlight: true
-          });
-        </script> 
+        var editor_${attrs.property} = CodeMirror.fromTextArea("editor_${attrs.property.encodeAsJavaScript()}", {
+          parserfile: ["parsegroovy.js"],
+          path: "${g.resource(plugin:'weceem', dir:'_weceem/codemirror/js/').encodeAsJavaScript()}",
+          stylesheet: "${g.resource(plugin:'weceem', dir:'_weceem/codemirror/css', file:'groovycolors.css').encodeAsJavaScript()}",
+          textWrapping: false
+        });
+        </script>
         """
     }
     
+    def editorResourcesHtmlCode = { attrs ->
+        includeCodeMirror()
+    }
+
+    def includeCodeMirror() {
+        if (!request['weceem.editor.codemirror.js.included']) {
+            out << g.render(template:'/editors/codemirror_resources', plugin:'weceem')
+            request['weceem.editor.codemirror.js.included'] = true
+        }
+    }
+
     def editorResourcesHTMLContent = { attrs ->
         if (pageScope.content.allowGSP) {
             out << editorResourcesHtmlCode(attrs)
@@ -251,60 +301,32 @@ class EditorFieldTagLib {
     }
     
     def editorResourcesJSCode = { attrs ->
-        includeEditArea()
-        out << """
-        <script language="javascript" type="text/javascript">
-          editAreaLoader.init({
-              id : "editor_${attrs.property}",
-              syntax: "js",
-              allow_toggle: false,
-              start_highlight: true
-          });
-        </script> 
-        """
+        includeCodeMirror()
     }
     
     def editorResourcesGroovyCode = { attrs ->
-       includeEditArea()
-       out << """
-       <script language="javascript" type="text/javascript">
-         editAreaLoader.init({
-             id : "editor_${attrs.property}",
-             syntax: "c",
-             allow_toggle: false,
-             start_highlight: true
-         });
-       </script> 
-       """
+        includeCodeMirror()
     }
 
     def editorFieldCssCode = { attrs ->
         // Workaround for Grails 1.1.x bug invoking tags with body as method - have to use a template instead
-        out << g.render(template:'/editors/codeeditor', plugin:'weceem', 
+        out << g.render(template:'/editors/codemirror', plugin:'weceem', 
             model:[name:attrs.property, value:pageScope.content[attrs.property]])
-    }
-
-    void includeEditArea() {
-        if (!request['weceem.editor.editarea.js.included']) {
-            out << """
-            <script language="javascript" type="text/javascript" src="${resource(dir: '_weceem/js/editarea', plugin:'weceem', file: 'edit_area_full.js')}"></script>
-            """
-            request['weceem.editor.editarea.js.included'] = true
-        }
+        
+        out << """
+        <script language="javascript" type="text/javascript">
+        var editor_${attrs.property} = CodeMirror.fromTextArea("editor_${attrs.property.encodeAsJavaScript()}", {
+          parserfile: ["parsecss.js"],
+          path: "${g.resource(plugin:'weceem', dir:'_weceem/codemirror/js/').encodeAsJavaScript()}",
+          stylesheet: "${g.resource(plugin:'weceem', dir:'_weceem/codemirror/css', file:'csscolors.css').encodeAsJavaScript()}",
+          textWrapping: false
+        });
+        </script>
+        """
     }
 
     def editorResourcesCssCode = { attrs ->
-        includeEditArea()
-        out << """
-        <script language="javascript" type="text/javascript">
-          editAreaLoader.init({
-              id : "editor_${attrs.property}",
-              syntax: "css",
-              allow_toggle: false,
-              start_highlight: true
-          });
-        </script> 
-        """
+        includeCodeMirror()
     }
     
     def editorResourcesWikiCode = { attrs ->

@@ -3,6 +3,7 @@ import grails.test.*
 import org.weceem.security.*
 import org.weceem.blog.*
 import org.weceem.content.*
+import org.weceem.html.*
 
 class SecurityPolicyTests extends grails.test.GrailsUnitTestCase {
 
@@ -124,6 +125,26 @@ class SecurityPolicyTests extends grails.test.GrailsUnitTestCase {
             ['spaceA_guest'], [WeceemSecurityPolicy.PERMISSION_VIEW])
     }
     
+    void testRoleSpecificSpaceDefaultsDoNotAffectSpaceDefaultsOfOtherRoles() {
+        policy.setDefaultPermissionForSpaceAndRole(WeceemSecurityPolicy.PERMISSION_ADMIN, true, 'spaceA', "admin")
+        policy.setDefaultPermissionForSpaceAndRole(WeceemSecurityPolicy.PERMISSION_ADMIN, false, 'spaceA', "user")
+        
+        policy.dumpPermissions()
+        
+        assertFalse policy.hasPermission('spaceA', '/anything', ['user'], [WeceemSecurityPolicy.PERMISSION_ADMIN])
+        assertTrue policy.hasPermission('spaceA', '/anything', ['admin'], [WeceemSecurityPolicy.PERMISSION_ADMIN])
+    }
+    
+    void testRoleSpecificSpaceDefaultsDoNotAffectGlobalSpaceDefaultsOfOtherRoles() {    
+        policy.setDefaultPermissionForSpaceAndRole(WeceemSecurityPolicy.PERMISSION_ADMIN, true, '*', "admin")
+        policy.setDefaultPermissionForSpaceAndRole(WeceemSecurityPolicy.PERMISSION_ADMIN, false, 'site1', "user")
+        
+        policy.dumpPermissions()
+
+        assertFalse policy.hasPermission('site1', '/anything', ['user'], [WeceemSecurityPolicy.PERMISSION_ADMIN])
+        assertTrue policy.hasPermission('site1', '/anything', ['admin'], [WeceemSecurityPolicy.PERMISSION_ADMIN])
+    }
+    
     void testTypeSpecificAccessControl() {
         policy.setURIPermissionForSpaceAndRole("/", WeceemSecurityPolicy.PERMISSION_ADMIN, true, 'spaceA', "spaceA_admin")
         policy.setURIPermissionForSpaceAndRole("/", WeceemSecurityPolicy.PERMISSION_EDIT, true, 'spaceA', "spaceA_admin")
@@ -138,6 +159,12 @@ class SecurityPolicyTests extends grails.test.GrailsUnitTestCase {
         policy.setURIPermissionForSpaceAndRole("/blog", WeceemSecurityPolicy.PERMISSION_CREATE, 
             [types:[WcmBlogEntry, WcmComment]], 'spaceA', "spaceA_user")
         policy.setURIPermissionForSpaceAndRole("/extranet", WeceemSecurityPolicy.PERMISSION_VIEW, false, 'spaceA', "spaceA_guest")
+
+        // Don't allow GSP editing of HTML content
+        policy.setURIPermissionForSpaceAndRole("/marketing", WeceemSecurityPolicy.PERMISSION_EDIT, 
+            [types:[(WcmHTMLContent):[allowGSP:false]]], 'spaceA', "spaceA_user")
+        policy.setURIPermissionForSpaceAndRole("/marketing", WeceemSecurityPolicy.PERMISSION_CREATE, 
+            [types:[(WcmHTMLContent):[allowGSP:false]]], 'spaceA', "spaceA_user")
 
         policy.setURIPermissionForSpaceAndRole("/", WeceemSecurityPolicy.PERMISSION_ADMIN, true, 'spaceB', "spaceB_admin")
         policy.setURIPermissionForSpaceAndRole("/", WeceemSecurityPolicy.PERMISSION_EDIT, true, 'spaceB', "spaceB_admin")
@@ -188,6 +215,16 @@ class SecurityPolicyTests extends grails.test.GrailsUnitTestCase {
             ['spaceB_user'], [WeceemSecurityPolicy.PERMISSION_EDIT])
         assertTrue policy.hasPermission('spaceB', '/blog/comments', 
             ['spaceB_user'], [WeceemSecurityPolicy.PERMISSION_EDIT], [type:WcmComment])
+
+        // Check user can create only HTML and only if allowGSP is false, but Admin can still create+edit anything
+        assertFalse policy.hasPermission('spaceA', '/marketing', 
+            ['spaceA_user'], [WeceemSecurityPolicy.PERMISSION_CREATE], [type:WcmComment])
+        assertFalse policy.hasPermission('spaceA', '/marketing', 
+            ['spaceA_user'], [WeceemSecurityPolicy.PERMISSION_CREATE], [type:WcmHTMLContent])
+        assertTrue policy.hasPermission('spaceA', '/marketing', 
+            ['spaceA_user'], [WeceemSecurityPolicy.PERMISSION_CREATE], [type:WcmHTMLContent, content:new WcmHTMLContent(allowGSP:false)])
+        assertFalse policy.hasPermission('spaceA', '/marketing', 
+            ['spaceA_user'], [WeceemSecurityPolicy.PERMISSION_CREATE], [type:WcmHTMLContent, content:new WcmHTMLContent(allowGSP:true)])
     }
     
     void testMissingPolicyCausesException() {

@@ -18,12 +18,6 @@ class MenuTagTests extends AbstractWeceemIntegrationTest {
     
     static transactional = true
 
-    void createContent(Closure c) {
-        c.delegate = new ContentCreatorDelegate(wcmContentRepositoryService:wcmContentRepositoryService)
-        c.call()
-    }
-    
-    
     void setUp() {
         super.setUp()
         
@@ -168,12 +162,13 @@ class MenuTagTests extends AbstractWeceemIntegrationTest {
         def r = taglib.menu(custom:true) { args ->
             def s = new StringBuilder()
             if (args.first) {
-                s << "[FIRST-${args.level}]\n"
+                s << "|FIRST-${args.level}|\n"
             }
-            s << "NODE: ${args.node.titleForHTML}\n"
+            s << "NODE: ${args.menuNode.titleForHTML}\n"
+            s << "ACTIVE: ${args.active}\n"
             s << args.nested
             if (args.last) {
-                s << "[LAST-${args.level}]\n"
+                s << "|LAST-${args.level}|\n"
             }
             s
         } 
@@ -181,28 +176,135 @@ class MenuTagTests extends AbstractWeceemIntegrationTest {
         r = r.toString()
         
         println "Menu tag yielded: ${r}"
-        /* Output should be like
-
-        [FIRST-0]
-        NODE: Parent A
-        [FIRST-1]
-        NODE: Child A1
-        NODE: Child A2
-        [LAST-1]
-        NODE: Parent B
-        [LAST-0]
-        */
         
-        assertEquals """[FIRST-0]
+        assertEquals """|FIRST-0|
 NODE: Parent A
-[FIRST-1]
+ACTIVE: true
+|FIRST-1|
 NODE: Child A1
+ACTIVE: false
 NODE: Child A2
-[LAST-1]
+ACTIVE: false
+|LAST-1|
 NODE: Parent B
-[LAST-0]
+ACTIVE: false
+|LAST-0|
 """, r
         
+    }
+
+    void testCustomMenuWithActiveChild() {
+        def taglib = new WeceemTagLib()
+
+        def parentA
+        def childA2
+        def childA1
+
+        createContent {
+            childA1 = content(WcmHTMLContent) {
+                space = spaceA
+                status = statusA
+                title = "Child A1"
+                content = "Child A1 content"
+            }
+            childA2 = content(WcmHTMLContent) {
+                space = spaceA
+                status = statusA
+                title = "Child A2"
+                content = "Child A2 content"
+            }
+
+            parentA = content(WcmHTMLContent) {
+                space = spaceA
+                status = statusA
+                title = "Parent A"
+                content = "Parent A content"
+            }
+            parentA.addToChildren(childA1)
+            parentA.addToChildren(childA2)
+
+            content(WcmHTMLContent) {
+                status = statusA
+                space = spaceA
+                title = "Parent B"
+                content = "Parent B content"
+            }
+        }
+
+        def space = spaceA
+
+        taglib.request.with {
+            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, childA2)
+            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_PAGE, WcmContentController.makePageInfo(parentA.aliasURI, parentA))
+            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_SPACE, space.aliasURI)
+        }
+
+        def r = taglib.menu(custom:true) { args ->
+            def s = new StringBuilder()
+            if (args.first) {
+                s << "|FIRST-${args.level}|\n"
+            }
+            s << "NODE: ${args.menuNode.titleForHTML}\n"
+            s << "ACTIVE: ${args.active}\n"
+            s << args.nested
+            if (args.last) {
+                s << "|LAST-${args.level}|\n"
+            }
+            s
+        } 
+
+        r = r.toString()
+
+        println "Menu tag yielded: ${r}"
+
+        assertEquals """|FIRST-0|
+NODE: Parent A
+ACTIVE: false
+|FIRST-1|
+NODE: Child A1
+ACTIVE: false
+NODE: Child A2
+ACTIVE: true
+|LAST-1|
+NODE: Parent B
+ACTIVE: false
+|LAST-0|
+""", r
+
+        def pi = WcmContentController.makePageInfo(parentA.aliasURI, childA1)
+        // Now try again using lineage of childA1
+        taglib.request.with {
+            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, childA1)
+            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_PAGE, pi)   
+            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_SPACE, space.aliasURI)
+        }
+        
+        println "Page info: ${pi.dump()}"
+        r = taglib.menu(custom:true, node:parentA) { args ->
+            def s = new StringBuilder()
+            if (args.first) {
+                s << "|FIRST-${args.level}|\n"
+            }
+            s << "NODE: ${args.menuNode.titleForHTML}\n"
+            s << "ACTIVE: ${args.active}\n"
+            s << args.nested
+            if (args.last) {
+                s << "|LAST-${args.level}|\n"
+            }
+            s
+        } 
+
+        r = r.toString()
+
+        println "Menu tag yielded: ${r}"
+
+        assertEquals """|FIRST-0|
+NODE: Child A1
+ACTIVE: true
+NODE: Child A2
+ACTIVE: false
+|LAST-0|
+""", r
     }
 
     void testDeepMenuWithChildrenOfCurrentPage() {
@@ -437,35 +539,5 @@ NODE: Parent B
         assertEquals 1, markup.ul.size()
         assertEquals 1, markup.ul.li.size()
         assertEquals "Child A2_1", markup.ul.li[0].a.text()
-    }
-}
-
-class ContentCreatorDelegate {
-    def wcmContentRepositoryService
-    
-    def nodeCount = 0
-    
-    def status(args) {
-        def s = new WcmStatus(code: args.code, description: args.description ?: "Status-"+args.code, 
-            publicContent: args.publicContent == null ? true : args.publicContent)
-        assert s.save(flush:true)        
-        return s
-    }
-    def content(type, Closure dsl) {
-        def deleg = [:]
-        dsl.delegate = deleg
-        dsl.call()
-        def inst = wcmContentRepositoryService.newContentInstance(type, deleg.remove('space'))
-        deleg.each {
-            inst[it.key] = it.value
-        }
-        if (!inst.aliasURI) {
-            inst.aliasURI = "node-"+System.currentTimeMillis()+"|"+(nodeCount++)
-        }
-        if (!inst.validate()) {
-            println "Errors creating content: ${inst.errors}"
-        }
-        assert inst.save(flush:true)
-        return inst
     }
 }

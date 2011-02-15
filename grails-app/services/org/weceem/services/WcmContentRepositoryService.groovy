@@ -7,9 +7,8 @@ import grails.util.Environment
 
 // This is for a hack, remove later
 import org.codehaus.groovy.grails.web.metaclass.BindDynamicMethod
+import org.codehaus.groovy.grails.web.context.ServletContextHolder
 import org.hibernate.exception.ConstraintViolationException
-
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 import org.weceem.content.*
 
@@ -17,8 +16,10 @@ import org.weceem.content.*
 import org.weceem.files.*
 import org.weceem.script.WcmScript
 
+import org.weceem.event.EventMethod
+import org.weceem.event.WeceemEvents
+import org.weceem.event.WeceemDomainEvents
 import org.weceem.security.*
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
 
 /**
  * WcmContentRepositoryService class provides methods for WcmContent Repository tree
@@ -29,6 +30,8 @@ import org.codehaus.groovy.grails.web.context.ServletContextHolder
  */
 class WcmContentRepositoryService implements InitializingBean {
 
+    static final String EMPTY_ALIAS_URI = "_ROOT"
+    
     static final CONTENT_CLASS = WcmContent.class.name
     static final STATUS_ANY_PUBLISHED = 'published'
     
@@ -50,6 +53,10 @@ class WcmContentRepositoryService implements InitializingBean {
     def archivedStatusCode
     def unmoderatedStatusCode
     
+    static uploadDir
+    static uploadUrl
+    static uploadInWebapp
+    
     static DEFAULT_ARCHIVED_STATUS_CODE = 500
     static DEFAULT_UNMODERATED_STATUS_CODE = 150
     
@@ -69,10 +76,81 @@ class WcmContentRepositoryService implements InitializingBean {
         gspClassCache = wcmCacheService.getCache(CACHE_NAME_GSP_CACHE)
         assert gspClassCache
 
-        archivedStatusCode = ConfigurationHolder.config.weceem.archived.status instanceof Number ? 
-            ConfigurationHolder.config.weceem.archived.status : DEFAULT_ARCHIVED_STATUS_CODE
-        unmoderatedStatusCode = ConfigurationHolder.config.weceem.unmoderated.status instanceof Number ? 
-            ConfigurationHolder.config.weceem.unmoderated.status : DEFAULT_UNMODERATED_STATUS_CODE
+        def wcmconf = grailsApplication.config.weceem
+        def code = wcmconf?.archived.status
+        archivedStatusCode = code instanceof Number ? code : DEFAULT_ARCHIVED_STATUS_CODE
+        code = wcmconf?.umoderated.status
+        unmoderatedStatusCode = code instanceof Number ? code : DEFAULT_UNMODERATED_STATUS_CODE
+            
+        loadConfig()
+    }
+    
+    /**
+     * Workaround for replaceAll problems with \ in Java
+     */
+    static String makeFileSystemPathFromURI(String uri) {
+        if (uri == null) {
+            return ''
+        }
+        def chars = uri.chars
+        chars.eachWithIndex { c, i ->
+            if (c == '/') {
+                chars[i] = File.separatorChar
+            }
+        }
+        new String(chars)
+    }
+
+    static File getUploadPath(WcmSpace space, path = null) {
+        if (File.separatorChar != '/') {
+            path = makeFileSystemPathFromURI(path)
+        }
+        def spcf = new File(WcmContentRepositoryService.uploadDir, 
+            space.makeUploadName() ?: EMPTY_ALIAS_URI)
+        return path ? new File(spcf, path) : spcf
+    }
+
+    static getUploadDirFromConfig(configObject) {
+        def uploadDirConf = configObject.weceem.upload.dir
+        (uploadDirConf instanceof String) && uploadDirConf ? uploadDirConf : "/WeceemFiles/"
+    }
+    
+    static getUploadUrlFromConfig(configObject) {
+        def uploadDirConf = getUploadDirFromConfig(configObject)
+
+        if (!uploadDirConf.startsWith('file:')) {
+            if (!uploadDirConf.startsWith('/')) uploadDirConf = '/'+uploadDirConf
+            if (!uploadDirConf.endsWith('/')) uploadDirConf += '/'
+            
+            return uploadDirConf
+        } else {
+            return '/uploads/'
+        }
+    }
+
+    void loadConfig() {
+        def uploadDirConf = getUploadDirFromConfig(grailsApplication.config)
+
+        if (!uploadDirConf.startsWith('file:')) {
+            uploadInWebapp = true
+            uploadDir = grailsApplication.mainContext.getResource("$uploadDirConf").file
+        } else {
+            def f = new File(new URI(uploadDirConf))
+            if (!f.exists()) {
+                def ok = f.mkdirs()
+                if (!ok) {
+                    throw new RuntimeException("Cannot start Weceem - upload directory is set to [${uploadDirConf}] but cannot make the directory and it doesn't exist")
+                }
+            }
+            uploadInWebapp = false
+            uploadDir = f
+        }
+
+        uploadUrl = WcmContentRepositoryService.getUploadUrlFromConfig(grailsApplication.config)
+        // In tests we don't have log
+        if (metaClass.hasProperty(this, 'log')) {
+            log?.info "Weceem will use [${uploadDir}] as the directory for static uploaded files, and the url [${uploadUrl}] to serve them, files are inside webapp? [${uploadInWebapp}]"
+        }
     }
     
     void createDefaultSpace() {
@@ -128,10 +206,20 @@ class WcmContentRepositoryService implements InitializingBean {
         WcmSpace.findByAliasURI(uri, [cache:true])
     }
     
+    Map resolveSpaceAndURIOfUploadedFile(String url) {
+        def u = url - uploadUrl
+        if (u.startsWith(EMPTY_ALIAS_URI)) {
+            u -= EMPTY_ALIAS_URI
+        }
+        resolveSpaceAndURI( u)
+        
+    }
+    
     Map resolveSpaceAndURI(String uri) {
         def spaceName
         def space
         
+        // This is pretty horrible stuff. Beware.
         if (uri?.startsWith('/')) {
             if (uri.length() > 1) {
                 uri = uri[1..uri.length()-1]
@@ -194,8 +282,7 @@ class WcmContentRepositoryService implements InitializingBean {
             s = new WcmSpace(params)
             if (s.save()) {
                 // Create the filesystem folder for the space
-                def spaceDir = grailsApplication.parentContext.getResource(
-                    "${WcmContentFile.DEFAULT_UPLOAD_DIR}/${s.makeUploadName()}").file
+                def spaceDir = getUploadPath(s)
                 if (!spaceDir.exists()) {
                     spaceDir.mkdirs()
                 }
@@ -235,14 +322,14 @@ class WcmContentRepositoryService implements InitializingBean {
         log.info "Successfully imported space template [${templateName}] into space [${space.name}]"
     }
     
-    void requirePermissions(WcmSpace space, permissionList, Class<WcmContent> type = null) throws AccessDeniedException {
+    void requirePermissions(WcmSpace space, List permissionList, Class<WcmContent> type = null) throws AccessDeniedException {
         if (!wcmSecurityService.hasPermissions(space, permissionList, type)) {
             throw new AccessDeniedException("User [${wcmSecurityService.userName}] with roles [${wcmSecurityService.userRoles}] does not have the permissions [$permissionList] to access space [${space.name}]")
         }
     }       
     
-    void requirePermissions(WcmContent content, permissionList, Class<WcmContent> type = null) throws AccessDeniedException {
-        if (!wcmSecurityService.hasPermissions(content, permissionList, type)) {
+    void requirePermissions(WcmContent content, permissionList) throws AccessDeniedException {
+        if (!wcmSecurityService.hasPermissions(content, permissionList)) {
             throw new AccessDeniedException("User [${wcmSecurityService.userName}] with roles [${wcmSecurityService.userRoles}] does not have the permissions [$permissionList] to access content at [${content.absoluteURI}] in space [${content.space.name}]")
         }
     }       
@@ -287,7 +374,8 @@ class WcmContentRepositoryService implements InitializingBean {
 
     def getGSPTemplate(content) {
         def absURI = content.absoluteURI
-        wcmCacheService.getOrPutObject(CACHE_NAME_GSP_CACHE, makeURICacheKey(content.space, absURI)) {
+        def k = makeURICacheKey(content.space, absURI)
+        wcmCacheService.getOrPutObject(CACHE_NAME_GSP_CACHE, k) {
             if (log.debugEnabled) {
                 log.debug "Creating GSP template class for $absURI"
             }
@@ -419,18 +507,62 @@ class WcmContentRepositoryService implements InitializingBean {
      */
     def createNode(String type, def params, Closure postInit = null) {
         def content = newContentInstance(type)
+        def tags = params.remove('tags')
         hackedBindData(content, params)
-        if (params.tags != null) {
-            content.setTags(params.tags.tokenize(',').collect { it.trim().toLowerCase()} )
-        }
         if (postInit) {
             postInit(content)
         }
         // Ignore result here, we need the content's errors
         createNode(content, content.parent)
+        // Set these after create, even if error - can't set them before instance exists
+        // and need them on the object in the case of error or they get lost
+        if (tags != null) {
+            content.setTags(tags.tokenize(',').collect { it.trim().toLowerCase()} )
+        }
         return content // has the errors set on it
     }
 
+    /**
+     * Trigger an event on the domain class and also on the events service.
+     *
+     * Not suitable for events that are confirmation "can this happen" callbacks, this if for
+     * things that have already happened.
+     */
+    def triggerEvent(WcmContent content, EventMethod event, arguments = null) {
+        assert event.definedIn(WeceemEvents)
+
+        def outcome = triggerDomainEvent(content, WeceemDomainEvents[event.name], arguments)
+        if (outcome) {
+            wcmEventService.event(event, content)
+        }
+        return outcome
+    }
+    
+    /**
+     * Trigger an event on the domain class only.
+     *
+     */
+    def triggerDomainEvent(WcmContent content, EventMethod event, arguments = null) {
+        assert event.definedIn(WeceemDomainEvents)
+        
+        if (log.debugEnabled) {
+            log.debug "Attempting to trigger domain event [$event] on node ${content.dump()}"
+        }
+        def eventName = event.toString()
+        if (content.conformsTo(event)) {
+            if (log.debugEnabled) {
+                log.debug "Trigger domain event [$event] as it is supported on node ${content.dump()}"
+            }
+            // Call the event so that nodes can perform post-creation tasks
+            return event.invokeOn(content, arguments)
+        } else {
+            if (log.debugEnabled) {
+                log.debug "Node does not support [$event] event, skipping"
+            }
+            return true
+        }
+    }
+    
     /**
      * Creates new WcmContent node and it's relation
      *
@@ -438,12 +570,7 @@ class WcmContentRepositoryService implements InitializingBean {
      * @param parentContent
      */
     Boolean createNode(WcmContent content, WcmContent parentContent = null) {
-        if (parentContent) { 
-            requirePermissions(parentContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
-        } else {
-            assert content.space
-            requirePermissions(content.space, [WeceemSecurityPolicy.PERMISSION_CREATE])        
-        }
+        requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_CREATE])        
 
         if (parentContent == null) parentContent = content.parent
 
@@ -454,22 +581,11 @@ class WcmContentRepositoryService implements InitializingBean {
         def result = true
 
         if (parentContent) {
-            result = parentContent.canAcceptChild(content)
+            result = triggerDomainEvent(parentContent, WeceemDomainEvents.contentShouldAcceptChild, [content])
         }
         
         if (result) {
-            if (content.metaClass.respondsTo(content, 'create', WcmContent)) {
-                if (log.debugEnabled) {
-                    log.debug "Creating node, type ${content.class} support 'create' event, calling"
-                }
-                // Call the event so that nodes can perform post-creation tasks
-                result = content.create(parentContent)
-            } else {
-                if (log.debugEnabled) {
-                    log.debug "Creating node, type ${content.class} does not support 'create' event, skipping"
-                }
-                result = true
-            }
+            result = triggerDomainEvent(content, WeceemDomainEvents.contentShouldBeCreated, [parentContent])
         }
 
         if (result) {
@@ -542,14 +658,17 @@ class WcmContentRepositoryService implements InitializingBean {
                 }
             }
             
+            if (result) {
+                triggerEvent(content, WeceemEvents.contentDidGetCreated)
+            }
+
             if (!result) {
                 parentContent?.discard() // revert the changes we made to parent
             }
+            
+            invalidateCachingForURI(content.space, content.absoluteURI)
         }
         
-        if (result) {
-            wcmEventService.afterContentAdded(content)
-        }
         return result
     }
 
@@ -614,9 +733,6 @@ class WcmContentRepositoryService implements InitializingBean {
         if (log.debugEnabled) {
             log.debug "Moving content ${sourceContent} to ${targetContent} at order index $orderIndex"
         }
-        if (targetContent) {
-            requirePermissions(targetContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
-        }
         requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_EDIT,WeceemSecurityPolicy.PERMISSION_VIEW])        
 
         if (!sourceContent) return false
@@ -647,13 +763,11 @@ class WcmContentRepositoryService implements InitializingBean {
 
         def parentChanged = targetContent != sourceContent.parent
         if (targetContent && parentChanged) {
-            success = targetContent.canAcceptChild(sourceContent)
+            success = triggerDomainEvent(targetContent, WeceemDomainEvents.contentShouldAcceptChild, [sourceContent])
         }
 
         if (success && parentChanged) {
-            if (sourceContent.metaClass.respondsTo(sourceContent, "move", WcmContent)){
-                success = sourceContent.move(targetContent)
-            }
+            success = triggerDomainEvent(sourceContent, WeceemDomainEvents.contentShouldMove, [targetContent])
         }
         
         if (success) {
@@ -680,24 +794,35 @@ class WcmContentRepositoryService implements InitializingBean {
             if (targetContent && parentChanged) {
                 if (!targetContent.children) targetContent.children = new TreeSet()
                 targetContent.addToChildren(sourceContent)
+
+                // Check we can be saved there
+                requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
+                
                 assert targetContent.save()
+            } else {
+                // Check we can be saved there
+                requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
             }
 
             // Invalidate the caches 
             invalidateCachingForURI(sourceContent.space, originalURI)
 
-            return sourceContent.save(flush: true)
+            success = sourceContent.save(flush: true)
+            if (success) {
+                triggerEvent(sourceContent, WeceemEvents.contentDidMove)
+            }
+            return success
         } else {
             return false
         }
      }
      
-    def shiftNodeChildrenOrderIndex(WcmSpace space, parent, shiftedOrderIndex){
+    def shiftNodeChildrenOrderIndex(WcmSpace space, WcmContent parent, shiftedOrderIndex){
         if (log.debugEnabled) {
             log.debug "Updating node order indexes in space ${space} for parent ${parent}"
         }
-        // Can't do this until space is supplied
-        //requirePermissions(parent, [WeceemSecurityPolicy.PERMISSION_EDIT])        
+        requirePermissions(parent ?: space, [WeceemSecurityPolicy.PERMISSION_EDIT])        
+        
         // @todo this is probably flushing the session with incomplete changes - use withNewSession?
         def criteria = WcmContent.createCriteria()
         def nodes = criteria {
@@ -769,9 +894,11 @@ class WcmContentRepositoryService implements InitializingBean {
         // Create a versioning entry
         sourceContent.saveRevision(sourceContent.title, sourceContent.space.name)
         
-        if (sourceContent.metaClass.respondsTo(sourceContent, 'deleteContent')) {
-            if (!sourceContent.deleteContent()) return false
+        if (!triggerDomainEvent(sourceContent, WeceemDomainEvents.contentShouldBeDeleted)) {
+            return false
         }
+
+        triggerEvent(sourceContent, WeceemEvents.contentWillBeDeleted)
 
         // Do this now before absoluteURI gets trashed by changing the parent
         invalidateCachingForURI(sourceContent.space, sourceContent.absoluteURI)
@@ -787,6 +914,7 @@ class WcmContentRepositoryService implements InitializingBean {
         // we need to delete all virtual contents that reference sourceContent
         def copies = WcmVirtualContent.findAllWhere(target: sourceContent)
         copies?.each() {
+           // @todo We should be using deleteNode here, recursing
            if (it.parent) {
                parent = WcmContent.get(it.parent.id)
                parent.children.remove(it)
@@ -808,7 +936,7 @@ class WcmContentRepositoryService implements InitializingBean {
         removeAllTagsFrom(sourceContent)
         sourceContent.delete(flush: true)
 
-        wcmEventService.afterContentRemoved(sourceContent)
+        triggerEvent(sourceContent, WeceemEvents.contentDidGetDeleted)
 
         return true
     }
@@ -816,10 +944,9 @@ class WcmContentRepositoryService implements InitializingBean {
     /**
      * Deletes content reference 
      *
-     * @todo Update the naming of this, "link" is not correct terminology. 
-     *
      * @param child
      * @param parent
+     * @deprecated This is old tat
      */
     void deleteLink(WcmContent child, WcmContent parent) {
         requirePermissions(parent, [WeceemSecurityPolicy.PERMISSION_EDIT])        
@@ -853,11 +980,9 @@ class WcmContentRepositoryService implements InitializingBean {
             def oldAliasURI = space.makeUploadName()
             hackedBindData(space, params)
             if (!space.hasErrors() && space.save()) {
-                def oldFile = new File(ServletContextHolder.servletContext.getRealPath(
-                        "/${WcmContentFile.DEFAULT_UPLOAD_DIR}/${oldAliasURI}"))
+                def oldFile = WcmContentRepositoryService.getUploadPath(space, oldAliasURI)
                 if (oldFile.exists()) {
-                    def newFile = new File(ServletContextHolder.servletContext.getRealPath(
-                        "/${WcmContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}"))
+                    def newFile = WcmContentRepositoryService.getUploadPath(space)
                     oldFile.renameTo(newFile)
                 }
                 return [space: space]
@@ -962,10 +1087,8 @@ class WcmContentRepositoryService implements InitializingBean {
             if (params.tags != null) {
                 content.setTags(params.tags.tokenize(',').collect { it.trim().toLowerCase()} )
             }
-
-            if (content.metaClass.respondsTo(content, 'rename', String)) {
-                content.rename(oldTitle)
-            }
+            triggerDomainEvent(content, WeceemDomainEvents.contentDidChangeTitle, [oldTitle])
+            
             if (log.debugEnabled) {
                 log.debug("Updated node with id ${content.id}, properties are now: ${content.dump()}")
             }
@@ -990,7 +1113,7 @@ class WcmContentRepositoryService implements InitializingBean {
             
                 invalidateCachingForURI(content.space, oldAbsURI)
 
-                wcmEventService.afterContentUpdated(content)
+                triggerEvent(content, WeceemEvents.contentDidGetUpdated)
 
                 return [content:content]
             }
@@ -1124,7 +1247,6 @@ class WcmContentRepositoryService implements InitializingBean {
 
         requirePermissions(sourceNode, [WeceemSecurityPolicy.PERMISSION_VIEW])        
         
-        
         // @todo replace this with smarter queries on children instead of requiring loading of all child objects
         def typeRestriction = getContentClassForType(args.type)
         if (log.debugEnabled) {
@@ -1138,10 +1260,13 @@ class WcmContentRepositoryService implements InitializingBean {
             }
             cache true
         }
-        
-        return children
+                    
+        return onlyNodesWithPermissions(children, [WeceemSecurityPolicy.PERMISSION_VIEW])        
     }
 
+    def onlyNodesWithPermissions(srcList, List permissionsNeeded) {
+        srcList?.findAll { c -> wcmSecurityService.hasPermissions(c, permissionsNeeded) }
+    }
 
     /**
      * Sort function for queries that cannot be sorted in the database, i.e. aggregated data
@@ -1174,7 +1299,7 @@ class WcmContentRepositoryService implements InitializingBean {
         if (status == null) {
             return true
         } else if (status == WcmContentRepositoryService.STATUS_ANY_PUBLISHED) {
-            return WcmStatus.findAllByPublicContent(true).find { it == node.status }
+            return WcmStatus.findAllByPublicContent(true, [cache:true]).find { it == node.status }
         } else if (status instanceof Collection) {
             // NOTE: This assumes collection is a collection of codes, not WcmStatus objects
             return status.find { it == node.status.code }  
@@ -1216,7 +1341,8 @@ class WcmContentRepositoryService implements InitializingBean {
                 parents << it
             }
         }
-        return sortNodes(parents, args.params?.sort, args.params?.order)
+        return onlyNodesWithPermissions(sortNodes(parents, args.params?.sort, args.params?.order), 
+            [WeceemSecurityPolicy.PERMISSION_VIEW])        
     }
 
     /**
@@ -1248,11 +1374,12 @@ class WcmContentRepositoryService implements InitializingBean {
         if (log.debugEnabled) {
             log.debug "findAllRootContent $space, $args"
         }
-        doCriteria(getContentClassForType(args.type), args.status, args.params) {
+        def res = doCriteria(getContentClassForType(args.type), args.status, args.params) {
             isNull('parent')
             eq('space', space)
             cache true
         }
+        return onlyNodesWithPermissions(res, [WeceemSecurityPolicy.PERMISSION_VIEW])        
     }
     
     /**
@@ -1263,10 +1390,11 @@ class WcmContentRepositoryService implements InitializingBean {
         if (log.debugEnabled) {
             log.debug "findAllContent $space, $args"
         }
-        doCriteria(getContentClassForType(args.type), args.status, args.params) {
+        def res = doCriteria(getContentClassForType(args.type), args.status, args.params) {
             eq('space', space)
             cache true
         }
+        return onlyNodesWithPermissions(res, [WeceemSecurityPolicy.PERMISSION_VIEW])        
     }
     
     /**
@@ -1376,6 +1504,9 @@ class WcmContentRepositoryService implements InitializingBean {
         }
     }
     
+    /**
+     * @deprecated Use normal content methods since 0.9
+     */
     def findFileRootContentByURI(String aliasURI, WcmSpace space, Map args = Collections.EMPTY_MAP) {
         if (log.debugEnabled) {
             log.debug "findFileRootContentByURI: aliasURI $aliasURI, space ${space?.name}, args ${args}"
@@ -1396,11 +1527,11 @@ class WcmContentRepositoryService implements InitializingBean {
         // Can't impl this yet
     }
     
-    def getTemplateForContent(def content){
-        def template = (content.metaClass.hasProperty(content, 'template')) ? content.template : null
-        if ((template == null) && (content.parent != null)){
+    def getTemplateForContent(def content) {
+        def template = content.metaClass.hasProperty(content, 'template') ? content.template : null
+        if ((template == null) && (content.parent != null)) {
             return getTemplateForContent(content.parent)
-        }else{
+        } else {
             return template
         }
     }
@@ -1428,28 +1559,39 @@ class WcmContentRepositoryService implements InitializingBean {
 
         def existingFiles = new TreeSet()
         def createdContent = []
-        def spaceDir = grailsApplication.parentContext.getResource(
-                "${WcmContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}").file
+        def spaceDir = WcmContentRepositoryService.getUploadPath(space)
         if (!spaceDir.exists()) spaceDir.mkdirs()
-        spaceDir.eachFileRecurse {file ->
-            def relativePath = file.absolutePath.substring(
-                    spaceDir.absolutePath.size() + 1)
+        log.info "Synchronizing filesystem with repository for space /${space.aliasURI} (server dir: ${spaceDir.absolutePath})"
+        spaceDir.eachFileRecurse { file ->
+            def relativePath = file.absolutePath.substring(spaceDir.absolutePath.size() + 1)
+            log.info "Checking for existing content node in space /${space.aliasURI} for server file ${relativePath}"
             def content = findContentForPath(relativePath, space, false)?.content
             //if content wasn't found then create new
-            if (!content){
-                createdContent += createContentFile("${spaceDir.name}/${relativePath}")
-                content = findContentForPath(relativePath, space, false)?.content
-                while (content){
-                    existingFiles << content
+            if (!content) {
+                log.info "Creating new content node in space /${space.aliasURI} for server file ${relativePath}"
+                def newFileContent = createContentFile(space, relativePath)
+                createdContent << newFileContent
+                existingFiles.add(newFileContent)
+                content = newFileContent.parent
+                while (content) {
+                    if (!existingFiles.find { c -> c.absoluteURI == content.absoluteURI } ) {
+                        existingFiles.add(content)
+                    }
                     content = content.parent
                 }
             }else{
-                existingFiles << content
+                log.info "Skipping server file ${relativePath}, already has content node"
+                existingFiles.add(content)
             }
         }
         def allFiles = WcmContentFile.findAllBySpace(space);
-        def missedFiles = allFiles.findAll(){f->
-            !(f.id in existingFiles*.id)
+        def existingIds = existingFiles*.id
+        def missedFiles = allFiles.findAll { f ->
+            def adding = !existingIds.contains(f.id)
+            if (adding) {
+                log.info "Adding ${f.absoluteURI} to list of orphaned files who have no content node"
+            }
+            return adding
         }
         
         return ["created": createdContent, "missed": missedFiles]
@@ -1459,66 +1601,51 @@ class WcmContentRepositoryService implements InitializingBean {
      * Creates WcmContentFile/WcmContentDirectory from specified <code>path</code>
      * on the file system.
      *
+     * @param space
      * @param path
+     * @return the new content node, if any
      */
-    def createContentFile(path) {
+    def createContentFile(space, path) {
         if (log.debugEnabled) {
             log.debug "Creating content node for server file at [$path]"
         }
         
+        def publicStatus = allPublicStatuses[0]
+        assert publicStatus
+        
         List tokens = path.replace('\\', '/').split('/')
-        if (tokens.size() > 1) {
-            def space = WcmSpace.findByAliasURI((tokens[0] == WcmContentFile.EMPTY_ALIAS_URI) ? '' : tokens[0])
-            def parents = tokens[1..(tokens.size() - 1)]
-            def ancestor = null
-            def content = null
-            def createdContent = []
+        if (tokens.size()) {
+            def parents = tokens
+            def ancestor
+            def content
+            def createdContent
             parents.eachWithIndex(){ obj, i ->
-                def parentPath = "${parents[0..i].join('/')}"
-                def file = grailsApplication.parentContext.getResource(
-                        "${WcmContentFile.DEFAULT_UPLOAD_DIR}/${space.makeUploadName()}/${parentPath}").file
+                def parentPath = parents[0..i].join('/')
+                log.debug "Creating content for file path $path, checking to see if node exists for ${parentPath}"
                 content = findContentForPath(parentPath, space)?.content
                 if (!content){
+                    def file = WcmContentRepositoryService.getUploadPath(space, parentPath)
                     if (file.isDirectory()){
                         content = new WcmContentDirectory(title: file.name,
                             content: '', filesCount: 0, space: space, orderIndex: 0,
-                            mimeType: '', fileSize: 0, status: WcmStatus.findByPublicContent(true))
+                            mimeType: '', fileSize: 0, status: publicStatus)
                     }else{
+                        // @todo This is bugged if x.y.z in filename use our MimeUtils
                         def mimeType = ServletContextHolder.servletContext.getMimeType(file.name)
                         content = new WcmContentFile(title: file.name,
                             content: '', space: space, orderIndex: 0, 
                             mimeType: (mimeType ? mimeType : ''), fileSize: file.length(),
-                            status: WcmStatus.findByPublicContent(true))
+                            status: publicStatus)
                     }
-                    // @todo this needs fixing, we don't know the parent yet!
-                    content.createAliasURI(content.parent)
 
-                    requirePermissions(content.parent ?: space, [WeceemSecurityPolicy.PERMISSION_CREATE])        
-
+                    createNode(content, ancestor)
+                    
                     if (!content.save()) {
                         log.error "Failed to save content ${content} - errors: ${content.errors}"
                         assert false
                     } else {
-                        createdContent << content
+                        createdContent = content
                     }
-                }
-                if (ancestor){
-                    if (ancestor.children == null) ancestor.children = new TreeSet()
-                    ancestor.children << content
-                    if (ancestor instanceof WcmContentDirectory)
-                        ancestor.filesCount += 1
-                    if (log.debugEnabled) {
-                        log.debug "Updated parent node of new file node [${ancestor.dump()}]"
-                    }
-                    assert ancestor.save(flush: true)
-                    content.parent = ancestor
-                    if (log.debugEnabled) {
-                        log.debug "Saving content node of new file node [${content.dump()}]"
-                    }
-                    if (log.debugEnabled && !content.validate()) {
-                        log.debug "Saving content node of new file node is about to fail. Node: [${content.dump()}], Errors: [${content.errors}]"
-                    }
-                    assert content.save(flush: true)
                 }
                 ancestor = content
             }
@@ -1547,9 +1674,7 @@ class WcmContentRepositoryService implements InitializingBean {
         def unmoderatedStat = getStatusByCode(unmoderatedStatusCode)
         
         Class contentClass = getContentClassForType(type)
-        // check CREATE permission on the uri & user
-        def n = parent ?: space
-        requirePermissions(n, [WeceemSecurityPolicy.PERMISSION_CREATE], contentClass)
+
         // create content and populate
 
         // Prevent setting status and other internal values
@@ -1572,6 +1697,10 @@ class WcmContentRepositoryService implements InitializingBean {
             // We should convention-ize this so they can have different fields
             c.ipAddress = request.remoteAddr
         }
+
+        // check CREATE permission on the new node
+        requirePermissions(newContent, [WeceemSecurityPolicy.PERMISSION_CREATE])
+
         // Check for binding errors
         return newContent.hasErrors() ? newContent : newContent.save() // it might not work, but hasErrors will be set if not
     }
@@ -1637,7 +1766,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
             cache true
         }
         
-        return children
+        return onlyNodesWithPermissions(children, [WeceemSecurityPolicy.PERMISSION_VIEW])        
     }
     
     /**
@@ -1751,11 +1880,13 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
         def count = 0
         pendingContent?.each { content ->
             // Find the next status (in code order) that is public content, after the content's current status
-            def status = WcmStatus.findByPublicContentAndCodeGreaterThan(true, content.status.code)
+            def status
+            WcmStatus.withNewSession { status = WcmStatus.findByPublicContentAndCodeGreaterThan(true, content.status.code) }
+
             if (!status) {
                 log.error "Tried to publish content ${content} with status [${content.status.dump()}] but found no public status with a code higher than it"
             } else if (log.debugEnabled) {
-                log.debug "Transitioning content ${content} from status [${content.status.code}] to [${status.code}]"
+                log.debug "Publish: Transitioning content ${content} from status [${content.status.code}] to [${status.code}]"
             }
             content.status = status
             count++
@@ -1776,11 +1907,24 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
         def staleContent = WcmContent.withCriteria {
             isNotNull('publishUntil')
             le('publishUntil', now)
+            status {
+                and {
+                    eq('publicContent', true)
+                    ne('code', archivedStatusCode)
+                }
+            }
         }
         def count = 0
+        def archivedCode
+        WcmStatus.withNewSession { 
+            archivedCode = getStatusByCode(archivedStatusCode) 
+        }
+        
         staleContent?.each { content ->
-            // Find the next status (in code order) that is public content, after the content's current status
-            content.status = getStatusByCode(archivedStatusCode)
+            if (log.debugEnabled) {
+                log.debug "Archive: Transitioning content ${content} from status [${content.status.code}] to [${archivedCode.code}]"
+            }
+            content.status = archivedCode
             count++
         }
         return count
@@ -1825,7 +1969,6 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
 
     def filterToTypes(listOfContent, String typeNames) {
         def types = typeNames.tokenize(',').collect { n -> grailsApplication.getClassForName(n.trim()) }
-        println "Types are $types"
         listOfContent.findAll { c -> types.any { t -> t.isAssignableFrom(c.class) } }
     }
 
@@ -1891,7 +2034,6 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
 
         // Filter by type if required
         if (args.types) {
-            println "Result types are: ${results.results*.class}"
             results.results = filterToTypes(results.results, args.types)
         }
         

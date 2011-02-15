@@ -1,7 +1,8 @@
 package org.weceem.services
 
 import org.weceem.content.WcmContent
-import org.weceem.event.Events
+import org.weceem.event.WeceemEvents
+import org.weceem.event.EventMethod
 
 /*
  * A service to send events to hooks used by plugins/internally
@@ -12,47 +13,43 @@ class WcmEventService {
 
     boolean transactional = false
 
-    private listeners = [:]
-
-    /* get listeners for an event */
-    private getListeners(Events event) {
-      listeners[event] ?: []
-    }
+    private listeners = []
 
     /*
-    * Register a listener with a callback method
+     * Register a listener with a callback method
      */
-    void registerListener(Events event, listener) {
-      listeners[event] = getListeners(event) << listener
+    void addListener(listener) {
+        assert listener.conformsTo(WeceemEvents)
+        listeners << listener
     }
 
     /*
-    * Unregister a listener
+     * Unregister a listener
      */
-    void unregisterListener(Events event, listener) {
-      getListeners(event).remove(listener)
+    void removeListener(listener) {
+        listeners.remove(listener)
     }
 
-
-  /************************************
-   **** Place events here
-   **********************************/
-
-    /*
-     * Called after new content is added
-    */
-    void afterContentAdded(WcmContent content) {
-      getListeners(Events.AFTER_CONTENT_ADDED)*.afterWeceemContentAdded(content)
-    }
-
-    /*
-     * Called after conent is updated
+    /**
+     * Call the event handler on any listeners
      */
-    void afterContentUpdated(WcmContent content) {
-      getListeners(Events.AFTER_CONTENT_UPDATED)*.afterWeceemContentUpdated(content)
-    }
-
-    void afterContentRemoved(WcmContent content) {
-      getListeners(Events.AFTER_CONTENT_REMOVED)*.afterWeceemContentRemoved(content)
+    void event(EventMethod event, WcmContent contentNode) {
+        assert event.definedIn(WeceemEvents)
+        
+        if (log.debugEnabled) {
+            log.debug "Triggering notification event: ${event} for ${contentNode.absoluteURI}"
+        }
+        
+        def listenerList
+        synchronized (listeners) {
+            listenerList = listeners.toArray()
+        }
+        
+        def eventName = event
+        listenerList.each { l ->
+            if (l.conformsTo(event)) {
+                event.invokeOn(l, [contentNode])
+            }
+        }
     }
 }

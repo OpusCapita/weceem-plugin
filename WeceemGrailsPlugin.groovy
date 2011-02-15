@@ -1,11 +1,13 @@
 import org.apache.commons.logging.LogFactory
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
+import org.weceem.services.WcmContentRepositoryService
+
 class WeceemGrailsPlugin {
     def _log = LogFactory.getLog('org.weceem.WeceemGrailsPlugin')
 
     // the plugin version
-    def version = "0.9.2"
+    def version = "1.0-M2"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.2.2 > *"
     
@@ -13,20 +15,26 @@ class WeceemGrailsPlugin {
     def dependsOn = [
         searchable:'0.5.5 > *', 
         quartz:'0.4.2 > *', 
-        navigation:'1.1.1 > *',
-        ckeditor:'3.4.0.2 > *',
+        navigation:'1.2 > *',
+        ckeditor:'3.4.1 > *',
         feeds:'1.5 > *',
         beanFields:'1.0-RC3 > *',
         blueprint:'0.9.1.1 > *',
-        jqueryUi:'1.8.4.3 > *',
+        jquery:'1.4.4.1 > *',
+        jqueryUi:'1.8.6.1 > *',
+        cacheHeaders:'1.1.3 > *',
         taggable:'0.6.2 > *'
     ]
     def observe = ["hibernate", 'services']
     
+    def loadAfter = ['logging']
+    def loadBefore = ['controllers'] // Make sure taglib sees configured service
+    
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
         "grails-app/views/error.gsp",
-        "web-app/${org.weceem.files.WcmContentFile.DEFAULT_UPLOAD_DIR}/**/*"
+        "web-app/WeceemFiles/**/*",
+        "web-app/testing/**/*"
     ]
 
     // TODO Fill in these fields
@@ -62,8 +70,11 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         
         applicationContext.navigationService.registerItem( 'weceem', 
             [controller:'wcmRepository', action:'treeTable', title:'content', path:'contentrepo', order:0])
+
         applicationContext.navigationService.registerItem( 'weceem', 
             [controller:'wcmPortal', action:'administration', title:'administration', path:'admin',order:2])
+
+        // Register the standard admin sections
         [
             [controller:'wcmSpace', action:'list', title:'spaces', path:'admin/spaces', order: 0],
             [controller:'wcmSynchronization', action:'list', title:'synchronize', path:'admin/files/synchronize', order: 1],
@@ -73,32 +84,81 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
                 applicationContext.navigationService.registerItem( 'weceem.plugin.admin', item)
         }
 
+        def repSvc = applicationContext.wcmContentRepositoryService
+        repSvc.loadConfig()
         applicationContext.wcmEditorService.cacheEditorInfo()
-        configureCKEditor()
+        configureCKEditor(repSvc.uploadInWebapp, repSvc.uploadDir, repSvc.uploadUrl)
 
-        applicationContext.wcmContentRepositoryService.createDefaultStatuses()
-        applicationContext.wcmContentRepositoryService.createDefaultSpace()
+        repSvc.createDefaultStatuses()
+        
+        def createDefSpace = ConfigurationHolder.config.weceem.create.default.space
+        if (createDefSpace instanceof ConfigObject) {
+            createDefSpace = true
+        } else {
+            createDefSpace = createDefSpace instanceof Boolean ? createDefSpace : createDefSpace.asBoolean()
+        }
+        
+        if (createDefSpace) {
+            repSvc.createDefaultSpace()
+        }
     }
 
-    def configureCKEditor(){
+    def configureCKEditor(uploadInWebapp, dir, url){
         def settings = ConfigurationHolder.config
         def co = new ConfigObject()
-        co.ckeditor.upload.basedir = "/${org.weceem.files.WcmContentFile.DEFAULT_UPLOAD_DIR}/"
+        if (uploadInWebapp) {
+            co.ckeditor.upload.basedir = url.toString()
+        } else {
+            co.ckeditor.upload.basedir = dir.toString()
+            co.ckeditor.upload.baseurl = url.toString()
+        }
         co.ckeditor.upload.overwrite = false
         co.ckeditor.defaultFileBrowser = "ofm"
         co.ckeditor.upload.image.browser = true
         co.ckeditor.upload.image.upload = true
         co.ckeditor.upload.image.allowed = ['jpg', 'gif', 'jpeg', 'png']
         co.ckeditor.upload.image.denied = []
-        co.ckeditor.upload.media.browser = true
+        co.ckeditor.upload.link.browser = true
+        co.ckeditor.upload.link.upload	= true
+        co.ckeditor.upload.link.allowed = ['pdf', 'doc', 'docx', 'zip', 'jpg', 'jpeg', 'png']
         co.ckeditor.upload.media.upload = true
         co.ckeditor.upload.media.allowed = ['mpg','mpeg','avi','wmv','asf','mov']
         co.ckeditor.upload.media.denied = []
+        co.ckeditor.upload.flash.upload = true
+        co.ckeditor.upload.flash.allowed = ['swf']
+        co.ckeditor.upload.flash.denied = []
         settings.merge(co)
     }
     
-    def doWithWebDescriptor = { xml ->
+    def doWithWebDescriptor = { webXml ->
         // TODO Implement additions to web.xml (optional)
+        
+        // Install filter for /$uploadUrl that
+        // extracts space URI part, converts back to space
+        // asks sec svc if current user can view that uri
+        // returns file if so
+        
+        log.info("Adding servlet filter")
+        
+        //def repSvc = applicationContext.wcmContentRepositoryService
+        def uploadUrl = WcmContentRepositoryService.getUploadUrlFromConfig(ConfigurationHolder.config)
+        log.info("Uploaded file filter will be at ${uploadUrl}")
+        
+        def filters = webXml.filter[0]
+        filters + {
+            'filter' {
+                'filter-name'("WeceemFileFilter")
+                'filter-class'("org.weceem.filter.UploadedFileFilter")
+            }
+        }
+        def mappings = webXml.'filter-mapping' // this does only yield 2 filter mappings
+        mappings + {
+            'filter-mapping' {
+                'filter-name'("WeceemFileFilter")
+                'url-pattern'("${uploadUrl}*")
+            }
+        }
+        
     }
 
     def doWithDynamicMethods = { ctx ->

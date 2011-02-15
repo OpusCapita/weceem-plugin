@@ -31,7 +31,6 @@ class WcmFeedsController {
         }
         
         render( feedType:actionName, feedVersion: params.version) {
-            println "Data: ${data}"
             title = data.parent.title
             description = data.parent.title
             link = g.createLink(controller:'wcmContent', action:'show', params:[uri: WeceemTagLib.makeFullContentURI(data.parent)], absolute:true)

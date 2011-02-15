@@ -126,9 +126,8 @@ class DefaultSpaceImporter implements SpaceImporter {
             }
         }
 
-        def filesDir = new File(ApplicationHolder.application.mainContext.servletContext.getRealPath(
-                "/${WcmContentFile.DEFAULT_UPLOAD_DIR}"))
-        ant.copy(todir: "${filesDir.absolutePath}/${space.makeUploadName()}", failonerror: false) {
+        def filesDir = org.weceem.services.WcmContentRepositoryService.getUploadPath(space)
+        ant.copy(todir: "${filesDir.absolutePath}", failonerror: false) {
             fileset(dir: "${tmpDir.absolutePath}/files")
         }
     }

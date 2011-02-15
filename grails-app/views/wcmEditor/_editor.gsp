@@ -39,7 +39,7 @@ $( function() {
             <div>
         <g:grep in="${editableProperties}" var="prop" filter="${ { p -> p.group == null }}">
                 <div class="clear span-4">
-                    <bean:label beanName="content" property="${prop.property}" labelKey="${'content.label.'+prop.property}"/>
+                    <wcm:editorLabel bean="${content}" property="${prop.property}"/>
                 </div>
                 <div class="field prepend-1 span-18 last">
                     <% println wcm."editorField${prop.editor}"(bean:content, property:prop.property) %>
