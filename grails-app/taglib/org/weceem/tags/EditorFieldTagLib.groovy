@@ -272,7 +272,7 @@ class EditorFieldTagLib {
         out << """
         <script language="javascript" type="text/javascript">
         var editor_${attrs.property} = CodeMirror.fromTextArea("editor_${attrs.property.encodeAsJavaScript()}", {
-          parserfile: ["parsegroovy.js"],
+          parserfile: ["tokenizegroovy.js", "parsegroovy.js"],
           path: "${g.resource(plugin:'weceem', dir:'_weceem/codemirror/js/').encodeAsJavaScript()}",
           stylesheet: "${g.resource(plugin:'weceem', dir:'_weceem/codemirror/css', file:'groovycolors.css').encodeAsJavaScript()}",
           textWrapping: false
