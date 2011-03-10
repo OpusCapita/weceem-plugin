@@ -65,8 +65,8 @@ class WcmHTMLContent extends WcmContent {
         return r
     }
     
-    String getMimeType() { "text/html" } // @todo we probably need to allow inclusion of charset
-
+    String getMimeType() { "text/html; charset=UTF-8" }
+    
     static handleRequest = { content ->
         if (content.allowGSP) {
             renderGSPContent(content)

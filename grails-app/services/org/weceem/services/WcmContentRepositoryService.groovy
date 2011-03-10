@@ -1,5 +1,8 @@
 package org.weceem.services
 
+import java.util.concurrent.ConcurrentHashMap
+
+import org.apache.commons.logging.LogFactory
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 import org.springframework.beans.factory.InitializingBean
@@ -30,6 +33,8 @@ import org.weceem.security.*
  */
 class WcmContentRepositoryService implements InitializingBean {
 
+    static log = LogFactory.getLog("grails.app.service."+WcmContentRepositoryService.class.name)
+
     static final String EMPTY_ALIAS_URI = "_ROOT"
     
     static final CONTENT_CLASS = WcmContent.class.name
@@ -37,18 +42,21 @@ class WcmContentRepositoryService implements InitializingBean {
     
     static CACHE_NAME_GSP_CACHE = "gspCache"
     static CACHE_NAME_URI_TO_CONTENT_ID = "uriToContentCache"
-    
+
     static transactional = true
 
     def uriToIdCache
     def gspClassCache
+
     
     def grailsApplication
     def wcmImportExportService
     def wcmCacheService
     def groovyPagesTemplateEngine
+
     def wcmSecurityService
     def wcmEventService
+    def wcmContentDependencyService
     
     def archivedStatusCode
     def unmoderatedStatusCode
@@ -84,7 +92,6 @@ class WcmContentRepositoryService implements InitializingBean {
             
         loadConfig()
     }
-    
     /**
      * Workaround for replaceAll problems with \ in Java
      */
@@ -319,6 +326,7 @@ class WcmContentRepositoryService implements InitializingBean {
             log.error "Unable to import space template [${templateName}] into space [${space.name}]", t
             throw t // rethrow, this is sort of fatal
         }
+
         log.info "Successfully imported space template [${templateName}] into space [${space.name}]"
     }
     
@@ -342,7 +350,7 @@ class WcmContentRepositoryService implements InitializingBean {
         // @todo remove/rework this for 0.2
         def contentList = WcmContent.findAllBySpace(space)
         for (content in contentList){
-            // Invalidate the caches before parent is changedBy
+            // Invalidate the caches before parent is changed
             invalidateCachingForURI(content.space, content.absoluteURI)
 
             content.parent = null
@@ -505,7 +513,7 @@ class WcmContentRepositoryService implements InitializingBean {
      *
      * @param content
      */
-    def createNode(String type, def params, Closure postInit = null) {
+    def createNode(type, params, Closure postInit = null) {
         def content = newContentInstance(type)
         def tags = params.remove('tags')
         hackedBindData(content, params)
@@ -667,6 +675,7 @@ class WcmContentRepositoryService implements InitializingBean {
             }
             
             invalidateCachingForURI(content.space, content.absoluteURI)
+            updateCachingMetadataFor(content)
         }
         
         return result
@@ -809,8 +818,11 @@ class WcmContentRepositoryService implements InitializingBean {
 
             success = sourceContent.save(flush: true)
             if (success) {
+                updateCachingMetadataFor(sourceContent)
+                
                 triggerEvent(sourceContent, WeceemEvents.contentDidMove)
             }
+
             return success
         } else {
             return false
@@ -1005,6 +1017,7 @@ class WcmContentRepositoryService implements InitializingBean {
         if (content) {
             return updateNode(content, params)
         } else {
+            updateCachingMetadataFor(content)
             return [notFound:true]
         }        
     }
@@ -1033,6 +1046,8 @@ class WcmContentRepositoryService implements InitializingBean {
                 uriToIdCache.remove(k)
             }
         }
+
+        wcmContentDependencyService.reload()        
     }
 
     /**
@@ -1112,6 +1127,7 @@ class WcmContentRepositoryService implements InitializingBean {
                 }
             
                 invalidateCachingForURI(content.space, oldAbsURI)
+                updateCachingMetadataFor(content)
 
                 triggerEvent(content, WeceemEvents.contentDidGetUpdated)
 
@@ -1522,9 +1538,32 @@ class WcmContentRepositoryService implements InitializingBean {
         }
         return result
     }
-    
+
+/*    
     def getAncestors(uri, sourceNode) {
         // Can't impl this yet
+    }
+*/
+    /**
+     * Return a flattened list of all the descendents of this node
+     */
+    def findDescendents(WcmContent parent) {
+        def r = findChildren(parent)
+        def result = r.clone()
+        r.each { c ->
+            result.addAll(findDescendents(c))
+        }
+        return result
+    }
+
+    def updateCachingMetadataFor(WcmContent content) {
+        wcmContentDependencyService.updateDependencyInfoFor(content)
+        wcmContentDependencyService.updateFingerprintFor(content)
+
+        if (log.debugEnabled) {
+            wcmContentDependencyService.dumpDependencyInfo()
+            wcmContentDependencyService.dumpFingerprintInfo()
+        }
     }
     
     def getTemplateForContent(def content) {
@@ -1534,6 +1573,14 @@ class WcmContentRepositoryService implements InitializingBean {
         } else {
             return template
         }
+    }
+    
+    def getLastModifiedDateFor(WcmContent content) {
+        def templ = getTemplateForContent(content)
+        // @todo Do we also need to check dependencies' (and their dependencies') last mod dates?
+        def templLastMod = templ?.lastModified
+        def contentLastMod = content.lastModified
+        return (templLastMod > contentLastMod) ? templLastMod : contentLastMod
     }
     
     /** 
@@ -2038,6 +2085,12 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
         }
         
         return results
+    }
+    
+    void resetAllCaches() {
+        uriToIdCache.removeAll()
+        gspClassCache.removeAll()
+        wcmContentDependencyService.reload()        
     }
 }
 

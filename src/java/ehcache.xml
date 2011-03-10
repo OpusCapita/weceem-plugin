@@ -21,6 +21,18 @@
          overflowToDisk="false"
          memoryStoreEvictionPolicy="LFU"/>
 
+     <cache name="weceem.contentTreeFingerprintCache"
+         maxElementsInMemory="5000"
+         eternal="true"
+         overflowToDisk="false"
+         memoryStoreEvictionPolicy="LFU"/>
+
+     <cache name="weceem.contentFingerprintCache"
+         maxElementsInMemory="5000"
+         eternal="true"
+         overflowToDisk="false"
+         memoryStoreEvictionPolicy="LFU"/>
+
      <cache name="weceem.uriToContentCache"
          maxElementsInMemory="1000"
          eternal="false"

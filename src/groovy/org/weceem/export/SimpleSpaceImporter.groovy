@@ -58,9 +58,9 @@ class SimpleSpaceImporter implements SpaceImporter {
         //Recursively save each element
         for (cntInfo in backrefMap.values()){
             def savedContent = saveContent(cntInfo.content)
-            
+
             // Reinstate tags
-            if (cntInfo.tags) {
+            if (savedContent && cntInfo.tags) {
                 savedContent.parseTags(cntInfo.tags)
             }
         }

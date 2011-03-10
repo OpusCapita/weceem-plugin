@@ -1,3 +1,7 @@
+package org.weceem.services
+
+import org.weceem.AbstractWeceemIntegrationTest
+
 import org.weceem.content.*
 import org.weceem.html.*
 import org.weceem.wiki.*

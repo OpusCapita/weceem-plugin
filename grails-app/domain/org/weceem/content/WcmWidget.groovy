@@ -47,6 +47,8 @@ class WcmWidget extends WcmContent {
     // 64Kb Unicode text with HTML/Wiki Markup
     String content
     
+    String contentDependencies
+
     /**
      * Must be overriden by content types that can represent their content as text.
      * Used for search results and versioning
@@ -70,6 +72,7 @@ class WcmWidget extends WcmContent {
         width()
         height()
         color()
+        contentDependencies(group:'extra')
     }
 
     static transients = WcmContent.transients
@@ -79,5 +82,6 @@ class WcmWidget extends WcmContent {
         width(nullable: true)
         height(nullable: true)
         color(nullable: true)
+        contentDependencies(maxSize:500, nullable: true)
     }
 }

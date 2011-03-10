@@ -201,4 +201,9 @@ class WcmContentFile extends WcmContent {
     File toFile() {
         org.weceem.services.WcmContentRepositoryService.getUploadPath(space, toRelativePath())
     }
+    
+    @Override 
+    Date getLastModified() {
+        new Date(toFile().lastModified())
+    }
 }

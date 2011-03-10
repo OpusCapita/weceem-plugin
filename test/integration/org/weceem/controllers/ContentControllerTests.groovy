@@ -1,3 +1,5 @@
+package org.weceem.controllers
+
 import org.springframework.context.ApplicationContext
 
 import groovy.mock.interceptor.*

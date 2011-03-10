@@ -77,8 +77,11 @@ class WcmContent implements Comparable, Taggable {
     String metaSource      // Entity that was original source of the content
     String metaCopyright   // Copyright for the content (aka Rights)
     
+    Integer validFor   // cache maxAge
+
     static belongsTo = [space: WcmSpace, parent: WcmContent]
     static transients = [ 
+        'lastModified', 
         'titleForHTML', 
         'titleForMenu', 
         'versioningProperties', 
@@ -99,6 +102,7 @@ class WcmContent implements Comparable, Taggable {
         space(nullable: false)
         status(nullable: false)
         orderIndex(nullable: true)
+        validFor(nullable: true)
         parent(nullable: true, lazy:true)
         createdBy(nullable: true)
         createdOn(nullable: true)
@@ -152,6 +156,8 @@ class WcmContent implements Comparable, Taggable {
         tags editor:'Tags', group:'extra'
         parent hidden:true
         children hidden:true
+
+        validFor group:'extra'   // cache maxAge
 
         metaCreator group:'meta'    
         metaPublisher group:'meta'   
@@ -277,6 +283,10 @@ class WcmContent implements Comparable, Taggable {
         }
     }
 
+    String calculateFingerprint() {
+        "${ident()}:${version}".encodeAsSHA256()
+    }
+    
     /**
      * Save a new content revision object with the current state of this content node
      */
@@ -343,5 +353,9 @@ class WcmContent implements Comparable, Taggable {
         s = s?.replaceAll('<', '&lt;')
         s = s?.replaceAll('>', '&gt;')
         return s
+    }
+    
+    Date getLastModified() {
+        changedOn ?: createdOn
     }
 }

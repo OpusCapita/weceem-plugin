@@ -29,10 +29,16 @@ class WcmTemplate extends WcmContent {
     
     static standaloneContent = false
 
-    String getMimeType() { "text/html" }
+    transient wcmContentRepositoryService
+    
+    String getMimeType() { "text/html; charset=UTF-8" }
     
     // 64Kb Unicode text with HTML/GSP Markup
     String content
+    
+    Boolean userSpecificContent
+    
+    String contentDependencies
 
     static searchable = {
         alias WcmTemplate.name.replaceAll("\\.", '_')
@@ -56,13 +62,18 @@ class WcmTemplate extends WcmContent {
 
     static constraints = {
         content(nullable: false, maxSize: 65536)
+        userSpecificContent(nullable: true)
+        contentDependencies(maxSize:500, nullable: true)
     }
     
     static editors = {
         content(editor:'HtmlCode')
+        userSpecificContent(group:'extra')
+        userSpecificContent(group:'extra')
+        contentDependencies(group:'extra')
     }
 
-    static transients = (WcmContent.transients - 'mimeType')
+    static transients = (WcmContent.transients + 'wcmContentRepositoryService') - 'mimeType'
 
     static mapping = {
         cache usage: 'nonstrict-read-write'

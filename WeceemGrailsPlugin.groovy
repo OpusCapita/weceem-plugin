@@ -7,7 +7,7 @@ class WeceemGrailsPlugin {
     def _log = LogFactory.getLog('org.weceem.WeceemGrailsPlugin')
 
     // the plugin version
-    def version = "1.0-M2"
+    def version = "1.0-RC1"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.2.2 > *"
     
@@ -27,7 +27,7 @@ class WeceemGrailsPlugin {
     ]
     def observe = ["hibernate", 'services']
     
-    def loadAfter = ['logging']
+    def loadAfter = ['logging', 'hibernate', 'services']
     def loadBefore = ['controllers'] // Make sure taglib sees configured service
     
     // resources that are excluded from plugin packaging
@@ -101,6 +101,8 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         if (createDefSpace) {
             repSvc.createDefaultSpace()
         }
+
+        applicationContext.wcmContentDependencyService.init()
     }
 
     def configureCKEditor(uploadInWebapp, dir, url){
@@ -144,6 +146,13 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         def uploadUrl = WcmContentRepositoryService.getUploadUrlFromConfig(ConfigurationHolder.config)
         log.info("Uploaded file filter will be at ${uploadUrl}")
         
+        def listeners = webXml.listener[0]
+        listeners + {
+            'listener' {
+                'listener-class'("org.weceem.servlet.SessionChangeListener")
+            }
+        }
+
         def filters = webXml.filter[0]
         filters + {
             'filter' {

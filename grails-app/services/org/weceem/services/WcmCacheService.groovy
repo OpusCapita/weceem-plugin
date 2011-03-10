@@ -25,10 +25,14 @@ class WcmCacheService implements InitializingBean {
         getCache(cacheName)?.remove(key, dontTellReplicators)
     }
     
-    def getCache(String name) {
-        def c = weceemCacheManager.getCache('weceem.'+name)
+    def getCache(cacheOrName) {
+        if (cacheOrName instanceof Cache) {
+            return cacheOrName
+        }
+        
+        def c = weceemCacheManager.getCache('weceem.'+cacheOrName)
         if (!c) {
-            log.warn "Tried to get cache with name [$name] but wasn't found - check ehcache.xml config"
+            log.warn "Tried to get cache with name [$cacheOrName] but wasn't found - check ehcache.xml config"
         }
         return c
     }
@@ -37,31 +41,37 @@ class WcmCacheService implements InitializingBean {
         getCache(cacheName).get(key)?.value
     }
     
+    def getObjectValue(cacheName, key) {
+        getCache(cacheName).get(key)?.objectValue
+    }
+    
     def getElement(cacheName, key) {
         getCache(cacheName).get(key)
     }
     
     def putValue(cacheName, key, value) {
         getCache(cacheName).put( new Element(key, value) )
+        return value
     }
 
     def putToCache(Cache cache, key, value) {
         cache.put( new Element(key, value) )
+        return value
     }
     
-    def getOrPutObject(cacheName, key, objectCallable) {
-        getOrPut(cacheName, true, key, objectCallable)
+    def getOrPutObject(cache, key, objectCallable) {
+        getOrPut(cache, true, key, objectCallable)
     }
 
-    def getOrPutValue(cacheName, key, valueCallable) {
-        getOrPut(cacheName, false, key, valueCallable)
+    def getOrPutValue(cache, key, valueCallable) {
+        getOrPut(cache, false, key, valueCallable)
     }
     
-    def getOrPut(cacheName, boolean isObject, key, valueCallable) {
+    def getOrPut(cache, boolean isObject, key, valueCallable) {
+        def c = cache instanceof Cache ? cache : getCache(cache)
         if (log.debugEnabled) {
-            log.debug "getOrPutValue to $cacheName with key $key"
+            log.debug "getOrPutValue to ${c.name} with key $key"
         }
-        def c = getCache(cacheName)
         def elem = c.get(key)
         def v
         if (elem) {
@@ -69,12 +79,12 @@ class WcmCacheService implements InitializingBean {
         }
         if (!v) {
             if (log.debugEnabled) {
-                log.debug "getOrPut did not find key in the cache so generating value for $key in cache $cacheName..."
+                log.debug "getOrPut did not find key in the cache so generating value for $key in cache ${c.name}..."
             }
             v = valueCallable.call() // Call whatever we were given
             c.put( new Element(key, v) )
             if (log.debugEnabled) {
-                log.debug "getOrPut stored generated value for $key in cache $cacheName."
+                log.debug "getOrPut stored generated value for $key in cache ${c.name}."
             }
         }
         return v

@@ -1,3 +1,4 @@
+import org.weceem.AbstractWeceemIntegrationTest
 
 import org.weceem.content.*
 import org.weceem.html.*
@@ -21,7 +22,7 @@ class SearchTests extends AbstractWeceemIntegrationTest {
     void setUp() {
         super.setUp()
         
-        searchableService = application.mainContext.searchableService
+        searchableService = grailsApplication.mainContext.searchableService
         searchableService.stopMirroring()
         
         statusA = new WcmStatus(code: 400, description: "published", publicContent: true)
