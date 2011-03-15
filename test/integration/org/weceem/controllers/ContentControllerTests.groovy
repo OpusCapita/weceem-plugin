@@ -32,6 +32,7 @@ class ContentControllerTests extends GroovyTestCase {
         def app = grailsApplication
         
         con.wcmContentRepositoryService = app.mainContext.wcmContentRepositoryService
+        con.wcmContentFingerprintService = app.mainContext.wcmContentFingerprintService
         con.wcmSecurityService = app.mainContext.wcmSecurityService
         return con
     }

@@ -57,6 +57,7 @@ class WcmContentRepositoryService implements InitializingBean {
     def wcmSecurityService
     def wcmEventService
     def wcmContentDependencyService
+    def wcmContentFingerprintService
     
     def archivedStatusCode
     def unmoderatedStatusCode
@@ -1558,11 +1559,11 @@ class WcmContentRepositoryService implements InitializingBean {
 
     def updateCachingMetadataFor(WcmContent content) {
         wcmContentDependencyService.updateDependencyInfoFor(content)
-        wcmContentDependencyService.updateFingerprintFor(content)
+        wcmContentFingerprintService.updateFingerprintFor(content)
 
         if (log.debugEnabled) {
             wcmContentDependencyService.dumpDependencyInfo()
-            wcmContentDependencyService.dumpFingerprintInfo()
+            wcmContentFingerprintService.dumpFingerprintInfo()
         }
     }
     
@@ -2090,6 +2091,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
     void resetAllCaches() {
         uriToIdCache.removeAll()
         gspClassCache.removeAll()
+        wcmContentFingerprintService.reset()        
         wcmContentDependencyService.reload()        
     }
 }

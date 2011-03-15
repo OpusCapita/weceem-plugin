@@ -38,7 +38,7 @@ class WcmContentController {
     static SESSION_TIMESTAMP_KEY = "weceem.session.timestamp"
     
     def wcmContentRepositoryService
-    def wcmContentDependencyService
+    def wcmContentFingerprintService
     def wcmSecurityService
     def wcmCacheService
     
@@ -179,7 +179,7 @@ class WcmContentController {
                 withCacheHeaders { 
                     etag {
                         if (content) {
-                            tagValue = wcmContentDependencyService.getFingerprintFor(content)
+                            tagValue = wcmContentFingerprintService.getFingerprintFor(content)
                         }
                         
                         // Create ETag including session timestamp if available && content is per-user, so

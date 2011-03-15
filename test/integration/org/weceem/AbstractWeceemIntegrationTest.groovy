@@ -7,7 +7,6 @@ import org.weceem.content.*
 
 abstract class AbstractWeceemIntegrationTest extends GroovyTestCase {
     def wcmContentRepositoryService
-    def wcmContentDependencyService
     def grailsApplication
     
     void setUp() {
@@ -17,8 +16,7 @@ abstract class AbstractWeceemIntegrationTest extends GroovyTestCase {
         wcmContentRepositoryService.wcmCacheService.weceemCacheManager = new net.sf.ehcache.CacheManager()
         wcmContentRepositoryService.loadConfig()
 
-        wcmContentDependencyService.init()
-
+        // Need to kill everything between tests
         wcmContentRepositoryService.resetAllCaches()
     }
     

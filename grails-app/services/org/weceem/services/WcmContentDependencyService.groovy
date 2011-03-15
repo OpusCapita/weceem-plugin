@@ -10,10 +10,6 @@ class WcmContentDependencyService {
     
     static transactional = true
 
-    static CACHE_NAME_CONTENT_FINGERPRINT_CACHE = "contentFingerprintCache"
-    static CACHE_NAME_CONTENT_TREE_FINGERPRINT_CACHE = "contentTreeFingerprintCache"
-
-    def wcmCacheService
     def grailsApplication
     
     /* We populate this ourselves to work around circular dependencies */
@@ -23,19 +19,9 @@ class WcmContentDependencyService {
         return s
     }()
 
-    def contentFingerprintCache
-    def contentTreeFingerprintCache
     Map contentDependencyInfo = new ConcurrentHashMap()
 
-    void init() {
-        contentFingerprintCache = wcmCacheService.getCache(CACHE_NAME_CONTENT_FINGERPRINT_CACHE)
-        assert contentFingerprintCache
-        contentFingerprintCache.removeAll()
-        
-        contentTreeFingerprintCache = wcmCacheService.getCache(CACHE_NAME_CONTENT_TREE_FINGERPRINT_CACHE)
-        assert contentTreeFingerprintCache
-        contentTreeFingerprintCache.removeAll()
-
+    void reset() {
         contentDependencyInfo.clear()
         
         reload()
@@ -65,7 +51,50 @@ class WcmContentDependencyService {
         }
     }
     
-    List<String> getDependencyPathsOf(WcmContent content) {
+    /**
+     * Get the list of string node paths that the specified node explicitly depends on, as well as any special
+     * implicit dependencies e.g. Template. This does not recurse, it gather the info for this node only, unless
+     * you pass in "true" for "recurse"
+     *
+     */
+    List<String> getDependencyPathsOf(WcmContent content, Boolean recurse = false) {
+        if (recurse) {
+            HashSet<String> results = []
+            HashSet<String> visitedNodes = []
+            
+            recurseDependencyPathsOf(content, results, visitedNodes)
+            return results as List<WcmContent>
+        } else {
+            return extractDependencyPathsOf(content) as List<WcmContent>
+        }
+    }
+    
+    void recurseDependencyPathsOf(WcmContent content, Set<String> results, Set<String> alreadyVisited) {
+        def contentURI = content.absoluteURI
+        alreadyVisited << contentURI
+
+        def deps = extractDependencyPathsOf(content)
+        deps.each {
+            if (!alreadyVisited.contains(it)) {
+                results << it
+            }
+        }
+        
+        println "Before loop, results: $results - already visited ${alreadyVisited}"
+        deps.each { d ->
+            def nodes = resolveDependencyPathToNodes(d, content.space)
+            nodes.each { n ->
+                // Prevent stackoverflow
+                def nURI = n.absoluteURI
+                println "Results: ${results} - node URI ${nURI}, content URI ${contentURI}"
+                if (!alreadyVisited.contains(nURI)) {
+                    recurseDependencyPathsOf( n, results, alreadyVisited)
+                }
+            }
+        }
+    }
+    
+    protected List<String> extractDependencyPathsOf(WcmContent content) {
         WcmTemplate template = wcmContentRepositoryService.getTemplateForContent(content)
         // A template is an implicit dependency for the node, any changes to the template or its deps
         // means we have to change too.
@@ -77,36 +106,73 @@ class WcmContentDependencyService {
                 results.addAll(deps)
             }
         }
+        
         return results
     }
     
     List<WcmContent> getDependenciesOf(WcmContent content) {
-        def deps = getDependencyPathsOf(content)
-        if (deps) {
-            def results = []
-            deps.each { uri -> 
-                def u = uri.trim()
-                if (u.endsWith('/**')) {
-                    def c = wcmContentRepositoryService.findContentForPath(u - '/**', content.space) 
-                    if (c?.content) {
-                        results.addAll(wcmContentRepositoryService.findDescendents(c.content))
-                    } else {
-                        println "BOOF! $c"
-                        log.warn "Content ${content.absoluteURI} depends on ${u} which describes no nodes"
-                    }
-                } else {
-                    def c = wcmContentRepositoryService.findContentForPath(u, content.space) 
-                    if (c?.content) {
-                        results << c.content
-                    }
+        println "IN GDO for ${content.absoluteURI}"
+        List l = []
+        gatherDependenciesOf(content, l)
+        println "Final getDeps for ${content.absoluteURI}: $l"
+        // Remove us
+        l.removeAll(content)        
+        return l
+    }
+    
+    protected List<WcmContent> resolveDependencyPathToNodes(String path, WcmSpace space) {
+        def u = path.trim()
+        if (u.endsWith('/**')) {
+            def c = wcmContentRepositoryService.findContentForPath(u - '/**', space) 
+            if (c?.content) {
+                return wcmContentRepositoryService.findDescendents(c.content)
+            } else {
+                if (log.debugEnabled) {
+                    log.debug "Attempt to resolve dependencies ${path} which describes no nodes"
                 }
             }
-            if (log.debugEnabled) {
-                log.debug "Returning dependencies of ${content.absoluteURI}: ${results*.absoluteURI}"
+        } else {
+            def c = wcmContentRepositoryService.findContentForPath(u, space) 
+            if (c?.content) {
+                return [c.content]
             }
-            return results
         }
-        return Collections.EMPTY_LIST
+        return []
+    }
+
+    protected void gatherDependenciesOf(WcmContent content, List results) {
+        println "IN GDO with ${content.absoluteURI}, ${results}"
+        println "Entering GDO Results hash: ${System.identityHashCode(results)}"
+        
+        def deps = getDependencyPathsOf(content)
+        if (deps) {
+            deps.each { uri -> 
+                def nodes = resolveDependencyPathToNodes(uri, content.space)
+
+                // Filter out results we already have
+                def localResults = nodes.findAll { n -> 
+                    !results.find { c -> 
+                        c.ident() == n.ident()
+                    }
+                }
+                // De-dupe any to prevent extra work / loops
+                localResults = localResults.unique()
+                
+                results.addAll( localResults)
+                println "ADDED TO RESULTS: ${localResults*.absoluteURI} - RESULTS NOW: ${results*.absoluteURI}"
+
+                println "Results hash: ${System.identityHashCode(results)}"
+                localResults.each { n ->
+                    gatherDependenciesOf(n, results)
+                    println "In recurse loop results hash: ${System.identityHashCode(results)}"
+                }
+
+                println "RESULTS AFTER RECURSE: ${results*.absoluteURI}"
+            }
+            if (log.debugEnabled) {
+                log.debug "Gathered dependencies of ${content.absoluteURI} - results ${results*.absoluteURI}"
+            }
+        }
     }
     
     def removeDependencyInfoFor(WcmContent content) {
@@ -124,9 +190,9 @@ class WcmContentDependencyService {
             log.debug "Updating dependency info for: ${content.absoluteURI}"
         }
         removeDependencyInfoFor(content)
-        def deps = getDependencyPathsOf(content)
+        def deps = getDependencyPathsOf(content, true)
         
-        println "Deps: ${contentDependencyInfo}"
+        println "Deps info before: ${contentDependencyInfo}"
         def dependerId = content.ident()
         deps.each { uri ->
             if (log.debugEnabled) {
@@ -156,20 +222,10 @@ class WcmContentDependencyService {
         }
     }
     
-    void dumpFingerprintInfo(boolean stdout = false) {
-        def out = stdout ? { println it } : { log.debug it }
-        out "Content node fingerprints:"
-        contentFingerprintCache.keys.each { k ->
-            def n = WcmContent.get(k).absoluteURI
-            out "$n ---> ${wcmCacheService.getObjectValue(contentFingerprintCache, k)}"
-        }
-        out "Content tree fingerprints:"
-        contentTreeFingerprintCache.keys.each { k ->
-            def n = WcmContent.get(k).absoluteURI
-            out "$n ---> ${wcmCacheService.getObjectValue(contentTreeFingerprintCache, k)}"
-        }
-    }
-    
+    /** 
+     * Get a flattened list of all the content nodes dependent on "content"
+     * This includes implicit dependencies e.g. inherited templates on deeply nested nodes
+     */
     def getContentDependentOn(WcmContent content) {
         /*
         
@@ -208,176 +264,16 @@ class WcmContentDependencyService {
             }
         }
         if (dependents) {
+            // Make sure we are not circular
+            dependents.remove(content.ident())
             return WcmContent.getAll(dependents)
         } else return dependents
     }
-    
-    def updateFingerprintFor(WcmContent content) {
-        if (log.debugEnabled) {
-            log.debug "Updating fingerprint for content ${content.absoluteURI}"
-        }
-        def currentETag
-        WcmTemplate template = wcmContentRepositoryService.getTemplateForContent(content)
+       
+}
 
-        // See if the content node has any dependencies itself, these need to be included
-        def contentURI = content.absoluteURI
-        def templateURI = template?.absoluteURI
-        def contentDepPaths = getDependencyPathsOf(content)
-        // Get all deps *except* template, we handle that in a special way
-        def contentDepFingerprints = contentDepPaths.findAll({ uri -> uri != templateURI}).collect { uri ->
-            if (uri.endsWith('/**')) {
-                return getFingerprintForDescendentsOf(uri - '/**', content.space)
-            } else {
-                return getFingerprintFor(uri, content.space)
-            }
-        }
-        boolean isTemplate = content instanceof WcmTemplate
-        
-        def aggregatedContentDepFingerPrints = contentDepFingerprints.join('')
+class DependencyIterator {
+    def results = []
 
-        if (template) {
-            // tag is tag of template plus content - template changes = reload the HTML content
-            def templDepPaths = getDependencyPathsOf(template)
-            def templDepFingerprints = templDepPaths.collect { uri ->
-                if (log.debugEnabled) {
-                    log.debug "Checking template dependency $uri"
-                }
-                if (uri.endsWith('/**')) {
-                    if (log.debugEnabled) {
-                        log.debug "Template dependency $uri is recursive"
-                    }
-                    def u = uri - '**'
-                    // If dep includes this current node we're processing, skip it to avoid recursion
-                    if (!contentURI.startsWith(u)) {
-                        if (log.debugEnabled) {
-                            log.debug "Template dependency $uri does not encompass the node ${contentURI} so we can calculate tree fingerprint"
-                        }
-                        return getFingerprintForDescendentsOf(uri-'/**', content.space)
-                    } else {
-                        if (log.debugEnabled) {
-                            log.debug "Template dependency $uri encompasses the node ${contentURI} so we will skip, we know part of it has changed as this node is under there"
-                        }
-                        return ''
-                    }
-                } else {
-                    if (log.debugEnabled) {
-                        log.debug "Template dependency $uri is not recursive"
-                    }
-                    // If dep includes this current node we're processing, skip it to avoid recursion
-                    if (uri != contentURI) {
-                        if (log.debugEnabled) {
-                            log.debug "Template dependency $uri is not current node ${contentURI} so getting fingerprint"
-                        }
-                        return getFingerprintFor(uri, content.space)
-                    } else {
-                        if (log.debugEnabled) {
-                            log.debug "Template dependency $uri is current node ${contentURI} so skipping"
-                        }
-                        return ''
-                    }
-                }
-            }
-            def templFp = templDepFingerprints.join('') + template.calculateFingerprint()
-            
-            if (log.debugEnabled) {
-                log.debug "Building fingerprint for templated content ${content.absoluteURI} using dependency fingerprints: "+
-                    "${aggregatedContentDepFingerPrints} and template fingerprint: $templFp"
-            }
-            currentETag = (aggregatedContentDepFingerPrints + templFp + content.calculateFingerprint()).encodeAsSHA256()
-            
-            // The template implicitly depends on us, so it needs to be recalculated, and that needs to ripple out to all nodes
-            // that use the template
-            invalidateFingerprintFor(template)
-        } else {
-            // No template, content controls it
-            if (log.debugEnabled) {
-                log.debug "Building fingerprint for non-templated content ${content.absoluteURI} using dep fingerprints: ${aggregatedContentDepFingerPrints}"
-            }
-            currentETag = (aggregatedContentDepFingerPrints+content.calculateFingerprint()).encodeAsSHA256()
-        }
 
-        wcmCacheService.putToCache(contentFingerprintCache, content.ident(), currentETag)
-
-        // **** Now we must invalidate the tree fingerprints on all our ancestors
-        if (content.parent) {
-            // This may cause recursion
-            updateFingerprintForDescendentsOf(content.parent)
-        }
-        
-        // **** Now we are past this point, we can update nodes that DEPEND on this node *****
-        
-        // Also must recalculate etags on all nodes that use nodes that depend on THIS node
-        if (log.debugEnabled) {
-            log.debug "Checking to see if this content ${content.absoluteURI} has content dependent on it, for which we need to update their fingerprints..."
-        }
-        getContentDependentOn(content).each { c -> 
-            def id = c.ident()
-            if ((id == content.ident()) || 
-                (id == template?.ident()) ) {
-                    return // no stack overflow thanks. We can't depend on self, and we don't want to process the template either
-            }
-            if (log.debugEnabled) {
-                log.debug "Found content ${c.absoluteURI} which needs a new fingerprint due to recalculation of fingerprint of ${content.absoluteURI}"
-            }
-            updateFingerprintFor(c) 
-        }
-        
-        return currentETag
-    }
-
-    def updateFingerprintForDescendentsOf(WcmContent content) {
-        if (log.debugEnabled) {
-            log.debug "Updating fingerprint for descendents of ${content.absoluteURI}, current is ${getFingerprintForDescendentsOf(content, false)}"
-        }
-        def fingerprints = wcmContentRepositoryService.findDescendents(content).collect { c -> getFingerprintFor(c) }
-        def fp = fingerprints.join('').encodeAsSHA256()
-        if (log.debugEnabled) {
-            log.debug "Updating fingerprint for descendents of ${content.absoluteURI}, new value from $fingerprints is ${fp}"
-        }
-        wcmCacheService.putToCache(contentTreeFingerprintCache, content.ident(), fp )
-        return fp
-    }
-
-    def getFingerprintFor(String uri, WcmSpace space) {
-        def c = wcmContentRepositoryService.findContentForPath(uri, space)?.content
-        return c ? getFingerprintFor(c) : ''
-    }
-    
-    def getFingerprintFor(WcmContent content, boolean updateIfMissing = true) {
-        if (log.debugEnabled) {
-            log.debug "Getting fingerprint for content ${content.absoluteURI}"
-        }
-        def v = wcmCacheService.getObjectValue(contentFingerprintCache, content.ident())
-        if (!v && updateIfMissing) {
-            return updateFingerprintFor(content)
-        } else {
-            return v
-        }
-    }
-    
-    def invalidateFingerprintFor(WcmContent content) {
-        if (log.debugEnabled) {
-            log.debug "Invalidating fingerprint for content ${content.absoluteURI}"
-        }
-        wcmCacheService.removeValue(CACHE_NAME_CONTENT_FINGERPRINT_CACHE, content.ident())
-    }
-    
-    def getFingerprintForDescendentsOf(String uri, WcmSpace space) {
-        def c = wcmContentRepositoryService.findContentForPath(uri, space)?.content
-        return c ? getFingerprintForDescendentsOf(c) : ''
-    }
-    
-    def getFingerprintForDescendentsOf(WcmContent content, boolean updateIfMissing = true) {
-        if (log.debugEnabled) {
-            log.debug "Getting fingerprint for descendents of content ${content.absoluteURI}"
-        }
-        def v = wcmCacheService.getObjectValue(contentTreeFingerprintCache, content.ident())
-        if (!v && updateIfMissing) {
-            return updateFingerprintForDescendentsOf(content)
-        } else {
-            return v
-        }
-    }
-    
-    
 }

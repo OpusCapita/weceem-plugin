@@ -102,7 +102,7 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
             repSvc.createDefaultSpace()
         }
 
-        applicationContext.wcmContentDependencyService.init()
+        applicationContext.wcmContentDependencyService.reset()
     }
 
     def configureCKEditor(uploadInWebapp, dir, url){
