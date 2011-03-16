@@ -267,7 +267,7 @@ class WcmContentDependencyService {
             // Make sure we are not circular
             dependents.remove(content.ident())
             return WcmContent.getAll(dependents)
-        } else return dependents
+        } else return []
     }
        
 }

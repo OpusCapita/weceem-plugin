@@ -39,6 +39,17 @@ class WcmContentFingerprintServiceTests extends AbstractWeceemIntegrationTest {
         spaceA = new WcmSpace(name: 'a', aliasURI: 'a')
         assert spaceA.save(flush: true)
 
+    }
+
+    void initBlogStyleRepo() {
+        initRepo('parent-a/**')
+    }
+    
+    void initNonDependentTemplateARepo() {
+        initRepo('')
+    }
+    
+    void initRepo(templateADeps) {
         createContent {
             templateA = content(WcmTemplate) {
                 title = 'template'
@@ -46,7 +57,7 @@ class WcmContentFingerprintServiceTests extends AbstractWeceemIntegrationTest {
                 space = spaceA
                 status = statusPublished
                 content = 'template content'
-                contentDependencies = 'parent-a/**'
+                contentDependencies = templateADeps
             }
 
             templateB = content(WcmTemplate) {
@@ -100,8 +111,68 @@ class WcmContentFingerprintServiceTests extends AbstractWeceemIntegrationTest {
         
         wcmContentDependencyService.reset()
     }
+
+    void testFingerprintChangesOnTemplatedContentAndTemplateWhenNonDependentTemplateChanges() {
+        initNonDependentTemplateARepo()
+
+        def oldTemplateFP = wcmContentFingerprintService.getFingerprintFor(templateA)
+        assertNotNull oldTemplateFP
+        def oldParentAFP = wcmContentFingerprintService.getFingerprintFor(parentA)
+        assertNotNull oldParentAFP
+        def oldParentATreeFP = wcmContentFingerprintService.getTreeHashForDescendentsOf(parentA)
+        assertNotNull oldParentATreeFP
+        def oldChildA1FP = wcmContentFingerprintService.getFingerprintFor(childA1)
+        assertNotNull oldChildA1FP
+        def oldChildA2FP = wcmContentFingerprintService.getFingerprintFor(childA2)
+        assertNotNull oldChildA2FP
+        
+        dumpInfo()
+
+        println "-"*20
+        
+        templateA.content = "bla bla bla"
+        templateA.save(flush:true)
+        
+        wcmContentFingerprintService.updateFingerprintFor(templateA)
+        
+        // Now we expect finger prints for template and its dependents to be updated
+        def newTemplateFP = wcmContentFingerprintService.getFingerprintFor(templateA)
+        def newParentAFP = wcmContentFingerprintService.getFingerprintFor(parentA)
+        def newParentTreeAFP = wcmContentFingerprintService.getTreeHashForDescendentsOf(parentA)
+        def newChildA1FP = wcmContentFingerprintService.getFingerprintFor(childA1)
+        def newChildA2FP = wcmContentFingerprintService.getFingerprintFor(childA2)
+
+        dumpInfo()
+        
+        assertNotNull newTemplateFP
+        assertTrue oldTemplateFP != newTemplateFP
+
+        // These must also change fingerprint as they dependen on the template
+        assertNotNull newParentAFP
+        assertTrue oldParentAFP != newParentAFP
+        assertNotNull newChildA1FP
+        assertTrue oldChildA1FP != newChildA1FP
+
+        // parent tree should have changed, one of the children uses the template
+        println "Old parent tree: $oldParentATreeFP - new: $newParentTreeAFP"
+        assertNotNull newParentTreeAFP
+        assertTrue oldParentATreeFP != newParentTreeAFP
+
+        // ChildA2 must not have changed, it uses a different template
+        assertEquals newChildA2FP, oldChildA2FP
+        
+        // Test invariance of the fingerprint
+        assertEquals newTemplateFP, wcmContentFingerprintService.getFingerprintFor(templateA)
+
+        // If we invalidate it and regenerate it, is it the same?
+        wcmContentFingerprintService.invalidateFingerprintFor(templateA)
+
+        // Test invariance of the fingerprint
+        assertEquals newTemplateFP, wcmContentFingerprintService.getFingerprintFor(templateA)
+    }
     
-    void testFingerprintChangesOnTemplatedContentAndTemplateWhenTemplateChanges() {
+    void testFingerprintChangesOnTemplatedContentAndTemplateWhenCircularRefTemplateChanges() {
+        initBlogStyleRepo()
 
         def oldTemplateFP = wcmContentFingerprintService.getFingerprintFor(templateA)
         assertNotNull oldTemplateFP
@@ -160,7 +231,8 @@ class WcmContentFingerprintServiceTests extends AbstractWeceemIntegrationTest {
     }
 
     void testFingerprintChangesOnNonTemplatedContent() {
-
+        initBlogStyleRepo()
+        
         def oldRootFP = wcmContentFingerprintService.getFingerprintFor(rootNode1)
         
         rootNode1.content = "bla bla bla"
@@ -179,6 +251,7 @@ class WcmContentFingerprintServiceTests extends AbstractWeceemIntegrationTest {
     }
 
     void testFingerprintChangesOnParentWithTemplateThatDependsOnDescendentsWhenDescendentChanges() {
+        initBlogStyleRepo()
         
         def oldTemplateFP = wcmContentFingerprintService.getFingerprintFor(templateA)
         assertNotNull oldTemplateFP

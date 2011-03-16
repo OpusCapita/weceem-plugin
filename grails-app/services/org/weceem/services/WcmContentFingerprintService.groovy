@@ -61,94 +61,31 @@ class WcmContentFingerprintService implements InitializingBean {
      * - no side effects should cause other nodes to update i.e. no getFingerprintFor
      * - any dependent nodes FPs must only be updated at the end of the method
      */
-    def updateFingerprintFor(WcmContent content, Boolean updateDependents = true) {
+    def updateFingerprintFor(WcmContent content, Set<WcmContent> alreadyVisited = []) {
         if (log.debugEnabled) {
             log.debug "Updating fingerprint for content ${content.absoluteURI}"
         }
         def currentETag
-        WcmTemplate template = wcmContentRepositoryService.getTemplateForContent(content)
 
         // See if the content node has any dependencies itself, these need to be included
-        def contentURI = content.absoluteURI
-        def templateURI = template?.absoluteURI
-        def contentDepPaths = wcmContentDependencyService.getDependencyPathsOf(content, true)
-        // Get all deps *except* template, we handle that in a special way
-        def contentDepFingerprints = contentDepPaths.findAll({ uri -> uri != templateURI}).collect { uri ->
-            if (uri.endsWith('/**')) {
-                return getTreeHashForDescendentsOf(uri - '/**', content.space)
-            } else {
-                return calculateFingerprintFor(uri, content.space)
-            }
-        }
-        boolean isTemplate = content instanceof WcmTemplate
-        
         def nodesNeedingRecalculation = []
 
-        def aggregatedContentDepFingerPrints = contentDepFingerprints.join(':')
-
-        if (template) {
-            // tag is tag of template plus content - template changes = reload the HTML content
-            def templDepPaths = wcmContentDependencyService.getDependencyPathsOf(template, true)
-            def templDepFingerprints = templDepPaths.collect { uri ->
-                if (log.debugEnabled) {
-                    log.debug "Checking template dependency $uri"
-                }
-                if (uri.endsWith('/**')) {
-                    if (log.debugEnabled) {
-                        log.debug "Template dependency $uri is recursive"
-                    }
-                    def u = uri - '**'
-                    // If dep includes this current node we're processing, skip it to avoid recursion
-                    if (!contentURI.startsWith(u)) {
-                        if (log.debugEnabled) {
-                            log.debug "Template dependency $uri does not encompass the node ${contentURI} so we can calculate tree fingerprint"
-                        }
-                        return calculateFingerprintForDescendentsOf(uri-'/**', content.space)
-                    } else {
-                        if (log.debugEnabled) {
-                            log.debug "Template dependency $uri encompasses the node ${contentURI} so we will skip, we know part of it has changed as this node is under there"
-                        }
-                        return ''
-                    }
-                } else {
-                    if (log.debugEnabled) {
-                        log.debug "Template dependency $uri is not recursive"
-                    }
-                    // If dep includes this current node we're processing, skip it to avoid recursion
-                    if (uri != contentURI) {
-                        if (log.debugEnabled) {
-                            log.debug "Template dependency $uri is not current node ${contentURI} so getting fingerprint"
-                        }
-                        return calculateFingerprintFor(uri, content.space)
-                    } else {
-                        if (log.debugEnabled) {
-                            log.debug "Template dependency $uri is current node ${contentURI} so skipping"
-                        }
-                        return ''
-                    }
-                }
-            }
-            def templFp = templDepFingerprints.join('') + template.calculateFingerprint()
-            
-            if (log.debugEnabled) {
-                log.debug "Building fingerprint for templated content ${content.absoluteURI} using dependency fingerprints: "+
-                    "${aggregatedContentDepFingerPrints} and template fingerprint: $templFp"
-            }
-            currentETag = (aggregatedContentDepFingerPrints + templFp + content.calculateFingerprint()).encodeAsSHA256()
-
-        } else {
-            // No template, content controls it
-            def fp = content.calculateFingerprint()
-            if (log.debugEnabled) {
-                log.debug "Building fingerprint for non-templated content ${content.absoluteURI} using dep fingerprints: ${aggregatedContentDepFingerPrints} and node FP $fp"
-            }
-            currentETag = (aggregatedContentDepFingerPrints+fp).encodeAsSHA256()
+        if (log.debugEnabled) {
+            log.debug "Updating fingerprint for content ${content.absoluteURI} - current is: ${wcmCacheService.getObjectValue(contentFingerprintCache, content.ident())}"
+        }
+        currentETag = calculateDeepFingerprintFor(content)
+        if (log.debugEnabled) {
+            log.debug "Updating fingerprint for content ${content.absoluteURI} - new is: ${currentETag}"
         }
 
+        // Update the cache
         wcmCacheService.putToCache(contentFingerprintCache, content.ident(), currentETag)
 
         // **** @todo Now we must invalidate the tree fingerprints on all our ancestors
+        // @todo we must not update if the etag has not changed
         if (content.parent) {
+            // This causes a lot of processing of nodes that haven't changed, but is necessary as we know
+            // as least some part of the tree has.
             updateTreeHashForDescendentsOf(content.parent)
         }
         
@@ -172,9 +109,8 @@ class WcmContentFingerprintService implements InitializingBean {
         
         // Need to recalculate for this and all nodes each of these depend on (recursively)
         println "Nodes that need to be recalculated now: "+nodesNeedingRecalculation
-        if (updateDependents) {
-            updateFingerprintsForAllDependencies(nodesNeedingRecalculation)
-        }
+        alreadyVisited << content
+        updateFingerprintsForAllDependencies(nodesNeedingRecalculation, alreadyVisited)
         return currentETag
     }
 
@@ -182,12 +118,16 @@ class WcmContentFingerprintService implements InitializingBean {
      * Update fingerprints for a dependency list, without recursing into their dependencies
      * The dependency list will usually include all the transitive depenencies, and this prevents stack overflow
      */
-    def updateFingerprintsForAllDependencies(nodesNeedingRecalculation) {
+    def updateFingerprintsForAllDependencies(nodesNeedingRecalculation, Set<WcmContent> alreadyVisited) {
         if (log.debugEnabled) {
             log.debug "Updating fingerprints for all of ${nodesNeedingRecalculation*.absoluteURI} "
         }
         nodesNeedingRecalculation.each { n ->   
-            updateFingerprintFor(n, false)
+            if (!alreadyVisited.contains(n)) {
+                updateFingerprintFor(n, alreadyVisited)
+            } else {
+                alreadyVisited << n
+            }
         }
     }
     
@@ -210,9 +150,60 @@ class WcmContentFingerprintService implements InitializingBean {
     /**
      * Locate a node and ask it for its individual content fingerprint
      */
-    def calculateFingerprintFor(String uri, WcmSpace space) {
+    def calculateShallowFingerprintFor(String uri, WcmSpace space) {
         def c = wcmContentRepositoryService.findContentForPath(uri, space)?.content
         return c.calculateFingerprint()
+    }
+    
+    /**
+     * Locate a node and ask it for its individual content fingerprint
+     */
+    def calculateShallowFingerprintFor(WcmContent content) {
+        return content.calculateFingerprint()
+    }
+    
+    /**
+     * Locate a node and ask it for its dependency's content fingerprint, handling any cyclic refs
+     */
+    def calculateDeepFingerprintFor(String uri, WcmSpace space) {
+        def c = wcmContentRepositoryService.findContentForPath(uri, space)?.content
+        return calculateDeepFingerprintFor(c)
+    }
+    
+    /**
+     * Locate a node and ask it for its dependency's content fingerprint, handling any cyclic refs
+     */
+    def calculateDeepFingerprintFor(WcmContent content, List<WcmContent> alreadyVisited = []) {
+        if (log.debugEnabled) {
+            log.debug "Calculating deep fingerprint for content ${content.absoluteURI}"
+        }
+        
+        // Prevent circulars
+        alreadyVisited << content
+
+        // Get deps
+        def deps = wcmContentDependencyService.getDependenciesOf(content)
+        
+        def nonCyclicDeps = deps.findAll { 
+            // Non-cylic dependencies are those that do not have any dependency on any of the nodes we've already processed
+            wcmContentDependencyService.getDependenciesOf(it).disjoint(alreadyVisited) 
+        }
+        def cyclicDeps = deps - nonCyclicDeps
+        if (log.debugEnabled) {
+            log.debug "Calculating deep fingerprint for content ${content.absoluteURI}, noncylic: ${nonCyclicDeps*.absoluteURI} cyclic: ${cyclicDeps*.absoluteURI}"
+        }
+
+        
+        // Get DFP of each dep that does not depend on content
+        def nonCyclicFP = nonCyclicDeps.collect({ calculateDeepFingerprintFor(it, alreadyVisited) }).join(':')
+
+        // Get SFP of nodes that depend on content
+        def cyclicFP = cyclicDeps.collect({ calculateShallowFingerprintFor(it) }).join(':')
+        def nodeFP = calculateShallowFingerprintFor(content)
+        if (log.debugEnabled) {
+            log.debug "Calculating deep fingerprint for content ${content.absoluteURI}, noncylic FP: ${nonCyclicFP} cyclic FP: ${cyclicFP} node FP: ${nodeFP}"
+        }
+        return [nodeFP, nonCyclicFP, cyclicFP].join(':').encodeAsSHA256()
     }
     
     /** 
