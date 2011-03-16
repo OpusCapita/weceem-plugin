@@ -65,19 +65,25 @@ class WcmContentFingerprintService implements InitializingBean {
         if (log.debugEnabled) {
             log.debug "Updating fingerprint for content ${content.absoluteURI}"
         }
-        def currentETag
+        def currentETag = wcmCacheService.getObjectValue(contentFingerprintCache, content.ident())
 
         // See if the content node has any dependencies itself, these need to be included
         def nodesNeedingRecalculation = []
 
         if (log.debugEnabled) {
-            log.debug "Updating fingerprint for content ${content.absoluteURI} - current is: ${wcmCacheService.getObjectValue(contentFingerprintCache, content.ident())}"
+            log.debug "Updating fingerprint for content ${content.absoluteURI} - current is: ${currentETag}"
         }
-        currentETag = calculateDeepFingerprintFor(content)
+        def newETag = calculateDeepFingerprintFor(content)
         if (log.debugEnabled) {
-            log.debug "Updating fingerprint for content ${content.absoluteURI} - new is: ${currentETag}"
+            log.debug "Updating fingerprint for content ${content.absoluteURI} - new is: ${newETag}"
         }
 
+        if (currentETag == newETag) {
+            return currentETag // nothing to do
+        }
+        
+        currentETag = newETag
+        
         // Update the cache
         wcmCacheService.putToCache(contentFingerprintCache, content.ident(), currentETag)
 
