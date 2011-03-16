@@ -84,9 +84,12 @@ class WcmContentFingerprintService implements InitializingBean {
         // **** @todo Now we must invalidate the tree fingerprints on all our ancestors
         // @todo we must not update if the etag has not changed
         if (content.parent) {
-            // This causes a lot of processing of nodes that haven't changed, but is necessary as we know
-            // as least some part of the tree has.
-            updateTreeHashForDescendentsOf(content.parent)
+            def p = content
+            while (p = p.parent) {
+                // This causes a lot of processing of nodes that haven't changed, but is necessary as we know
+                // as least some part of the tree has.
+                updateTreeHashForDescendentsOf(p)
+            }
         }
         
         // **** Now we are past this point, we can update nodes that DEPEND on this node *****
@@ -182,7 +185,7 @@ class WcmContentFingerprintService implements InitializingBean {
         alreadyVisited << content
 
         // Get deps
-        def deps = wcmContentDependencyService.getDependenciesOf(content)
+        def deps = wcmContentDependencyService.getDependenciesOf(content) - alreadyVisited
         
         def nonCyclicDeps = deps.findAll { 
             // Non-cylic dependencies are those that do not have any dependency on any of the nodes we've already processed

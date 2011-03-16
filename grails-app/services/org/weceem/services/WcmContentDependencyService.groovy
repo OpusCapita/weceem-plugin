@@ -255,12 +255,15 @@ class WcmContentDependencyService {
         // go up parent uris and check for /** at any depth
         // dependents of X = sum of all explicit and ancestral dependents on X
         if (u.indexOf('/') >= 0) {
-            def lastSlash = u.lastIndexOf('/')
-            if (lastSlash > 0) {
-                def deps = contentDependencyInfo[u[0..lastSlash]+'**']
+            def lastSlash
+            while ((lastSlash = u.lastIndexOf('/')) > 0) {
+                def wildcardURL = u[0..lastSlash]+'**'
+                println "Looking for wildcard dep ${wildcardURL}"
+                def deps = contentDependencyInfo[wildcardURL]
                 if (deps) {
                     dependents.addAll(deps)
                 }
+                u = u[0..lastSlash-1]
             }
         }
         if (dependents) {
@@ -270,10 +273,4 @@ class WcmContentDependencyService {
         } else return []
     }
        
-}
-
-class DependencyIterator {
-    def results = []
-
-
 }
