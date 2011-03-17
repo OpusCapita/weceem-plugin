@@ -171,7 +171,7 @@ class EditorFieldTagLib {
     }
 
     def editorFieldInteger = { attrs ->
-        out << bean.field(beanName:'content', property:attrs.property, noLabel:true)
+        out << bean.input(beanName:'content', property:attrs.property, noLabel:true)
     }
 
     def editorFieldContentFileUpload = { attrs ->
