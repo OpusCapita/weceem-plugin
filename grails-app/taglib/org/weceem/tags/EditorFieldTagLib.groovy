@@ -139,6 +139,11 @@ class EditorFieldTagLib {
             from: templates, optionValue:'title', optionKey:'id')
     }
 
+    def editorFieldCacheMaxAge = { attrs ->
+        out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
+            optionValue: { g.message(code:'editor.max.age.seconds.'+it) } )
+    }
+
     def editorFieldWcmScript = { attrs ->
         def templates = WcmScript.findAllBySpace( pageScope.content.space, [sort:'title'])
         out << bean.select(beanName:'content', property:attrs.property, noLabel:true,

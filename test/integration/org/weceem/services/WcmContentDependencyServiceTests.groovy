@@ -9,7 +9,10 @@ class WcmContentDependencyServiceTests extends AbstractWeceemIntegrationTest {
 
     def statusPublished
     def statusDraft
+    
     def spaceA
+    def spaceB
+    
     def templateA
     def templateB
     def childA1
@@ -17,6 +20,9 @@ class WcmContentDependencyServiceTests extends AbstractWeceemIntegrationTest {
     def childA2
     def parentA
     def rootNode1
+    
+    def templateInSpaceB
+    def htmlInSpaceB
     
     def wcmContentDependencyService
 
@@ -37,6 +43,9 @@ class WcmContentDependencyServiceTests extends AbstractWeceemIntegrationTest {
 
         spaceA = new WcmSpace(name: 'a', aliasURI: 'a')
         assert spaceA.save(flush: true)
+
+        spaceB = new WcmSpace(name: 'b', aliasURI: 'b')
+        assert spaceB.save(flush: true)
 
         createContent {
             templateA = content(WcmTemplate) {
@@ -107,6 +116,26 @@ class WcmContentDependencyServiceTests extends AbstractWeceemIntegrationTest {
             }
         }
         
+        // Space B
+        createContent {
+            templateInSpaceB = content(WcmTemplate) {
+                title = 'templateSpaceB'
+                aliasURI = 'templateA'
+                space = spaceB
+                status = statusPublished
+                content = 'template content in space B'
+                contentDependencies = 'blog/**'
+            }
+
+            htmlInSpaceB = content(WcmHTMLContent) {
+                status = statusPublished
+                space = spaceB
+                template = templateInSpaceB
+                title = "space b html"
+                content = "html in space B content"
+            }
+        }
+        
         wcmContentDependencyService.reload()
     }
     
@@ -165,7 +194,11 @@ class WcmContentDependencyServiceTests extends AbstractWeceemIntegrationTest {
     }
 
     void testDependencyInfoDoesNotClashAcrossSpacesForSameURI() {
-        assert false
+        assertEquals ([htmlInSpaceB]*.id.sort(), wcmContentDependencyService.getContentDependentOn(templateInSpaceB)*.id.sort())
+        assertEquals ([templateInSpaceB]*.id.sort(), wcmContentDependencyService.getDependenciesOf(htmlInSpaceB)*.id.sort())
+
+        assertEquals ([parentA, childA1, grandchildA1]*.id.sort(), wcmContentDependencyService.getContentDependentOn(templateA)*.id.sort())
+        assertEquals ([templateA, childA2, grandchildA1, childA1, templateB]*.id.sort(), wcmContentDependencyService.getDependenciesOf(parentA)*.id.sort())
     }
     
     void dumpInfo() {

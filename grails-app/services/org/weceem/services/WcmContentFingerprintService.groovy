@@ -26,6 +26,7 @@ class WcmContentFingerprintService implements InitializingBean {
         return s
     }()
 
+    // Both these caches are space-safe, cached on id
     def contentFingerprintCache
     def contentTreeFingerprintCache
 

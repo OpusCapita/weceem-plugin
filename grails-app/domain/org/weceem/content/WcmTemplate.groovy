@@ -37,8 +37,6 @@ class WcmTemplate extends WcmContent {
     String content
     
     Boolean userSpecificContent
-    
-    String contentDependencies
 
     static searchable = {
         alias WcmTemplate.name.replaceAll("\\.", '_')
@@ -63,14 +61,11 @@ class WcmTemplate extends WcmContent {
     static constraints = {
         content(nullable: false, maxSize: 65536)
         userSpecificContent(nullable: true)
-        contentDependencies(maxSize:500, nullable: true)
     }
     
     static editors = {
         content(editor:'HtmlCode')
-        userSpecificContent(group:'extra')
-        userSpecificContent(group:'extra')
-        contentDependencies(group:'extra')
+        userSpecificContent(group:'advanced')
     }
 
     static transients = (WcmContent.transients + 'wcmContentRepositoryService') - 'mimeType'

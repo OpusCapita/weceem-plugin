@@ -59,34 +59,23 @@ $( function() {
         </div>
         
         <div class="span-24 last" id="panels">
-            <h2><a href="#">Extra</a></h2>
-            <div id="editor-extras">
-                <g:grep in="${editableProperties}" var="prop" filter="${ { p -> p.group == 'extra'} }">
-                
-                    <div class="clear prepend-1 span-4">
-                        <bean:label beanName="content" property="${prop.property}" labelKey="${'content.label.'+prop.property}"/>
-                    </div>
-                    <div class="field prepend-1 span-17 last">
-                        <% println wcm."editorField${prop.editor}"(bean:content, property:prop.property) %>
-                    </div>
-                </g:grep>
-            </div>
+            <g:set var="groupNames" value="${(editableProperties*.group).findAll({ it }).unique()}"/>
+            <g:each in="${groupNames}" var="gn">
+                <h2><a href="#"><g:message code="editor.group.heading.${gn}" default="${gn}" encodeAs="HTML"/></a></h2>
+                <div id="editor-${gn.encodeAsHTML()}" class="editorpanel">
+                    <g:grep in="${editableProperties}" var="prop" filter="${ { p -> p.group == gn} }">
+                        <div class="clear prepend-1 span-4">
+                            <bean:label beanName="content" property="${prop.property}" labelKey="${'content.label.'+prop.property}"/>
+                        </div>
+                        <div class="field prepend-1 span-17 last">
+                            <% println wcm."editorField${prop.editor}"(bean:content, property:prop.property) %>
+                        </div>
+                    </g:grep>
+                </div>
+            </g:each>
 
-            <h2><a href="#">Metadata</a></h2>
-            <div id="editor-meta">
-                <g:grep in="${editableProperties}" var="prop" filter="${ { p -> p.group == 'meta'} }">
-                
-                    <div class="clear prepend-1 span-4">
-                        <bean:label beanName="content" property="${prop.property}" labelKey="${'content.label.'+prop.property}"/>
-                    </div>
-                    <div class="field prepend-1 span-17 last">
-                        <% println wcm."editorField${prop.editor}"(bean:content, property:prop.property) %>
-                    </div>
-                </g:grep>
-            </div>
-            
             <h2><a href="#">Change history</a></h2>
-            <div id="editor-changes">
+            <div id="editor-changes" class="editorpanel">
                 <div class="prepend-1 span-22 last">
                     <div>
                     <g:each in="${changeHistory}" var="change">
@@ -97,7 +86,7 @@ $( function() {
             </div>
 
             <h2><a href="#">Parent &amp; Children</a></h2>
-            <div id="editor-family">
+            <div id="editor-family" class="editorpanel">
                 <div class="clear prepend-1 span-2">
                     <label>Parent:</label>
                 </div>

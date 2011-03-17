@@ -19,15 +19,25 @@ class WcmContentDependencyService {
         return s
     }()
 
-    Map contentDependencyInfo = new ConcurrentHashMap()
+    // This is keyed on URIs, so needs space id namespacing or multiple caches
+    Map contentDependenciesBySpace = new ConcurrentHashMap()
 
     void reset() {
-        contentDependencyInfo.clear()
+        contentDependenciesBySpace.clear()
         
         reload()
     }
 
-    void reload() {
+    /**
+     * Reload all the depenency info for one or all spaces
+     */
+    void reload(WcmSpace space = null) {
+        if (space) {
+            contentDependenciesBySpace.remove(space.ident())
+        } else {
+            contentDependenciesBySpace.clear()
+        }
+        
         // Find all nodes with contentDependencies
         List<Class> classesWithDeps = grailsApplication.domainClasses.findAll { d -> d.clazz.metaClass.hasProperty(d, 'contentDependencies') }
         if (log.debugEnabled) {
@@ -42,7 +52,8 @@ class WcmContentDependencyService {
             if (log.debugEnabled) {
                 log.debug "Loading content instances for ${dc} to load dependency info..."
             }
-            dc.list().each { content ->
+            def instances = space ? dc.findAllBySpace(space) : dc.list()
+            instances.each { content ->
                 if (log.debugEnabled) {
                     log.debug "Content instance ${content.absoluteURI} dependency info being loaded..."
                 }
@@ -177,10 +188,11 @@ class WcmContentDependencyService {
     
     def removeDependencyInfoFor(WcmContent content) {
         def id = content.ident()
-        synchronized (contentDependencyInfo) {
-            def keys = contentDependencyInfo.keySet()
+        def depInfo = getDependencyCacheForSpace(content.space)
+        synchronized (depInfo) {
+            def keys = depInfo.keySet()
             keys.each { k ->
-                contentDependencyInfo[k] = contentDependencyInfo[k].findAll { n -> n != id }
+                depInfo[k] = depInfo[k].findAll { n -> n != id } // can do minus?
             }
         }
     }
@@ -192,17 +204,18 @@ class WcmContentDependencyService {
         removeDependencyInfoFor(content)
         def deps = getDependencyPathsOf(content, true)
         
-        println "Deps info before: ${contentDependencyInfo}"
+        def depInfo = getDependencyCacheForSpace(content.space)
+        println "Deps info before: ${depInfo}"
         def dependerId = content.ident()
         deps.each { uri ->
             if (log.debugEnabled) {
                 log.debug "Storing dependency: ${content.absoluteURI} depends on $uri"
             }
             // We treat /** and normal uris the same
-            def depsList = contentDependencyInfo[uri]
+            def depsList = depInfo[uri]
             if (depsList == null) {
                 depsList = []
-                contentDependencyInfo[uri] = depsList
+                depInfo[uri] = depsList
             }
             if (!depsList.contains(dependerId)) {
                 depsList << dependerId
@@ -213,12 +226,15 @@ class WcmContentDependencyService {
     void dumpDependencyInfo(boolean stdout = false) {
         def out = stdout ? { println it } : { log.debug it }
         out "Content dependencies:" 
-        contentDependencyInfo.each { k, v ->
-            def ns = v.collect { id -> 
-                def c = WcmContent.get(id)
-                return c ? c.absoluteURI : '?not found?'
+        contentDependenciesBySpace.each { spaceId, depInfo ->
+            out "Space: $spaceId" 
+            depInfo.each { k, v ->
+                def ns = v.collect { id -> 
+                    def c = WcmContent.get(id)
+                    return c ? c.absoluteURI : '?not found?'
+                }
+                out "$k --- is dependency of nodes with ids ---> ${ns}"
             }
-            out "$k --- is dependency of nodes with ids ---> ${ns}"
         }
     }
     
@@ -247,7 +263,8 @@ class WcmContentDependencyService {
         
         */
         def u = content.absoluteURI
-        def dependents = contentDependencyInfo[u]
+        def depInfo = getDependencyCacheForSpace(content.space)
+        def dependents = depInfo[u]
         if (dependents == null) {
             dependents = []
         }
@@ -259,7 +276,7 @@ class WcmContentDependencyService {
             while ((lastSlash = u.lastIndexOf('/')) > 0) {
                 def wildcardURL = u[0..lastSlash]+'**'
                 println "Looking for wildcard dep ${wildcardURL}"
-                def deps = contentDependencyInfo[wildcardURL]
+                def deps = depInfo[wildcardURL]
                 if (deps) {
                     dependents.addAll(deps)
                 }
@@ -271,6 +288,12 @@ class WcmContentDependencyService {
             dependents.remove(content.ident())
             return WcmContent.getAll(dependents)
         } else return []
+    }
+    
+    Map<String, List> getDependencyCacheForSpace(WcmSpace space) {
+        def id = space.ident()
+        contentDependenciesBySpace.putIfAbsent(id, new HashMap<String, List>())
+        return contentDependenciesBySpace[id]
     }
        
 }

@@ -1048,7 +1048,8 @@ class WcmContentRepositoryService implements InitializingBean {
             }
         }
 
-        wcmContentDependencyService.reload()        
+        wcmContentDependencyService.reload(space)        
+        wcmContentFingerprintService.reset() // @todo prefer to do this per-space...        
     }
 
     /**
