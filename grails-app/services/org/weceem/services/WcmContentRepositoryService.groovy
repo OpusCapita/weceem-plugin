@@ -7,6 +7,7 @@ import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 import org.springframework.beans.factory.InitializingBean
 import grails.util.Environment
+import grails.util.GrailsNameUtils
 
 // This is for a hack, remove later
 import org.codehaus.groovy.grails.web.metaclass.BindDynamicMethod
@@ -904,13 +905,25 @@ class WcmContentRepositoryService implements InitializingBean {
         
         requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_DELETE])        
         
-        // Create a versioning entry
-        sourceContent.saveRevision(sourceContent.title, sourceContent.space.name)
-        
+        // We can't delete if we have children
+        if (sourceContent.children?.size() > 0) {
+            return false
+        }
+
+        // Get the dependencies before we delete it
+        def deps = wcmContentDependencyService.getContentDependentOn(sourceContent)
+        if (deps) {
+            log.error "Could not delete content, it has other nodes dependent on it: ${deps*.absoluteURI}"
+            return false
+        }
+
         if (!triggerDomainEvent(sourceContent, WeceemDomainEvents.contentShouldBeDeleted)) {
             return false
         }
 
+        // Create a versioning entry
+        sourceContent.saveRevision(sourceContent.title, sourceContent.space.name)
+        
         triggerEvent(sourceContent, WeceemEvents.contentWillBeDeleted)
 
         // Do this now before absoluteURI gets trashed by changing the parent
@@ -918,35 +931,28 @@ class WcmContentRepositoryService implements InitializingBean {
 
         def parent = sourceContent.parent
 
+        removeAllTagsFrom(sourceContent)
         // if there is a parent  - we delete node from its association
         if (parent) {
-            parent.children = parent.children.findAll{it-> it.id != sourceContent.id}
-            assert parent.save()
+            sourceContent.parent = null
+            parent.children = parent.children.findAll { it != sourceContent }
+            assert parent.save(flush:true)
         }
 
-        // we need to delete all virtual contents that reference sourceContent
-        def copies = WcmVirtualContent.findAllWhere(target: sourceContent)
-        copies?.each() {
-           // @todo We should be using deleteNode here, recursing
-           if (it.parent) {
-               parent = WcmContent.get(it.parent.id)
-               parent.children.remove(it)
-           }
-           removeAllTagsFrom(it)
-           it.delete()
+        // Strip off associations
+        def artef = grailsApplication.getArtefact(org.codehaus.groovy.grails.commons.DomainClassArtefactHandler.TYPE, 
+                sourceContent.class.name)
+                
+        println "Artefact: ${artef} - object is ${sourceContent.dump()}"
+        artef.persistentProperties.each { p ->
+            println "Artefact prop: ${p.name}: ${artef}"
+            if (p.association && !p.owningSide ) {
+                println "Clearing association: ${p.name}"
+                sourceContent[p.name] = null // detach association
+            }
         }
 
-        // delete node
-        
-        // @todo replace this with code that looks at all the properties for relationships
-        if (sourceContent.metaClass.hasProperty(sourceContent, 'template')?.type == WcmTemplate) {
-            sourceContent.template = null
-        }
-        if (sourceContent.metaClass.hasProperty(sourceContent, 'target')?.type == WcmContent) {
-            sourceContent.target = null
-        }
-
-        removeAllTagsFrom(sourceContent)
+        println "About to delete: object is ${sourceContent.dump()}"
         sourceContent.delete(flush: true)
 
         triggerEvent(sourceContent, WeceemEvents.contentDidGetDeleted)
@@ -1258,11 +1264,6 @@ class WcmContentRepositoryService implements InitializingBean {
         // @todo we also need to filter the result list by VIEW permission too!
         assert sourceNode != null
 
-        // for WcmVirtualContent - the children list is a list of target children
-        if (sourceNode instanceof WcmVirtualContent) {
-            sourceNode = sourceNode.target
-        }
-
         requirePermissions(sourceNode, [WeceemSecurityPolicy.PERMISSION_VIEW])        
         
         // @todo replace this with smarter queries on children instead of requiring loading of all child objects
@@ -1549,11 +1550,14 @@ class WcmContentRepositoryService implements InitializingBean {
     /**
      * Return a flattened list of all the descendents of this node
      */
-    def findDescendents(WcmContent parent) {
+    def findDescendents(WcmContent parent, Set<WcmContent> alreadyVisited = []) {
+        alreadyVisited << parent
         def r = findChildren(parent)
         def result = r.clone()
         r.each { c ->
-            result.addAll(findDescendents(c))
+            if (!alreadyVisited.contains(c)) {
+                result.addAll(findDescendents(c, alreadyVisited))
+            }
         }
         return result
     }

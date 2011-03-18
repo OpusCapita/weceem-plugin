@@ -20,6 +20,7 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     def defStatus
     def virtContent1
     def virtContent2
+    def virtContent3
     
     def extraNode
 
@@ -86,18 +87,25 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
                            content: 'WcmVirtualContent B for nodeWiki',
                            space: spaceA, orderIndex: 6)
         assert virtContent2.save(flush:true)
+        virtContent3 = new WcmVirtualContent(title: 'virtContent3', aliasURI: 'virtContent3',
+                           parent: nodeWiki, target: nodeA, status: defStatus,
+                           content: 'WcmVirtualContent cyclic node A for nodeWiki',
+                           space: spaceA, orderIndex: 7)
+        assert virtContent3.save(flush:true)
+
         nodeWiki.children = new TreeSet()
         nodeWiki.children << virtContent2
+        nodeWiki.children << virtContent3
         nodeWiki.save()    
                            
         // Tree structure:
         //
         //   a
-        //   ----b (1)
+        //   ----b (real)
         //   ----c
-        //       ----b (2)
+        //       ----b (virtual 1)
         //   ----d
-        //       ----b (3)
+        //       ----b (virtual 2)
 
 
         assert new WcmHTMLContent(title: 'Other Index', aliasURI: 'contentA',
@@ -505,6 +513,17 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         assertTrue children.contains(nodeWiki)
     }
 
+    void testFindDescendents() {
+        def descendents = wcmContentRepositoryService.findDescendents(nodeA)
+        assertEquals 6, descendents.size()
+        assertTrue descendents.contains(nodeB)
+        assertTrue descendents.contains(nodeC)
+        assertTrue descendents.contains(nodeWiki)
+        assertTrue descendents.contains(virtContent1)
+        assertTrue descendents.contains(virtContent2)
+        assertTrue descendents.contains(virtContent3)
+    }
+
     void testFindChildrenWithType() {
         def children = wcmContentRepositoryService.findChildren(nodeA, [type:WcmWikiItem])
         assertEquals 1, children.size()
@@ -583,7 +602,7 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     void testFindAllContent() {
         def nodes = wcmContentRepositoryService.findAllContent(spaceA)
         println "nodes: $nodes"
-        assertEquals 7, nodes.size()
+        assertEquals 8, nodes.size()
         assertTrue nodes.contains(nodeA)
         assertTrue nodes.contains(nodeB)
         assertTrue nodes.contains(nodeC)
@@ -591,6 +610,7 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         assertTrue nodes.contains(template)
         assertTrue nodes.contains(virtContent1)
         assertTrue nodes.contains(virtContent2)
+        assertTrue nodes.contains(virtContent3)
     }
     
     void testFindAllContentWithType() {
@@ -620,7 +640,7 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     }
     
     void testCountContent() {
-        assertEquals(7, wcmContentRepositoryService.countContent(spaceA))
+        assertEquals(8, wcmContentRepositoryService.countContent(spaceA))
     }
     
     void testCountContentWithType() {
