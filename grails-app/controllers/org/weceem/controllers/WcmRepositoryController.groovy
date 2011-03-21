@@ -32,6 +32,7 @@ import org.weceem.files.*
 import org.weceem.html.*
 
 import org.weceem.event.WeceemDomainEvents
+import org.weceem.services.DeleteNotPossibleException
 
 /**
  */
@@ -381,10 +382,13 @@ class WcmRepositoryController {
         if (!node) {
             render ([result:'error', error: message(code: 'error.content.repository.node.not.found')]) as JSON
         } else {
-            def success = wcmContentRepositoryService.deleteNode(node)
-            def resp = [result: (success ? 'success' : 'error')]
-            if (!success) {
-                resp.error = message(code: 'error.content.repository.node.not.found')
+            def resp
+            try {
+                wcmContentRepositoryService.deleteNode(node)
+                resp = [result: 'success']
+            } catch (DeleteNotPossibleException de) {
+                log.error de
+                resp = [result: 'error', message: de.message]
             }
             render resp as JSON
         }

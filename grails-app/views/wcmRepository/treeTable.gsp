@@ -140,7 +140,7 @@ $(function(){
 </div>
 
 <div id="deleteDialog" title="Do you want to delete this node?" class="ui-helper-hidden">
-	<p>Deleting the content "<span id="deleteContentNodeTitle"></span>" will delete all its child nodes - you cannot undo this.</p>
+	<p>Deleting the content "<span id="deleteContentNodeTitle"></span>" - you cannot undo this.</p>
 	<p>Continue with delete?</p>
 </div>
 

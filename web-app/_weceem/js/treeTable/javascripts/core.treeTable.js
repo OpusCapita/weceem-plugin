@@ -597,7 +597,7 @@ function initTreeTable() {
             		            $('#expiredDialog').dialog('open');
             		        } else
         		            if (data.result != 'success') {
-        		                errorMessage("Delete failed: "+data.error)
+        		                errorMessage("Delete failed: "+data.message)
         		            } else {
         		                removeNode(nodeId)
         		            }

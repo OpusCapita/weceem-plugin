@@ -358,6 +358,8 @@ class WcmContentRepositoryService implements InitializingBean {
             content.parent = null
             content.save()
         }
+        // @todo This code is very naïve and probably broken
+        // It needs leaf-first dependency ordering and/or brute force clearing of all refs
         def wasDelete = true
         while (wasDelete){
             contentList = WcmContent.findAllBySpace(space)
@@ -900,25 +902,33 @@ class WcmContentRepositoryService implements InitializingBean {
      *
      * @param sourceContent
      */
-    Boolean deleteNode(WcmContent sourceContent) {
-        if (!sourceContent) return Boolean.FALSE
+    void deleteNode(WcmContent sourceContent, boolean deleteChildren = false) throws DeleteNotPossibleException {
+        if (log.debugEnabled) {
+            log.debug "Deleting ${sourceContent.absoluteURI} (including children? $deleteChildren)"
+        }
+
+        if (!sourceContent) {
+            throw new DeleteNotPossibleException("Could not delete content, it is null")
+        }
         
         requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_DELETE])        
         
         // We can't delete if we have children
-        if (sourceContent.children?.size() > 0) {
-            return false
+        if (!deleteChildren && sourceContent.children?.size() > 0) {
+            log.error "Could not delete content, it has children"
+            throw new DeleteNotPossibleException("Could not delete content, it has children")
         }
 
         // Get the dependencies before we delete it
         def deps = wcmContentDependencyService.getContentDependentOn(sourceContent)
         if (deps) {
             log.error "Could not delete content, it has other nodes dependent on it: ${deps*.absoluteURI}"
-            return false
+            throw new DeleteNotPossibleException("Could not delete content, it has content dependent on it: ${deps*.absoluteURI.join(', ')}")
         }
 
         if (!triggerDomainEvent(sourceContent, WeceemDomainEvents.contentShouldBeDeleted)) {
-            return false
+            log.error "Could not delete content, it has vetoed it"
+            throw new DeleteNotPossibleException("Could not delete content, it has vetoed it")
         }
 
         // Create a versioning entry
@@ -926,6 +936,14 @@ class WcmContentRepositoryService implements InitializingBean {
         
         triggerEvent(sourceContent, WeceemEvents.contentWillBeDeleted)
 
+        if (log.debugEnabled) {
+            log.debug "Deleting children of ${sourceContent.absoluteURI}"
+        }
+        if (deleteChildren) {
+            def children = sourceContent.children.collect { it }
+            children.each { deleteNode(it, true) }
+        }
+        
         // Do this now before absoluteURI gets trashed by changing the parent
         invalidateCachingForURI(sourceContent.space, sourceContent.absoluteURI)
 
@@ -939,25 +957,31 @@ class WcmContentRepositoryService implements InitializingBean {
             assert parent.save(flush:true)
         }
 
+        // We don't want any dep info relating to us to persist
+        wcmContentDependencyService.removeDependencyInfoFor(sourceContent)
+
         // Strip off associations
         def artef = grailsApplication.getArtefact(org.codehaus.groovy.grails.commons.DomainClassArtefactHandler.TYPE, 
                 sourceContent.class.name)
                 
+        // Nuke all the references
         println "Artefact: ${artef} - object is ${sourceContent.dump()}"
         artef.persistentProperties.each { p ->
             println "Artefact prop: ${p.name}: ${artef}"
-            if (p.association && !p.owningSide ) {
+            if (p.association && !p.owningSide) {
                 println "Clearing association: ${p.name}"
-                sourceContent[p.name] = null // detach association
+                if (p.manyToMany || p.oneToMany) {
+                    sourceContent[p.name]?.clear()
+                } else {
+                    sourceContent[p.name] = null // detach association
+                }
             }
         }
 
         println "About to delete: object is ${sourceContent.dump()}"
         sourceContent.delete(flush: true)
-
+        
         triggerEvent(sourceContent, WeceemEvents.contentDidGetDeleted)
-
-        return true
     }
 
     /**

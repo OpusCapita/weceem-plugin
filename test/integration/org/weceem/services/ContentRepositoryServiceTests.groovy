@@ -114,6 +114,7 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
                 space: spaceB, 
                 orderIndex: 0).save()
         
+        wcmContentRepositoryService.wcmContentDependencyService.reset()
     }
 
     void tearDown() {
@@ -171,30 +172,60 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         assertEquals nodeB.id, wcmContentRepositoryService.findContentForPath('changed-alias/contentB', spaceA).content.id
     }    
     
+    void testDeletePreventedIfHaschildren() {
+        shouldFail(DeleteNotPossibleException) {
+            wcmContentRepositoryService.deleteNode(nodeA)
+        }
+    }
+
+    void testDeletePreventedIfVirtualContentReferencesIt() {
+        def kids = nodeA.children.collect { it }
+        for (child in kids){
+            nodeA.children.remove(child)
+            child.parent = null
+        }
+        nodeA.children.clear()
+        assert nodeA.save(flush:true)
+
+        shouldFail(DeleteNotPossibleException) {
+            wcmContentRepositoryService.deleteNode(nodeA)
+        }
+    }
+
     void testDeleteNodeA() {
         // Result Tree:
         //   c
         //   ----b
         //   ----e
         //       ----b
-        for (child in nodeA.children){
+        def kids = nodeA.children.collect { it }
+        for (child in kids){
+            nodeA.children.remove(child)
             child.parent = null
-            assert child.save(flush:true)
         }
-        nodeA.children = null
+        nodeA.children.clear()
         assert nodeA.save(flush:true)
+        
+        // Remove virtual ref
+        wcmContentRepositoryService.deleteNode(virtContent3)
+
+        // We deleted without using the service...
+        wcmContentRepositoryService.wcmContentDependencyService.reload()
+
+        // Now remove the node
         wcmContentRepositoryService.deleteNode(nodeA)
         nodeA = WcmContent.findByTitle('contentA')
         nodeB = WcmContent.findByTitle('contentB')
 
-        // check that there are no parents for contentC
-        def references = WcmVirtualContent.findAllWhere(target: nodeC)?.unique()*.parent
-        if (nodeC.parent) reference << nodeC.parent
-         
-        assertEquals 0, references.size()
-
         // check that contentA was deleted
-        assertTrue "Countent should not exist!", WcmContent.findByTitle('contentA') == null
+        assertTrue "Content should not exist!", WcmContent.findByTitle('contentA') == null
+
+        // check that B and C still exist (not cascaded delete)
+        assertNotNull "Content B should exist!", WcmContent.findByTitle('contentB')
+        assertNotNull "Content C should exist!", WcmContent.findByTitle('contentC')
+
+        // check that template still exists
+        assertNotNull "Template should exist!", WcmContent.findByTitle('template')
     }
 
     void testDeleteNodeB() {
@@ -203,6 +234,23 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         //   ----c
         //   ----d
         
+        shouldFail(DeleteNotPossibleException) {
+            wcmContentRepositoryService.deleteNode(nodeB)
+        }
+
+        // Remove the virtual ref from its parent
+        nodeC.children.remove(virtContent1)
+        assert nodeC.save(flush:true)
+        nodeWiki.children.remove(virtContent2)
+        assert nodeWiki.save(flush:true)
+
+        // Now delete the virtual refs to B
+        virtContent1.delete(flush: true)
+        virtContent2.delete(flush: true)
+        
+        // We deleted without using the service...
+        wcmContentRepositoryService.wcmContentDependencyService.reload()
+
         wcmContentRepositoryService.deleteNode(nodeB)
         nodeA.refresh()
         nodeC.refresh()
@@ -217,27 +265,7 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         
         // check that there are no children for contentC and contentD
         assertEquals 0, nodeC.children.size()
-        assertEquals 0, nodeWiki.children.size()
-    }
-
-    void testDeleteNodeC() {
-        // Result Tree:
-        //   a
-        //   ----b
-        //   ----d
-        //       ----b2
-        wcmContentRepositoryService.deleteNode(nodeC)
-        nodeA.refresh()
-        nodeWiki.refresh()
-        
-        // check that contentB has only two different parents: contentA + contentD
-        def references = WcmVirtualContent.findAllWhere(target: nodeB)*.parent
-        if (nodeB.parent) references << nodeB.parent
-
-        assertEquals 2, references.size()  // The node C and its virtual child should have been deleted
-        assertEquals 2, references.unique().size()
-        assertNotNull references.find { it == nodeA }
-        assertNotNull references.find { it == nodeWiki }
+        assertEquals 1, nodeWiki.children.size()
     }
 
     void testDeleteVirtualContent() {
@@ -246,7 +274,7 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         //   ----c
         //   ----d
 
-        wcmContentRepositoryService.deleteNode(WcmVirtualContent.findWhere(title: 'virtContent1'))
+        wcmContentRepositoryService.deleteNode(virtContent1)
 
         nodeA = WcmContent.findByTitle('contentA')
         nodeC = WcmContent.findByTitle('contentC')

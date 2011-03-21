@@ -12,6 +12,15 @@ abstract class AbstractWeceemIntegrationTest extends GroovyTestCase {
     void setUp() {
         super.setUp()
         
+        WcmContentRepositoryService.metaClass.getLog = { ->
+            [
+                debugEnabled: true, debug: { s -> println s },
+                errorEnabled: true, error: { s -> println s },
+                warnEnabled: true, warn: { s -> println s },
+                infoEnabled: true, info: { s -> println s }
+            ]
+        }
+        
         wcmContentRepositoryService.wcmCacheService = new WcmCacheService()
         wcmContentRepositoryService.wcmCacheService.weceemCacheManager = new net.sf.ehcache.CacheManager()
         wcmContentRepositoryService.loadConfig()
