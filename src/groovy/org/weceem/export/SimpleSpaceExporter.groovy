@@ -70,7 +70,7 @@ class SimpleSpaceExporter implements SpaceExporter {
                 }
             }
         }
-        file << writer.toString()
+        file.write(writer.toString(), 'UTF-8')
         
         def ant = new AntBuilder()
 

@@ -43,7 +43,7 @@ class SimpleSpaceImporter implements SpaceImporter {
         }
         backrefMap.clear()
         def grailsApp = ApplicationHolder.application
-        def xml = new XmlSlurper().parseText(contentXmlFile.text)
+        def xml = new XmlSlurper().parseText(contentXmlFile.getText('UTF-8'))
         def contents = [:]
         def cont_parent = [:]
         def cont_children = [:]
