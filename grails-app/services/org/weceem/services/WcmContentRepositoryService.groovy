@@ -1120,7 +1120,6 @@ class WcmContentRepositoryService implements InitializingBean {
             log.debug("Updating node with id ${content.id}, with parameters: $params")
         }
         def oldAbsURI = content.absoluteURI
-        def oldSpaceName = params.space ? WcmSpace.get(params.'space.id')?.name : content.space.name
         
         // Get read-only instance now, for persisting revision info after we bind and successfully update
         def contentForRevisionSave = content.class.read(content.id)
@@ -1152,7 +1151,7 @@ class WcmContentRepositoryService implements InitializingBean {
             def ok = content.validate()
             if (content.save()) {
                 // Save the revision now
-                contentForRevisionSave.saveRevision(params.title ?: oldTitle, oldSpaceName)
+                contentForRevisionSave.saveRevision(params.title ?: oldTitle, content.space.name)
 
                 if (log.debugEnabled) {
                     log.debug("Update node with id ${content.id} saved OK")
