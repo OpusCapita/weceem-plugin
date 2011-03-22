@@ -33,6 +33,7 @@ import org.weceem.html.*
 
 import org.weceem.event.WeceemDomainEvents
 import org.weceem.services.DeleteNotPossibleException
+import org.weceem.services.ContentRepositoryException
 
 /**
  */
@@ -359,14 +360,15 @@ class WcmRepositoryController {
         log.debug "Move node action: ${params}"
         def sourceContent = WcmContent.get(params.sourceId)
         def targetContent = WcmContent.get(params.targetId)
-        if (wcmContentRepositoryService.moveNode(sourceContent, targetContent, params.index.toInteger())) {
+        try {
+            wcmContentRepositoryService.moveNode(sourceContent, targetContent, params.index.toInteger())
             def indexes = [:]
             if (targetContent) {
                 wcmContentRepositoryService.findChildren(targetContent)?.collect{indexes.put(it.id, it.orderIndex)}
             }
             render([result: 'success', indexes: indexes] as JSON)
-        } else {
-            render([result: 'failure', error: message(code: 'error.contentRepository.moveNode')] as JSON)
+        } catch (ContentRepositoryException cre) {
+            render([result: 'failure', error: message(code: 'error.contentRepository.moveNode', args:[cre.message])] as JSON)
         }
     }
 

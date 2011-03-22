@@ -742,13 +742,15 @@ class WcmContentRepositoryService implements InitializingBean {
      * @param sourceContent
      * @param targetContent
      */
-    Boolean moveNode(WcmContent sourceContent, WcmContent targetContent, orderIndex) {
+    void moveNode(WcmContent sourceContent, WcmContent targetContent, orderIndex) throws ContentRepositoryException {
         if (log.debugEnabled) {
             log.debug "Moving content ${sourceContent} to ${targetContent} at order index $orderIndex"
         }
         requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_EDIT,WeceemSecurityPolicy.PERMISSION_VIEW])        
 
-        if (!sourceContent) return false
+        if (!sourceContent) {
+            throw new IllegalArgumentException("sourceContent cannot be null")
+        }
 
         // Do an ugly check for unique uris at root
         if (!targetContent){
@@ -766,70 +768,69 @@ class WcmContentRepositoryService implements InitializingBean {
             }
             
             if (nodes.size() > 0){
-                return false
+                throw new IllegalArgumentException("Another node at the root of your repository has the same aliasURI")
             } 
         }
-        def success = true
 
         // We need this to invalidate caches
         def originalURI = sourceContent.absoluteURI
 
         def parentChanged = targetContent != sourceContent.parent
         if (targetContent && parentChanged) {
-            success = triggerDomainEvent(targetContent, WeceemDomainEvents.contentShouldAcceptChild, [sourceContent])
+            if (!triggerDomainEvent(targetContent, WeceemDomainEvents.contentShouldAcceptChild, [sourceContent])) {
+                throw new InvalidDestinationException("This node is not accepted by the target '${targetContent.absoluteURI}'")
+            }
         }
 
-        if (success && parentChanged) {
-            success = triggerDomainEvent(sourceContent, WeceemDomainEvents.contentShouldMove, [targetContent])
+        if (parentChanged) {
+            if (!triggerDomainEvent(sourceContent, WeceemDomainEvents.contentShouldMove, [targetContent])) {
+                throw new InvalidDestinationException("This node cannot move to the target '${targetContent.absoluteURI}'")
+            }
         }
         
-        if (success) {
-            if (parentChanged) {
-                // Transpose to new parent
-                def parent = sourceContent.parent
-                if (parent) {
-                    parent.children.remove(sourceContent)
-                    sourceContent.parent = null
-                    assert parent.save()
-                }
+        if (parentChanged) {
+            // Transpose to new parent
+            def parent = sourceContent.parent
+            if (parent) {
+                parent.children.remove(sourceContent)
+                sourceContent.parent = null
+                assert parent.save()
             }
+        }
+        
+        // Update the orderIndexes of target's children
+        WcmContent inPoint = WcmContent.findByOrderIndexAndParent(orderIndex, targetContent)
+        if (inPoint != null) {
+            shiftNodeChildrenOrderIndex(sourceContent.space, targetContent, orderIndex)
+        }
+        
+        // Update ourself to new orderIndex
+        sourceContent.orderIndex = orderIndex
+        
+        // Add us to the child list
+        if (targetContent && parentChanged) {
+            if (!targetContent.children) targetContent.children = new TreeSet()
+            targetContent.addToChildren(sourceContent)
+
+            // Check we can be saved there
+            requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
             
-            // Update the orderIndexes of target's children
-            WcmContent inPoint = WcmContent.findByOrderIndexAndParent(orderIndex, targetContent)
-            if (inPoint != null) {
-                shiftNodeChildrenOrderIndex(sourceContent.space, targetContent, orderIndex)
-            }
-            
-            // Update ourself to new orderIndex
-            sourceContent.orderIndex = orderIndex
-            
-            // Add us to the child list
-            if (targetContent && parentChanged) {
-                if (!targetContent.children) targetContent.children = new TreeSet()
-                targetContent.addToChildren(sourceContent)
-
-                // Check we can be saved there
-                requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
-                
-                assert targetContent.save()
-            } else {
-                // Check we can be saved there
-                requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
-            }
-
-            // Invalidate the caches 
-            invalidateCachingForURI(sourceContent.space, originalURI)
-
-            success = sourceContent.save(flush: true)
-            if (success) {
-                updateCachingMetadataFor(sourceContent)
-                
-                triggerEvent(sourceContent, WeceemEvents.contentDidMove)
-            }
-
-            return success
+            assert targetContent.save()
         } else {
-            return false
+            // Check we can be saved there
+            requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
+        }
+
+        // Invalidate the caches 
+        invalidateCachingForURI(sourceContent.space, originalURI)
+
+        if (sourceContent.save(flush: true)) {
+            updateCachingMetadataFor(sourceContent)
+            
+            triggerEvent(sourceContent, WeceemEvents.contentDidMove)
+        } else {
+            log.error "Couldn't save node: ${sourceContent.errors}"
+            throw new UpdateFailedException("The node could not be saved")
         }
      }
      

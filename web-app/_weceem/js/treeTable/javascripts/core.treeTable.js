@@ -418,6 +418,9 @@ function performDrop(e, ui) {
             var type = $(currentDropRefNode).data("type");
             if (resources["haveChildren"][type]){
                 confirmDragDropOperation( {'switch':currentDropMode, 'source':src, 'target':currentDropRefNode} )
+            } else {
+    	        hideInserter();
+                errorMessage('The target cannot accept child nodes');
             }
         }
     }
