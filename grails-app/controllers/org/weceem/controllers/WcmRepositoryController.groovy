@@ -369,6 +369,8 @@ class WcmRepositoryController {
             render([result: 'success', indexes: indexes] as JSON)
         } catch (ContentRepositoryException cre) {
             render([result: 'failure', error: message(code: 'error.contentRepository.moveNode', args:[cre.message])] as JSON)
+        } catch (IllegalArgumentException iae) {
+            render([result: 'failure', error: message(code: 'error.contentRepository.moveNode', args:[iae.message])] as JSON)
         }
     }
 

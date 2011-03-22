@@ -830,7 +830,11 @@ class WcmContentRepositoryService implements InitializingBean {
             triggerEvent(sourceContent, WeceemEvents.contentDidMove)
         } else {
             log.error "Couldn't save node: ${sourceContent.errors}"
-            throw new UpdateFailedException("The node could not be saved")
+            if (sourceContent.errors.hasFieldErrors('aliasURI')) {
+                throw new IllegalArgumentException("Another child of the target has the same alias URI. Change the alias URI first and then move again.")
+            } else {
+                throw new UpdateFailedException("The node could not be saved")
+            }
         }
      }
      
