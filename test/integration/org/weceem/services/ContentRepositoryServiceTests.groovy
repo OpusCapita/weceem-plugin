@@ -21,6 +21,7 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     def virtContent1
     def virtContent2
     def virtContent3
+    def spaceBnodeA
     
     def extraNode
 
@@ -108,13 +109,16 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         //       ----b (virtual 2)
 
 
-        assert new WcmHTMLContent(title: 'Other Index', aliasURI: 'contentA',
+        spaceBnodeA = new WcmHTMLContent(title: 'Other Index', aliasURI: 'contentA',
                 content: 'Other Index page', status: defStatus,
                 createdBy: 'admin', createdOn: new Date(),
                 space: spaceB, 
                 orderIndex: 0).save()
+        assert spaceBnodeA
         
         wcmContentRepositoryService.wcmContentDependencyService.reset()
+        wcmContentRepositoryService.invalidateCachingForSpace(spaceA)
+        wcmContentRepositoryService.invalidateCachingForSpace(spaceB)
     }
 
     void tearDown() {
@@ -729,5 +733,15 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
 
     void testCreateNodeFailsForInvalidParams() {
         assertTrue wcmContentRepositoryService.createNode('org.weceem.html.WcmHTMLContent', [space:spaceA]).hasErrors()
+    }
+    
+    void testURIToIdCacheDoesNotLeakAcrossSpaces() {
+        wcmContentRepositoryService.findContentForPath('contentA', spaceA)
+        wcmContentRepositoryService.findContentForPath('contentA', spaceB)
+        
+        def spaceAcA = wcmContentRepositoryService.getCachedContentInfoFor(spaceA, 'contentA')
+        assertEquals "Space A contentA cached id was wrong", nodeA.ident(), spaceAcA.id
+        def spaceBcA = wcmContentRepositoryService.getCachedContentInfoFor(spaceB, 'contentA')
+        assertEquals "Space B contentA cached id was wrong", spaceBnodeA.ident(), spaceBcA.id
     }
 }

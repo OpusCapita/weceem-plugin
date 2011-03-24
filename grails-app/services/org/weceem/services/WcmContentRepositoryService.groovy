@@ -1443,7 +1443,13 @@ class WcmContentRepositoryService implements InitializingBean {
         }
         return onlyNodesWithPermissions(res, [WeceemSecurityPolicy.PERMISSION_VIEW])        
     }
-    
+
+    def getCachedContentInfoFor(space, uriPath) {
+        def cacheKey = makeURICacheKey(space, uriPath)
+        def cachedElement = uriToIdCache.get(cacheKey)
+        cachedElement?.getValue()
+    }
+
     /**
      *
      * Find the content node that is identified by the specified uri path. This always finds a single WcmContent node
@@ -1463,14 +1469,11 @@ class WcmContentRepositoryService implements InitializingBean {
             log.debug "findContentForPath uri: ${uriPath} space: ${space}"
         }
 
-        def cacheKey = makeURICacheKey(space, uriPath)
-        
         if (useCache) {
             // This looks up the uriPath in the cache to see if we can get a Map of the content id and parentURI
             // If we call getValue on the cache hit, we lose 50% of our performance. Just retrieving
             // the cache hit is not expensive.
-            def cachedElement = uriToIdCache.get(cacheKey)
-            def cachedContentInfo = cachedElement?.getValue()
+            def cachedContentInfo = getCachedContentInfoFor(space, uriPath)
             if (cachedContentInfo) {
                 if (log.debugEnabled) {
                     log.debug "Found content info in cache for uri $uriPath: ${cachedContentInfo}"
@@ -1539,6 +1542,8 @@ class WcmContentRepositoryService implements InitializingBean {
             log.debug "Caching content info for uri $uriPath: $cacheValue"
         }
         if (useCache) {
+            def cacheKey = makeURICacheKey(space, uriPath)
+
             wcmCacheService.putToCache(uriToIdCache, cacheKey, cacheValue)
         }
         
