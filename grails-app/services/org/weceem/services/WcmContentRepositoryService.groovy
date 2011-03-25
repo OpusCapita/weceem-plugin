@@ -822,6 +822,7 @@ class WcmContentRepositoryService implements InitializingBean {
         }
 
         // Invalidate the caches 
+        println "Invalidating caching for ${sourceContent.absoluteURI} - originalURI ${originalURI}"
         invalidateCachingForURI(sourceContent.space, originalURI)
 
         if (sourceContent.save(flush: true)) {
@@ -1093,7 +1094,11 @@ class WcmContentRepositoryService implements InitializingBean {
     void invalidateCachingForURI( WcmSpace space, uri) {
         // If this was content that created a cached GSP class, clear it now
         def key = makeURICacheKey(space,uri)
-        log.debug "Removing cached info for cache key [$key]"
+        if (log.debugEnabled) {
+            log.debug "Removing cached info for cache key [$key]"
+        }
+        println "Removing cached info for cache key [$key]"
+        
         gspClassCache.remove(key) // even if its not a GSP/script lets just assume so, quicker than checking & remove
         uriToIdCache.remove(key)
         
@@ -1446,6 +1451,7 @@ class WcmContentRepositoryService implements InitializingBean {
 
     def getCachedContentInfoFor(space, uriPath) {
         def cacheKey = makeURICacheKey(space, uriPath)
+        println "Getting cached info for key ${cacheKey} for URI path ${uriPath}"
         def cachedElement = uriToIdCache.get(cacheKey)
         cachedElement?.getValue()
     }

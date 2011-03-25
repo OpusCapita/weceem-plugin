@@ -230,6 +230,9 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
 
         // check that template still exists
         assertNotNull "Template should exist!", WcmContent.findByTitle('template')
+
+        def spaceAcA = wcmContentRepositoryService.getCachedContentInfoFor(spaceA, 'contentA')
+        assertEquals "Space A contentA cached info should have been invalidated", null, spaceAcA
     }
 
     void testDeleteNodeB() {
@@ -420,6 +423,9 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         def beforeURI = nodeB.absoluteURI
         assertNotNull wcmContentRepositoryService.findContentForPath(beforeURI, nodeB.space)
 
+        def nodeBInfo = wcmContentRepositoryService.getCachedContentInfoFor(spaceA, 'contentA/contentB')
+        assertEquals "Space A contentA cached info should have been invalidated", nodeBInfo.id, nodeB.id
+
         wcmContentRepositoryService.moveNode(nodeB, null, 0)
         nodeA = WcmContent.findByTitle('contentA')
         nodeB = WcmContent.findByTitle('contentB')
@@ -433,10 +439,18 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         assertNull nodeB.parent
         assert nodeA.children.contains(nodeB) == false
 
+
         // Make sure the content uri cache has been invalidated for old URI
+        nodeBInfo = wcmContentRepositoryService.getCachedContentInfoFor(spaceA, 'contentA/contentB')
+        assertEquals "Space A contentB old URI info should have been invalidated", null, nodeBInfo
+
+        // Do this AFTER checking cache explicitly, because findContentForPath will force caching of a "not found" entry
         println "Old URI for the node is [$beforeURI], new is ${nodeB.absoluteURI}"
         assertNull wcmContentRepositoryService.findContentForPath(beforeURI, nodeB.space)
         assertNotNull wcmContentRepositoryService.findContentForPath(nodeB.absoluteURI, nodeB.space)
+
+        nodeBInfo = wcmContentRepositoryService.getCachedContentInfoFor(spaceA, 'contentB')
+        assertEquals "Space A contentB cached info was not updated correctly", nodeB.ident(), nodeBInfo.id
     }
 
     void testMoveB1toRoot() {
