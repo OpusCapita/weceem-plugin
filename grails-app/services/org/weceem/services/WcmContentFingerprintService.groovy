@@ -118,7 +118,6 @@ class WcmContentFingerprintService implements InitializingBean {
         }
         
         // Need to recalculate for this and all nodes each of these depend on (recursively)
-        println "Nodes that need to be recalculated now: "+nodesNeedingRecalculation
         alreadyVisited << content
         updateFingerprintsForAllDependencies(nodesNeedingRecalculation, alreadyVisited)
         return currentETag

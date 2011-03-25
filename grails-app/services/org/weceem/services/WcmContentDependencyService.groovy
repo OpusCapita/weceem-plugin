@@ -91,13 +91,11 @@ class WcmContentDependencyService {
             }
         }
         
-        println "Before loop, results: $results - already visited ${alreadyVisited}"
         deps.each { d ->
             def nodes = resolveDependencyPathToNodes(d, content.space)
             nodes.each { n ->
                 // Prevent stackoverflow
                 def nURI = n.absoluteURI
-                println "Results: ${results} - node URI ${nURI}, content URI ${contentURI}"
                 if (!alreadyVisited.contains(nURI)) {
                     recurseDependencyPathsOf( n, results, alreadyVisited)
                 }
@@ -122,10 +120,8 @@ class WcmContentDependencyService {
     }
     
     List<WcmContent> getDependenciesOf(WcmContent content) {
-        println "IN GDO for ${content.absoluteURI}"
         List l = []
         gatherDependenciesOf(content, l)
-        println "Final getDeps for ${content.absoluteURI}: $l"
         // Remove us
         l.removeAll(content)        
         return l
@@ -152,9 +148,6 @@ class WcmContentDependencyService {
     }
 
     protected void gatherDependenciesOf(WcmContent content, List results) {
-        println "IN GDO with ${content.absoluteURI}, ${results}"
-        println "Entering GDO Results hash: ${System.identityHashCode(results)}"
-        
         def deps = getDependencyPathsOf(content)
         if (deps) {
             deps.each { uri -> 
@@ -170,15 +163,10 @@ class WcmContentDependencyService {
                 localResults = localResults.unique()
                 
                 results.addAll( localResults)
-                println "ADDED TO RESULTS: ${localResults*.absoluteURI} - RESULTS NOW: ${results*.absoluteURI}"
-
-                println "Results hash: ${System.identityHashCode(results)}"
                 localResults.each { n ->
                     gatherDependenciesOf(n, results)
-                    println "In recurse loop results hash: ${System.identityHashCode(results)}"
                 }
 
-                println "RESULTS AFTER RECURSE: ${results*.absoluteURI}"
             }
             if (log.debugEnabled) {
                 log.debug "Gathered dependencies of ${content.absoluteURI} - results ${results*.absoluteURI}"
@@ -205,7 +193,6 @@ class WcmContentDependencyService {
         def deps = getDependencyPathsOf(content, true)
         
         def depInfo = getDependencyCacheForSpace(content.space)
-        println "Deps info before: ${depInfo}"
         def dependerId = content.ident()
         deps.each { uri ->
             if (log.debugEnabled) {
@@ -275,7 +262,6 @@ class WcmContentDependencyService {
             def lastSlash
             while ((lastSlash = u.lastIndexOf('/')) > 0) {
                 def wildcardURL = u[0..lastSlash]+'**'
-                println "Looking for wildcard dep ${wildcardURL}"
                 def deps = depInfo[wildcardURL]
                 if (deps) {
                     dependents.addAll(deps)
