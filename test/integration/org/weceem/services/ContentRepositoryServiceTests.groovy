@@ -21,6 +21,12 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     def virtContent1
     def virtContent2
     def virtContent3
+    def defaultDocRootIndex
+    def defaultDocSubIndex
+    def defaultDocSubIndexHtml
+    def defaultDocSubParent
+    def defaultDocSubParent2
+    
     def spaceBnodeA
     
     def extraNode
@@ -98,7 +104,47 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         nodeWiki.children << virtContent2
         nodeWiki.children << virtContent3
         nodeWiki.save()    
+          
+        defaultDocRootIndex = new WcmHTMLContent(title: 'root index', aliasURI: 'index',
+            content: 'root index content', status: defStatus,
+            createdBy: 'admin', createdOn: new Date(),
+            space: spaceA)
+        assert defaultDocRootIndex.save(flush:true)
                            
+        defaultDocSubParent = new WcmHTMLContent(title: 'default test sub', aliasURI: 'defaultTest',
+            content: 'default doc sub parent 1 content', status: defStatus,
+            createdBy: 'admin', createdOn: new Date(),
+            space: spaceA)
+        assert defaultDocSubParent.save(flush:true)
+                           
+        defaultDocSubParent2 = new WcmHTMLContent(title: 'default test 2 sub', aliasURI: 'defaultTest2',
+            content: 'default doc sub parent 2 content', status: defStatus,
+            createdBy: 'admin', createdOn: new Date(),
+            space: spaceA)
+        assert defaultDocSubParent2.save(flush:true)
+                           
+        defaultDocSubIndex = new WcmHTMLContent(title: 'sub index', aliasURI: 'index',
+            parent: defaultDocSubParent,
+            content: 'sub index content', status: defStatus,
+            createdBy: 'admin', createdOn: new Date(),
+            space: spaceA)
+        assert defaultDocSubIndex.save(flush:true)
+                           
+        defaultDocSubIndexHtml = new WcmHTMLContent(title: 'sub index html', aliasURI: 'index.html',
+            parent: defaultDocSubParent2,    
+            content: 'sub index html content', status: defStatus,
+            createdBy: 'admin', createdOn: new Date(),
+            space: spaceA)
+        assert defaultDocSubIndexHtml.save(flush:true)
+                         
+        defaultDocSubParent.children = new TreeSet()  
+        defaultDocSubParent.children << defaultDocSubIndex
+        assert defaultDocSubParent.save()
+
+        defaultDocSubParent2.children = new TreeSet()  
+        defaultDocSubParent2.children << defaultDocSubIndexHtml
+        assert defaultDocSubParent2.save()
+        
         // Tree structure:
         //
         //   a
@@ -162,6 +208,30 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         }
     }
     
+    void testFindContentForPathWithDefaultDocumentURIs() {
+        Closure doTests = { withCache ->
+            assertEquals defaultDocRootIndex.ident(), 
+                wcmContentRepositoryService.findContentForPath('', spaceA, withCache).content?.ident()
+            assertEquals defaultDocRootIndex.ident(), 
+                wcmContentRepositoryService.findContentForPath('index', spaceA, withCache).content?.ident()
+            assertEquals defaultDocSubParent.ident(), 
+                wcmContentRepositoryService.findContentForPath('defaultTest', spaceA, withCache).content?.ident()
+            assertEquals defaultDocSubIndex.ident(), 
+                wcmContentRepositoryService.findContentForPath('defaultTest/', spaceA, withCache).content?.ident()
+            assertEquals defaultDocSubParent2.ident(), 
+                wcmContentRepositoryService.findContentForPath('defaultTest2', spaceA, withCache).content?.ident()
+            assertEquals defaultDocSubIndexHtml.ident(), 
+                wcmContentRepositoryService.findContentForPath('defaultTest2/', spaceA, withCache).content?.ident()
+        }
+        
+        // Do first with no caching
+        doTests(false)
+        
+        // Do with cache twice, so first caches, second gets from cache
+        doTests(true)
+        doTests(true)
+    }
+
     void testUpdatingNodesMaintainsURICacheIntegrity() {
         assertEquals nodeA.id, wcmContentRepositoryService.findContentForPath('contentA', spaceA).content.id
         assertEquals nodeB.id, wcmContentRepositoryService.findContentForPath('contentA/contentB', spaceA).content.id
@@ -640,7 +710,7 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     void testFindAllRootContent() {
         def nodes = wcmContentRepositoryService.findAllRootContent(spaceA)
         println "nodes: $nodes"
-        assertEquals 2, nodes.size()
+        assertEquals 5, nodes.size()
         assertTrue nodes.contains(nodeA)
         assertTrue nodes.contains(template)
     }
@@ -648,7 +718,7 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     void testFindAllContent() {
         def nodes = wcmContentRepositoryService.findAllContent(spaceA)
         println "nodes: $nodes"
-        assertEquals 8, nodes.size()
+        assertEquals 13, nodes.size()
         assertTrue nodes.contains(nodeA)
         assertTrue nodes.contains(nodeB)
         assertTrue nodes.contains(nodeC)
@@ -662,7 +732,7 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     void testFindAllContentWithType() {
         def nodes = wcmContentRepositoryService.findAllContent(spaceA, [type: 'org.weceem.html.WcmHTMLContent'])
         println "nodes: $nodes"
-        assertEquals 3, nodes.size()
+        assertEquals 8, nodes.size()
         assertTrue nodes.contains(nodeA)
         assertTrue nodes.contains(nodeB)
         assertTrue nodes.contains(nodeC)
@@ -686,11 +756,11 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     }
     
     void testCountContent() {
-        assertEquals(8, wcmContentRepositoryService.countContent(spaceA))
+        assertEquals(13, wcmContentRepositoryService.countContent(spaceA))
     }
     
     void testCountContentWithType() {
-        assertEquals(3, wcmContentRepositoryService.countContent(spaceA, [type: 'org.weceem.html.WcmHTMLContent']))
+        assertEquals(8, wcmContentRepositoryService.countContent(spaceA, [type: 'org.weceem.html.WcmHTMLContent']))
     }
     
     void testCountContentWithStatus() {

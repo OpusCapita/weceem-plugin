@@ -43,6 +43,8 @@ class WcmContentRepositoryService implements InitializingBean {
     
     static CACHE_NAME_GSP_CACHE = "gspCache"
     static CACHE_NAME_URI_TO_CONTENT_ID = "uriToContentCache"
+    
+    static DEFAULT_DOCUMENT_NAMES = ['index', 'index.html']
 
     static transactional = true
 
@@ -276,11 +278,6 @@ class WcmContentRepositoryService implements InitializingBean {
                 }
             }
         }        
-
-        // If the URI is just for the space uri with no doc, default to "index" node in root of spacer
-        if ((uri == null) || (uri == space?.aliasURI) || (uri == space?.aliasURI+'/')) { 
-            uri = 'index'
-        }
 
         [space:space, uri:uri]
     }
@@ -1464,6 +1461,38 @@ class WcmContentRepositoryService implements InitializingBean {
      * and 'parentURI' (the uri to the parent of this instance of the node)
      */
     def findContentForPath(String uriPath, WcmSpace space, boolean useCache = true) {
+        println "fCFP: $uriPath - ${space.aliasURI} - $useCache"
+        def c
+        def isFolderURL = uriPath.endsWith('/')
+        // If it doesn't end in / and its not blank, try to find it
+        if (!isFolderURL && uriPath) {
+            c = doFindContentForPath(uriPath,space,useCache)
+        }
+            
+        // If it is a folder ending in / or not yet found, try default documents
+        println "fCFP: isFolder $isFolderURL - contentinfo ${c}"
+        if (isFolderURL || !c?.content) {
+            // Add slash to end if required (not for root)
+            if (!isFolderURL && uriPath) {
+                uriPath += '/'
+            }
+
+            // Look for default document aliasURIs
+            for (n in DEFAULT_DOCUMENT_NAMES) {
+                def u = uriPath+n
+                println "fCFP: Checking default doc with uri $u"
+                c = doFindContentForPath(u,space,useCache)
+                if (c?.content) {
+                    break;
+                }
+            }
+        }
+        println "fCFP: result ${c}"
+        
+        return c
+    }
+    
+    protected def doFindContentForPath(String uriPath, WcmSpace space, boolean useCache) {
         if (log.debugEnabled) {
             log.debug "findContentForPath uri: ${uriPath} space: ${space}"
         }
