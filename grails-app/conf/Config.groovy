@@ -3,6 +3,8 @@
 grails.views.default.codec="none" // none, html, base64
 grails.views.gsp.encoding="UTF-8"
 
+grails.mime.file.extensions = false // enables the parsing of file extensions from URLs into the request format
+
 org.weceem.plugin.standalone="true"
 
 //weceem.content.prefix="content"

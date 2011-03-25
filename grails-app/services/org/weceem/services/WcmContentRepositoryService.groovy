@@ -271,7 +271,9 @@ class WcmContentRepositoryService implements InitializingBean {
                 }
                 space = findSpaceByURI('')
                 if (space) {
-                    uri = uri ? spaceName + '/' + uri : spaceName
+                    uri = spaceName + uri
+                    spaceName = ''
+                    uri = uri ? (spaceName ? spaceName + '/' : '') + uri : spaceName
                     if (log.debugEnabled) {
                         log.debug "Content request has found space with blank aliasURI, amending uri to include the space name: ${uri}"
                     }
@@ -279,6 +281,10 @@ class WcmContentRepositoryService implements InitializingBean {
             }
         }        
 
+        if (uri == null) {
+            uri = ''
+        }
+        
         [space:space, uri:uri]
     }
     
@@ -1461,9 +1467,13 @@ class WcmContentRepositoryService implements InitializingBean {
      * and 'parentURI' (the uri to the parent of this instance of the node)
      */
     def findContentForPath(String uriPath, WcmSpace space, boolean useCache = true) {
+        if (uriPath == null) {
+            uriPath = ''
+        }
+        
         println "fCFP: $uriPath - ${space.aliasURI} - $useCache"
         def c
-        def isFolderURL = uriPath.endsWith('/')
+        def isFolderURL = uriPath?.endsWith('/')
         // If it doesn't end in / and its not blank, try to find it
         if (!isFolderURL && uriPath) {
             c = doFindContentForPath(uriPath,space,useCache)
