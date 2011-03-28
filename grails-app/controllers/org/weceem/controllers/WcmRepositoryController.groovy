@@ -77,11 +77,12 @@ class WcmRepositoryController {
             if (log.debugEnabled) {
                 log.debug "Loading space from parameter: ${params.space}"
             }
+            def spaceName = params.space
             params.space = findSelectedSpace()
             if (!params.space) {
                 // @todo in future we should default to another space if none found, with a message
                 // "The space you selected can no longer be found"
-                flash.message = message(code:'message.no.such.space', args:[params.space])
+                flash.message = message(code:'message.no.such.space', args:[spaceName])
                 params.space = wcmContentRepositoryService.findDefaultSpace()
             }
         }

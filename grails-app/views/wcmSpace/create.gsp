@@ -7,7 +7,7 @@
   <body>
 
     <div class="body">
-      <b class="header">Create Space</b>
+      <h1>Create Space</h1>
 
       <g:if test="${flash.message}">
         <div class="message">${flash.message}</div>
@@ -24,12 +24,23 @@
             <tbody>
               <g:render plugin="weceem" template="/wcmSpace/form" model="[space: space]"/>
               <tr class="prop">
+                <td valign="top" class="aliasURI">
+                  <label for="name">Use template:</label>
+                </td>
+                <td valign="top" class="value">
+                  <g:select name="templateName" from="${templates}" 
+                    optionValue="${ { v -> g.message(code:'weceem.template.name.'+v.key) } }"
+                    optionKey="key"
+                    />
+                </td>
+              </tr>            
+              <tr class="prop">
                 <td colspan="2">
                   <g:actionSubmit class="button" value="Save" action="save"/>&nbsp;
                   <g:actionSubmit class="button" value="Back" action="list"/>
                 </td>
               </tr>
-            </tbody>
+              </tbody>
           </table>
         </div>
       </g:form>

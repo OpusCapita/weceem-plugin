@@ -12,6 +12,10 @@ org.weceem.plugin.standalone="true"
 //weceem.tools.prefix="cms/tools"
 //weceem.admin.layout="weceemadmin-alt"
 //weceem.create.default.space = false
+//weceem.default.space.template = "file:/.....zip"
+weceem.space.templates = [default: "classpath:/org/weceem/resources/default-space-template.zip", 
+   basic:"classpath:/org/weceem/resources/basic-space-template.zip"]
+//   fun:"classpath:/my/app/fun-template.zip"]
 
 log4j = {
     root {
