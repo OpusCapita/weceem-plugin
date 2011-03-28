@@ -79,7 +79,7 @@ class WcmSpaceController {
     }
 
     def importSpace = {
-        return [importers: wcmImportExportService.importers]
+        return [importers: wcmImportExportService.importers, space: WcmSpace.get(params.id)]
     }
 
     /**
@@ -89,7 +89,7 @@ class WcmSpaceController {
      * @param file
      */
     def startImport = {
-        def space = WcmSpace.get(params.space)
+        def space = WcmSpace.get(params.id)
 
         assert wcmSecurityService.hasPermissions(space, [WeceemSecurityPolicy.PERMISSION_ADMIN])
         
@@ -115,10 +115,11 @@ class WcmSpaceController {
     }
 
     def exportSpace = {
-        return [exporters: wcmImportExportService.exporters]
+        return [exporters: wcmImportExportService.exporters, space: WcmSpace.get(params.id)]
     }
 
     def startExport = {
+        [space: WcmSpace.get(params.id)]
     }
 
     /**
@@ -144,7 +145,7 @@ class WcmSpaceController {
             log.error "Could not export space ${params.space}", e
             // This is unlikely to work!
             flash.message = e.message
-            redirect(action: exportSpace)
+            redirect(action: exportSpace, params:[id:params.space])
         }
     }
 }

@@ -6,25 +6,18 @@
 
   <body>
     <div class="span-24 last">
-      <h1><g:message code="space.title.export"/></h1>
+      <h1><g:message code="space.title.export" args="[space.name]" encodeAs="HTML"/></h1>
 
       <g:if test="${flash.message}">
         <div class="message">${flash.message}</div>
       </g:if>
 
       <p>Please select a space to export</p>
-      <g:form controller="wcmSpace" method="post" action="startExport">
+      <g:form controller="wcmSpace" method="post" params="[id:space.id]"
+            action="startExport">
         <div class="dialog">
           <table>
             <tbody>
-              <tr class="prop">
-                <td valign="top" class="name">
-                  <label for="space"><g:message code="space.label.space"/></label>
-                </td>
-                <td valign="top" class="value">
-                  <g:select from="${org.weceem.content.WcmSpace.list()}" name="space" optionKey="id" optionValue="name"/>
-                </td>
-              </tr>
               <tr>
                 <td><label for="exporter"><g:message code="space.label.exportType"/></label></td>
                 <td>
