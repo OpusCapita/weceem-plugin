@@ -46,6 +46,8 @@ class WcmContentRepositoryService implements InitializingBean {
     
     static DEFAULT_DOCUMENT_NAMES = ['index', 'index.html']
 
+    static DEFAULT_SPACE_TEMPLATE_ZIP = "classpath:/org/weceem/resources/default-space-template.zip"
+    
     static transactional = true
 
     def uriToIdCache
@@ -165,10 +167,10 @@ class WcmContentRepositoryService implements InitializingBean {
     }
     
     void createDefaultSpace() {
-        if (Environment.current != Environment.TEST) {
-            if (WcmSpace.count() == 0) {
-                createSpace([name:'Default'])
-            }
+        if (WcmSpace.count() == 0) {
+            def configValue = grailsApplication.config.weceem.default.space.template
+            def templateName = configValue instanceof String ? configValue : 'default'
+            createSpace([name:'Default'], templateName)
         }
     }
     
@@ -289,6 +291,7 @@ class WcmContentRepositoryService implements InitializingBean {
     }
     
     WcmSpace createSpace(params, templateName = 'default') {
+        
         def s
         WcmContent.withTransaction { txn ->
             s = new WcmSpace(params)
@@ -309,14 +312,32 @@ class WcmContentRepositoryService implements InitializingBean {
         return s // If this fails we still return the original space so we can see errors
     }
     
+    def getSpaceTemplates() {
+        def temps = grailsApplication.config.weceem.space.templates 
+        def data = [:]
+        if (temps.size()) {
+            data.putAll(temps)
+        } else {
+            data.'default' = DEFAULT_SPACE_TEMPLATE_ZIP
+        }
+        return data
+    }
+    
     /**
      * Import a named space template (import zip) into the specified space
+     * @param templateName Name of a template in classpath:/org/weceem/resources/ or file: or classpath: url to ZIP file
+     * @param space The space into which the import is to be performed
      */
     void importSpaceTemplate(String templateName, WcmSpace space) {
+        
         log.info "Importing space template [${templateName}] into space [${space.name}]"
         // For now we only load files, in future we may get them as blobs from DB
-        def f = File.createTempFile("default-space-import", null)
-        def resourceName = "classpath:/org/weceem/resources/${templateName}-space-template.zip"
+        def f = File.createTempFile("weceem-space-import", null)
+    
+        def resourceName = templateName.startsWith('file:') || templateName.startsWith('classpath:') ?
+            templateName :
+            "classpath:/org/weceem/resources/${templateName}-space-template.zip"
+            
         def res = ApplicationHolder.application.parentContext.getResource(resourceName).inputStream
         if (!res) {
             log.error "Unable to import space template [${templateName}] into space [${space.name}], space template not found at resource ${resourceName}"
@@ -333,6 +354,8 @@ class WcmContentRepositoryService implements InitializingBean {
         }
 
         log.info "Successfully imported space template [${templateName}] into space [${space.name}]"
+        
+        invalidateCachingForSpace(space)
     }
     
     void requirePermissions(WcmSpace space, List permissionList, Class<WcmContent> type = null) throws AccessDeniedException {
@@ -929,6 +952,9 @@ class WcmContentRepositoryService implements InitializingBean {
 
         // Get the dependencies before we delete it
         def deps = wcmContentDependencyService.getContentDependentOn(sourceContent)
+        if (log.debugEnabled) {
+            wcmContentDependencyService.dumpDependencyInfo()
+        }
         if (deps) {
             log.error "Could not delete content, it has other nodes dependent on it: ${deps*.absoluteURI}"
             throw new DeleteNotPossibleException("Could not delete content, it has content dependent on it: ${deps*.absoluteURI.join(', ')}")
@@ -944,10 +970,10 @@ class WcmContentRepositoryService implements InitializingBean {
         
         triggerEvent(sourceContent, WeceemEvents.contentWillBeDeleted)
 
-        if (log.debugEnabled) {
-            log.debug "Deleting children of ${sourceContent.absoluteURI}"
-        }
         if (deleteChildren) {
+            if (log.debugEnabled) {
+                log.debug "Deleting children of ${sourceContent.absoluteURI}"
+            }
             def children = sourceContent.children.collect { it }
             children.each { deleteNode(it, true) }
         }
@@ -1471,7 +1497,6 @@ class WcmContentRepositoryService implements InitializingBean {
             uriPath = ''
         }
         
-        println "fCFP: $uriPath - ${space.aliasURI} - $useCache"
         def c
         def isFolderURL = uriPath?.endsWith('/')
         // If it doesn't end in / and its not blank, try to find it
@@ -1480,7 +1505,6 @@ class WcmContentRepositoryService implements InitializingBean {
         }
             
         // If it is a folder ending in / or not yet found, try default documents
-        println "fCFP: isFolder $isFolderURL - contentinfo ${c}"
         if (isFolderURL || !c?.content) {
             // Add slash to end if required (not for root)
             if (!isFolderURL && uriPath) {
@@ -1490,14 +1514,12 @@ class WcmContentRepositoryService implements InitializingBean {
             // Look for default document aliasURIs
             for (n in DEFAULT_DOCUMENT_NAMES) {
                 def u = uriPath+n
-                println "fCFP: Checking default doc with uri $u"
                 c = doFindContentForPath(u,space,useCache)
                 if (c?.content) {
                     break;
                 }
             }
         }
-        println "fCFP: result ${c}"
         
         return c
     }

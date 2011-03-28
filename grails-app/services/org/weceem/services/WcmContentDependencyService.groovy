@@ -43,11 +43,13 @@ class WcmContentDependencyService {
         if (log.debugEnabled) {
             log.debug "Content classes with contentDependencies: ${classesWithDeps*.clazz}"
         }
-        // Find all nodes with templates
+
+        // Find all nodes with templates, this is an implicit dependency
         List<Class> classesWithTemplates = grailsApplication.domainClasses.findAll { d -> d.clazz.metaClass.hasProperty(d, 'template') }
         if (log.debugEnabled) {
             log.debug "Content classes with template: ${classesWithTemplates*.clazz}"
         }
+
         (classesWithDeps + classesWithTemplates).unique().clazz.each { dc ->
             if (log.debugEnabled) {
                 log.debug "Loading content instances for ${dc} to load dependency info..."

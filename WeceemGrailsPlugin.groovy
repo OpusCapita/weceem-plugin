@@ -3,6 +3,8 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 import org.weceem.services.WcmContentRepositoryService
 
+import grails.util.Environment
+
 class WeceemGrailsPlugin {
     def _log = LogFactory.getLog('org.weceem.WeceemGrailsPlugin')
 
@@ -99,7 +101,9 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         }
         
         if (createDefSpace) {
-            repSvc.createDefaultSpace()
+            if (Environment.current != Environment.TEST) {
+                repSvc.createDefaultSpace()
+            }
         }
 
         applicationContext.wcmContentDependencyService.reset()
