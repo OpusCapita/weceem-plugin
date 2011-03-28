@@ -3,6 +3,7 @@
 	<meta name="layout" content="${wcm.adminLayout().toString()}"/>
 	<title>Weceem - ${space.name.encodeAsHTML()}</title>
 	<script type="text/javascript" src="${g.resource(plugin:'weceem', dir: '_weceem/js/treeTable/javascripts', file:'jquery.treeTable.js')}"></script>
+	<script type="text/javascript" src="${g.resource(plugin:'weceem', dir: '_weceem/js', file:'jquery.hotkeys.js')}"></script>
 	<script type="text/javascript" src="${g.resource(plugin:'weceem', dir: '_weceem/js/treeTable/javascripts/', file:'core.treeTable.js')}"></script>
 	<link href="${g.resource(plugin:'weceem', dir: '_weceem/js/treeTable/stylesheets', file:'jquery.treeTable.css')}" rel="stylesheet" type="text/css" />
 	<link href="${g.resource(plugin:'weceem', dir: '_weceem/css', file:'contentRepository.css')}" rel="stylesheet" type="text/css" />
@@ -51,9 +52,6 @@ function init(){
     cacheParams["isAsc"] = true;
     cacheParams["sortField"] = "title";
 }
-
-
-
 
 $(function(){
     init();

@@ -585,6 +585,7 @@ function initTreeTable() {
 		var dlg = $('#infoDialog'+i)
 		dlg.dialog('open')
 	})
+    
 	$('#deleteDialog').dialog( {
 		autoOpen: false, 
 	    width: DIALOG_WIDTH,
@@ -612,9 +613,8 @@ function initTreeTable() {
 			} 
 		}
 	})
-	$('.ui-icon-circle-minus').click( function() { 
-        deleteSelected()
-	})
+
+	$(document).bind('keyup', 'alt+ctrl+d', deleteSelected);
 	
 	$('#createNewDialog').dialog({
 	    autoOpen: false,
