@@ -16,6 +16,7 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     def nodeWiki
     def spaceA
     def spaceB
+    def spaceC
     def template
     def defStatus
     def virtContent1
@@ -41,6 +42,8 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         assert spaceA.save(flush: true)
         spaceB = new WcmSpace(name: 'other', aliasURI: 'other')
         assert spaceB.save(flush: true)
+        spaceC = new WcmSpace(name: 'root', aliasURI: '')
+        assert spaceC.save(flush: true)
 
         template = new WcmTemplate(title: 'template', aliasURI: 'template',
                     space: spaceA, status: defStatus,
@@ -190,6 +193,10 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         res = wcmContentRepositoryService.resolveSpaceAndURI('other/anything')
         assert res.space.id == spaceB.id
         assertEquals 'anything', res.uri
+
+        res = wcmContentRepositoryService.resolveSpaceAndURI('libs/jquery/jquery-1.4.2.min.js')
+        assert res.space.id == spaceC.id
+        assertEquals 'libs/jquery/jquery-1.4.2.min.js', res.uri
     }
 
     void testFindContentForPath() {
