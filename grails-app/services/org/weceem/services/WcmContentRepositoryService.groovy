@@ -273,7 +273,10 @@ class WcmContentRepositoryService implements InitializingBean {
                 }
                 space = findSpaceByURI('')
                 if (space) {
-                    uri = spaceName + uri
+                    // put the space name back into uri
+                    if (spaceName) {
+                        uri = spaceName + '/' + uri
+                    }
                     spaceName = ''
                     uri = uri ? (spaceName ? spaceName + '/' : '') + uri : spaceName
                     if (log.debugEnabled) {
