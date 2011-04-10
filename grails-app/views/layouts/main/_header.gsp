@@ -3,11 +3,11 @@
     
     <div id="iconbar" class="span-10 last prepend-top" style="text-align: right">
         <span title="Current User">
-          Welcome, ${wcm.loggedInUserName().encodeAsHTML()} (${wcm.loggedInUserEmail().encodeAsHTML()})
+          <g:message code="admin.user.current" args="${[wcm.loggedInUserName().encodeAsHTML(), wcm.loggedInUserEmail().encodeAsHTML()]}"/>
         </span>
-        <g:link url="${wcm.userProfileEditUrl().encodeAsHTML()}">Profile</g:link> |
-        <a href="http://www.weceem.org/">Help</a> |
-        <g:link url="${wcm.userLogOutUrl().encodeAsHTML()}">Log Out</g:link>
+        <g:link url="${wcm.userProfileEditUrl().encodeAsHTML()}"><g:message code="admin.user.profile"/></g:link> |
+        <a href="http://www.weceem.org/"><g:message code="admin.help.label"/></a> |
+        <g:link url="${wcm.userLogOutUrl().encodeAsHTML()}"><g:message code="admin.user.logout"/></g:link>
     </div>
 
     <div id="navigation" class="span-24 last">

@@ -64,7 +64,7 @@ $(function(){
     <div class="span-24 last">
         <div class="container" id="repository-toolbar">
             <div class="span-12"><g:render plugin="weceem" template="repository-buttons"/></div>
-            <div class="span-6"><label>Space:</label><g:select id="spaceSelector" name="space" from="${spaces}" 
+            <div class="span-6"><label><g:message code="space.label.space" default="Space:"/></label><g:select id="spaceSelector" name="space" from="${spaces}"
 				 optionKey="id" optionValue="name" onchange="changeSpace()" value="${space.id}"/>
     		</div>
     		<div class="span-6 last" id="repository-searchbox">
@@ -93,10 +93,10 @@ $(function(){
                 <table id="treeTable">
                   <thead>
                     <tr>
-                      <th align="left" class="page-column">Page</th>
-                      <th align="left">Status</th>
-                      <th align="left">Created by</th>
-                      <th align="left">Last changed</th>
+                      <th align="left" class="page-column"><g:message code="header.content" default="Page"/></th>
+                      <th align="left"><g:message code="header.status" default="Status"/></th>
+                      <th align="left"><g:message code="header.createdBy" default="Created by"/></th>
+                      <th align="left"><g:message code="header.lastChanged" default="Last changed"/></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -116,10 +116,10 @@ $(function(){
                     <table class="treeTable">
                         <thead style="border-spacing: 10px 10px">
                           <tr>
-                            <th align="left" class="asc"><a href="#" onclick="sortByField('title')">Page&nbsp;&nbsp;</a></th>
-                            <th align="left" class="asc"><a href="#" onclick="sortByField('status.description')">Status&nbsp;&nbsp;</a></th>
-                            <th align="left" class="asc"><a href="#" onclick="sortByField('createdBy')">Created by&nbsp;&nbsp;</a></th>
-                            <th align="left" class="asc"><a href="#" onclick="sortByField('changedOn')">Last changed&nbsp;&nbsp;</a></th>
+                            <th align="left" class="asc"><a href="#" onclick="sortByField('title')"><g:message code="header.content" default="Page"/>&nbsp;&nbsp;</a></th>
+                            <th align="left" class="asc"><a href="#" onclick="sortByField('status.description')"><g:message code="header.status" default="Status"/>&nbsp;&nbsp;</a></th>
+                            <th align="left" class="asc"><a href="#" onclick="sortByField('createdBy')"><g:message code="header.createdBy" default="Created by"/>&nbsp;&nbsp;</a></th>
+                            <th align="left" class="asc"><a href="#" onclick="sortByField('changedOn')"><g:message code="header.lastChanged" default="Last changed"/>&nbsp;&nbsp;</a></th>
                           </tr>
                         </thead>
                         <tbody>
