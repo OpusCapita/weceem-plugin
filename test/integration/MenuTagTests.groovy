@@ -1,3 +1,4 @@
+import org.weceem.AbstractWeceemIntegrationTest
 
 import org.weceem.controllers.*
 import org.weceem.content.*

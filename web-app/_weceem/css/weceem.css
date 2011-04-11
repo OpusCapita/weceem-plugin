@@ -106,7 +106,7 @@ div.existingTag {
     display: inline;
 }
 
-#editor-extras, #editor-changes, #editor-meta, #editor-family {
+#panels div.editorpanel {
     padding: 0;
 }
 

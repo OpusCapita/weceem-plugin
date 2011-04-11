@@ -26,7 +26,8 @@ class WcmSpaceController {
         def space = new WcmSpace()
         // Using bindData to work around Grails 1.2m2 bugs, change to .properties when 1.2-RC1 is live
         bindData(space, params)
-        return ['space': space]
+        def templs = wcmContentRepositoryService.spaceTemplates
+        return ['space': space, templates:templs]
     }
 
     def edit = {
@@ -41,7 +42,7 @@ class WcmSpaceController {
     }
 
     def save = {
-        def space = wcmContentRepositoryService.createSpace(params)
+        def space = wcmContentRepositoryService.createSpace(params, params.templateName)
         if (!space.hasErrors()) {
             flash.message = "Space '${space.name}' created"
             redirect(action: list, id: space.id)
@@ -79,7 +80,7 @@ class WcmSpaceController {
     }
 
     def importSpace = {
-        return [importers: wcmImportExportService.importers]
+        return [importers: wcmImportExportService.importers, space: WcmSpace.get(params.id)]
     }
 
     /**
@@ -89,7 +90,7 @@ class WcmSpaceController {
      * @param file
      */
     def startImport = {
-        def space = WcmSpace.get(params.space)
+        def space = WcmSpace.get(params.id)
 
         assert wcmSecurityService.hasPermissions(space, [WeceemSecurityPolicy.PERMISSION_ADMIN])
         
@@ -115,10 +116,11 @@ class WcmSpaceController {
     }
 
     def exportSpace = {
-        return [exporters: wcmImportExportService.exporters]
+        return [exporters: wcmImportExportService.exporters, space: WcmSpace.get(params.id)]
     }
 
     def startExport = {
+        [space: WcmSpace.get(params.id)]
     }
 
     /**
@@ -144,7 +146,7 @@ class WcmSpaceController {
             log.error "Could not export space ${params.space}", e
             // This is unlikely to work!
             flash.message = e.message
-            redirect(action: exportSpace)
+            redirect(action: exportSpace, params:[id:params.space])
         }
     }
 }

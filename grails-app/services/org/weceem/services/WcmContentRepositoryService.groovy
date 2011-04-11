@@ -1,9 +1,13 @@
 package org.weceem.services
 
+import java.util.concurrent.ConcurrentHashMap
+
+import org.apache.commons.logging.LogFactory
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 import org.springframework.beans.factory.InitializingBean
 import grails.util.Environment
+import grails.util.GrailsNameUtils
 
 // This is for a hack, remove later
 import org.codehaus.groovy.grails.web.metaclass.BindDynamicMethod
@@ -30,6 +34,8 @@ import org.weceem.security.*
  */
 class WcmContentRepositoryService implements InitializingBean {
 
+    static log = LogFactory.getLog("grails.app.service."+WcmContentRepositoryService.class.name)
+
     static final String EMPTY_ALIAS_URI = "_ROOT"
     
     static final CONTENT_CLASS = WcmContent.class.name
@@ -38,17 +44,25 @@ class WcmContentRepositoryService implements InitializingBean {
     static CACHE_NAME_GSP_CACHE = "gspCache"
     static CACHE_NAME_URI_TO_CONTENT_ID = "uriToContentCache"
     
+    static DEFAULT_DOCUMENT_NAMES = ['index', 'index.html']
+
+    static DEFAULT_SPACE_TEMPLATE_ZIP = "classpath:/org/weceem/resources/default-space-template.zip"
+    
     static transactional = true
 
     def uriToIdCache
     def gspClassCache
+
     
     def grailsApplication
     def wcmImportExportService
     def wcmCacheService
     def groovyPagesTemplateEngine
+
     def wcmSecurityService
     def wcmEventService
+    def wcmContentDependencyService
+    def wcmContentFingerprintService
     
     def archivedStatusCode
     def unmoderatedStatusCode
@@ -84,7 +98,6 @@ class WcmContentRepositoryService implements InitializingBean {
             
         loadConfig()
     }
-    
     /**
      * Workaround for replaceAll problems with \ in Java
      */
@@ -154,10 +167,10 @@ class WcmContentRepositoryService implements InitializingBean {
     }
     
     void createDefaultSpace() {
-        if (Environment.current != Environment.TEST) {
-            if (WcmSpace.count() == 0) {
-                createSpace([name:'Default'])
-            }
+        if (WcmSpace.count() == 0) {
+            def configValue = grailsApplication.config.weceem.default.space.template
+            def templateName = configValue instanceof String ? configValue : 'default'
+            createSpace([name:'Default'], templateName)
         }
     }
     
@@ -260,7 +273,12 @@ class WcmContentRepositoryService implements InitializingBean {
                 }
                 space = findSpaceByURI('')
                 if (space) {
-                    uri = uri ? spaceName + '/' + uri : spaceName
+                    // put the space name back into uri
+                    if (spaceName) {
+                        uri = spaceName + '/' + uri
+                    }
+                    spaceName = ''
+                    uri = uri ? (spaceName ? spaceName + '/' : '') + uri : spaceName
                     if (log.debugEnabled) {
                         log.debug "Content request has found space with blank aliasURI, amending uri to include the space name: ${uri}"
                     }
@@ -268,15 +286,15 @@ class WcmContentRepositoryService implements InitializingBean {
             }
         }        
 
-        // If the URI is just for the space uri with no doc, default to "index" node in root of spacer
-        if ((uri == null) || (uri == space?.aliasURI) || (uri == space?.aliasURI+'/')) { 
-            uri = 'index'
+        if (uri == null) {
+            uri = ''
         }
-
+        
         [space:space, uri:uri]
     }
     
     WcmSpace createSpace(params, templateName = 'default') {
+        
         def s
         WcmContent.withTransaction { txn ->
             s = new WcmSpace(params)
@@ -297,14 +315,32 @@ class WcmContentRepositoryService implements InitializingBean {
         return s // If this fails we still return the original space so we can see errors
     }
     
+    def getSpaceTemplates() {
+        def temps = grailsApplication.config.weceem.space.templates 
+        def data = [:]
+        if (temps.size()) {
+            data.putAll(temps)
+        } else {
+            data.'default' = DEFAULT_SPACE_TEMPLATE_ZIP
+        }
+        return data
+    }
+    
     /**
      * Import a named space template (import zip) into the specified space
+     * @param templateName Name of a template in classpath:/org/weceem/resources/ or file: or classpath: url to ZIP file
+     * @param space The space into which the import is to be performed
      */
     void importSpaceTemplate(String templateName, WcmSpace space) {
+        
         log.info "Importing space template [${templateName}] into space [${space.name}]"
         // For now we only load files, in future we may get them as blobs from DB
-        def f = File.createTempFile("default-space-import", null)
-        def resourceName = "classpath:/org/weceem/resources/${templateName}-space-template.zip"
+        def f = File.createTempFile("weceem-space-import", null)
+    
+        def resourceName = templateName.startsWith('file:') || templateName.startsWith('classpath:') ?
+            templateName :
+            "classpath:/org/weceem/resources/${templateName}-space-template.zip"
+            
         def res = ApplicationHolder.application.parentContext.getResource(resourceName).inputStream
         if (!res) {
             log.error "Unable to import space template [${templateName}] into space [${space.name}], space template not found at resource ${resourceName}"
@@ -319,7 +355,10 @@ class WcmContentRepositoryService implements InitializingBean {
             log.error "Unable to import space template [${templateName}] into space [${space.name}]", t
             throw t // rethrow, this is sort of fatal
         }
+
         log.info "Successfully imported space template [${templateName}] into space [${space.name}]"
+        
+        invalidateCachingForSpace(space)
     }
     
     void requirePermissions(WcmSpace space, List permissionList, Class<WcmContent> type = null) throws AccessDeniedException {
@@ -342,12 +381,14 @@ class WcmContentRepositoryService implements InitializingBean {
         // @todo remove/rework this for 0.2
         def contentList = WcmContent.findAllBySpace(space)
         for (content in contentList){
-            // Invalidate the caches before parent is changedBy
+            // Invalidate the caches before parent is changed
             invalidateCachingForURI(content.space, content.absoluteURI)
 
             content.parent = null
             content.save()
         }
+        // @todo This code is very naïve and probably broken
+        // It needs leaf-first dependency ordering and/or brute force clearing of all refs
         def wasDelete = true
         while (wasDelete){
             contentList = WcmContent.findAllBySpace(space)
@@ -505,7 +546,7 @@ class WcmContentRepositoryService implements InitializingBean {
      *
      * @param content
      */
-    def createNode(String type, def params, Closure postInit = null) {
+    def createNode(type, params, Closure postInit = null) {
         def content = newContentInstance(type)
         def tags = params.remove('tags')
         hackedBindData(content, params)
@@ -667,6 +708,7 @@ class WcmContentRepositoryService implements InitializingBean {
             }
             
             invalidateCachingForURI(content.space, content.absoluteURI)
+            updateCachingMetadataFor(content)
         }
         
         return result
@@ -729,13 +771,15 @@ class WcmContentRepositoryService implements InitializingBean {
      * @param sourceContent
      * @param targetContent
      */
-    Boolean moveNode(WcmContent sourceContent, WcmContent targetContent, orderIndex) {
+    void moveNode(WcmContent sourceContent, WcmContent targetContent, orderIndex) throws ContentRepositoryException {
         if (log.debugEnabled) {
             log.debug "Moving content ${sourceContent} to ${targetContent} at order index $orderIndex"
         }
         requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_EDIT,WeceemSecurityPolicy.PERMISSION_VIEW])        
 
-        if (!sourceContent) return false
+        if (!sourceContent) {
+            throw new IllegalArgumentException("sourceContent cannot be null")
+        }
 
         // Do an ugly check for unique uris at root
         if (!targetContent){
@@ -753,67 +797,73 @@ class WcmContentRepositoryService implements InitializingBean {
             }
             
             if (nodes.size() > 0){
-                return false
+                throw new IllegalArgumentException("Another node at the root of your repository has the same aliasURI")
             } 
         }
-        def success = true
 
         // We need this to invalidate caches
         def originalURI = sourceContent.absoluteURI
 
         def parentChanged = targetContent != sourceContent.parent
         if (targetContent && parentChanged) {
-            success = triggerDomainEvent(targetContent, WeceemDomainEvents.contentShouldAcceptChild, [sourceContent])
+            if (!triggerDomainEvent(targetContent, WeceemDomainEvents.contentShouldAcceptChild, [sourceContent])) {
+                throw new InvalidDestinationException("This node is not accepted by the target '${targetContent.absoluteURI}'")
+            }
         }
 
-        if (success && parentChanged) {
-            success = triggerDomainEvent(sourceContent, WeceemDomainEvents.contentShouldMove, [targetContent])
+        if (parentChanged) {
+            if (!triggerDomainEvent(sourceContent, WeceemDomainEvents.contentShouldMove, [targetContent])) {
+                throw new InvalidDestinationException("This node cannot move to the target '${targetContent.absoluteURI}'")
+            }
         }
         
-        if (success) {
-            if (parentChanged) {
-                // Transpose to new parent
-                def parent = sourceContent.parent
-                if (parent) {
-                    parent.children.remove(sourceContent)
-                    sourceContent.parent = null
-                    assert parent.save()
-                }
+        if (parentChanged) {
+            // Transpose to new parent
+            def parent = sourceContent.parent
+            if (parent) {
+                parent.children.remove(sourceContent)
+                sourceContent.parent = null
+                assert parent.save()
             }
-            
-            // Update the orderIndexes of target's children
-            WcmContent inPoint = WcmContent.findByOrderIndexAndParent(orderIndex, targetContent)
-            if (inPoint != null) {
-                shiftNodeChildrenOrderIndex(sourceContent.space, targetContent, orderIndex)
-            }
-            
-            // Update ourself to new orderIndex
-            sourceContent.orderIndex = orderIndex
-            
-            // Add us to the child list
-            if (targetContent && parentChanged) {
-                if (!targetContent.children) targetContent.children = new TreeSet()
-                targetContent.addToChildren(sourceContent)
+        }
+        
+        // Update the orderIndexes of target's children
+        WcmContent inPoint = WcmContent.findByOrderIndexAndParent(orderIndex, targetContent)
+        if (inPoint != null) {
+            shiftNodeChildrenOrderIndex(sourceContent.space, targetContent, orderIndex)
+        }
+        
+        // Update ourself to new orderIndex
+        sourceContent.orderIndex = orderIndex
+        
+        // Add us to the child list
+        if (targetContent && parentChanged) {
+            if (!targetContent.children) targetContent.children = new TreeSet()
+            targetContent.addToChildren(sourceContent)
 
-                // Check we can be saved there
-                requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
-                
-                assert targetContent.save()
-            } else {
-                // Check we can be saved there
-                requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
-            }
-
-            // Invalidate the caches 
-            invalidateCachingForURI(sourceContent.space, originalURI)
-
-            success = sourceContent.save(flush: true)
-            if (success) {
-                triggerEvent(sourceContent, WeceemEvents.contentDidMove)
-            }
-            return success
+            // Check we can be saved there
+            requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
+            
+            assert targetContent.save()
         } else {
-            return false
+            // Check we can be saved there
+            requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
+        }
+
+        // Invalidate the caches 
+        invalidateCachingForURI(sourceContent.space, originalURI)
+
+        if (sourceContent.save(flush: true)) {
+            updateCachingMetadataFor(sourceContent)
+            
+            triggerEvent(sourceContent, WeceemEvents.contentDidMove)
+        } else {
+            log.error "Couldn't save node: ${sourceContent.errors}"
+            if (sourceContent.errors.hasFieldErrors('aliasURI')) {
+                throw new IllegalArgumentException("Another child of the target has the same alias URI. Change the alias URI first and then move again.")
+            } else {
+                throw new UpdateFailedException("The node could not be saved")
+            }
         }
      }
      
@@ -886,59 +936,85 @@ class WcmContentRepositoryService implements InitializingBean {
      *
      * @param sourceContent
      */
-    Boolean deleteNode(WcmContent sourceContent) {
-        if (!sourceContent) return Boolean.FALSE
+    void deleteNode(WcmContent sourceContent, boolean deleteChildren = false) throws DeleteNotPossibleException {
+        if (log.debugEnabled) {
+            log.debug "Deleting ${sourceContent.absoluteURI} (including children? $deleteChildren)"
+        }
+
+        if (!sourceContent) {
+            throw new DeleteNotPossibleException("Could not delete content, it is null")
+        }
         
         requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_DELETE])        
         
+        // We can't delete if we have children
+        if (!deleteChildren && sourceContent.children?.size() > 0) {
+            log.error "Could not delete content, it has children"
+            throw new DeleteNotPossibleException("Could not delete content, it has children")
+        }
+
+        // Get the dependencies before we delete it
+        def deps = wcmContentDependencyService.getContentDependentOn(sourceContent)
+        if (log.debugEnabled) {
+            wcmContentDependencyService.dumpDependencyInfo()
+        }
+        if (deps) {
+            log.error "Could not delete content, it has other nodes dependent on it: ${deps*.absoluteURI}"
+            throw new DeleteNotPossibleException("Could not delete content, it has content dependent on it: ${deps*.absoluteURI.join(', ')}")
+        }
+
+        if (!triggerDomainEvent(sourceContent, WeceemDomainEvents.contentShouldBeDeleted)) {
+            log.error "Could not delete content, it has vetoed it"
+            throw new DeleteNotPossibleException("Could not delete content, it has vetoed it")
+        }
+
         // Create a versioning entry
         sourceContent.saveRevision(sourceContent.title, sourceContent.space.name)
         
-        if (!triggerDomainEvent(sourceContent, WeceemDomainEvents.contentShouldBeDeleted)) {
-            return false
-        }
-
         triggerEvent(sourceContent, WeceemEvents.contentWillBeDeleted)
 
+        if (deleteChildren) {
+            if (log.debugEnabled) {
+                log.debug "Deleting children of ${sourceContent.absoluteURI}"
+            }
+            def children = sourceContent.children.collect { it }
+            children.each { deleteNode(it, true) }
+        }
+        
         // Do this now before absoluteURI gets trashed by changing the parent
         invalidateCachingForURI(sourceContent.space, sourceContent.absoluteURI)
 
         def parent = sourceContent.parent
 
+        removeAllTagsFrom(sourceContent)
         // if there is a parent  - we delete node from its association
         if (parent) {
-            parent.children = parent.children.findAll{it-> it.id != sourceContent.id}
-            assert parent.save()
+            sourceContent.parent = null
+            parent.children = parent.children.findAll { it != sourceContent }
+            assert parent.save(flush:true)
         }
 
-        // we need to delete all virtual contents that reference sourceContent
-        def copies = WcmVirtualContent.findAllWhere(target: sourceContent)
-        copies?.each() {
-           // @todo We should be using deleteNode here, recursing
-           if (it.parent) {
-               parent = WcmContent.get(it.parent.id)
-               parent.children.remove(it)
-           }
-           removeAllTagsFrom(it)
-           it.delete()
+        // We don't want any dep info relating to us to persist
+        wcmContentDependencyService.removeDependencyInfoFor(sourceContent)
+
+        // Strip off associations
+        def artef = grailsApplication.getArtefact(org.codehaus.groovy.grails.commons.DomainClassArtefactHandler.TYPE, 
+                sourceContent.class.name)
+                
+        // Nuke all the references
+        artef.persistentProperties.each { p ->
+            if (p.association && !p.owningSide) {
+                if (p.manyToMany || p.oneToMany) {
+                    sourceContent[p.name]?.clear()
+                } else {
+                    sourceContent[p.name] = null // detach association
+                }
+            }
         }
 
-        // delete node
-        
-        // @todo replace this with code that looks at all the properties for relationships
-        if (sourceContent.metaClass.hasProperty(sourceContent, 'template')?.type == WcmTemplate) {
-            sourceContent.template = null
-        }
-        if (sourceContent.metaClass.hasProperty(sourceContent, 'target')?.type == WcmContent) {
-            sourceContent.target = null
-        }
-
-        removeAllTagsFrom(sourceContent)
         sourceContent.delete(flush: true)
-
+        
         triggerEvent(sourceContent, WeceemEvents.contentDidGetDeleted)
-
-        return true
     }
 
     /**
@@ -1005,6 +1081,7 @@ class WcmContentRepositoryService implements InitializingBean {
         if (content) {
             return updateNode(content, params)
         } else {
+            updateCachingMetadataFor(content)
             return [notFound:true]
         }        
     }
@@ -1033,6 +1110,9 @@ class WcmContentRepositoryService implements InitializingBean {
                 uriToIdCache.remove(k)
             }
         }
+
+        wcmContentDependencyService.reload(space)        
+        wcmContentFingerprintService.reset() // @todo prefer to do this per-space...        
     }
 
     /**
@@ -1041,7 +1121,10 @@ class WcmContentRepositoryService implements InitializingBean {
     void invalidateCachingForURI( WcmSpace space, uri) {
         // If this was content that created a cached GSP class, clear it now
         def key = makeURICacheKey(space,uri)
-        log.debug "Removing cached info for cache key [$key]"
+        if (log.debugEnabled) {
+            log.debug "Removing cached info for cache key [$key]"
+        }
+        
         gspClassCache.remove(key) // even if its not a GSP/script lets just assume so, quicker than checking & remove
         uriToIdCache.remove(key)
         
@@ -1073,7 +1156,6 @@ class WcmContentRepositoryService implements InitializingBean {
             log.debug("Updating node with id ${content.id}, with parameters: $params")
         }
         def oldAbsURI = content.absoluteURI
-        def oldSpaceName = params.space ? WcmSpace.get(params.'space.id')?.name : content.space.name
         
         // Get read-only instance now, for persisting revision info after we bind and successfully update
         def contentForRevisionSave = content.class.read(content.id)
@@ -1105,13 +1187,14 @@ class WcmContentRepositoryService implements InitializingBean {
             def ok = content.validate()
             if (content.save()) {
                 // Save the revision now
-                contentForRevisionSave.saveRevision(params.title ?: oldTitle, oldSpaceName)
+                contentForRevisionSave.saveRevision(params.title ?: oldTitle, content.space.name)
 
                 if (log.debugEnabled) {
                     log.debug("Update node with id ${content.id} saved OK")
                 }
             
                 invalidateCachingForURI(content.space, oldAbsURI)
+                updateCachingMetadataFor(content)
 
                 triggerEvent(content, WeceemEvents.contentDidGetUpdated)
 
@@ -1239,11 +1322,6 @@ class WcmContentRepositoryService implements InitializingBean {
         }
         // @todo we also need to filter the result list by VIEW permission too!
         assert sourceNode != null
-
-        // for WcmVirtualContent - the children list is a list of target children
-        if (sourceNode instanceof WcmVirtualContent) {
-            sourceNode = sourceNode.target
-        }
 
         requirePermissions(sourceNode, [WeceemSecurityPolicy.PERMISSION_VIEW])        
         
@@ -1396,7 +1474,13 @@ class WcmContentRepositoryService implements InitializingBean {
         }
         return onlyNodesWithPermissions(res, [WeceemSecurityPolicy.PERMISSION_VIEW])        
     }
-    
+
+    def getCachedContentInfoFor(space, uriPath) {
+        def cacheKey = makeURICacheKey(space, uriPath)
+        def cachedElement = uriToIdCache.get(cacheKey)
+        cachedElement?.getValue()
+    }
+
     /**
      *
      * Find the content node that is identified by the specified uri path. This always finds a single WcmContent node
@@ -1412,18 +1496,47 @@ class WcmContentRepositoryService implements InitializingBean {
      * and 'parentURI' (the uri to the parent of this instance of the node)
      */
     def findContentForPath(String uriPath, WcmSpace space, boolean useCache = true) {
+        if (uriPath == null) {
+            uriPath = ''
+        }
+        
+        def c
+        def isFolderURL = uriPath?.endsWith('/')
+        // If it doesn't end in / and its not blank, try to find it
+        if (!isFolderURL && uriPath) {
+            c = doFindContentForPath(uriPath,space,useCache)
+        }
+            
+        // If it is a folder ending in / or not yet found, try default documents
+        if (isFolderURL || !c?.content) {
+            // Add slash to end if required (not for root)
+            if (!isFolderURL && uriPath) {
+                uriPath += '/'
+            }
+
+            // Look for default document aliasURIs
+            for (n in DEFAULT_DOCUMENT_NAMES) {
+                def u = uriPath+n
+                c = doFindContentForPath(u,space,useCache)
+                if (c?.content) {
+                    break;
+                }
+            }
+        }
+        
+        return c
+    }
+    
+    protected def doFindContentForPath(String uriPath, WcmSpace space, boolean useCache) {
         if (log.debugEnabled) {
             log.debug "findContentForPath uri: ${uriPath} space: ${space}"
         }
 
-        def cacheKey = makeURICacheKey(space, uriPath)
-        
         if (useCache) {
             // This looks up the uriPath in the cache to see if we can get a Map of the content id and parentURI
             // If we call getValue on the cache hit, we lose 50% of our performance. Just retrieving
             // the cache hit is not expensive.
-            def cachedElement = uriToIdCache.get(cacheKey)
-            def cachedContentInfo = cachedElement?.getValue()
+            def cachedContentInfo = getCachedContentInfoFor(space, uriPath)
             if (cachedContentInfo) {
                 if (log.debugEnabled) {
                     log.debug "Found content info in cache for uri $uriPath: ${cachedContentInfo}"
@@ -1492,6 +1605,8 @@ class WcmContentRepositoryService implements InitializingBean {
             log.debug "Caching content info for uri $uriPath: $cacheValue"
         }
         if (useCache) {
+            def cacheKey = makeURICacheKey(space, uriPath)
+
             wcmCacheService.putToCache(uriToIdCache, cacheKey, cacheValue)
         }
         
@@ -1522,9 +1637,35 @@ class WcmContentRepositoryService implements InitializingBean {
         }
         return result
     }
-    
+
+/*    
     def getAncestors(uri, sourceNode) {
         // Can't impl this yet
+    }
+*/
+    /**
+     * Return a flattened list of all the descendents of this node
+     */
+    def findDescendents(WcmContent parent, Set<WcmContent> alreadyVisited = []) {
+        alreadyVisited << parent
+        def r = findChildren(parent)
+        def result = r.clone()
+        r.each { c ->
+            if (!alreadyVisited.contains(c)) {
+                result.addAll(findDescendents(c, alreadyVisited))
+            }
+        }
+        return result
+    }
+
+    def updateCachingMetadataFor(WcmContent content) {
+        wcmContentDependencyService.updateDependencyInfoFor(content)
+        wcmContentFingerprintService.updateFingerprintFor(content)
+
+        if (log.debugEnabled) {
+            wcmContentDependencyService.dumpDependencyInfo()
+            wcmContentFingerprintService.dumpFingerprintInfo()
+        }
     }
     
     def getTemplateForContent(def content) {
@@ -1534,6 +1675,14 @@ class WcmContentRepositoryService implements InitializingBean {
         } else {
             return template
         }
+    }
+    
+    def getLastModifiedDateFor(WcmContent content) {
+        def templ = getTemplateForContent(content)
+        // @todo Do we also need to check dependencies' (and their dependencies') last mod dates?
+        def templLastMod = templ?.lastModified
+        def contentLastMod = content.lastModified
+        return (templLastMod > contentLastMod) ? templLastMod : contentLastMod
     }
     
     /** 
@@ -2038,6 +2187,13 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
         }
         
         return results
+    }
+    
+    void resetAllCaches() {
+        uriToIdCache.removeAll()
+        gspClassCache.removeAll()
+        wcmContentFingerprintService.reset()        
+        wcmContentDependencyService.reload()        
     }
 }
 

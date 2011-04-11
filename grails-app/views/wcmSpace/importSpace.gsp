@@ -6,27 +6,18 @@
 
   <body>
     <div class="span-24 last">
-      <h1><g:message code="space.title.import"/></h1>
+      <h1><g:message code="space.title.import" args="[space.name]" encodeAs="HTML"/></h1>
 
       <g:if test="${flash.message}">
         <div class="message">${flash.message}</div>
       </g:if>
 
-      <p>Please select the space you wish to import into</P>
-          
       <g:form controller="wcmSpace" method="post" action="startImport"
+            params="[id:space.id]"
             enctype="multipart/form-data">
         <div class="dialog">
           <table>
             <tbody>
-              <tr class="prop">
-                <td valign="top" class="name">
-                  <label for="space"><g:message code="space.label.space"/></label>
-                </td>
-                <td valign="top" class="value">
-                  <g:select from="${org.weceem.content.WcmSpace.list()}" name="space" optionKey="id" optionValue="name"/>
-                </td>
-              </tr>
               <tr>
                 <td><label for="importer"><g:message code="space.label.importType"/></label></td>
                 <td>

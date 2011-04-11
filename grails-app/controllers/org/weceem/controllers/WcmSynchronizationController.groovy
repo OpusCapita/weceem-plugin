@@ -44,7 +44,7 @@ class WcmSynchronizationController {
         for (p in params){
             if (pattern.matcher(p.key).matches()){
                 def id = idpattern.matcher(p.key)[0]
-                wcmContentRepositoryService.deleteNode(WcmContentFile.get(id))
+                wcmContentRepositoryService.deleteNode(WcmContentFile.get(id), true)
             }
         }
         redirect(controller: "wcmRepository")

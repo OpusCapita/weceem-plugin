@@ -50,43 +50,32 @@ $( function() {
 
         <div class="clear span-24 last">
             <div class="prepend-top append-bottom editorsaveactions">
-                <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="Save and continue editing" action="${content.id ? 'updateContinue' : 'saveContinue'}"/>
-                <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="Save" action="${content.id ? 'update' : 'save'}"/>
-                <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" class="ui-widget ui-state-default ui-corner-all preview-button" value="Preview" action="preview"/>
+                <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="${message(code:'content.button.saveAndContinue', default:'Save and continue editing')}" action="${content.id ? 'updateContinue' : 'saveContinue'}"/>
+                <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="${message(code:'content.button.save', default:'Save')}" action="${content.id ? 'update' : 'save'}"/>
+                <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" class="ui-widget ui-state-default ui-corner-all preview-button" value="${message(code:'content.button.preview', default:'Preview')}" action="preview"/>
                 <input style="display:none" type="submit" id="preview-action-submitter" name="_action_preview" value="preview"/> <%-- Needed to invoke onsubmit on form during our preview submit phase --%>
-                <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="Cancel" action="cancel"/>
+                <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="${message(code:'content.button.cancel', default:'Cancel')}" action="${content.id ? 'update' : 'save'}" action="cancel"/>
             </div>
         </div>
         
         <div class="span-24 last" id="panels">
-            <h2><a href="#">Extra</a></h2>
-            <div id="editor-extras">
-                <g:grep in="${editableProperties}" var="prop" filter="${ { p -> p.group == 'extra'} }">
-                
-                    <div class="clear prepend-1 span-4">
-                        <bean:label beanName="content" property="${prop.property}" labelKey="${'content.label.'+prop.property}"/>
-                    </div>
-                    <div class="field prepend-1 span-17 last">
-                        <% println wcm."editorField${prop.editor}"(bean:content, property:prop.property) %>
-                    </div>
-                </g:grep>
-            </div>
+            <g:set var="groupNames" value="${(editableProperties*.group).findAll({ it }).unique()}"/>
+            <g:each in="${groupNames}" var="gn">
+                <h2><a href="#"><g:message code="editor.group.heading.${gn}" default="${gn}" encodeAs="HTML"/></a></h2>
+                <div id="editor-${gn.encodeAsHTML()}" class="editorpanel">
+                    <g:grep in="${editableProperties}" var="prop" filter="${ { p -> p.group == gn} }">
+                        <div class="clear prepend-1 span-4">
+                            <bean:label beanName="content" property="${prop.property}" labelKey="${'content.label.'+prop.property}"/>
+                        </div>
+                        <div class="field prepend-1 span-17 last">
+                            <% println wcm."editorField${prop.editor}"(bean:content, property:prop.property) %>
+                        </div>
+                    </g:grep>
+                </div>
+            </g:each>
 
-            <h2><a href="#">Metadata</a></h2>
-            <div id="editor-meta">
-                <g:grep in="${editableProperties}" var="prop" filter="${ { p -> p.group == 'meta'} }">
-                
-                    <div class="clear prepend-1 span-4">
-                        <bean:label beanName="content" property="${prop.property}" labelKey="${'content.label.'+prop.property}"/>
-                    </div>
-                    <div class="field prepend-1 span-17 last">
-                        <% println wcm."editorField${prop.editor}"(bean:content, property:prop.property) %>
-                    </div>
-                </g:grep>
-            </div>
-            
-            <h2><a href="#">Change history</a></h2>
-            <div id="editor-changes">
+            <h2><a href="#"><g:message code="editor.group.heading.changes" default="Change history"/></a></h2>
+            <div id="editor-changes" class="editorpanel">
                 <div class="prepend-1 span-22 last">
                     <div>
                     <g:each in="${changeHistory}" var="change">
@@ -96,8 +85,8 @@ $( function() {
                 </div>
             </div>
 
-            <h2><a href="#">Parent &amp; Children</a></h2>
-            <div id="editor-family">
+            <h2><a href="#"><g:message code="editor.group.heading.children" default="Parent &amp; Children"/></a></h2>
+            <div id="editor-family" class="editorpanel">
                 <div class="clear prepend-1 span-2">
                     <label>Parent:</label>
                 </div>

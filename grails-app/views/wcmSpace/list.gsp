@@ -6,17 +6,7 @@
 
   <body>
     <div class="body">
-      <b class="header"><g:message code="space.title.list"/></b>
-
-      <g:form controller="wcmSpace">
-        <div class="nav">
-          <br/>
-          <span class="menuButton" style="padding-left:3px; margin-bottom:8px;">
-            <g:actionSubmit action="create" value="${message(code: 'command.add')}" class="button ui-state-default ui-corner-all"/>
-          </span>
-          <br/>
-        </div>
-      </g:form>
+      <h1><g:message code="space.title.list"/></h1>
 
       <div class="list">
         <table class="standard">
@@ -34,29 +24,26 @@
                 <td>${fieldValue(bean: space, field: 'aliasURI')}</td>
                 <td>
                   <g:link action="edit" class="button ui-corner-all" id="${space.id}"><g:message code="command.edit"/></g:link>
-                  <g:link action="delete" class="button ui-corner-all" id ="${space.id}"><g:message code="command.delete"/></g:link>
+                  <g:link action="delete" class="button ui-corner-all" id="${space.id}"><g:message code="command.delete"/></g:link>
+                  <g:link action="importSpace" class="button ui-corner-all" id="${space.id}"><g:message code="space.command.import"/></g:link>
+                  <g:link action="exportSpace" class="button ui-corner-all" id="${space.id}"><g:message code="space.command.export"/></g:link>
                 </td>
               </tr>
             </g:each>
           </tbody>
         </table>
       </div>
-      <div class="paginateButtons">
-        <g:paginate total="${org.weceem.content.WcmSpace.count()}"/>
-      </div>
-      <br/>
-      <div>
-        <g:link action="importSpace" class="button ui-corner-all" >
-            <img src="${g.resource(plugin:'weceem', dir:'_weceem/images/weceem', file: 'fileimport_24.gif')}"
-                alt="" style="vertical-align: middle;"/>
-            <span><g:message code="space.link.import"/></span>
-        </g:link>
-        <g:link action="exportSpace" class="button ui-corner-all">
-            <img src="${g.resource(plugin:'weceem', dir:'_weceem/images/weceem', file: 'fileexport_24.gif')}"
-                alt="" style="vertical-align: middle;"/>
-            <span><g:message code="space.link.export"/></span>
-        </g:link>
-      </div>
+
+      <g:form controller="wcmSpace">
+        <div class="nav">
+          <br/>
+          <span class="menuButton" style="padding-left:3px; margin-bottom:8px;">
+            <g:actionSubmit action="create" value="${message(code: 'command.add')}" class="button ui-state-default ui-corner-all"/>
+          </span>
+          <br/>
+        </div>
+      </g:form>
+
     </div>
   </body>
 </html>

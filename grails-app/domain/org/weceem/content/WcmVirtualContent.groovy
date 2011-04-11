@@ -36,6 +36,14 @@ class WcmVirtualContent extends WcmContent {
             target:target?.ident()
         ] 
     }
+
+    /**
+     * Override the normal dependency mechanism and auto-depend on the target
+     */
+    @Override
+    String getContentDependencies() {
+        target.absoluteURI
+    }
     
     boolean contentShouldAcceptChildren() { false }
 
@@ -45,5 +53,9 @@ class WcmVirtualContent extends WcmContent {
     
     static mapping = {
         //target lazy:false // we never want proxies for this, but in Grails < 1.2 final, this gives us bad proxies
+    }
+    
+    static editors = {
+        contentDependencies hidden: true
     }
 }

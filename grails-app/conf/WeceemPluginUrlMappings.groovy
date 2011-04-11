@@ -64,6 +64,13 @@ class WeceemPluginUrlMappings {
         
         def wcmContentRepositoryService = ApplicationHolder.application.mainContext.wcmContentRepositoryService
 
+/*
+        def u = wcmContentRepositoryService.uploadUrl
+        delegate.(u+'$uri**') {
+            controller = "wcmContent"
+            action = "showUploadedFile"
+        }
+*/
         // This is tricky
         def contentURI = (WeceemPluginUrlMappings.CONTENT_PREFIX ? '/' : '')+"${WeceemPluginUrlMappings.CONTENT_PREFIX}/$uri**"
         

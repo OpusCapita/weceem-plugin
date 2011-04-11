@@ -35,9 +35,10 @@ class WcmContentController {
     static String REQUEST_PRERENDERED_CONTENT = "weceem.prerendered.content"
     static String UI_MESSAGE = 'weceem.message'
     
-    static CACHE_NAME_TEMPLATE_CACHE = "gspCache"
+    static SESSION_TIMESTAMP_KEY = "weceem.session.timestamp"
     
     def wcmContentRepositoryService
+    def wcmContentFingerprintService
     def wcmSecurityService
     def wcmCacheService
     
@@ -169,13 +170,34 @@ class WcmContentController {
                     log.debug "Content after resolving virtual content for uri: ${uri} is: ${content?.dump()}"
                 }
                 
+                def template
+                if (content) {
+                    template = wcmContentRepositoryService.getTemplateForContent(content)
+                }
+
+                def tagValue
                 withCacheHeaders { 
                     etag {
-                        content ? "${content.ident()}:${content.version}".encodeAsSHA1() : null
+                        if (content) {
+                            tagValue = wcmContentFingerprintService.getFingerprintFor(content)
+                        }
+                        
+                        // Create ETag including session timestamp if available && content is per-user, so
+                        // that user-specific content refreshes but caches appropriately
+                        // This means we don't add session timestamp to ETags for non-templated resources
+                        if (template && template.userSpecificContent) {
+                            if (log.debugEnabled) {
+                                log.debug "Calculating user-specific ETag"
+                            }
+                            def sessionTimestamp = session[SESSION_TIMESTAMP_KEY] ?: ''
+                            return tagValue + '/'+sessionTimestamp
+                        } else {
+                            return content ? tagValue : null
+                        }
                     }
                     
                     lastModified {
-                        content ? (content.changedOn ?: content.createdOn) : null
+                        content ? wcmContentRepositoryService.getLastModifiedDateFor(content) : null
                     }
                     
                     generate {
@@ -183,7 +205,13 @@ class WcmContentController {
                         request[REQUEST_ATTRIBUTE_USER] = activeUser
             
                         if (content) {
-                            cache validFor: 1, shared:true  // 1 second caching, just makes sure some OK headers are sent for proxies
+                            // @todo parameterize this default max age
+                            def cacheMaxAge = (content.validFor ?: template?.validFor) ?: 1
+                            
+                            // @todo parameterize the defaut publicly cacheable (shared) setting
+                            def publiclyCacheable = template ? !template.userSpecificContent : true
+                            
+                            cache validFor: cacheMaxAge, shared:publiclyCacheable  // 1 second caching, just makes sure some OK headers are sent for proxies
                             WcmContentController.showContent(this, content)
                         } else {
                             response.sendError 404, "No content found for this URI"

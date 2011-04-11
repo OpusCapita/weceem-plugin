@@ -418,6 +418,9 @@ function performDrop(e, ui) {
             var type = $(currentDropRefNode).data("type");
             if (resources["haveChildren"][type]){
                 confirmDragDropOperation( {'switch':currentDropMode, 'source':src, 'target':currentDropRefNode} )
+            } else {
+    	        hideInserter();
+                errorMessage('The target cannot accept child nodes');
             }
         }
     }
@@ -582,6 +585,7 @@ function initTreeTable() {
 		var dlg = $('#infoDialog'+i)
 		dlg.dialog('open')
 	})
+    
 	$('#deleteDialog').dialog( {
 		autoOpen: false, 
 	    width: DIALOG_WIDTH,
@@ -597,7 +601,7 @@ function initTreeTable() {
             		            $('#expiredDialog').dialog('open');
             		        } else
         		            if (data.result != 'success') {
-        		                errorMessage("Delete failed: "+data.error)
+        		                errorMessage("Delete failed: "+data.message)
         		            } else {
         		                removeNode(nodeId)
         		            }
@@ -609,9 +613,8 @@ function initTreeTable() {
 			} 
 		}
 	})
-	$('.ui-icon-circle-minus').click( function() { 
-        deleteSelected()
-	})
+
+	$(document).bind('keyup', 'alt+ctrl+d', deleteSelected);
 	
 	$('#createNewDialog').dialog({
 	    autoOpen: false,

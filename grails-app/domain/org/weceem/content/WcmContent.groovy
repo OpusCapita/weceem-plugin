@@ -77,8 +77,13 @@ class WcmContent implements Comparable, Taggable {
     String metaSource      // Entity that was original source of the content
     String metaCopyright   // Copyright for the content (aka Rights)
     
+    Integer validFor = VALID_FOR_DAY  // cache maxAge
+
+    String contentDependencies
+
     static belongsTo = [space: WcmSpace, parent: WcmContent]
     static transients = [ 
+        'lastModified', 
         'titleForHTML', 
         'titleForMenu', 
         'versioningProperties', 
@@ -93,12 +98,15 @@ class WcmContent implements Comparable, Taggable {
     static hasMany = [children: WcmContent]
     static hasOne = [parent: WcmContent]
 
+    static final VALID_FOR_DAY = 60*60*24
+    
     static constraints = {
         title(size:1..100, nullable: false, blank: false)
         aliasURI(nullable: false, blank: false, unique: ['space', 'parent'], maxSize: 50)
         space(nullable: false)
         status(nullable: false)
         orderIndex(nullable: true)
+        validFor(nullable: true, inList:[0, 60, 60*5, 60*60, VALID_FOR_DAY, 60*60*24*7, 60*60*24*30, 60*60*24*300])
         parent(nullable: true, lazy:true)
         createdBy(nullable: true)
         createdOn(nullable: true)
@@ -115,6 +123,8 @@ class WcmContent implements Comparable, Taggable {
             return null
         })
         language(nullable: true, size:0..3)
+
+        contentDependencies(maxSize:500, nullable: true)
 
         metaCreator nullable: true, blank: true, size:0..80   
         metaPublisher nullable: true, blank: true, size:0..80   
@@ -152,6 +162,9 @@ class WcmContent implements Comparable, Taggable {
         tags editor:'Tags', group:'extra'
         parent hidden:true
         children hidden:true
+
+        validFor group:'advanced', editor:'CacheMaxAge'   // cache maxAge
+        contentDependencies group:'advanced'
 
         metaCreator group:'meta'    
         metaPublisher group:'meta'   
@@ -277,6 +290,10 @@ class WcmContent implements Comparable, Taggable {
         }
     }
 
+    String calculateFingerprint() {
+        "${ident()}:${version}".encodeAsSHA256()
+    }
+    
     /**
      * Save a new content revision object with the current state of this content node
      */
@@ -343,5 +360,9 @@ class WcmContent implements Comparable, Taggable {
         s = s?.replaceAll('<', '&lt;')
         s = s?.replaceAll('>', '&gt;')
         return s
+    }
+    
+    Date getLastModified() {
+        changedOn ?: createdOn
     }
 }

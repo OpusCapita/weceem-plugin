@@ -1,4 +1,5 @@
-import org.weceem.controllers.*
+package org.weceem.controllers
+
 import org.weceem.content.*
 import org.weceem.html.*
 import org.weceem.wiki.*

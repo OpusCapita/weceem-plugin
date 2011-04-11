@@ -139,6 +139,11 @@ class EditorFieldTagLib {
             from: templates, optionValue:'title', optionKey:'id')
     }
 
+    def editorFieldCacheMaxAge = { attrs ->
+        out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
+            optionValue: { g.message(code:'editor.max.age.seconds.'+it) } )
+    }
+
     def editorFieldWcmScript = { attrs ->
         def templates = WcmScript.findAllBySpace( pageScope.content.space, [sort:'title'])
         out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
@@ -166,7 +171,7 @@ class EditorFieldTagLib {
     }
 
     def editorFieldInteger = { attrs ->
-        out << bean.field(beanName:'content', property:attrs.property, noLabel:true)
+        out << bean.input(beanName:'content', property:attrs.property, noLabel:true)
     }
 
     def editorFieldContentFileUpload = { attrs ->
@@ -272,7 +277,7 @@ class EditorFieldTagLib {
         out << """
         <script language="javascript" type="text/javascript">
         var editor_${attrs.property} = CodeMirror.fromTextArea("editor_${attrs.property.encodeAsJavaScript()}", {
-          parserfile: ["parsegroovy.js"],
+          parserfile: ["tokenizegroovy.js", "parsegroovy.js"],
           path: "${g.resource(plugin:'weceem', dir:'_weceem/codemirror/js/').encodeAsJavaScript()}",
           stylesheet: "${g.resource(plugin:'weceem', dir:'_weceem/codemirror/css', file:'groovycolors.css').encodeAsJavaScript()}",
           textWrapping: false

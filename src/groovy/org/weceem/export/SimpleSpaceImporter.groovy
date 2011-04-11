@@ -43,7 +43,7 @@ class SimpleSpaceImporter implements SpaceImporter {
         }
         backrefMap.clear()
         def grailsApp = ApplicationHolder.application
-        def xml = new XmlSlurper().parseText(contentXmlFile.text)
+        def xml = new XmlSlurper().parseText(contentXmlFile.getText('UTF-8'))
         def contents = [:]
         def cont_parent = [:]
         def cont_children = [:]
@@ -58,9 +58,9 @@ class SimpleSpaceImporter implements SpaceImporter {
         //Recursively save each element
         for (cntInfo in backrefMap.values()){
             def savedContent = saveContent(cntInfo.content)
-            
+
             // Reinstate tags
-            if (cntInfo.tags) {
+            if (savedContent && cntInfo.tags) {
                 savedContent.parseTags(cntInfo.tags)
             }
         }

@@ -19,6 +19,14 @@ class WcmAction extends WcmContent {
     
     static transients = WcmContent.transients
     
+    /**
+     * Override the normal dependency mechanism and auto-depend on the script
+     */
+    @Override
+    String getContentDependencies() {
+        script.absoluteURI
+    }
+
     static constraints = {
         script(nullable: false)
         description(maxSize:200)
