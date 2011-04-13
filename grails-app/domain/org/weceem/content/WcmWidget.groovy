@@ -72,7 +72,6 @@ class WcmWidget extends WcmContent {
         width()
         height()
         color()
-        contentDependencies(group:'extra')
     }
 
     static transients = WcmContent.transients
@@ -82,6 +81,5 @@ class WcmWidget extends WcmContent {
         width(nullable: true)
         height(nullable: true)
         color(nullable: true)
-        contentDependencies(maxSize:500, nullable: true)
     }
 }
