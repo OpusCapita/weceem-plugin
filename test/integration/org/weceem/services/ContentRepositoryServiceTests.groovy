@@ -27,6 +27,8 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     def defaultDocSubIndexHtml
     def defaultDocSubParent
     def defaultDocSubParent2
+    def defaultDocTestFolder
+    def defaultDocTestFolderIndex
     
     def spaceBnodeA
     
@@ -148,6 +150,23 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         defaultDocSubParent2.children << defaultDocSubIndexHtml
         assert defaultDocSubParent2.save()
         
+        defaultDocTestFolder = new WcmFolder(title: 'default test folder', aliasURI: 'defaultTestFolder',
+            status: defStatus,
+            createdBy: 'admin', createdOn: new Date(),
+            space: spaceA)
+        assert defaultDocTestFolder.save(flush:true)
+                           
+        defaultDocTestFolderIndex = new WcmHTMLContent(title: 'folder index', aliasURI: 'index',
+            parent: defaultDocTestFolder,
+            content: 'folder index content', status: defStatus,
+            createdBy: 'admin', createdOn: new Date(),
+            space: spaceA)
+        assert defaultDocTestFolder.save(flush:true)
+
+        defaultDocTestFolder.children = new TreeSet()  
+        defaultDocTestFolder.children << defaultDocTestFolderIndex
+        assert defaultDocTestFolder.save()
+
         // Tree structure:
         //
         //   a
@@ -229,6 +248,13 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
                 wcmContentRepositoryService.findContentForPath('defaultTest2', spaceA, withCache).content?.ident()
             assertEquals defaultDocSubIndexHtml.ident(), 
                 wcmContentRepositoryService.findContentForPath('defaultTest2/', spaceA, withCache).content?.ident()
+
+            // Test for non-standaloneContent types
+            assertEquals defaultDocTestFolderIndex.ident(), 
+                wcmContentRepositoryService.findContentForPath('defaultTestFolder', spaceA, withCache).content?.ident()
+
+            assertEquals defaultDocTestFolderIndex.ident(), 
+                wcmContentRepositoryService.findContentForPath('defaultTestFolder/', spaceA, withCache).content?.ident()
         }
         
         // Do first with no caching
@@ -717,7 +743,7 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     void testFindAllRootContent() {
         def nodes = wcmContentRepositoryService.findAllRootContent(spaceA)
         println "nodes: $nodes"
-        assertEquals 5, nodes.size()
+        assertEquals 6, nodes.size()
         assertTrue nodes.contains(nodeA)
         assertTrue nodes.contains(template)
     }
@@ -725,7 +751,7 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     void testFindAllContent() {
         def nodes = wcmContentRepositoryService.findAllContent(spaceA)
         println "nodes: $nodes"
-        assertEquals 13, nodes.size()
+        assertEquals 15, nodes.size()
         assertTrue nodes.contains(nodeA)
         assertTrue nodes.contains(nodeB)
         assertTrue nodes.contains(nodeC)
@@ -739,7 +765,7 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     void testFindAllContentWithType() {
         def nodes = wcmContentRepositoryService.findAllContent(spaceA, [type: 'org.weceem.html.WcmHTMLContent'])
         println "nodes: $nodes"
-        assertEquals 8, nodes.size()
+        assertEquals 9, nodes.size()
         assertTrue nodes.contains(nodeA)
         assertTrue nodes.contains(nodeB)
         assertTrue nodes.contains(nodeC)
@@ -763,11 +789,11 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     }
     
     void testCountContent() {
-        assertEquals(13, wcmContentRepositoryService.countContent(spaceA))
+        assertEquals(15, wcmContentRepositoryService.countContent(spaceA))
     }
     
     void testCountContentWithType() {
-        assertEquals(8, wcmContentRepositoryService.countContent(spaceA, [type: 'org.weceem.html.WcmHTMLContent']))
+        assertEquals(9, wcmContentRepositoryService.countContent(spaceA, [type: 'org.weceem.html.WcmHTMLContent']))
     }
     
     void testCountContentWithStatus() {

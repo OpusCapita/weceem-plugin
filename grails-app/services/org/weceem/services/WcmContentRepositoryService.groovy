@@ -1508,7 +1508,7 @@ class WcmContentRepositoryService implements InitializingBean {
         }
             
         // If it is a folder ending in / or not yet found, try default documents
-        if (isFolderURL || !c?.content) {
+        if (isFolderURL || !c?.content || (c.content && !contentIsRenderable(c.content))) {
             // Add slash to end if required (not for root)
             if (!isFolderURL && uriPath) {
                 uriPath += '/'
