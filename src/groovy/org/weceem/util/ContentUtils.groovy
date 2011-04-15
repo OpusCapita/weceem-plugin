@@ -33,6 +33,7 @@ class ContentUtils {
     */
     static htmlToText(s) {
         if (s) {
+            // @todo replace all </p> and <br/> and </div> with a LF
             s.replaceAll("\\<.*?>", '').decodeHTML()
         } else return s;
     }

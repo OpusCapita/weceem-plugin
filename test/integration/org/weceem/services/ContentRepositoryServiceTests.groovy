@@ -249,10 +249,11 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
             assertEquals defaultDocSubIndexHtml.ident(), 
                 wcmContentRepositoryService.findContentForPath('defaultTest2/', spaceA, withCache).content?.ident()
 
-            // Test for non-standaloneContent types
-            assertEquals defaultDocTestFolderIndex.ident(), 
+            // Test for non-standaloneContent types - this MUST NOT resolve to default docs
+            assertEquals defaultDocTestFolder.ident(), 
                 wcmContentRepositoryService.findContentForPath('defaultTestFolder', spaceA, withCache).content?.ident()
 
+            // Test for non-standaloneContent types - this MUST resolve to default doc
             assertEquals defaultDocTestFolderIndex.ident(), 
                 wcmContentRepositoryService.findContentForPath('defaultTestFolder/', spaceA, withCache).content?.ident()
         }
@@ -269,6 +270,25 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         assertEquals nodeA.id, wcmContentRepositoryService.findContentForPath('contentA', spaceA).content.id
         assertEquals nodeB.id, wcmContentRepositoryService.findContentForPath('contentA/contentB', spaceA).content.id
 
+        def result = wcmContentRepositoryService.updateNode(nodeA.id.toString(), [aliasURI:'changed-alias'])
+        assertTrue(!result.notFound)
+        assertTrue(!result.errors)
+        
+        assertNull wcmContentRepositoryService.findContentForPath('contentA', spaceA)
+        assertNull wcmContentRepositoryService.findContentForPath('contentA/contentB', spaceA)
+        assertEquals nodeA.id, wcmContentRepositoryService.findContentForPath('changed-alias', spaceA).content.id
+        assertEquals nodeB.id, wcmContentRepositoryService.findContentForPath('changed-alias/contentB', spaceA).content.id
+    }    
+    
+
+    void testUpdatingNodeInvalidatesPreviouslyNotFoundCacheEntry() {
+        assertEquals nodeA.id, wcmContentRepositoryService.findContentForPath('contentA', spaceA).content.id
+        assertEquals nodeB.id, wcmContentRepositoryService.findContentForPath('contentA/contentB', spaceA).content.id
+
+        // First, foul the cache
+        wcmContentRepositoryService.findContentForPath('changed-alias', spaceA)
+
+        // Now update to the URL that was sought
         def result = wcmContentRepositoryService.updateNode(nodeA.id.toString(), [aliasURI:'changed-alias'])
         assertTrue(!result.notFound)
         assertTrue(!result.errors)

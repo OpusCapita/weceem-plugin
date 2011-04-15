@@ -1081,7 +1081,6 @@ class WcmContentRepositoryService implements InitializingBean {
         if (content) {
             return updateNode(content, params)
         } else {
-            updateCachingMetadataFor(content)
             return [notFound:true]
         }        
     }
@@ -1193,7 +1192,10 @@ class WcmContentRepositoryService implements InitializingBean {
                     log.debug("Update node with id ${content.id} saved OK")
                 }
             
+                // Invalidate the old URI's info
                 invalidateCachingForURI(content.space, oldAbsURI)
+                // Invalidate the new URI's info - it might exist already but with no data (not found)
+                invalidateCachingForURI(content.space, content.absoluteURI)
                 updateCachingMetadataFor(content)
 
                 triggerEvent(content, WeceemEvents.contentDidGetUpdated)
@@ -1508,7 +1510,7 @@ class WcmContentRepositoryService implements InitializingBean {
         }
             
         // If it is a folder ending in / or not yet found, try default documents
-        if (isFolderURL || !c?.content || (c.content && !contentIsRenderable(c.content))) {
+        if (isFolderURL || !c?.content) {
             // Add slash to end if required (not for root)
             if (!isFolderURL && uriPath) {
                 uriPath += '/'
