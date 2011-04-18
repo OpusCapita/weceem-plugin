@@ -47,6 +47,7 @@ class WcmContentRepositoryService implements InitializingBean {
     static DEFAULT_DOCUMENT_NAMES = ['index', 'index.html']
 
     static DEFAULT_SPACE_TEMPLATE_ZIP = "classpath:/org/weceem/resources/default-space-template.zip"
+    static BASIC_SPACE_TEMPLATE_ZIP = "classpath:/org/weceem/resources/basic-space-template.zip"
     
     static transactional = true
 
@@ -322,6 +323,7 @@ class WcmContentRepositoryService implements InitializingBean {
             data.putAll(temps)
         } else {
             data.'default' = DEFAULT_SPACE_TEMPLATE_ZIP
+            data.'basic' = BASIC_SPACE_TEMPLATE_ZIP
         }
         return data
     }
