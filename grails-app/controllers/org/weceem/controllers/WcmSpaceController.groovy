@@ -80,6 +80,10 @@ class WcmSpaceController {
         }
     }
 
+    def confirmDelete = {
+        [space: WcmSpace.get(params.id)]
+    } 
+    
     def importSpace = {
         return [importers: wcmImportExportService.importers, space: WcmSpace.get(params.id)]
     }
