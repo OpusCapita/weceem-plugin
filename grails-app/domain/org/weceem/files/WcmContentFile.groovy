@@ -71,13 +71,17 @@ class WcmContentFile extends WcmContent {
      * Files are *not* stored in the repository database
      */
     boolean contentShouldBeCreated(WcmContent parentContent) {
+        if (parentContent == null) {
+            return false // cannot be at root
+        }
+        
         if (!title) {
             title = uploadedFile?.originalFilename
         }
         aliasURI = uploadedFile?.originalFilename
         assert title
         def path = ''
-        if (parentContent && (parentContent instanceof WcmContentDirectory)) {
+        if (parentContent instanceof WcmContentDirectory) {
             assert parentContent.save()
             path = getPathTo(parentContent)
             //@todo surely this is redundant, we can just count children?
@@ -99,7 +103,7 @@ class WcmContentFile extends WcmContent {
         return true
     }
 
-    Boolean contentDidChangeTitle(String oldTitle) {
+    boolean contentDidChangeTitle(String oldTitle) {
         def path = ''
         def parent = this.parent
         if (parent && (parent instanceof WcmContentDirectory)) {
@@ -111,47 +115,38 @@ class WcmContentFile extends WcmContent {
         createAliasURI(this.parent)
     }
 
-    Boolean contentDidMove(WcmContent targetParent) {
-        if (!targetParent || (targetParent instanceof WcmContentDirectory)) {
+    boolean contentShouldMove(WcmContent targetParent) {
+        return targetParent ? targetParent instanceof WcmContentDirectory : false
+    }
+    
+    void contentDidMove(String originalURI, WcmContent originalParent) {
+        def srcPath = originalURI
+        def dstPath = ''
 
-            def srcPath = ''
-            def dstPath = ''
-
-            // Increment file counter for new parent (really need this?)
-            if (targetParent && !(this instanceof WcmContentDirectory)) {
-                targetParent.filesCount += 1
-                assert targetParent.save()
-            }
-            
-            dstPath = getPathTo(targetParent)
-
-            // Decrement file counter for previous parent (really need this?)
-            if (this.parent instanceof WcmContentDirectory) {
-                this.parent.filesCount -= 1
-                assert this.parent.save()
-            } 
-            
-            srcPath = getPathTo(this)
-            
-            if (srcPath || dstPath) {
-                def file = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, srcPath)
-                def targetDir = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, dstPath)
-                log.info "Moving file ${file} to ${targetDir}"
-                try {
-                    FileUtils.moveToDirectory file, targetDir, true
-
-                    return true
-                } catch (Exception e) {
-                    log.error "Couldn't move files", e
-                    return false
-                }
-            }
+        // Increment file counter for new parent (really need this?)
+        if (parent && !(this instanceof WcmContentDirectory)) {
+            parent.filesCount += 1
+            assert parent.save()
         }
+        
+        // Decrement file counter for previous parent (really need this?)
+        if (originalParent) {
+            originalParent.filesCount -= 1
+            assert originalParent.save()
+        } 
+        
+        def file = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, srcPath)
+        def targetDir = parent ? parent.toFile() : toFile()
+        log.info "Moving file ${file} to ${targetDir}"
+        try {
+            FileUtils.moveToDirectory file, targetDir, true
 
-        return false // Move was not possible
+        } catch (Exception e) {
+            log.error "Couldn't move files", e
+        }
     }
 
-    Boolean contentWillBeDeleted() {
+    boolean contentWillBeDeleted() {
         def path = getPathTo(this.parent)
 
         def parentContent = this.parent ? WcmContent.get(this.parent.id) : this.parent

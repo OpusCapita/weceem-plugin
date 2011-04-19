@@ -184,7 +184,8 @@ class WcmContentController {
                 if (content) {
                     template = wcmContentRepositoryService.getTemplateForContent(content)
                 }
-
+                
+                
                 def tagValue
                 withCacheHeaders { 
                     etag {

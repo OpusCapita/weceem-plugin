@@ -23,6 +23,9 @@ abstract class AbstractWeceemIntegrationTest extends GroovyTestCase {
         
         wcmContentRepositoryService.wcmCacheService = new WcmCacheService()
         wcmContentRepositoryService.wcmCacheService.weceemCacheManager = new net.sf.ehcache.CacheManager()
+
+        wcmContentRepositoryService.wcmSecurityService.securityDelegate.getUserRoles = { -> ['ROLE_ADMIN'] }
+
         wcmContentRepositoryService.loadConfig()
 
         // Need to kill everything between tests

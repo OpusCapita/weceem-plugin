@@ -676,6 +676,8 @@ class WcmContentRepositoryService implements InitializingBean {
                     content.publishFrom = new Date()
                 }
             
+                triggerEvent(content, WeceemEvents.contentWillBeCreated, [parentContent])
+
                 // We must have generated aliasURI and set parent here to be sure that the uri is unique
                 boolean saved = false
                 int attempts = 0
@@ -805,8 +807,9 @@ class WcmContentRepositoryService implements InitializingBean {
 
         // We need this to invalidate caches
         def originalURI = sourceContent.absoluteURI
-
-        def parentChanged = targetContent != sourceContent.parent
+        def originalParent = sourceContent.parent
+        
+        def parentChanged = targetContent != originalParent
         if (targetContent && parentChanged) {
             if (!triggerDomainEvent(targetContent, WeceemDomainEvents.contentShouldAcceptChild, [sourceContent])) {
                 throw new InvalidDestinationException("This node is not accepted by the target '${targetContent.absoluteURI}'")
@@ -815,7 +818,7 @@ class WcmContentRepositoryService implements InitializingBean {
 
         if (parentChanged) {
             if (!triggerDomainEvent(sourceContent, WeceemDomainEvents.contentShouldMove, [targetContent])) {
-                throw new InvalidDestinationException("This node cannot move to the target '${targetContent.absoluteURI}'")
+                throw new InvalidDestinationException("This node cannot move to the target '${targetContent?.absoluteURI}'")
             }
         }
         
@@ -858,7 +861,7 @@ class WcmContentRepositoryService implements InitializingBean {
         if (sourceContent.save(flush: true)) {
             updateCachingMetadataFor(sourceContent)
             
-            triggerEvent(sourceContent, WeceemEvents.contentDidMove)
+            triggerEvent(sourceContent, WeceemEvents.contentDidMove, [originalURI, originalParent])
         } else {
             log.error "Couldn't save node: ${sourceContent.errors}"
             if (sourceContent.errors.hasFieldErrors('aliasURI')) {

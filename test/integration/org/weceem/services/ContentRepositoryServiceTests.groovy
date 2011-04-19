@@ -562,7 +562,6 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         assertNull nodeB.parent
         assert nodeA.children.contains(nodeB) == false
 
-
         // Make sure the content uri cache has been invalidated for old URI
         nodeBInfo = wcmContentRepositoryService.getCachedContentInfoFor(spaceA, 'contentA/contentB')
         assertEquals "Space A contentB old URI info should have been invalidated", null, nodeBInfo

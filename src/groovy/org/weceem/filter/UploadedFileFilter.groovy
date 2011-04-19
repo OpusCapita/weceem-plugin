@@ -5,8 +5,12 @@ import org.springframework.web.context.support.WebApplicationContextUtils
 import org.weceem.util.MimeUtils
 import org.weceem.security.WeceemSecurityPolicy
 
+/**
+ * Filter for files uploaded with CK Editor, to apply our security policy / status / caching rules
+ */
 class UploadedFileFilter implements Filter {
     
+    def wcmContentFingerprintService
     def wcmContentRepositoryService
     def wcmSecurityService
     def cacheHeadersService
@@ -16,6 +20,7 @@ class UploadedFileFilter implements Filter {
         wcmContentRepositoryService = applicationContext.wcmContentRepositoryService
         wcmSecurityService = applicationContext.wcmSecurityService
         cacheHeadersService = applicationContext.cacheHeadersService
+        wcmContentFingerprintService = applicationContext.wcmContentFingerprintService
     }
 
     void destroy() {
@@ -51,18 +56,28 @@ class UploadedFileFilter implements Filter {
             return
         }
         
-        cacheHeadersService.withCacheHeaders([cacheHeadersService:cacheHeadersService, request:request, response:response]) { 
+        def ctx = [
+            cacheHeadersService:cacheHeadersService, 
+            wcmContentFingerprintService:wcmContentFingerprintService, 
+            wcmContentRepositoryService:wcmContentRepositoryService, 
+            request:request, 
+            response:response,
+        ]
+        cacheHeadersService.withCacheHeaders(ctx) { 
             etag {
-                // @todo implement ETag somehow for files with no ContentFile, store hash in domain object?
-                content ? "${content.ident()}:${content.version}".encodeAsSHA1() : null
+                tagValue = wcmContentFingerprintService.getFingerprintFor(content)
             }
             
             lastModified {
-                content ? (content.changedOn ?: content.createdOn) : new Date(f.lastModified())
+                content ? wcmContentRepositoryService.getLastModifiedDateFor(content) : null
             }
             
             generate {
-                cacheHeadersService.cache(response, [validFor: 1, shared:true])  // 1 second caching, just makes sure some OK headers are sent for proxies
+                def cacheMaxAge = content?.validFor ?: 1
+                
+                def publiclyCacheable = true
+                
+                cacheHeadersService.cache(response, [validFor: cacheMaxAge, shared:publiclyCacheable])
 
                 def mt = MimeUtils.getDefaultMimeType(f.name)
                 response.setContentType(mt)    

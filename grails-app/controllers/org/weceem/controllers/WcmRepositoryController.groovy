@@ -368,10 +368,9 @@ class WcmRepositoryController {
                 wcmContentRepositoryService.findChildren(targetContent)?.collect{indexes.put(it.id, it.orderIndex)}
             }
             render([result: 'success', indexes: indexes] as JSON)
-        } catch (ContentRepositoryException cre) {
+        } catch (Throwable cre) {
+            log.error "Couldn't move node", cre
             render([result: 'failure', error: message(code: 'error.contentRepository.moveNode', args:[cre.message])] as JSON)
-        } catch (IllegalArgumentException iae) {
-            render([result: 'failure', error: message(code: 'error.contentRepository.moveNode', args:[iae.message])] as JSON)
         }
     }
 

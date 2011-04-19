@@ -155,7 +155,7 @@ class ContentControllerTests extends GroovyTestCase {
         def con = mockedController()
 
         // Clear roles
-//        con.wcmSecurityService.securityDelegate.getUserRoles = { -> ['ROLE_GUEST'] }
+        con.wcmSecurityService.securityDelegate.getUserRoles = { -> ['ROLE_GUEST'] }
 
         con.params.uri = "/jcatalog/folder"
         con.show()
