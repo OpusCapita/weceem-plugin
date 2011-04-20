@@ -8,7 +8,7 @@ grails.mime.file.extensions = false // enables the parsing of file extensions fr
 org.weceem.plugin.standalone="true"
 
 //weceem.content.prefix="content"
-//weceem.admin.prefix="cms/admin"
+//weceem.admin.prefix="wcm-admin"
 //weceem.tools.prefix="cms/tools"
 //weceem.admin.layout="weceemadmin-alt"
 //weceem.create.default.space = false

@@ -29,7 +29,7 @@ class UploadedFileFilter implements Filter {
     void doFilter(ServletRequest request, ServletResponse response,
         FilterChain chain) throws IOException, ServletException {
 
-        def info = wcmContentRepositoryService.resolveSpaceAndURIOfUploadedFile(request.requestURI - request.contextPath)
+        def info = wcmContentRepositoryService.resolveSpaceAndURIOfUploadedFile(request.requestURI.decodeURL() - request.contextPath)
         def space = info.space
         def uri = info.uri
  
@@ -64,22 +64,25 @@ class UploadedFileFilter implements Filter {
             response:response,
         ]
         cacheHeadersService.withCacheHeaders(ctx) { 
-            etag {
-                tagValue = wcmContentFingerprintService.getFingerprintFor(content)
+            if (content) {
+                etag {
+                    tagValue = wcmContentFingerprintService.getFingerprintFor(content)
+                }
             }
             
             lastModified {
-                content ? wcmContentRepositoryService.getLastModifiedDateFor(content) : null
+                content ? wcmContentRepositoryService.getLastModifiedDateFor(content) : new Date(f.lastModified())
             }
             
             generate {
                 def cacheMaxAge = content?.validFor ?: 1
-                
+                    
                 def publiclyCacheable = true
                 
                 cacheHeadersService.cache(response, [validFor: cacheMaxAge, shared:publiclyCacheable])
 
-                def mt = MimeUtils.getDefaultMimeType(f.name)
+                def mt = content ? content.mimeType : MimeUtils.getDefaultMimeType(f.name)
+
                 response.setContentType(mt)    
                 // @todo is this fast enough?    
                 response.outputStream << f.newInputStream()
