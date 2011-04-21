@@ -29,8 +29,9 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     def defaultDocSubParent2
     def defaultDocTestFolder
     def defaultDocTestFolderIndex
-    
+
     def spaceBnodeA
+    def spaceBdefaultDoc
     
     def extraNode
 
@@ -184,6 +185,13 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
                 orderIndex: 0).save()
         assert spaceBnodeA
         
+        spaceBdefaultDoc = new WcmHTMLContent(title: 'spaceb default', aliasURI: 'index',
+                content: 'spaceb default page', status: defStatus,
+                createdBy: 'admin', createdOn: new Date(),
+                space: spaceB, 
+                orderIndex: 1).save()
+        assert spaceBdefaultDoc
+        
         wcmContentRepositoryService.wcmContentDependencyService.reset()
         wcmContentRepositoryService.invalidateCachingForSpace(spaceA)
         wcmContentRepositoryService.invalidateCachingForSpace(spaceB)
@@ -205,6 +213,10 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         assert res.space.id == spaceA.id
         assertEquals 'anything', res.uri
         
+        res = wcmContentRepositoryService.resolveSpaceAndURI('jcatalog/')
+        assert res.space.id == spaceA.id
+        assertEquals '', res.uri
+
         res = wcmContentRepositoryService.resolveSpaceAndURI('jcatalog/anything')
         assert res.space.id == spaceA.id
         assertEquals 'anything', res.uri
@@ -216,6 +228,10 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         res = wcmContentRepositoryService.resolveSpaceAndURI('libs/jquery/jquery-1.4.2.min.js')
         assert res.space.id == spaceC.id
         assertEquals 'libs/jquery/jquery-1.4.2.min.js', res.uri
+
+        res = wcmContentRepositoryService.resolveSpaceAndURI('other/')
+        assert res.space.id == spaceB.id
+        assertEquals '', res.uri
     }
 
     void testFindContentForPath() {
@@ -238,8 +254,14 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         Closure doTests = { withCache ->
             assertEquals defaultDocRootIndex.ident(), 
                 wcmContentRepositoryService.findContentForPath('', spaceA, withCache).content?.ident()
+
             assertEquals defaultDocRootIndex.ident(), 
                 wcmContentRepositoryService.findContentForPath('index', spaceA, withCache).content?.ident()
+
+            assertEquals spaceBdefaultDoc.ident(), 
+                wcmContentRepositoryService.findContentForPath('index', spaceB, withCache).content?.ident()
+
+
             assertEquals defaultDocSubParent.ident(), 
                 wcmContentRepositoryService.findContentForPath('defaultTest', spaceA, withCache).content?.ident()
             assertEquals defaultDocSubIndex.ident(), 

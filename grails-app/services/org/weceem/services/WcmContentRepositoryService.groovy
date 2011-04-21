@@ -229,6 +229,11 @@ class WcmContentRepositoryService implements InitializingBean {
         
     }
     
+    /**
+     * Take a URI and work out what space it refers to, and what the remaining URI is
+     *
+     * Note, this is perhaps one of our most evil pieces of logic. Enter at your peril.
+     */
     Map resolveSpaceAndURI(String uri) {
         def spaceName
         def space
@@ -246,6 +251,8 @@ class WcmContentRepositoryService implements InitializingBean {
             spaceName = uri[0..n-1]
             if (n < uri.size()-1) {
                 uri = uri[n+1..-1]
+            } else {
+                uri = ''
             }
         }
         
