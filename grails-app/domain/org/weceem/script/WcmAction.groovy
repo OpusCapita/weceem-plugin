@@ -24,7 +24,7 @@ class WcmAction extends WcmContent {
      */
     @Override
     String getContentDependencies() {
-        script.absoluteURI
+        script?.absoluteURI ?: ''
     }
 
     static constraints = {
