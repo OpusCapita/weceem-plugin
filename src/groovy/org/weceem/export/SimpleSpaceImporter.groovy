@@ -71,7 +71,9 @@ class SimpleSpaceImporter implements SpaceImporter {
                 def sid = entry.key
                 def childrenList = childrenMap[(sid)]
                 for (chid in childrenList){
-                    cnt.addToChildren(backrefMap[(chid)].content)
+                    if (backrefMap[chid]?.content) {
+                        cnt.addToChildren(backrefMap[chid].content)
+                    }
                 }
                 if (!cnt.save()){
                     log.error("Can't save content: ${cnt.aliasURI}, error: ${cnt.errors}")
@@ -134,7 +136,13 @@ class SimpleSpaceImporter implements SpaceImporter {
     def parse(def element, def document, def space){
         if (element.name() == "*") return
         def id = element.id.text().toLong()
-        def props = getDomainClassArtefact(element.name()).getPersistantProperties()
+        def cls = getDomainClassArtefact(element.name())
+        if (!cls) {
+            log.error "Could not import node of type ${element.name()}, class not found - skipping"
+            return [content:null]
+        }
+        
+        def props = cls.getPersistentProperties()
         if (backrefMap[id] != null){
             return backrefMap[id]
         }
