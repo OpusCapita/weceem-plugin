@@ -19,6 +19,9 @@ class WcmContentFingerprintService implements InitializingBean {
     def wcmContentDependencyService
     def grailsApplication
     
+    def n = 0
+    def p = 0
+    
     /* We populate this ourselves to work around circular dependencies */
     @Lazy
     def wcmContentRepositoryService = { 
@@ -62,7 +65,9 @@ class WcmContentFingerprintService implements InitializingBean {
      * - no side effects should cause other nodes to update i.e. no getFingerprintFor
      * - any dependent nodes FPs must only be updated at the end of the method
      */
-    def updateFingerprintFor(WcmContent content, Set<WcmContent> alreadyVisited = []) {
+    synchronized def updateFingerprintFor(WcmContent content, Set<WcmContent> alreadyVisited = []) {
+        n++
+        
         if (log.debugEnabled) {
             log.debug "Updating fingerprint for content ${content.absoluteURI}"
         }
@@ -127,7 +132,7 @@ class WcmContentFingerprintService implements InitializingBean {
      * Update fingerprints for a dependency list, without recursing into their dependencies
      * The dependency list will usually include all the transitive depenencies, and this prevents stack overflow
      */
-    def updateFingerprintsForAllDependencies(nodesNeedingRecalculation, Set<WcmContent> alreadyVisited) {
+    synchronized def updateFingerprintsForAllDependencies(nodesNeedingRecalculation, Set<WcmContent> alreadyVisited) {
         if (log.debugEnabled) {
             log.debug "Updating fingerprints for all of ${nodesNeedingRecalculation*.absoluteURI} "
         }
@@ -160,7 +165,9 @@ class WcmContentFingerprintService implements InitializingBean {
      * Locate a node and ask it for its individual content fingerprint
      */
     def calculateShallowFingerprintFor(String uri, WcmSpace space) {
-        def c = wcmContentRepositoryService.findContentForPath(uri, space)?.content
+        def c = wcmContentRepositoryService.withPermissionsBypass {
+            wcmContentRepositoryService.findContentForPath(uri, space)?.content
+        }
         return c.calculateFingerprint()
     }
     
@@ -175,7 +182,9 @@ class WcmContentFingerprintService implements InitializingBean {
      * Locate a node and ask it for its dependency's content fingerprint, handling any cyclic refs
      */
     def calculateDeepFingerprintFor(String uri, WcmSpace space) {
-        def c = wcmContentRepositoryService.findContentForPath(uri, space)?.content
+        def c = wcmContentRepositoryService.withPermissionsBypass {
+            wcmContentRepositoryService.findContentForPath(uri, space)?.content
+        }
         return calculateDeepFingerprintFor(c)
     }
     
@@ -219,7 +228,9 @@ class WcmContentFingerprintService implements InitializingBean {
      * Calculate the concatenated fingerprint for all descendents of the specified node
      */
     def calculateFingerprintForDescendentsOf(String uri, WcmSpace space) {
-        def c = wcmContentRepositoryService.findContentForPath(uri, space)?.content
+        def c = wcmContentRepositoryService.withPermissionsBypass {
+            wcmContentRepositoryService.findContentForPath(uri, space)?.content
+        }
         return calculateFingerprintForDescendentsOf(c)
     }
     
@@ -227,7 +238,9 @@ class WcmContentFingerprintService implements InitializingBean {
      * Calculate the concatenated fingerprint for all descendents of the specified node
      */
     def calculateFingerprintForDescendentsOf(WcmContent content) {
-        def hashes = wcmContentRepositoryService.findDescendents(content).collect { c -> getFingerprintFor(c) }
+        def hashes = wcmContentRepositoryService.withPermissionsBypass {
+            wcmContentRepositoryService.findDescendents(content).collect { c -> getFingerprintFor(c) }
+        }
         def fp = hashes.join('').encodeAsSHA256()
         if (log.debugEnabled) {
             log.debug "Updating fingerprint for descendents of ${content.absoluteURI}, new value from $hashes is ${fp}"
@@ -235,7 +248,9 @@ class WcmContentFingerprintService implements InitializingBean {
         return fp
     }
     
-    def getFingerprintFor(WcmContent content, boolean updateIfMissing = true) {
+    synchronized def getFingerprintFor(WcmContent content, boolean updateIfMissing = true) {
+        p++
+        
         if (log.debugEnabled) {
             log.debug "Getting fingerprint for content ${content.absoluteURI}"
         }
@@ -255,11 +270,13 @@ class WcmContentFingerprintService implements InitializingBean {
     }
     
     def getTreeHashForDescendentsOf(String uri, WcmSpace space) {
-        def c = wcmContentRepositoryService.findContentForPath(uri, space)?.content
+        def c = wcmContentRepositoryService.withPermissionsBypass {
+            wcmContentRepositoryService.findContentForPath(uri, space)?.content
+        }
         return c ? getTreeHashForDescendentsOf(c) : ''
     }
     
-    def getTreeHashForDescendentsOf(WcmContent content, boolean updateIfMissing = true) {
+    synchronized def getTreeHashForDescendentsOf(WcmContent content, boolean updateIfMissing = true) {
         if (log.debugEnabled) {
             log.debug "Getting fingerprint for descendents of content ${content.absoluteURI}"
         }

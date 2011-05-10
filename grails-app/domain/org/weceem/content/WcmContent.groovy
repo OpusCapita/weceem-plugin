@@ -238,8 +238,10 @@ class WcmContent implements Comparable, Taggable {
     }
 
     public void createAliasURI(parent) {
-        def uri = (title.size() < 30) ? title : title.substring(0, 30)
-        aliasURI = uri.replaceAll(INVALID_ALIAS_URI_CHARS_PATTERN, '-')
+        if (title) {
+            def uri = (title.size() < 30) ? title : title.substring(0, 30)
+            aliasURI = uri.replaceAll(INVALID_ALIAS_URI_CHARS_PATTERN, '-')
+        }
     }
 
     public String getAbsoluteURI() {
