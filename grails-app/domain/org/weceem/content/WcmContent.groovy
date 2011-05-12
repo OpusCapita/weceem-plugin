@@ -257,7 +257,7 @@ class WcmContent implements Comparable, Taggable {
                 def msg = "Cannot calculate absoluteURI of content with id ${ident()} and "+
                     "aliasURI $aliasURI because there is a loop in the ancestry to ${c.ident()} (${c.aliasURI})"
                 log.error(msg)
-                throw new IllegalArumentException(msg)
+                throw new IllegalArgumentException(msg)
             } else {
                 visitedNodes << c.ident() 
             }
