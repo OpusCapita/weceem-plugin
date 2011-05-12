@@ -1715,11 +1715,7 @@ class WcmContentRepositoryService implements InitializingBean {
 
     def updateCachingMetadataFor(WcmContent content) {
         wcmContentDependencyService.updateDependencyInfoFor(content)
-        println "******************************** Starting update FP **********************************"
-        wcmContentFingerprintService.n = 0
-        wcmContentFingerprintService.p = 0
         wcmContentFingerprintService.updateFingerprintFor(content)
-        println "******************************** Done update FP: ${wcmContentFingerprintService.n} & ${wcmContentFingerprintService.p} **********************************"
 
         if (log.debugEnabled) {
             wcmContentDependencyService.dumpDependencyInfo()
