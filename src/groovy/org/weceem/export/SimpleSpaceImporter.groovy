@@ -136,10 +136,12 @@ class SimpleSpaceImporter implements SpaceImporter {
     def parse(def element, def document, def space){
         if (element.name() == "*") return
         def id = element.id.text().toLong()
+        def clsName = element.name()
         def cls = getDomainClassArtefact(element.name())
         if (!cls) {
-            log.error "Could not import node of type ${element.name()}, class not found - skipping"
-            return [content:null]
+            log.warn "Could not import node of type ${element.name()}, class not found - using WcmHTMLContent instead"
+            clsName = 'org.weceem.html.WcmHTMLContent'
+            cls = getDomainClassArtefact(clsName)
         }
         
         def props = cls.getPersistentProperties()
@@ -185,7 +187,7 @@ class SimpleSpaceImporter implements SpaceImporter {
         }
         def content = WcmContent.findWhere(aliasURI: params.aliasURI, space: space)
         if (!content){
-            content = getClass(element.name()).newInstance()
+            content = getClass(clsName).newInstance()
         }
         params.remove "id"
         params.remove "space"
