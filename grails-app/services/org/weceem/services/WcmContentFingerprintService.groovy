@@ -8,6 +8,17 @@ import org.weceem.content.WcmSpace
 import org.weceem.content.WcmContent
 import org.weceem.content.WcmTemplate
 
+/**
+ * Service that is responsible for caching and calculating fingerprints of individual content nodes
+ * and also "tree" fingerprints representing the fingerprint of all the descendents of a node.
+ * This information is used in the ETag handling and relies heavily on the dependency service.
+ *
+ * NOTE: This is really complicated. The issues around cyclic node dependencies and avoiding 
+ * calculating hashes that change during their own calculation (e.g. tree hashes) hurt your brain.
+ * Do not change any of this without fully understanding it.
+ * 
+ * @author Marc Palmer (marc@grailsrocks.com)
+ */
 class WcmContentFingerprintService implements InitializingBean {
     
     static transactional = true
