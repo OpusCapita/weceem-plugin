@@ -409,6 +409,23 @@ class WcmContentFingerprintServiceTests extends AbstractWeceemIntegrationTest {
         assertEquals newChildA1comment1FP, wcmContentFingerprintService.getFingerprintFor(childA1comment1)        
     }
     
+    void testDeepFingerprintCalculationFromCold() {
+        initDeepBlogRepo()
+        
+        def commentFP = wcmContentFingerprintService.getFingerprintFor(childA1comment1)
+        assertNotNull commentFP
+    }
+    
+    void testDeepTreeFingerprintCalculationFromCold() {
+        initDeepBlogRepo()
+        
+        def n = childA1comment1
+        while (n = n.parent) {
+            def treeFP = wcmContentFingerprintService.getTreeHashForDescendentsOf(n)
+            assertNotNull treeFP
+        }
+    }
+    
     void dumpInfo() {
         wcmContentDependencyService.dumpDependencyInfo(true)
         wcmContentFingerprintService.dumpFingerprintInfo(true)
