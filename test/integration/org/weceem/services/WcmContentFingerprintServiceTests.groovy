@@ -14,7 +14,11 @@ class WcmContentFingerprintServiceTests extends AbstractWeceemIntegrationTest {
     def templateB
     def childA1
     def childA1comment1
+    def childA1comment1Child1
+    def childA1comment1Child2
     def childA1comment2
+    def childA1comment2Child1
+    def childA1comment2Child2
     def childA2
     def parentA
     def rootNode1
@@ -126,6 +130,25 @@ class WcmContentFingerprintServiceTests extends AbstractWeceemIntegrationTest {
                     content = "Child A1 comment 1 text"
                     template = templateA
                 }
+                
+                childA1comment1Child1 = content(WcmHTMLContent) {
+                    space = spaceA
+                    status = statusPublished
+                    title = "Child A1 comment 1 child 1"
+                    content = "Child A1 comment 1  child 1 text"
+                    template = templateA
+                }
+                childA1comment1Child2 = content(WcmHTMLContent) {
+                    space = spaceA
+                    status = statusPublished
+                    title = "Child A1 comment 1 child 2"
+                    content = "Child A1 comment 1  child 2 text"
+                    template = templateA
+                }
+                
+                childA1comment1.addToChildren(childA1comment1Child1)
+                childA1comment1.addToChildren(childA1comment1Child2)
+                
                 childA1comment2 = content(WcmHTMLContent) {
                     space = spaceA
                     status = statusPublished
@@ -134,6 +157,23 @@ class WcmContentFingerprintServiceTests extends AbstractWeceemIntegrationTest {
                     template = templateB
                 }
                 
+                childA1comment2Child1 = content(WcmHTMLContent) {
+                    space = spaceA
+                    status = statusPublished
+                    title = "Child A1 comment 2 child 1"
+                    content = "Child A1 comment 2 child 1 text"
+                    template = templateA
+                }
+                childA1comment2Child2 = content(WcmHTMLContent) {
+                    space = spaceA
+                    status = statusPublished
+                    title = "Child A1 comment 2 child 2"
+                    content = "Child A1 comment 2 child 2 text"
+                    template = templateA
+                }
+                childA1comment2.addToChildren(childA1comment2Child1)
+                childA1comment2.addToChildren(childA1comment2Child2)
+                    
                 childA1.addToChildren(childA1comment1)
                 childA1.addToChildren(childA1comment2)
             }
@@ -412,14 +452,24 @@ class WcmContentFingerprintServiceTests extends AbstractWeceemIntegrationTest {
     void testDeepFingerprintCalculationFromCold() {
         initDeepBlogRepo()
         
+        def commentChildFP = wcmContentFingerprintService.getFingerprintFor(childA1comment1Child1)
+        assertNotNull commentChildFP
+
         def commentFP = wcmContentFingerprintService.getFingerprintFor(childA1comment1)
         assertNotNull commentFP
+
     }
     
     void testDeepTreeFingerprintCalculationFromCold() {
         initDeepBlogRepo()
         
-        def n = childA1comment1
+        def n = childA1comment1Child1
+        while (n = n.parent) {
+            def treeFP = wcmContentFingerprintService.getTreeHashForDescendentsOf(n)
+            assertNotNull treeFP
+        }
+
+        n = childA1comment1
         while (n = n.parent) {
             def treeFP = wcmContentFingerprintService.getTreeHashForDescendentsOf(n)
             assertNotNull treeFP
