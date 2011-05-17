@@ -2134,6 +2134,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
                 log.debug "Archive: Transitioning content ${content} from status [${content.status.code}] to [${archivedCode.code}]"
             }
             content.status = archivedCode
+            content.save() // This shouldn't be needed, but without it we get "collection not processed by flush"
             count++
         }
         return count
