@@ -14,6 +14,8 @@ class SecurityServiceTests extends grails.test.GrailsUnitTestCase {
         super.setUp()
         
         mockLogging(WcmSecurityService, true)
+        mockDomain(WcmHTMLContent)
+        mockDomain(WcmComment)
 
         mockSpace = new WcmSpace(name:'Test', aliasURI:'test')
     }

@@ -10,7 +10,12 @@ import org.weceem.services.*
 import org.codehaus.groovy.grails.plugins.web.taglib.ApplicationTagLib
 
 class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
-    
+
+    void setUp() {
+        super.setUp()
+        mockDomain(WcmHTMLContent)
+    }
+
     void testSpace() {
         mockTagLib(WeceemTagLib)
         def taglib = new WeceemTagLib()

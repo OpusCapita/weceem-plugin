@@ -1234,6 +1234,7 @@ class WcmContentRepositoryService implements InitializingBean {
 
                 return [content:content]
             }
+
         }
         if (log.debugEnabled) {
             log.debug("Update node with id ${content.id} failed with errors: ${content.errors}")

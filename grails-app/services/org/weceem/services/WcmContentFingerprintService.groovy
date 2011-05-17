@@ -114,9 +114,6 @@ class WcmContentFingerprintService implements InitializingBean {
         startFingerprinting(content)
         try {
             def result = doUpdateFingerprintFor(content, alreadyVisited)
-            if (result.changed) {
-                invalidateTreeHashesForAncestorsOf(content)
-            }
             return result
         } finally {
             stopFingerprinting()
@@ -192,19 +189,6 @@ class WcmContentFingerprintService implements InitializingBean {
     }
 
     void updateAllFingerprintsDependentOn(WcmContent content, List<WcmContent> alreadyVisited = []) {
-        if (log.debugEnabled) {
-            log.debug "Updating ancestor tree hashes of ${content.absoluteURI}"
-        }
-        if (content.parent) {
-            def p = content
-            while (p = p.parent) {
-                // This causes a lot of processing of nodes that haven't changed, but is necessary as we know
-                // at least some part of the tree has.
-                updateTreeHashForDescendentsOf(p)
-            }
-        }
-    
-        // **** Now we are past this point, we can update nodes that DEPEND on this node *****
     
         // Also must recalculate etags on all nodes that use nodes that depend on THIS node
         if (log.debugEnabled) {
@@ -334,104 +318,5 @@ class WcmContentFingerprintService implements InitializingBean {
         }
         wcmCacheService.removeValue(CACHE_NAME_CONTENT_FINGERPRINT_CACHE, content.ident())
     }
-    
-    synchronized getTreeHashForDescendentsOf(String uri, WcmSpace space) {
-        startFingerprinting(uri)
-        try {
-            def c = wcmContentRepositoryService.withPermissionsBypass {
-                wcmContentRepositoryService.findContentForPath(uri, space)?.content
-            }
-            return c ? getTreeHashForDescendentsOf(c) : ''
-        } finally {
-            stopFingerprinting()
-        }
-    }
-    
-    synchronized getTreeHashForDescendentsOf(WcmContent content, boolean updateIfMissing = true) {
-        startFingerprinting(content)
-        try {
-            if (log.debugEnabled) {
-                log.debug "Getting fingerprint for descendents of content ${content.absoluteURI}"
-            }
-            def v = wcmCacheService.getObjectValue(contentTreeFingerprintCache, content.ident())
-            println "tree hash for ${content.absoluteURI} is $v"
-            if (!v && updateIfMissing) {
-                return updateTreeHashForDescendentsOf(content)
-            } else {
-                return v
-            }
-        } finally {
-            stopFingerprinting()
-        }
-    }
-    
-    protected updateTreeHashForDescendentsOf(WcmContent content) {
-        if (log.debugEnabled) {
-            log.debug "Updating fingerprint for descendents of ${content.absoluteURI}, current is ${getTreeHashForDescendentsOf(content, false)}"
-        }
-        def fingerprint = calculateFingerprintForDescendentsOf(content)
-        wcmCacheService.putToCache(contentTreeFingerprintCache, content.ident(), fingerprint )
-        return fingerprint
-    }
-    
-    
-    /** 
-     * Calculate the concatenated fingerprint for all descendents of the specified node
-     */
-    protected calculateFingerprintForDescendentsOf(String uri, WcmSpace space) {
-        def c = wcmContentRepositoryService.withPermissionsBypass {
-            wcmContentRepositoryService.findContentForPath(uri, space)?.content
-        }
-        return calculateFingerprintForDescendentsOf(c)
-    }
-    
-    /** 
-     * Calculate the concatenated fingerprint for all descendents of the specified node
-     */
-    protected calculateFingerprintForDescendentsOf(WcmContent content) {
-        def ctx = fingerprintingContext.get()
-        ctx.treeHashCallCounter++
-        def fp = ctx.treeHashes[content.absoluteURI]
-        if (!fp) {
-            def descendents = []
-            def hashes = wcmContentRepositoryService.withPermissionsBypass {
-                wcmContentRepositoryService.findDescendents(content).collect { c -> 
-                    descendents << c
-                    return doGetFingerprintFor(c, true, false) 
-                }
-            }
-            fp = hashes.join(':').encodeAsSHA256()
-            if (log.debugEnabled) {
-                log.debug "Updating fingerprint for descendents of ${content.absoluteURI}, new value from $hashes is ${fp}"
-            }
-            ctx.treeHashes[content.absoluteURI] = fp
             
-            // Now invalidate all the other hashes of content that depends on 
-            descendents.each { d ->
-                invalidateTreeHashesForAncestorsOf(d, [content] as Set)
-            }
-        }
-        return fp
-    }
-        
-    void invalidateTreeHashesForAncestorsOf(WcmContent content, Set<WcmContent> excludes = []) {
-        if (log.debugEnabled) {
-            log.debug "Invalidating tree hashes of ancestors of ${content.absoluteURI}"
-        }
-        if (content.parent) {
-            def p = content
-            while (p = p.parent) {
-                if (!excludes.contains(p)) {
-                    invalidateTreeHashForDescendentsOf(p)
-                }
-            }
-        }
-    }
-
-    protected def invalidateTreeHashForDescendentsOf(WcmContent content) {
-        if (log.debugEnabled) {
-            log.debug "Invalidating tree hash for descendents of ${content.absoluteURI}"
-        }
-        wcmCacheService.removeValue(CACHE_NAME_CONTENT_TREE_FINGERPRINT_CACHE, content.ident())
-    }
 }

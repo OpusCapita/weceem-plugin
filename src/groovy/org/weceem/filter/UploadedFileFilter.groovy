@@ -44,6 +44,7 @@ class UploadedFileFilter implements Filter {
             // @todo also implement Draft status checks here so ppl cannot view drafts even if they have perms (e.g. guests)
             if (!canView) {
                 response.sendError(503, "You do not have permission to view this resource")
+                chain.doFilter(request, response)
                 return
             }
 
@@ -92,5 +93,7 @@ class UploadedFileFilter implements Filter {
                 }
             }
         }
+ 
+        chain.doFilter(request, response)
     }
 }
