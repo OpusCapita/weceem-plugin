@@ -88,8 +88,12 @@ class UploadedFileFilter implements Filter {
                     def mt = content ? content.mimeType : MimeUtils.getDefaultMimeType(f.name)
 
                     response.setContentType(mt)    
-                    // @todo is this fast enough?    
-                    response.outputStream << f.newInputStream()
+                    try {
+                        // @todo is this fast enough?    
+                        response.outputStream << f.newInputStream()
+                    } catch (IOException ioe) {
+                        // Munch. We should never do this but the client has gone away so...
+                    }
                 }
             }
         }
