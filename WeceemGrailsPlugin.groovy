@@ -164,8 +164,9 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
                 'filter-class'("org.weceem.filter.UploadedFileFilter")
             }
         }
-        def mappings = webXml.'filter-mapping' // this does only yield 2 filter mappings
-        mappings + {
+        def filterMappings = webXml."filter-mapping"
+        def lastMapping = filterMappings[filterMappings.size() - 1]
+        lastMapping + {
             'filter-mapping' {
                 'filter-name'("WeceemFileFilter")
                 'url-pattern'("${uploadUrl}*")
