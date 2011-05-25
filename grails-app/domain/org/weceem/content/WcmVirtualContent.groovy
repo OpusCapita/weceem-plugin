@@ -42,7 +42,7 @@ class WcmVirtualContent extends WcmContent {
      */
     @Override
     String getContentDependencies() {
-        target.absoluteURI
+        target?.absoluteURI ?: ''
     }
     
     boolean contentShouldAcceptChildren() { false }

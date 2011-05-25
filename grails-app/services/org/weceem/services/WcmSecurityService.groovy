@@ -13,7 +13,7 @@ import org.weceem.security.*
 class WcmSecurityService implements InitializingBean {
     static transactional = false
     
-    WeceemSecurityPolicy policy = new WeceemSecurityPolicy()
+    def policy = new WeceemSecurityPolicy()
     
     def grailsApplication
 
@@ -31,7 +31,6 @@ class WcmSecurityService implements InitializingBean {
             policy.load(scriptLocation)
         } else policy.initDefault()
     }
-     
     
     /** 
      * Applications set this to an object implementing these methods
@@ -54,7 +53,7 @@ class WcmSecurityService implements InitializingBean {
     def getUserRoles() {
         def roles = []
         roles.addAll(securityDelegate.getUserRoles())
-        roles << ["USER_${userName}"]
+        roles << "USER_${userName}"
         return roles
     }
 

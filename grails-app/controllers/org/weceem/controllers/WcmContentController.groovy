@@ -152,6 +152,16 @@ class WcmContentController {
                     log.debug "Loading content from for uri: ${uri}"
                 }
                 def contentInfo = wcmContentRepositoryService.findContentForPath(uri,space)
+
+                // See if we hit non-renderable content, which might have a index.html under it i.e. Folder or Server Directory
+                if (contentInfo) {
+                    if (contentInfo.content && 
+                        !uri.endsWith('/') &&
+                        !wcmContentRepositoryService.contentIsRenderable(contentInfo.content)) {
+                        contentInfo = wcmContentRepositoryService.findContentForPath(uri+'/',space)
+                    }
+                }
+
                 if (contentInfo) {
                     if (log.debugEnabled) {
                         log.debug "Checking user is allowed to view content at $uri"
@@ -174,7 +184,8 @@ class WcmContentController {
                 if (content) {
                     template = wcmContentRepositoryService.getTemplateForContent(content)
                 }
-
+                
+                
                 def tagValue
                 withCacheHeaders { 
                     etag {
@@ -401,8 +412,10 @@ class WcmContentController {
             if (contentText != null) {
                 // todo: what need to be rendered?
                 log.debug "Rendering content of type [${content.mimeType}] without template: $contentText"
+
                 // @todo This needs to handle WcmContentFile/WcmContentDirectory requests and pipe them through request dispatcher
-                render(text:contentText, contentType:content.mimeType)
+                response.contentType = content.mimeType
+                render(text:contentText)
             } else {
                 response.sendError(500, "Unable to render content at ${uri}, no content property and no template defined")
                 return null

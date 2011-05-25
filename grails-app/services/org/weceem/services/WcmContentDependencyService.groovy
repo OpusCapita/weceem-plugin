@@ -31,7 +31,7 @@ class WcmContentDependencyService {
     /**
      * Reload all the depenency info for one or all spaces
      */
-    void reload(WcmSpace space = null) {
+    synchronized void reload(WcmSpace space = null) {
         if (space) {
             contentDependenciesBySpace.remove(space.ident())
         } else {
@@ -106,7 +106,9 @@ class WcmContentDependencyService {
     }
     
     protected List<String> extractDependencyPathsOf(WcmContent content) {
-        WcmTemplate template = wcmContentRepositoryService.getTemplateForContent(content)
+        WcmTemplate template = wcmContentRepositoryService.withPermissionsBypass {
+            wcmContentRepositoryService.getTemplateForContent(content)
+        }
         // A template is an implicit dependency for the node, any changes to the template or its deps
         // means we have to change too.
         def results = template ? [template.absoluteURI] : []
@@ -132,16 +134,22 @@ class WcmContentDependencyService {
     protected List<WcmContent> resolveDependencyPathToNodes(String path, WcmSpace space) {
         def u = path.trim()
         if (u.endsWith('/**')) {
-            def c = wcmContentRepositoryService.findContentForPath(u - '/**', space) 
+            def c = wcmContentRepositoryService.withPermissionsBypass {
+                wcmContentRepositoryService.findContentForPath(u - '/**', space) 
+            }
             if (c?.content) {
-                return wcmContentRepositoryService.findDescendents(c.content)
+                return wcmContentRepositoryService.withPermissionsBypass {
+                    wcmContentRepositoryService.findDescendents(c.content)
+                }
             } else {
                 if (log.debugEnabled) {
                     log.debug "Attempt to resolve dependencies ${path} which describes no nodes"
                 }
             }
         } else {
-            def c = wcmContentRepositoryService.findContentForPath(u, space) 
+            def c = wcmContentRepositoryService.withPermissionsBypass {
+                wcmContentRepositoryService.findContentForPath(u, space) 
+            }
             if (c?.content) {
                 return [c.content]
             }

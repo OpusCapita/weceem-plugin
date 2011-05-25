@@ -47,6 +47,7 @@ class WcmContentRepositoryService implements InitializingBean {
     static DEFAULT_DOCUMENT_NAMES = ['index', 'index.html']
 
     static DEFAULT_SPACE_TEMPLATE_ZIP = "classpath:/org/weceem/resources/default-space-template.zip"
+    static BASIC_SPACE_TEMPLATE_ZIP = "classpath:/org/weceem/resources/basic-space-template.zip"
     
     static transactional = true
 
@@ -66,6 +67,8 @@ class WcmContentRepositoryService implements InitializingBean {
     
     def archivedStatusCode
     def unmoderatedStatusCode
+    
+    ThreadLocal permissionsBypass = new ThreadLocal()
     
     static uploadDir
     static uploadUrl
@@ -228,6 +231,11 @@ class WcmContentRepositoryService implements InitializingBean {
         
     }
     
+    /**
+     * Take a URI and work out what space it refers to, and what the remaining URI is
+     *
+     * Note, this is perhaps one of our most evil pieces of logic. Enter at your peril.
+     */
     Map resolveSpaceAndURI(String uri) {
         def spaceName
         def space
@@ -245,6 +253,8 @@ class WcmContentRepositoryService implements InitializingBean {
             spaceName = uri[0..n-1]
             if (n < uri.size()-1) {
                 uri = uri[n+1..-1]
+            } else {
+                uri = ''
             }
         }
         
@@ -322,6 +332,7 @@ class WcmContentRepositoryService implements InitializingBean {
             data.putAll(temps)
         } else {
             data.'default' = DEFAULT_SPACE_TEMPLATE_ZIP
+            data.'basic' = BASIC_SPACE_TEMPLATE_ZIP
         }
         return data
     }
@@ -362,14 +373,18 @@ class WcmContentRepositoryService implements InitializingBean {
     }
     
     void requirePermissions(WcmSpace space, List permissionList, Class<WcmContent> type = null) throws AccessDeniedException {
-        if (!wcmSecurityService.hasPermissions(space, permissionList, type)) {
-            throw new AccessDeniedException("User [${wcmSecurityService.userName}] with roles [${wcmSecurityService.userRoles}] does not have the permissions [$permissionList] to access space [${space.name}]")
+        if (!permissionsBypass.get()) {
+            if (!wcmSecurityService.hasPermissions(space, permissionList, type)) {
+                throw new AccessDeniedException("User [${wcmSecurityService.userName}] with roles [${wcmSecurityService.userRoles}] does not have the permissions [$permissionList] to access space [${space.name}]")
+            }
         }
     }       
     
     void requirePermissions(WcmContent content, permissionList) throws AccessDeniedException {
-        if (!wcmSecurityService.hasPermissions(content, permissionList)) {
-            throw new AccessDeniedException("User [${wcmSecurityService.userName}] with roles [${wcmSecurityService.userRoles}] does not have the permissions [$permissionList] to access content at [${content.absoluteURI}] in space [${content.space.name}]")
+        if (!permissionsBypass.get()) {
+            if (!wcmSecurityService.hasPermissions(content, permissionList)) {
+                throw new AccessDeniedException("User [${wcmSecurityService.userName}] with roles [${wcmSecurityService.userRoles}] does not have the permissions [$permissionList] to access content at [${content.absoluteURI}] in space [${content.space.name}]")
+            }
         }
     }       
 
@@ -622,11 +637,19 @@ class WcmContentRepositoryService implements InitializingBean {
         def result = true
 
         if (parentContent) {
-            result = triggerDomainEvent(parentContent, WeceemDomainEvents.contentShouldAcceptChild, [content])
+            result = triggerDomainEvent(parentContent, WeceemDomainEvents.contentShouldAcceptChildren)
+            if (result) {
+                result = triggerDomainEvent(parentContent, WeceemDomainEvents.contentShouldAcceptChild, [content])
+            } else if (log.infoEnabled) {
+                log.info "Cancelled creating node, shouldAcceptChild returned false for: ${content.dump()}"
+            }
         }
         
         if (result) {
             result = triggerDomainEvent(content, WeceemDomainEvents.contentShouldBeCreated, [parentContent])
+            if (!result && log.infoEnabled) {
+                log.info "Cancelled creating node, shouldBeCreated returned false for: ${content.dump()} with parent [$parentContent]"
+            }
         }
 
         if (result) {
@@ -652,28 +675,36 @@ class WcmContentRepositoryService implements InitializingBean {
             if (parentContent) {
                 parentContent.addToChildren(content)
             }
-
-            // Short circuit out of here if not valid now
-            def valid = content.validate()
-            if (!valid) {
-                // If its not just a blank aliasURI error, get out now
-                if (!(content.errors.errorCount == 1 && content.errors.getFieldErrors('aliasURI').size() == 1)) {
-                    result = false
-                }
-            }
-
+            
             if (result) {
                 // We complete the AliasURI, AFTER handling the create() event which may need to affect title/aliasURI
                 if (!content.aliasURI) {
                     content.createAliasURI(parentContent)
                 }
             
+                // Short circuit out of here if not valid now
+                def valid = content.validate()
+                if (!valid) {
+                    // If its not just a blank aliasURI error, get out now
+                    if (!(content.errors.errorCount == 1 && content.errors.getFieldErrors('aliasURI').size() == 1)) {
+                        result = false
+                    }
+                }
+            }
+            
+            if (result) {
                 // Auto-set publishFrom to now if content is created as public but no publishFrom specified
                 // Required for blogs and sort by publishFrom to work
-                if (content.status.publicContent && (content.publishFrom == null)) {
+                if (content.status?.publicContent && (content.publishFrom == null)) {
                     content.publishFrom = new Date()
                 }
             
+            }
+            
+            if (result) {
+
+                triggerEvent(content, WeceemEvents.contentWillBeCreated, [parentContent])
+
                 // We must have generated aliasURI and set parent here to be sure that the uri is unique
                 boolean saved = false
                 int attempts = 0
@@ -803,8 +834,9 @@ class WcmContentRepositoryService implements InitializingBean {
 
         // We need this to invalidate caches
         def originalURI = sourceContent.absoluteURI
-
-        def parentChanged = targetContent != sourceContent.parent
+        def originalParent = sourceContent.parent
+        
+        def parentChanged = targetContent != originalParent
         if (targetContent && parentChanged) {
             if (!triggerDomainEvent(targetContent, WeceemDomainEvents.contentShouldAcceptChild, [sourceContent])) {
                 throw new InvalidDestinationException("This node is not accepted by the target '${targetContent.absoluteURI}'")
@@ -813,7 +845,7 @@ class WcmContentRepositoryService implements InitializingBean {
 
         if (parentChanged) {
             if (!triggerDomainEvent(sourceContent, WeceemDomainEvents.contentShouldMove, [targetContent])) {
-                throw new InvalidDestinationException("This node cannot move to the target '${targetContent.absoluteURI}'")
+                throw new InvalidDestinationException("This node cannot move to the target '${targetContent?.absoluteURI}'")
             }
         }
         
@@ -856,7 +888,7 @@ class WcmContentRepositoryService implements InitializingBean {
         if (sourceContent.save(flush: true)) {
             updateCachingMetadataFor(sourceContent)
             
-            triggerEvent(sourceContent, WeceemEvents.contentDidMove)
+            triggerEvent(sourceContent, WeceemEvents.contentDidMove, [originalURI, originalParent])
         } else {
             log.error "Couldn't save node: ${sourceContent.errors}"
             if (sourceContent.errors.hasFieldErrors('aliasURI')) {
@@ -1081,7 +1113,6 @@ class WcmContentRepositoryService implements InitializingBean {
         if (content) {
             return updateNode(content, params)
         } else {
-            updateCachingMetadataFor(content)
             return [notFound:true]
         }        
     }
@@ -1193,13 +1224,17 @@ class WcmContentRepositoryService implements InitializingBean {
                     log.debug("Update node with id ${content.id} saved OK")
                 }
             
+                // Invalidate the old URI's info
                 invalidateCachingForURI(content.space, oldAbsURI)
+                // Invalidate the new URI's info - it might exist already but with no data (not found)
+                invalidateCachingForURI(content.space, content.absoluteURI)
                 updateCachingMetadataFor(content)
 
                 triggerEvent(content, WeceemEvents.contentDidGetUpdated)
 
                 return [content:content]
             }
+
         }
         if (log.debugEnabled) {
             log.debug("Update node with id ${content.id} failed with errors: ${content.errors}")
@@ -1313,6 +1348,23 @@ class WcmContentRepositoryService implements InitializingBean {
     }
     
     /**
+     * Run all repo service methods inside the closure without any permissions checks.
+     * Inherently dangerous but needed to build up correct fingerprint and dependency info.
+     * @todo Block access to this and security policy beans from Groovy script actions
+     */
+    protected withPermissionsBypass(Closure code) {
+        try {
+            permissionsBypass.set(true)
+
+            return code()
+            
+        } finally {
+            permissionsBypass.set(false)
+        }
+    }
+    
+    
+    /**
      * Find all the children of the specified node, within the content hierarchy, optionally filtering by a content type class
      * @todo we can probably improve performance by applying the typeRestriction using some HQL
      */ 
@@ -1324,6 +1376,11 @@ class WcmContentRepositoryService implements InitializingBean {
         assert sourceNode != null
 
         requirePermissions(sourceNode, [WeceemSecurityPolicy.PERMISSION_VIEW])        
+        
+        // Short circuit out of here without querying if content cannot have children
+        if (!triggerDomainEvent(sourceNode, WeceemDomainEvents.contentShouldAcceptChildren)) {
+            return []
+        }
         
         // @todo replace this with smarter queries on children instead of requiring loading of all child objects
         def typeRestriction = getContentClassForType(args.type)
@@ -1541,7 +1598,6 @@ class WcmContentRepositoryService implements InitializingBean {
                 if (log.debugEnabled) {
                     log.debug "Found content info in cache for uri $uriPath: ${cachedContentInfo}"
                 }
-                // @todo will this break with different table mapping strategy eg multiple ids of "1" with separate tables?
                 WcmContent c = WcmContent.get(cachedContentInfo.id)
                 // @todo re-load the lineage objects here, currently they are ids!
                 def reloadedLineage = cachedContentInfo.lineage?.collect { l_id ->
@@ -1719,16 +1775,20 @@ class WcmContentRepositoryService implements InitializingBean {
             if (!content) {
                 log.info "Creating new content node in space /${space.aliasURI} for server file ${relativePath}"
                 def newFileContent = createContentFile(space, relativePath)
-                createdContent << newFileContent
-                existingFiles.add(newFileContent)
-                content = newFileContent.parent
-                while (content) {
-                    if (!existingFiles.find { c -> c.absoluteURI == content.absoluteURI } ) {
-                        existingFiles.add(content)
+                if (newFileContent) {
+                    createdContent << newFileContent
+                    existingFiles.add(newFileContent)
+                    content = newFileContent.parent
+                    while (content) {
+                        if (!existingFiles.find { c -> c.absoluteURI == content.absoluteURI } ) {
+                            existingFiles.add(content)
+                        }
+                        content = content.parent
                     }
-                    content = content.parent
+                } else {
+                    log.warn "Skipping server file ${relativePath}, cannot be created"
                 }
-            }else{
+            } else {
                 log.info "Skipping server file ${relativePath}, already has content node"
                 existingFiles.add(content)
             }
@@ -1787,11 +1847,11 @@ class WcmContentRepositoryService implements InitializingBean {
                             status: publicStatus)
                     }
 
-                    createNode(content, ancestor)
+                    def ok = createNode(content, ancestor)
                     
-                    if (!content.save()) {
-                        log.error "Failed to save content ${content} - errors: ${content.errors}"
-                        assert false
+                    if (!ok) {
+                        log.warn "Failed to save content ${content} - errors: ${content.errors}"
+                        return null
                     } else {
                         createdContent = content
                     }
@@ -2038,6 +2098,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
                 log.debug "Publish: Transitioning content ${content} from status [${content.status.code}] to [${status.code}]"
             }
             content.status = status
+            content.save() // This shouldn't be needed, but without it we get "collection not processed by flush"
             count++
         }
         return count
@@ -2074,6 +2135,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
                 log.debug "Archive: Transitioning content ${content} from status [${content.status.code}] to [${archivedCode.code}]"
             }
             content.status = archivedCode
+            content.save() // This shouldn't be needed, but without it we get "collection not processed by flush"
             count++
         }
         return count

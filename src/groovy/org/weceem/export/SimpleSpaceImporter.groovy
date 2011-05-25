@@ -71,7 +71,9 @@ class SimpleSpaceImporter implements SpaceImporter {
                 def sid = entry.key
                 def childrenList = childrenMap[(sid)]
                 for (chid in childrenList){
-                    cnt.addToChildren(backrefMap[(chid)].content)
+                    if (backrefMap[chid]?.content) {
+                        cnt.addToChildren(backrefMap[chid].content)
+                    }
                 }
                 if (!cnt.save()){
                     log.error("Can't save content: ${cnt.aliasURI}, error: ${cnt.errors}")
@@ -134,7 +136,15 @@ class SimpleSpaceImporter implements SpaceImporter {
     def parse(def element, def document, def space){
         if (element.name() == "*") return
         def id = element.id.text().toLong()
-        def props = getDomainClassArtefact(element.name()).getPersistantProperties()
+        def clsName = element.name()
+        def cls = getDomainClassArtefact(element.name())
+        if (!cls) {
+            log.warn "Could not import node of type ${element.name()}, class not found - using WcmHTMLContent instead"
+            clsName = 'org.weceem.html.WcmHTMLContent'
+            cls = getDomainClassArtefact(clsName)
+        }
+        
+        def props = cls.getPersistentProperties()
         if (backrefMap[id] != null){
             return backrefMap[id]
         }
@@ -177,7 +187,7 @@ class SimpleSpaceImporter implements SpaceImporter {
         }
         def content = WcmContent.findWhere(aliasURI: params.aliasURI, space: space)
         if (!content){
-            content = getClass(element.name()).newInstance()
+            content = getClass(clsName).newInstance()
         }
         params.remove "id"
         params.remove "space"

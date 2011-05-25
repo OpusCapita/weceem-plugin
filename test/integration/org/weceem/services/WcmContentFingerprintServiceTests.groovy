@@ -14,7 +14,11 @@ class WcmContentFingerprintServiceTests extends AbstractWeceemIntegrationTest {
     def templateB
     def childA1
     def childA1comment1
+    def childA1comment1Child1
+    def childA1comment1Child2
     def childA1comment2
+    def childA1comment2Child1
+    def childA1comment2Child2
     def childA2
     def parentA
     def rootNode1
@@ -126,6 +130,25 @@ class WcmContentFingerprintServiceTests extends AbstractWeceemIntegrationTest {
                     content = "Child A1 comment 1 text"
                     template = templateA
                 }
+                
+                childA1comment1Child1 = content(WcmHTMLContent) {
+                    space = spaceA
+                    status = statusPublished
+                    title = "Child A1 comment 1 child 1"
+                    content = "Child A1 comment 1  child 1 text"
+                    template = templateA
+                }
+                childA1comment1Child2 = content(WcmHTMLContent) {
+                    space = spaceA
+                    status = statusPublished
+                    title = "Child A1 comment 1 child 2"
+                    content = "Child A1 comment 1  child 2 text"
+                    template = templateA
+                }
+                
+                childA1comment1.addToChildren(childA1comment1Child1)
+                childA1comment1.addToChildren(childA1comment1Child2)
+                
                 childA1comment2 = content(WcmHTMLContent) {
                     space = spaceA
                     status = statusPublished
@@ -134,6 +157,23 @@ class WcmContentFingerprintServiceTests extends AbstractWeceemIntegrationTest {
                     template = templateB
                 }
                 
+                childA1comment2Child1 = content(WcmHTMLContent) {
+                    space = spaceA
+                    status = statusPublished
+                    title = "Child A1 comment 2 child 1"
+                    content = "Child A1 comment 2 child 1 text"
+                    template = templateA
+                }
+                childA1comment2Child2 = content(WcmHTMLContent) {
+                    space = spaceA
+                    status = statusPublished
+                    title = "Child A1 comment 2 child 2"
+                    content = "Child A1 comment 2 child 2 text"
+                    template = templateA
+                }
+                childA1comment2.addToChildren(childA1comment2Child1)
+                childA1comment2.addToChildren(childA1comment2Child2)
+                    
                 childA1.addToChildren(childA1comment1)
                 childA1.addToChildren(childA1comment2)
             }
@@ -148,8 +188,10 @@ class WcmContentFingerprintServiceTests extends AbstractWeceemIntegrationTest {
         assertNotNull oldTemplateFP
         def oldParentAFP = wcmContentFingerprintService.getFingerprintFor(parentA)
         assertNotNull oldParentAFP
+/*
         def oldParentATreeFP = wcmContentFingerprintService.getTreeHashForDescendentsOf(parentA)
         assertNotNull oldParentATreeFP
+*/
         def oldChildA1FP = wcmContentFingerprintService.getFingerprintFor(childA1)
         assertNotNull oldChildA1FP
         def oldChildA2FP = wcmContentFingerprintService.getFingerprintFor(childA2)
@@ -167,7 +209,9 @@ class WcmContentFingerprintServiceTests extends AbstractWeceemIntegrationTest {
         // Now we expect finger prints for template and its dependents to be updated
         def newTemplateFP = wcmContentFingerprintService.getFingerprintFor(templateA)
         def newParentAFP = wcmContentFingerprintService.getFingerprintFor(parentA)
-        def newParentTreeAFP = wcmContentFingerprintService.getTreeHashForDescendentsOf(parentA)
+        println "+++++++++++++++++++++"
+//        def newParentTreeAFP = wcmContentFingerprintService.getTreeHashForDescendentsOf(parentA)
+        println "+++++++++++++++++++++"
         def newChildA1FP = wcmContentFingerprintService.getFingerprintFor(childA1)
         def newChildA2FP = wcmContentFingerprintService.getFingerprintFor(childA2)
 
@@ -183,10 +227,11 @@ class WcmContentFingerprintServiceTests extends AbstractWeceemIntegrationTest {
         assertTrue oldChildA1FP != newChildA1FP
 
         // parent tree should have changed, one of the children uses the template
+/*
         println "Old parent tree: $oldParentATreeFP - new: $newParentTreeAFP"
         assertNotNull newParentTreeAFP
         assertTrue oldParentATreeFP != newParentTreeAFP
-
+*/
         // ChildA2 must not have changed, it uses a different template
         assertEquals newChildA2FP, oldChildA2FP
         
@@ -207,8 +252,10 @@ class WcmContentFingerprintServiceTests extends AbstractWeceemIntegrationTest {
         assertNotNull oldTemplateFP
         def oldParentAFP = wcmContentFingerprintService.getFingerprintFor(parentA)
         assertNotNull oldParentAFP
+/*
         def oldParentATreeFP = wcmContentFingerprintService.getTreeHashForDescendentsOf(parentA)
         assertNotNull oldParentATreeFP
+*/
         def oldChildA1FP = wcmContentFingerprintService.getFingerprintFor(childA1)
         assertNotNull oldChildA1FP
         def oldChildA2FP = wcmContentFingerprintService.getFingerprintFor(childA2)
@@ -226,7 +273,7 @@ class WcmContentFingerprintServiceTests extends AbstractWeceemIntegrationTest {
         // Now we expect finger prints for template and its dependents to be updated
         def newTemplateFP = wcmContentFingerprintService.getFingerprintFor(templateA)
         def newParentAFP = wcmContentFingerprintService.getFingerprintFor(parentA)
-        def newParentTreeAFP = wcmContentFingerprintService.getTreeHashForDescendentsOf(parentA)
+//        def newParentTreeAFP = wcmContentFingerprintService.getTreeHashForDescendentsOf(parentA)
         def newChildA1FP = wcmContentFingerprintService.getFingerprintFor(childA1)
         def newChildA2FP = wcmContentFingerprintService.getFingerprintFor(childA2)
 
@@ -242,10 +289,11 @@ class WcmContentFingerprintServiceTests extends AbstractWeceemIntegrationTest {
         assertTrue oldChildA1FP != newChildA1FP
 
         // parent tree should have changed, one of the children uses the template
+/*
         println "Old parent tree: $oldParentATreeFP - new: $newParentTreeAFP"
         assertNotNull newParentTreeAFP
         assertTrue oldParentATreeFP != newParentTreeAFP
-
+*/
         // ChildA2 must not have changed, it uses a different template
         assertEquals newChildA2FP, oldChildA2FP
         
@@ -286,8 +334,10 @@ class WcmContentFingerprintServiceTests extends AbstractWeceemIntegrationTest {
         assertNotNull oldTemplateFP
         def oldParentAFP = wcmContentFingerprintService.getFingerprintFor(parentA)
         assertNotNull oldParentAFP
+/*
         def oldParentATreeFP = wcmContentFingerprintService.getTreeHashForDescendentsOf(parentA)
         assertNotNull oldParentATreeFP
+*/
         def oldChildA1FP = wcmContentFingerprintService.getFingerprintFor(childA1)
         assertNotNull oldChildA1FP
         def oldChildA2FP = wcmContentFingerprintService.getFingerprintFor(childA2)
@@ -307,9 +357,9 @@ class WcmContentFingerprintServiceTests extends AbstractWeceemIntegrationTest {
         assertNotNull newParentAFP
         assertTrue "The parent fingerprint did not change", oldParentAFP != newParentAFP
 
-        def newParentATreeFP = wcmContentFingerprintService.getTreeHashForDescendentsOf(parentA)
-        assertNotNull newParentATreeFP
-        assertTrue "The parent tree fingerprint did not change", oldParentATreeFP != newParentATreeFP
+//        def newParentATreeFP = wcmContentFingerprintService.getTreeHashForDescendentsOf(parentA)
+//        assertNotNull newParentATreeFP
+//       assertTrue "The parent tree fingerprint did not change", oldParentATreeFP != newParentATreeFP
 
         // Now we expect finger prints for template and its dependents to be updated
         def newTemplateFP = wcmContentFingerprintService.getFingerprintFor(templateA)
@@ -339,14 +389,15 @@ class WcmContentFingerprintServiceTests extends AbstractWeceemIntegrationTest {
 
         def oldParentAFP = wcmContentFingerprintService.getFingerprintFor(parentA)
         assertNotNull oldParentAFP
+/*
         def oldParentATreeFP = wcmContentFingerprintService.getTreeHashForDescendentsOf(parentA)
         assertNotNull oldParentATreeFP
-
+*/
         def oldChildA1FP = wcmContentFingerprintService.getFingerprintFor(childA1)
         assertNotNull oldChildA1FP
-        def oldChildA1TreeFP = wcmContentFingerprintService.getTreeHashForDescendentsOf(childA1)
+/*        def oldChildA1TreeFP = wcmContentFingerprintService.getTreeHashForDescendentsOf(childA1)
         assertNotNull oldChildA1TreeFP
-
+*/
         def oldChildA1comment1FP = wcmContentFingerprintService.getFingerprintFor(childA1comment1)
         assertNotNull oldChildA1comment1FP
         def oldChildA1comment2FP = wcmContentFingerprintService.getFingerprintFor(childA1comment2)
@@ -370,6 +421,7 @@ class WcmContentFingerprintServiceTests extends AbstractWeceemIntegrationTest {
         assertTrue "The grandparent fingerprint did not change", oldParentAFP != newParentAFP
 
         // Grandparent tree check...
+/*
         def newParentATreeFP = wcmContentFingerprintService.getTreeHashForDescendentsOf(parentA)
         assertNotNull newParentATreeFP
         assertTrue "The grandparent tree fingerprint did not change", oldParentATreeFP != newParentATreeFP
@@ -378,7 +430,7 @@ class WcmContentFingerprintServiceTests extends AbstractWeceemIntegrationTest {
         def newChildA1TreeFP = wcmContentFingerprintService.getTreeHashForDescendentsOf(childA1)
         assertNotNull newChildA1TreeFP
         assertTrue "The parent tree fingerprint did not change", oldChildA1TreeFP != newChildA1TreeFP
-
+*/
         // Now we expect finger prints for template and its dependents to be updated
         def newTemplateFP = wcmContentFingerprintService.getFingerprintFor(templateA)
         def newChildA1FP = wcmContentFingerprintService.getFingerprintFor(childA1)
@@ -409,6 +461,33 @@ class WcmContentFingerprintServiceTests extends AbstractWeceemIntegrationTest {
         assertEquals newChildA1comment1FP, wcmContentFingerprintService.getFingerprintFor(childA1comment1)        
     }
     
+    void testDeepFingerprintCalculationFromCold() {
+        initDeepBlogRepo()
+        
+        def commentChildFP = wcmContentFingerprintService.getFingerprintFor(childA1comment1Child1)
+        assertNotNull commentChildFP
+
+        def commentFP = wcmContentFingerprintService.getFingerprintFor(childA1comment1)
+        assertNotNull commentFP
+
+    }
+/*    
+    void testDeepTreeFingerprintCalculationFromCold() {
+        initDeepBlogRepo()
+        
+        def n = childA1comment1Child1
+        while (n = n.parent) {
+            def treeFP = wcmContentFingerprintService.getTreeHashForDescendentsOf(n)
+            assertNotNull treeFP
+        }
+
+        n = childA1comment1
+        while (n = n.parent) {
+            def treeFP = wcmContentFingerprintService.getTreeHashForDescendentsOf(n)
+            assertNotNull treeFP
+        }
+    }
+*/    
     void dumpInfo() {
         wcmContentDependencyService.dumpDependencyInfo(true)
         wcmContentFingerprintService.dumpFingerprintInfo(true)

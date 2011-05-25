@@ -43,6 +43,8 @@ class ContentSubmissionControllerTests extends GroovyTestCase {
             ]
             afterPropertiesSet()
         }
+        secSvc.securityDelegate.getUserRoles = { -> ['ROLE_ADMIN'] }
+
         con.wcmContentRepositoryService = new WcmContentRepositoryService()
         con.wcmContentRepositoryService.wcmCacheService = new WcmCacheService()
         con.wcmContentRepositoryService.wcmCacheService.weceemCacheManager = new net.sf.ehcache.CacheManager()

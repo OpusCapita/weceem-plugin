@@ -5,7 +5,9 @@ import org.weceem.content.WcmContent
 class WeceemDomainEvents {
     static events = {
         /* Called before a new node is created. Return true to allow the creation */
-        contentShouldBeCreated { WcmContent newNode -> }
+        contentShouldBeCreated { WcmContent parentConent -> }
+        /* Called just before saving the node */
+        contentWillBeCreated { WcmContent parentConent -> }
         /* Called after a node has been created, so that it can intialize anything that depends on it */
         contentDidGetCreated()
 
@@ -25,7 +27,7 @@ class WeceemDomainEvents {
         /* Called before a node is moved to a new parent. Return true to permit the move. Parent may be null */
         contentShouldMove { WcmContent newParent -> }
         /* Called after a node is moved to a new parent. */
-        contentDidMove()
+        contentDidMove { String previousURL, WcmContent previousParent -> }
 
         /* Called to establish whether this node can have children. Return true to permit addition of children */
         contentShouldAcceptChildren()

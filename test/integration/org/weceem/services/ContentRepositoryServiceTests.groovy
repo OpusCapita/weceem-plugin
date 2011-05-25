@@ -27,8 +27,11 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     def defaultDocSubIndexHtml
     def defaultDocSubParent
     def defaultDocSubParent2
-    
+    def defaultDocTestFolder
+    def defaultDocTestFolderIndex
+
     def spaceBnodeA
+    def spaceBdefaultDoc
     
     def extraNode
 
@@ -148,6 +151,23 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         defaultDocSubParent2.children << defaultDocSubIndexHtml
         assert defaultDocSubParent2.save()
         
+        defaultDocTestFolder = new WcmFolder(title: 'default test folder', aliasURI: 'defaultTestFolder',
+            status: defStatus,
+            createdBy: 'admin', createdOn: new Date(),
+            space: spaceA)
+        assert defaultDocTestFolder.save(flush:true)
+                           
+        defaultDocTestFolderIndex = new WcmHTMLContent(title: 'folder index', aliasURI: 'index',
+            parent: defaultDocTestFolder,
+            content: 'folder index content', status: defStatus,
+            createdBy: 'admin', createdOn: new Date(),
+            space: spaceA)
+        assert defaultDocTestFolder.save(flush:true)
+
+        defaultDocTestFolder.children = new TreeSet()  
+        defaultDocTestFolder.children << defaultDocTestFolderIndex
+        assert defaultDocTestFolder.save()
+
         // Tree structure:
         //
         //   a
@@ -164,6 +184,13 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
                 space: spaceB, 
                 orderIndex: 0).save()
         assert spaceBnodeA
+        
+        spaceBdefaultDoc = new WcmHTMLContent(title: 'spaceb default', aliasURI: 'index',
+                content: 'spaceb default page', status: defStatus,
+                createdBy: 'admin', createdOn: new Date(),
+                space: spaceB, 
+                orderIndex: 1).save()
+        assert spaceBdefaultDoc
         
         wcmContentRepositoryService.wcmContentDependencyService.reset()
         wcmContentRepositoryService.invalidateCachingForSpace(spaceA)
@@ -186,6 +213,10 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         assert res.space.id == spaceA.id
         assertEquals 'anything', res.uri
         
+        res = wcmContentRepositoryService.resolveSpaceAndURI('jcatalog/')
+        assert res.space.id == spaceA.id
+        assertEquals '', res.uri
+
         res = wcmContentRepositoryService.resolveSpaceAndURI('jcatalog/anything')
         assert res.space.id == spaceA.id
         assertEquals 'anything', res.uri
@@ -197,6 +228,10 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         res = wcmContentRepositoryService.resolveSpaceAndURI('libs/jquery/jquery-1.4.2.min.js')
         assert res.space.id == spaceC.id
         assertEquals 'libs/jquery/jquery-1.4.2.min.js', res.uri
+
+        res = wcmContentRepositoryService.resolveSpaceAndURI('other/')
+        assert res.space.id == spaceB.id
+        assertEquals '', res.uri
     }
 
     void testFindContentForPath() {
@@ -219,8 +254,14 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         Closure doTests = { withCache ->
             assertEquals defaultDocRootIndex.ident(), 
                 wcmContentRepositoryService.findContentForPath('', spaceA, withCache).content?.ident()
+
             assertEquals defaultDocRootIndex.ident(), 
                 wcmContentRepositoryService.findContentForPath('index', spaceA, withCache).content?.ident()
+
+            assertEquals spaceBdefaultDoc.ident(), 
+                wcmContentRepositoryService.findContentForPath('index', spaceB, withCache).content?.ident()
+
+
             assertEquals defaultDocSubParent.ident(), 
                 wcmContentRepositoryService.findContentForPath('defaultTest', spaceA, withCache).content?.ident()
             assertEquals defaultDocSubIndex.ident(), 
@@ -229,6 +270,14 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
                 wcmContentRepositoryService.findContentForPath('defaultTest2', spaceA, withCache).content?.ident()
             assertEquals defaultDocSubIndexHtml.ident(), 
                 wcmContentRepositoryService.findContentForPath('defaultTest2/', spaceA, withCache).content?.ident()
+
+            // Test for non-standaloneContent types - this MUST NOT resolve to default docs
+            assertEquals defaultDocTestFolder.ident(), 
+                wcmContentRepositoryService.findContentForPath('defaultTestFolder', spaceA, withCache).content?.ident()
+
+            // Test for non-standaloneContent types - this MUST resolve to default doc
+            assertEquals defaultDocTestFolderIndex.ident(), 
+                wcmContentRepositoryService.findContentForPath('defaultTestFolder/', spaceA, withCache).content?.ident()
         }
         
         // Do first with no caching
@@ -243,6 +292,25 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         assertEquals nodeA.id, wcmContentRepositoryService.findContentForPath('contentA', spaceA).content.id
         assertEquals nodeB.id, wcmContentRepositoryService.findContentForPath('contentA/contentB', spaceA).content.id
 
+        def result = wcmContentRepositoryService.updateNode(nodeA.id.toString(), [aliasURI:'changed-alias'])
+        assertTrue(!result.notFound)
+        assertTrue(!result.errors)
+        
+        assertNull wcmContentRepositoryService.findContentForPath('contentA', spaceA)
+        assertNull wcmContentRepositoryService.findContentForPath('contentA/contentB', spaceA)
+        assertEquals nodeA.id, wcmContentRepositoryService.findContentForPath('changed-alias', spaceA).content.id
+        assertEquals nodeB.id, wcmContentRepositoryService.findContentForPath('changed-alias/contentB', spaceA).content.id
+    }    
+    
+
+    void testUpdatingNodeInvalidatesPreviouslyNotFoundCacheEntry() {
+        assertEquals nodeA.id, wcmContentRepositoryService.findContentForPath('contentA', spaceA).content.id
+        assertEquals nodeB.id, wcmContentRepositoryService.findContentForPath('contentA/contentB', spaceA).content.id
+
+        // First, foul the cache
+        wcmContentRepositoryService.findContentForPath('changed-alias', spaceA)
+
+        // Now update to the URL that was sought
         def result = wcmContentRepositoryService.updateNode(nodeA.id.toString(), [aliasURI:'changed-alias'])
         assertTrue(!result.notFound)
         assertTrue(!result.errors)
@@ -516,7 +584,6 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         assertNull nodeB.parent
         assert nodeA.children.contains(nodeB) == false
 
-
         // Make sure the content uri cache has been invalidated for old URI
         nodeBInfo = wcmContentRepositoryService.getCachedContentInfoFor(spaceA, 'contentA/contentB')
         assertEquals "Space A contentB old URI info should have been invalidated", null, nodeBInfo
@@ -717,7 +784,7 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     void testFindAllRootContent() {
         def nodes = wcmContentRepositoryService.findAllRootContent(spaceA)
         println "nodes: $nodes"
-        assertEquals 5, nodes.size()
+        assertEquals 6, nodes.size()
         assertTrue nodes.contains(nodeA)
         assertTrue nodes.contains(template)
     }
@@ -725,7 +792,7 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     void testFindAllContent() {
         def nodes = wcmContentRepositoryService.findAllContent(spaceA)
         println "nodes: $nodes"
-        assertEquals 13, nodes.size()
+        assertEquals 15, nodes.size()
         assertTrue nodes.contains(nodeA)
         assertTrue nodes.contains(nodeB)
         assertTrue nodes.contains(nodeC)
@@ -739,7 +806,7 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     void testFindAllContentWithType() {
         def nodes = wcmContentRepositoryService.findAllContent(spaceA, [type: 'org.weceem.html.WcmHTMLContent'])
         println "nodes: $nodes"
-        assertEquals 8, nodes.size()
+        assertEquals 9, nodes.size()
         assertTrue nodes.contains(nodeA)
         assertTrue nodes.contains(nodeB)
         assertTrue nodes.contains(nodeC)
@@ -763,11 +830,11 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     }
     
     void testCountContent() {
-        assertEquals(13, wcmContentRepositoryService.countContent(spaceA))
+        assertEquals(15, wcmContentRepositoryService.countContent(spaceA))
     }
     
     void testCountContentWithType() {
-        assertEquals(8, wcmContentRepositoryService.countContent(spaceA, [type: 'org.weceem.html.WcmHTMLContent']))
+        assertEquals(9, wcmContentRepositoryService.countContent(spaceA, [type: 'org.weceem.html.WcmHTMLContent']))
     }
     
     void testCountContentWithStatus() {
@@ -805,7 +872,7 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
     }
 
     void testCreateNodeFailsForInvalidContent() {
-        def content = new WcmHTMLContent()
+        def content = new WcmHTMLContent(title:'test')
         content.space = spaceA
         assertFalse content.validate()
         assertFalse wcmContentRepositoryService.createNode(content, null)

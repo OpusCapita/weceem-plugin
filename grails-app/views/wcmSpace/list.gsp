@@ -24,7 +24,7 @@
                 <td>${fieldValue(bean: space, field: 'aliasURI')}</td>
                 <td>
                   <g:link action="edit" class="button ui-corner-all" id="${space.id}"><g:message code="command.edit"/></g:link>
-                  <g:link action="delete" class="button ui-corner-all" id="${space.id}"><g:message code="command.delete"/></g:link>
+                  <g:link action="confirmDelete" class="button ui-corner-all" id="${space.id}"><g:message code="command.delete"/></g:link>
                   <g:link action="importSpace" class="button ui-corner-all" id="${space.id}"><g:message code="space.command.import"/></g:link>
                   <g:link action="exportSpace" class="button ui-corner-all" id="${space.id}"><g:message code="space.command.export"/></g:link>
                 </td>

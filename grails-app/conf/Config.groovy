@@ -8,13 +8,13 @@ grails.mime.file.extensions = false // enables the parsing of file extensions fr
 org.weceem.plugin.standalone="true"
 
 //weceem.content.prefix="content"
-//weceem.admin.prefix="cms/admin"
+//weceem.admin.prefix="wcm-admin"
 //weceem.tools.prefix="cms/tools"
 //weceem.admin.layout="weceemadmin-alt"
 //weceem.create.default.space = false
 //weceem.default.space.template = "file:/.....zip"
-weceem.space.templates = [default: "classpath:/org/weceem/resources/default-space-template.zip", 
-   basic:"classpath:/org/weceem/resources/basic-space-template.zip"]
+//weceem.space.templates = [default: "classpath:/org/weceem/resources/default-space-template.zip", 
+//   basic:"classpath:/org/weceem/resources/basic-space-template.zip"]
 //   fun:"classpath:/my/app/fun-template.zip"]
 
 log4j = {
@@ -28,8 +28,8 @@ log4j = {
     debug   'grails.app.controller',
             'grails.app.service',
             'grails.app.task',
-            'org.codehaus.groovy.grails.web.servlet',  //  controllers
-    	    'org.codehaus.groovy.grails.web.pages', //  GSP
+//            'org.codehaus.groovy.grails.web.servlet',  //  controllers
+//    	    'org.codehaus.groovy.grails.web.pages', //  GSP
             'grails.app.domain'
 //            'org.codehaus.groovy.grails.web.mapping' // URL mapping
 

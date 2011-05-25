@@ -25,6 +25,8 @@ class ContentControllerTests extends GroovyTestCase {
     def nodeA
     def nodeB
     def grailsApplication
+    def folder
+    def defaultDoc
     
     WcmContentController mockedController() {
         def con = new WcmContentController()
@@ -40,11 +42,8 @@ class ContentControllerTests extends GroovyTestCase {
     void setUp() {
         def servletContext = new MockServletContext(
                 'test/files/contentRepository', new FileSystemResourceLoader())
-/*        servletContext.setAttribute(
-                GrailsApplicationAttributes.APPLICATION_CONTEXT,
-                applicationContext)
-*/
         ServletContextHolder.servletContext = servletContext
+
         def defStatus = new WcmStatus(code: 400, description: "published", publicContent: true)
         assert defStatus.save(flush:true)
 
@@ -110,6 +109,18 @@ class ContentControllerTests extends GroovyTestCase {
                                               parent: nodeLangDE, target: nodeB, status: defStatus,
                                               space: spaceA, orderIndex: 3)
         assert virtContent2.save(flush:true)
+
+
+        def folder = new WcmFolder(title: 'folder', aliasURI: 'folder',
+            status: defStatus,
+            space: spaceA)
+
+        def defaultDoc = new WcmHTMLContent(title: 'default doc', aliasURI: 'index',
+            status: defStatus, content: 'default doc',
+            space: spaceA)
+        folder.addToChildren(defaultDoc)
+        assert folder.save(flush:true)
+        assert defaultDoc.save(flush:true)
     }
     
     void testDraftContentNotViewableByGuest() {
@@ -140,6 +151,35 @@ class ContentControllerTests extends GroovyTestCase {
     
     }
 
+    void testDefaultDocumentUnderFolder() {
+        def con = mockedController()
+
+        // Clear roles
+        con.wcmSecurityService.securityDelegate.getUserRoles = { -> ['ROLE_GUEST'] }
+
+        con.params.uri = "/jcatalog/folder"
+        con.show()
+
+        assertEquals 200, con.response.status
+
+        println "resp type: "+con.response.contentType
+        con.response.headerNames.each { n ->
+            println "$n = "+con.response.getHeader(n) 
+        }
+        
+        println con.response.contentAsString
+
+        assertTrue con.response.contentAsString.contains('default doc')
+
+        con.params.uri = "/jcatalog/folder/"
+        con.show()
+        assertEquals 200, con.response.status
+
+        println con.response.contentAsString
+        assertTrue con.response.contentAsString.contains('default doc')
+    }
+    
+    
     void testVirtualContentRenderRoot() {
         /*
 

@@ -40,6 +40,10 @@ class RepositoryControllerTests extends GroovyTestCase {
                 GrailsApplicationAttributes.APPLICATION_CONTEXT,
                 applicationContext)
         ServletContextHolder.servletContext = servletContext
+        
+        wcmContentRepositoryService.wcmSecurityService.securityDelegate.getUserRoles = { -> ['ROLE_ADMIN'] }
+        
+        
         defStatus = new WcmStatus(code: 400, description: "published", publicContent: true)
         assert defStatus.save(flush:true)
         spaceA = new WcmSpace(name: 'jcatalog', aliasURI: 'jcatalog').save(flush: true)

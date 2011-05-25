@@ -77,7 +77,7 @@ class WcmContent implements Comparable, Taggable {
     String metaSource      // Entity that was original source of the content
     String metaCopyright   // Copyright for the content (aka Rights)
     
-    Integer validFor = VALID_FOR_DAY  // cache maxAge
+    Integer validFor = VALID_FOR_HOUR  // cache maxAge
 
     String contentDependencies
 
@@ -99,6 +99,8 @@ class WcmContent implements Comparable, Taggable {
     static hasOne = [parent: WcmContent]
 
     static final VALID_FOR_DAY = 60*60*24
+    static final VALID_FOR_HOUR = 60*60
+    static final VALID_FOR_5MIN = 60*5
     
     static constraints = {
         title(size:1..100, nullable: false, blank: false)
@@ -106,7 +108,7 @@ class WcmContent implements Comparable, Taggable {
         space(nullable: false)
         status(nullable: false)
         orderIndex(nullable: true)
-        validFor(nullable: true, inList:[0, 60, 60*5, 60*60, VALID_FOR_DAY, 60*60*24*7, 60*60*24*30, 60*60*24*300])
+        validFor(nullable: true, inList:[0, 60, VALID_FOR_5MIN, VALID_FOR_HOUR, VALID_FOR_DAY, 60*60*24*7, 60*60*24*30, 60*60*24*300])
         parent(nullable: true, lazy:true)
         createdBy(nullable: true)
         createdOn(nullable: true)
@@ -236,18 +238,29 @@ class WcmContent implements Comparable, Taggable {
     }
 
     public void createAliasURI(parent) {
-        def uri = (title.size() < 30) ? title : title.substring(0, 30)
-        aliasURI = uri.replaceAll(INVALID_ALIAS_URI_CHARS_PATTERN, '-')
+        if (title) {
+            def uri = (title.size() < 30) ? title : title.substring(0, 30)
+            aliasURI = uri.replaceAll(INVALID_ALIAS_URI_CHARS_PATTERN, '-')
+        }
     }
 
     public String getAbsoluteURI() {
         def uri = new StringBuilder()
         uri << aliasURI
         def c = this
+        def visitedNodes = [this.ident()]
         while (c.parent != null) {
             c = c.parent
             uri.insert(0,'/')
             uri.insert(0,c.aliasURI)
+            if (visitedNodes.contains(c.ident())) {
+                def msg = "Cannot calculate absoluteURI of content with id ${ident()} and "+
+                    "aliasURI $aliasURI because there is a loop in the ancestry to ${c.ident()} (${c.aliasURI})"
+                log.error(msg)
+                throw new IllegalArgumentException(msg)
+            } else {
+                visitedNodes << c.ident() 
+            }
         }
         return uri.toString()
     }

@@ -26,7 +26,8 @@ class WcmSpaceController {
         def space = new WcmSpace()
         // Using bindData to work around Grails 1.2m2 bugs, change to .properties when 1.2-RC1 is live
         bindData(space, params)
-        def templs = wcmContentRepositoryService.spaceTemplates
+        def templs = new TreeMap()
+        templs.putAll(wcmContentRepositoryService.spaceTemplates)
         return ['space': space, templates:templs]
     }
 
@@ -79,6 +80,10 @@ class WcmSpaceController {
         }
     }
 
+    def confirmDelete = {
+        [space: WcmSpace.get(params.id)]
+    } 
+    
     def importSpace = {
         return [importers: wcmImportExportService.importers, space: WcmSpace.get(params.id)]
     }
