@@ -1107,7 +1107,9 @@ class WcmContentRepositoryService implements InitializingBean {
      * @return a map containing an optional "errors" list property and optional notFound boolean property
      */
     def updateNode(String id, def params) {
-        WcmContent content = WcmContent.get(id)
+        // Eager fetch to avoid problems with lazy loading if errors occur
+        WcmContent content = WcmContent.findById(id, [fetch:[children:'eager']])
+        
         requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_EDIT])        
 
         if (content) {
