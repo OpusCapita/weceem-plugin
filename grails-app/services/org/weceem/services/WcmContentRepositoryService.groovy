@@ -1207,10 +1207,16 @@ class WcmContentRepositoryService implements InitializingBean {
                 content.createAliasURI(content.parent)
             }
 
-            // Auto-set publishFrom to now if content is created as public but no publishFrom specified
-            // Required for blogs and sort by publishFrom to work
             if (content.status.publicContent && (content.publishFrom == null)) {
+                // Auto-set publishFrom to now if content is created as public but no publishFrom specified
+                // Required for blogs and sort by publishFrom to work
                 content.publishFrom = new Date()
+            } else if (!content.status.publicContent && content.publishFrom && (content.publishFrom < new Date())) {
+                // Automatically clear the publishFrom if it was in the past, as it does not make sense and will
+                // be automatically re-published. Future publishFrom must have been manually set so 
+                // its ok to keep it. Doing this stops content with auto publishFrom being pushed
+                // back to published soon after edit to non-published without manually clearing publishFrom
+                content.publishFrom = null
             }
 
             def ok = content.validate()
