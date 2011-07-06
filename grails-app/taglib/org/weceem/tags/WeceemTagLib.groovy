@@ -319,8 +319,8 @@ class WeceemTagLib {
                 }
 
                 def contentInfo = wcmContentRepositoryService.findContentForPath(nodePath, space)
-                if (!contentInfo.content) {
-                    throwTagError "Tag cannot locate a content node specified in [$ATTR_PATH] attribute with value [$nodePath]"
+                if (!contentInfo?.content) {
+                    return null
                 }
                 node = contentInfo.content
             }
@@ -516,6 +516,7 @@ class WeceemTagLib {
     
     def createLink = { attrs, body -> 
         def space = attrs.remove(ATTR_SPACE)
+        def path = attrs[ATTR_PATH]
         
         if (space != null) {
             space = WcmSpace.findByAliasURI(space)
@@ -534,12 +535,12 @@ class WeceemTagLib {
             log.error ("Tag [wcm:createLink] cannot create a link to the content as "+
                 "there is no content node at that URI")
             out << g.createLink(controller:'wcmContent', action:'notFound', params:[path:path])
+        } else {
+            attrs.params = [uri:WeceemTagLib.makeFullContentURI(content)]
+            attrs.controller = 'wcmContent'
+            attrs.action = 'show'
+            out << g.createLink(attrs)
         }
-        
-        attrs.params = [uri:WeceemTagLib.makeFullContentURI(content)]
-        attrs.controller = 'wcmContent'
-        attrs.action = 'show'
-        out << g.createLink(attrs)
     }
     
     /**
@@ -668,9 +669,10 @@ class WeceemTagLib {
     
     def ifUserCanView = { attrs, body ->
         def node = resolveNode(attrs)
-
-        if (wcmSecurityService.isUserAllowedToViewContent(node)) {
-            out << body()
+        if (node) {
+            if (wcmSecurityService.isUserAllowedToViewContent(node)) {
+                out << body()
+            }
         }
     }
     
