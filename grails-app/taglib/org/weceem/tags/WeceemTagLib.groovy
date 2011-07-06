@@ -241,8 +241,8 @@ class WeceemTagLib {
     }
          
     /**
-     * Renders a breadcrumb trail. Renders up to but not including the current page, from the root of
-     * the space. 
+     * Renders a breadcrumb trail. Renders entries including the current page, from the root of
+     * the space, but the final element is not a link
      * Attributes:
      *  divider - an optional string that is the HTML used between breadcrumb elements. HTML encode the value in your GSP
      *  custom - an optional value, which if evaluates to boolean "true" will use the supplied tag body to render each
@@ -432,6 +432,7 @@ class WeceemTagLib {
                 last: last, 
                 firstClass: firstClass,
                 lastClass: lastClass,
+                activeClass: activeClass,
                 levelClassPrefix: levelClassPrefix,
                 levels: levels-1,
                 link: createLink(node:n),
