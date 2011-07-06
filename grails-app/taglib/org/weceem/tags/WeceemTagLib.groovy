@@ -361,7 +361,11 @@ class WeceemTagLib {
 
         def types = attrs[ATTR_TYPES] ?: [org.weceem.html.WcmHTMLContent]
         def custom = attrs[ATTR_CUSTOM]?.toString()?.toBoolean()
-        def levels = attrs[ATTR_LEVELS]?.toString()?.toInteger() ?: 2
+        def levels = attrs[ATTR_LEVELS] == null ? 2 : attrs[ATTR_LEVELS]
+        if (!(levels instanceof Number)) {
+            levels = levels.toString().toInteger()
+        }
+        
         def bodyToUse = body
         if (!custom) {
             bodyToUse = DEFAULT_MENU_BODY.clone()
@@ -412,7 +416,7 @@ class WeceemTagLib {
         if (log.debugEnabled) {
             log.debug "Rendering menu for level [$currentLevel] nodes: ${levelnodes}"
         }
-
+        
         def o = out
         levelnodes?.eachWithIndex { n, i -> 
             if (!custom && first) {
