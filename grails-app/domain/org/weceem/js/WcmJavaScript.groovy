@@ -41,7 +41,7 @@ class WcmJavaScript extends WcmContent {
     String getMimeType() { "text/javascript" }
 
     static constraints = {
-        content(nullable: false, maxSize: 500000) // 500k
+        content(nullable: false, maxSize: WcmContent.MAX_CONTENT_SIZE) // 500k
         status(nullable: false) // Workaround for Grails 1.1.1 constraint inheritance bug
     }
 

@@ -51,7 +51,7 @@ class WcmWikiItem extends WcmContent {
     }
     
     static constraints = {
-        content(nullable: false, maxSize: 65536)
+        content(nullable: false, maxSize: WcmContent.MAX_CONTENT_SIZE)
         keywords(nullable: true)
         template(nullable: true)
         status(nullable: false) // Workaround for Grails 1.1.1 constraint inheritance bug

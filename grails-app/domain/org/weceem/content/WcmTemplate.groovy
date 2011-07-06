@@ -59,7 +59,7 @@ class WcmTemplate extends WcmContent {
     static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "template-32.png"]
 
     static constraints = {
-        content(nullable: false, maxSize: 65536)
+        content(nullable: false, maxSize: WcmContent.MAX_CONTENT_SIZE)
         userSpecificContent(nullable: true)
     }
     

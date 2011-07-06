@@ -77,7 +77,7 @@ class WcmWidget extends WcmContent {
     static transients = WcmContent.transients
     
     static constraints = {
-        content(nullable: false, maxSize: 65536)
+        content(nullable: false, maxSize: WcmContent.MAX_CONTENT_SIZE)
         width(nullable: true)
         height(nullable: true)
         color(nullable: true)
