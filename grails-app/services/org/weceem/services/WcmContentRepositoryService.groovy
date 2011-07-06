@@ -813,20 +813,23 @@ class WcmContentRepositoryService implements InitializingBean {
         }
 
         // Do an ugly check for unique uris at root
-        if (!targetContent) {
-            def criteria = WcmContent.createCriteria()
-            def nodes = criteria {
+        def criteria = WcmContent.createCriteria()
+        def nodes = criteria {
+            eq("space", sourceContent.space)
+            if (!targetContent) {
                 isNull("parent")
-                eq("aliasURI", sourceContent.aliasURI)
-                not {
-                    idEq(sourceContent.ident())
-                }
+            } else {
+                eq('parent.id', target.ident())
             }
-            
-            if (nodes.size() > 0){
-                throw new IllegalArgumentException("Another node at the root of your repository has the same aliasURI")
-            } 
+            eq("aliasURI", sourceContent.aliasURI)
+            not {
+                idEq(sourceContent.ident())
+            }
         }
+        
+        if (nodes.size() > 0){
+            throw new IllegalArgumentException("Another node at the root of your repository has the same aliasURI")
+        } 
 
         // We need this to invalidate caches
         def originalURI = sourceContent.absoluteURI
