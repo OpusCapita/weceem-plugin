@@ -370,15 +370,6 @@ function showDropInsertionPoint(targetItem, ui) {
             mouseY -= offset.top;
         }
         
-/*        debug("Calc'd pos: "+mouseLeft+', '+mouseY);
-        debug("Pos: "+ui.position.left+', '+ui.position.top);
-        debug("Ofs: "+ui.offset.left+', '+ui.offset.top);
-        debug("helper: "+ui.helper);
-        debug("helper pos L: "+$(ui.helper).position().left);
-        debug("helper ofs L: "+$(ui.helper).offset().left);
-        debug("helper parent: "+$(ui.helper).parent().attr('id'));
-        debug("helper ofs parent: "+$(ui.helper).offsetParent().nodeName);
-*/
         var targetItemMidPoint = dropOffset.top + ($(currentDropTarget).height() >> 1);
         var targetItemLeft = $('div.item', currentDropTarget).position().left;
         //debug("targetItemLeft: "+targetItemLeft+", itemtop "+dropOffset.top+", Midp: "+targetItemMidPoint);
