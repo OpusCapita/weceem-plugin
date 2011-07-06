@@ -813,17 +813,13 @@ class WcmContentRepositoryService implements InitializingBean {
         }
 
         // Do an ugly check for unique uris at root
-        if (!targetContent){
+        if (!targetContent) {
             def criteria = WcmContent.createCriteria()
             def nodes = criteria {
-                if (targetContent){
-                    eq("parent.id", targetContent.id)
-                }else{
-                    isNull("parent")
-                }
+                isNull("parent")
                 eq("aliasURI", sourceContent.aliasURI)
-                not{
-                    eq("id", sourceContent.id)
+                not {
+                    idEq(sourceContent.ident())
                 }
             }
             
