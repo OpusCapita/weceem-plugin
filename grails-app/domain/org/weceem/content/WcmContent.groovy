@@ -30,6 +30,7 @@ class WcmContent implements Comparable, Taggable {
     static VALID_ALIAS_URI_CHARS = 'A-Za-z0-9_\\-\\.'
     static INVALID_ALIAS_URI_CHARS_PATTERN = "[^"+VALID_ALIAS_URI_CHARS+"]"
     static VALID_ALIAS_URI_PATTERN = "["+VALID_ALIAS_URI_CHARS+"]+"
+    static MAX_CONTENT_SIZE = 500000
     
     transient def wcmSecurityService
     

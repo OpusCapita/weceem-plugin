@@ -241,8 +241,8 @@ class WeceemTagLib {
     }
          
     /**
-     * Renders a breadcrumb trail. Renders up to but not including the current page, from the root of
-     * the space. 
+     * Renders a breadcrumb trail. Renders entries including the current page, from the root of
+     * the space, but the final element is not a link
      * Attributes:
      *  divider - an optional string that is the HTML used between breadcrumb elements. HTML encode the value in your GSP
      *  custom - an optional value, which if evaluates to boolean "true" will use the supplied tag body to render each
@@ -251,7 +251,7 @@ class WeceemTagLib {
     def breadcrumb = { attrs, body -> 
         def node = request[WcmContentController.REQUEST_ATTRIBUTE_NODE]
         def lineage = request[WcmContentController.REQUEST_ATTRIBUTE_PAGE].lineage
-        def div = attrs.divider?.decodeHTML() ?: ' &gt; '
+        def div = (attrs.divider != null) ? attrs.divider.decodeHTML() : ' &gt; '
         def first = true
         if (!attrs.custom?.toString()?.toBoolean()) {
             body = { args -> 
@@ -260,23 +260,23 @@ class WeceemTagLib {
                     o << div
                 }
 
-                o << wcm.link(node:args.node) {
-                    out << args.node.titleForMenu.encodeAsHTML() 
-                } 
+                def title = args.breadcrumbNode.titleForMenu.encodeAsHTML() 
+                if (!args.last) {
+                    o << wcm.link(node:args.breadcrumbNode) {
+                        out << title
+                    } 
+                } else {
+                    o << "<span class=\"last\">${title}</span>"
+                }
                 return o.toString()
             }
         }
         
-        lineage.each { parent ->
-            if (parent != node) {
-                out << body(first:first, node:parent)
-            }
+        def nodes = lineage
+        nodes.each { current ->
+            out << body(first:first, last: current.ident() == node.ident(), breadcrumbNode:current)
             first = false
         }
-        if (!first) {
-            out << div
-        }
-        out << node.titleForMenu.encodeAsHTML()
     }
 
     static DEFAULT_MENU_BODY = { args -> 
@@ -319,8 +319,8 @@ class WeceemTagLib {
                 }
 
                 def contentInfo = wcmContentRepositoryService.findContentForPath(nodePath, space)
-                if (!contentInfo.content) {
-                    throwTagError "Tag cannot locate a content node specified in [$ATTR_PATH] attribute with value [$nodePath]"
+                if (!contentInfo?.content) {
+                    return null
                 }
                 node = contentInfo.content
             }
@@ -361,7 +361,11 @@ class WeceemTagLib {
 
         def types = attrs[ATTR_TYPES] ?: [org.weceem.html.WcmHTMLContent]
         def custom = attrs[ATTR_CUSTOM]?.toString()?.toBoolean()
-        def levels = attrs[ATTR_LEVELS]?.toString()?.toInteger() ?: 2
+        def levels = attrs[ATTR_LEVELS] == null ? 2 : attrs[ATTR_LEVELS]
+        if (!(levels instanceof Number)) {
+            levels = levels.toString().toInteger()
+        }
+        
         def bodyToUse = body
         if (!custom) {
             bodyToUse = DEFAULT_MENU_BODY.clone()
@@ -412,7 +416,7 @@ class WeceemTagLib {
         if (log.debugEnabled) {
             log.debug "Rendering menu for level [$currentLevel] nodes: ${levelnodes}"
         }
-
+        
         def o = out
         levelnodes?.eachWithIndex { n, i -> 
             if (!custom && first) {
@@ -428,6 +432,7 @@ class WeceemTagLib {
                 last: last, 
                 firstClass: firstClass,
                 lastClass: lastClass,
+                activeClass: activeClass,
                 levelClassPrefix: levelClassPrefix,
                 levels: levels-1,
                 link: createLink(node:n),
@@ -516,6 +521,7 @@ class WeceemTagLib {
     
     def createLink = { attrs, body -> 
         def space = attrs.remove(ATTR_SPACE)
+        def path = attrs[ATTR_PATH]
         
         if (space != null) {
             space = WcmSpace.findByAliasURI(space)
@@ -534,12 +540,12 @@ class WeceemTagLib {
             log.error ("Tag [wcm:createLink] cannot create a link to the content as "+
                 "there is no content node at that URI")
             out << g.createLink(controller:'wcmContent', action:'notFound', params:[path:path])
+        } else {
+            attrs.params = [uri:WeceemTagLib.makeFullContentURI(content)]
+            attrs.controller = 'wcmContent'
+            attrs.action = 'show'
+            out << g.createLink(attrs)
         }
-        
-        attrs.params = [uri:WeceemTagLib.makeFullContentURI(content)]
-        attrs.controller = 'wcmContent'
-        attrs.action = 'show'
-        out << g.createLink(attrs)
     }
     
     /**
@@ -668,9 +674,10 @@ class WeceemTagLib {
     
     def ifUserCanView = { attrs, body ->
         def node = resolveNode(attrs)
-
-        if (wcmSecurityService.isUserAllowedToViewContent(node)) {
-            out << body()
+        if (node) {
+            if (wcmSecurityService.isUserAllowedToViewContent(node)) {
+                out << body()
+            }
         }
     }
     

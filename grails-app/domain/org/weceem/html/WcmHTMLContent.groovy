@@ -76,7 +76,7 @@ class WcmHTMLContent extends WcmContent {
     }
     
     static constraints = {
-        content(nullable: false, maxSize: 500000)
+        content(nullable: false, maxSize: WcmContent.MAX_CONTENT_SIZE)
         keywords(nullable: true, blank: true, maxSize: 200)
         menuTitle(nullable: true, blank: true, maxSize: 40)
         htmlTitle(nullable: true, blank: true, maxSize: 400)

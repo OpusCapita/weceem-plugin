@@ -541,4 +541,62 @@ ACTIVE: false
         assertEquals 1, markup.ul.li.size()
         assertEquals "Child A2_1", markup.ul.li[0].a.text()
     }
+    
+    void testShallowMenu() {
+        def taglib = new WeceemTagLib()
+
+        def parentA
+        
+        createContent {
+            def childA1 = content(WcmHTMLContent) {
+                space = spaceA
+                status = statusA
+                title = "Child A1"
+                content = "Child A1 content"
+            }
+            def childA2 = content(WcmHTMLContent) {
+                space = spaceA
+                status = statusA
+                title = "Child A2"
+                content = "Child A2 content"
+            }
+
+            parentA = content(WcmHTMLContent) {
+                space = spaceA
+                status = statusA
+                title = "Parent A"
+                content = "Parent A content"
+            }
+            parentA.addToChildren(childA1)
+            parentA.addToChildren(childA2)
+
+            content(WcmHTMLContent) {
+                status = statusA
+                space = spaceA
+                title = "Parent B"
+                content = "Parent B content"
+            }
+        }
+        
+        def space = spaceA
+        
+        taglib.request.with {
+            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, parentA)
+            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_PAGE, WcmContentController.makePageInfo(parentA.aliasURI, parentA))
+            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_SPACE, space.aliasURI)
+        }
+    
+        def out = taglib.menu(levels:1) 
+        
+        out = out.toString()
+        
+        println "Menu tag yielded: ${out}"
+        
+        def markup = new XmlSlurper().parseText("<body>$out</body>")
+        
+        assertEquals 1, markup.ul.size()
+        assertEquals 2, markup.ul.li.size()
+        assertEquals "Parent A", markup.ul.li[0].a.text()
+        assertEquals "Parent B", markup.ul.li[1].a.text()
+    }
 }

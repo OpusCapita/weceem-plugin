@@ -112,7 +112,8 @@ class WcmContentFile extends WcmContent {
         def oldFile = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, "${path}/${oldTitle}")
         def newFile = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, "${path}/${title}")
         oldFile.renameTo(newFile)
-        createAliasURI(this.parent)
+        // Update our URI to match new file
+        aliasURI = this.title 
     }
 
     boolean contentShouldMove(WcmContent targetParent) {

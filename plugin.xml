@@ -1,4 +1,4 @@
-<plugin name='weceem' version='1.0.RC2' grailsVersion='1.2.2 &gt; *'>
+<plugin name='weceem' version='1.0' grailsVersion='1.2.2 &gt; *'>
   <author>jCatalog AG</author>
   <authorEmail>info@weceem.org</authorEmail>
   <title>Weceem CMS</title>
@@ -317,162 +317,6 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
       <description />
       <argument type='java.util.List' />
     </method>
-    <method name='methodMissing' artefact='Domain' type='org.weceem.content.WcmComment'>
-      <description />
-      <argument type='java.lang.String' />
-      <argument type='java.lang.Object' />
-    </method>
-    <method name='save' artefact='Domain' type='org.weceem.content.WcmComment'>
-      <description />
-      <argument type='java.lang.Boolean' />
-    </method>
-    <method name='save' artefact='Domain' type='org.weceem.content.WcmComment'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='save' artefact='Domain' type='org.weceem.content.WcmComment'>
-      <description />
-    </method>
-    <method name='merge' artefact='Domain' type='org.weceem.content.WcmComment'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='merge' artefact='Domain' type='org.weceem.content.WcmComment'>
-      <description />
-    </method>
-    <method name='instanceOf' artefact='Domain' type='org.weceem.content.WcmComment'>
-      <description />
-      <argument type='java.lang.Class' />
-    </method>
-    <method name='delete' artefact='Domain' type='org.weceem.content.WcmComment'>
-      <description />
-    </method>
-    <method name='delete' artefact='Domain' type='org.weceem.content.WcmComment'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='refresh' artefact='Domain' type='org.weceem.content.WcmComment'>
-      <description />
-    </method>
-    <method name='discard' artefact='Domain' type='org.weceem.content.WcmComment'>
-      <description />
-    </method>
-    <method name='attach' artefact='Domain' type='org.weceem.content.WcmComment'>
-      <description />
-    </method>
-    <method name='isAttached' artefact='Domain' type='org.weceem.content.WcmComment'>
-      <description />
-    </method>
-    <method name='isDirty' artefact='Domain' type='org.weceem.content.WcmComment'>
-      <description />
-    </method>
-    <method name='isDirty' artefact='Domain' type='org.weceem.content.WcmComment'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='getDirtyPropertyNames' artefact='Domain' type='org.weceem.content.WcmComment'>
-      <description />
-    </method>
-    <method name='getPersistentValue' artefact='Domain' type='org.weceem.content.WcmComment'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='lock' artefact='Domain' type='org.weceem.content.WcmComment'>
-      <description />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.content.WcmComment'>
-      <description />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.content.WcmComment'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.content.WcmComment'>
-      <description />
-      <argument type='java.lang.Boolean' />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.content.WcmComment'>
-      <description />
-      <argument type='java.util.List' />
-    </method>
-    <method name='methodMissing' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
-      <description />
-      <argument type='java.lang.String' />
-      <argument type='java.lang.Object' />
-    </method>
-    <method name='save' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
-      <description />
-      <argument type='java.lang.Boolean' />
-    </method>
-    <method name='save' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='save' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
-      <description />
-    </method>
-    <method name='merge' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='merge' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
-      <description />
-    </method>
-    <method name='instanceOf' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
-      <description />
-      <argument type='java.lang.Class' />
-    </method>
-    <method name='delete' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
-      <description />
-    </method>
-    <method name='delete' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='refresh' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
-      <description />
-    </method>
-    <method name='discard' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
-      <description />
-    </method>
-    <method name='attach' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
-      <description />
-    </method>
-    <method name='isAttached' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
-      <description />
-    </method>
-    <method name='isDirty' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
-      <description />
-    </method>
-    <method name='isDirty' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='getDirtyPropertyNames' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
-      <description />
-    </method>
-    <method name='getPersistentValue' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='lock' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
-      <description />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
-      <description />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
-      <description />
-      <argument type='java.lang.Boolean' />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
-      <description />
-      <argument type='java.util.List' />
-    </method>
     <method name='methodMissing' artefact='Domain' type='org.weceem.script.WcmScript'>
       <description />
       <argument type='java.lang.String' />
@@ -548,6 +392,396 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
       <argument type='java.lang.Boolean' />
     </method>
     <method name='validate' artefact='Domain' type='org.weceem.script.WcmScript'>
+      <description />
+      <argument type='java.util.List' />
+    </method>
+    <method name='methodMissing' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+      <description />
+      <argument type='java.lang.String' />
+      <argument type='java.lang.Object' />
+    </method>
+    <method name='save' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+      <description />
+      <argument type='java.lang.Boolean' />
+    </method>
+    <method name='save' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='save' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+      <description />
+    </method>
+    <method name='merge' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='merge' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+      <description />
+    </method>
+    <method name='instanceOf' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+      <description />
+      <argument type='java.lang.Class' />
+    </method>
+    <method name='delete' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+      <description />
+    </method>
+    <method name='delete' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='refresh' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+      <description />
+    </method>
+    <method name='discard' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+      <description />
+    </method>
+    <method name='attach' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+      <description />
+    </method>
+    <method name='isAttached' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+      <description />
+    </method>
+    <method name='isDirty' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+      <description />
+    </method>
+    <method name='isDirty' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='getDirtyPropertyNames' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+      <description />
+    </method>
+    <method name='getPersistentValue' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='lock' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+      <description />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+      <description />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+      <description />
+      <argument type='java.lang.Boolean' />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+      <description />
+      <argument type='java.util.List' />
+    </method>
+    <method name='methodMissing' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
+      <description />
+      <argument type='java.lang.String' />
+      <argument type='java.lang.Object' />
+    </method>
+    <method name='save' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
+      <description />
+      <argument type='java.lang.Boolean' />
+    </method>
+    <method name='save' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='save' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
+      <description />
+    </method>
+    <method name='merge' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='merge' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
+      <description />
+    </method>
+    <method name='instanceOf' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
+      <description />
+      <argument type='java.lang.Class' />
+    </method>
+    <method name='delete' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
+      <description />
+    </method>
+    <method name='delete' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='refresh' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
+      <description />
+    </method>
+    <method name='discard' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
+      <description />
+    </method>
+    <method name='attach' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
+      <description />
+    </method>
+    <method name='isAttached' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
+      <description />
+    </method>
+    <method name='isDirty' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
+      <description />
+    </method>
+    <method name='isDirty' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='getDirtyPropertyNames' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
+      <description />
+    </method>
+    <method name='getPersistentValue' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='lock' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
+      <description />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
+      <description />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
+      <description />
+      <argument type='java.lang.Boolean' />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
+      <description />
+      <argument type='java.util.List' />
+    </method>
+    <method name='methodMissing' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+      <description />
+      <argument type='java.lang.String' />
+      <argument type='java.lang.Object' />
+    </method>
+    <method name='save' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+      <description />
+      <argument type='java.lang.Boolean' />
+    </method>
+    <method name='save' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='save' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+      <description />
+    </method>
+    <method name='merge' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='merge' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+      <description />
+    </method>
+    <method name='instanceOf' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+      <description />
+      <argument type='java.lang.Class' />
+    </method>
+    <method name='delete' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+      <description />
+    </method>
+    <method name='delete' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='refresh' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+      <description />
+    </method>
+    <method name='discard' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+      <description />
+    </method>
+    <method name='attach' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+      <description />
+    </method>
+    <method name='isAttached' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+      <description />
+    </method>
+    <method name='isDirty' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+      <description />
+    </method>
+    <method name='isDirty' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='getDirtyPropertyNames' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+      <description />
+    </method>
+    <method name='getPersistentValue' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='lock' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+      <description />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+      <description />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+      <description />
+      <argument type='java.lang.Boolean' />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+      <description />
+      <argument type='java.util.List' />
+    </method>
+    <method name='methodMissing' artefact='Domain' type='org.weceem.content.WcmTemplate'>
+      <description />
+      <argument type='java.lang.String' />
+      <argument type='java.lang.Object' />
+    </method>
+    <method name='save' artefact='Domain' type='org.weceem.content.WcmTemplate'>
+      <description />
+      <argument type='java.lang.Boolean' />
+    </method>
+    <method name='save' artefact='Domain' type='org.weceem.content.WcmTemplate'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='save' artefact='Domain' type='org.weceem.content.WcmTemplate'>
+      <description />
+    </method>
+    <method name='merge' artefact='Domain' type='org.weceem.content.WcmTemplate'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='merge' artefact='Domain' type='org.weceem.content.WcmTemplate'>
+      <description />
+    </method>
+    <method name='instanceOf' artefact='Domain' type='org.weceem.content.WcmTemplate'>
+      <description />
+      <argument type='java.lang.Class' />
+    </method>
+    <method name='delete' artefact='Domain' type='org.weceem.content.WcmTemplate'>
+      <description />
+    </method>
+    <method name='delete' artefact='Domain' type='org.weceem.content.WcmTemplate'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='refresh' artefact='Domain' type='org.weceem.content.WcmTemplate'>
+      <description />
+    </method>
+    <method name='discard' artefact='Domain' type='org.weceem.content.WcmTemplate'>
+      <description />
+    </method>
+    <method name='attach' artefact='Domain' type='org.weceem.content.WcmTemplate'>
+      <description />
+    </method>
+    <method name='isAttached' artefact='Domain' type='org.weceem.content.WcmTemplate'>
+      <description />
+    </method>
+    <method name='isDirty' artefact='Domain' type='org.weceem.content.WcmTemplate'>
+      <description />
+    </method>
+    <method name='isDirty' artefact='Domain' type='org.weceem.content.WcmTemplate'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='getDirtyPropertyNames' artefact='Domain' type='org.weceem.content.WcmTemplate'>
+      <description />
+    </method>
+    <method name='getPersistentValue' artefact='Domain' type='org.weceem.content.WcmTemplate'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='lock' artefact='Domain' type='org.weceem.content.WcmTemplate'>
+      <description />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.content.WcmTemplate'>
+      <description />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.content.WcmTemplate'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.content.WcmTemplate'>
+      <description />
+      <argument type='java.lang.Boolean' />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.content.WcmTemplate'>
+      <description />
+      <argument type='java.util.List' />
+    </method>
+    <method name='methodMissing' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+      <description />
+      <argument type='java.lang.String' />
+      <argument type='java.lang.Object' />
+    </method>
+    <method name='save' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+      <description />
+      <argument type='java.lang.Boolean' />
+    </method>
+    <method name='save' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='save' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+      <description />
+    </method>
+    <method name='merge' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='merge' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+      <description />
+    </method>
+    <method name='instanceOf' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+      <description />
+      <argument type='java.lang.Class' />
+    </method>
+    <method name='delete' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+      <description />
+    </method>
+    <method name='delete' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='refresh' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+      <description />
+    </method>
+    <method name='discard' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+      <description />
+    </method>
+    <method name='attach' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+      <description />
+    </method>
+    <method name='isAttached' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+      <description />
+    </method>
+    <method name='isDirty' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+      <description />
+    </method>
+    <method name='isDirty' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='getDirtyPropertyNames' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+      <description />
+    </method>
+    <method name='getPersistentValue' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='lock' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+      <description />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+      <description />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+      <description />
+      <argument type='java.lang.Boolean' />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
       <description />
       <argument type='java.util.List' />
     </method>
@@ -707,81 +941,81 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
       <description />
       <argument type='java.util.List' />
     </method>
-    <method name='methodMissing' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+    <method name='methodMissing' artefact='Domain' type='org.weceem.content.WcmFolder'>
       <description />
       <argument type='java.lang.String' />
       <argument type='java.lang.Object' />
     </method>
-    <method name='save' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+    <method name='save' artefact='Domain' type='org.weceem.content.WcmFolder'>
       <description />
       <argument type='java.lang.Boolean' />
     </method>
-    <method name='save' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+    <method name='save' artefact='Domain' type='org.weceem.content.WcmFolder'>
       <description />
       <argument type='java.util.Map' />
     </method>
-    <method name='save' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+    <method name='save' artefact='Domain' type='org.weceem.content.WcmFolder'>
       <description />
     </method>
-    <method name='merge' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+    <method name='merge' artefact='Domain' type='org.weceem.content.WcmFolder'>
       <description />
       <argument type='java.util.Map' />
     </method>
-    <method name='merge' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+    <method name='merge' artefact='Domain' type='org.weceem.content.WcmFolder'>
       <description />
     </method>
-    <method name='instanceOf' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+    <method name='instanceOf' artefact='Domain' type='org.weceem.content.WcmFolder'>
       <description />
       <argument type='java.lang.Class' />
     </method>
-    <method name='delete' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+    <method name='delete' artefact='Domain' type='org.weceem.content.WcmFolder'>
       <description />
     </method>
-    <method name='delete' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='refresh' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
-      <description />
-    </method>
-    <method name='discard' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
-      <description />
-    </method>
-    <method name='attach' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
-      <description />
-    </method>
-    <method name='isAttached' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
-      <description />
-    </method>
-    <method name='isDirty' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
-      <description />
-    </method>
-    <method name='isDirty' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='getDirtyPropertyNames' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
-      <description />
-    </method>
-    <method name='getPersistentValue' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='lock' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
-      <description />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
-      <description />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+    <method name='delete' artefact='Domain' type='org.weceem.content.WcmFolder'>
       <description />
       <argument type='java.util.Map' />
     </method>
-    <method name='validate' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+    <method name='refresh' artefact='Domain' type='org.weceem.content.WcmFolder'>
+      <description />
+    </method>
+    <method name='discard' artefact='Domain' type='org.weceem.content.WcmFolder'>
+      <description />
+    </method>
+    <method name='attach' artefact='Domain' type='org.weceem.content.WcmFolder'>
+      <description />
+    </method>
+    <method name='isAttached' artefact='Domain' type='org.weceem.content.WcmFolder'>
+      <description />
+    </method>
+    <method name='isDirty' artefact='Domain' type='org.weceem.content.WcmFolder'>
+      <description />
+    </method>
+    <method name='isDirty' artefact='Domain' type='org.weceem.content.WcmFolder'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='getDirtyPropertyNames' artefact='Domain' type='org.weceem.content.WcmFolder'>
+      <description />
+    </method>
+    <method name='getPersistentValue' artefact='Domain' type='org.weceem.content.WcmFolder'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='lock' artefact='Domain' type='org.weceem.content.WcmFolder'>
+      <description />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.content.WcmFolder'>
+      <description />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.content.WcmFolder'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.content.WcmFolder'>
       <description />
       <argument type='java.lang.Boolean' />
     </method>
-    <method name='validate' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+    <method name='validate' artefact='Domain' type='org.weceem.content.WcmFolder'>
       <description />
       <argument type='java.util.List' />
     </method>
@@ -863,549 +1097,159 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
       <description />
       <argument type='java.util.List' />
     </method>
-    <method name='methodMissing' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+    <method name='methodMissing' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
       <description />
       <argument type='java.lang.String' />
       <argument type='java.lang.Object' />
     </method>
-    <method name='save' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+    <method name='save' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
       <description />
       <argument type='java.lang.Boolean' />
     </method>
-    <method name='save' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+    <method name='save' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
       <description />
       <argument type='java.util.Map' />
     </method>
-    <method name='save' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+    <method name='save' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
       <description />
     </method>
-    <method name='merge' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+    <method name='merge' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
       <description />
       <argument type='java.util.Map' />
     </method>
-    <method name='merge' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+    <method name='merge' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
       <description />
     </method>
-    <method name='instanceOf' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+    <method name='instanceOf' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
       <description />
       <argument type='java.lang.Class' />
     </method>
-    <method name='delete' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+    <method name='delete' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
       <description />
     </method>
-    <method name='delete' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='refresh' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
-      <description />
-    </method>
-    <method name='discard' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
-      <description />
-    </method>
-    <method name='attach' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
-      <description />
-    </method>
-    <method name='isAttached' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
-      <description />
-    </method>
-    <method name='isDirty' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
-      <description />
-    </method>
-    <method name='isDirty' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='getDirtyPropertyNames' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
-      <description />
-    </method>
-    <method name='getPersistentValue' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='lock' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
-      <description />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
-      <description />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+    <method name='delete' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
       <description />
       <argument type='java.util.Map' />
     </method>
-    <method name='validate' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+    <method name='refresh' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
+      <description />
+    </method>
+    <method name='discard' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
+      <description />
+    </method>
+    <method name='attach' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
+      <description />
+    </method>
+    <method name='isAttached' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
+      <description />
+    </method>
+    <method name='isDirty' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
+      <description />
+    </method>
+    <method name='isDirty' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='getDirtyPropertyNames' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
+      <description />
+    </method>
+    <method name='getPersistentValue' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='lock' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
+      <description />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
+      <description />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
       <description />
       <argument type='java.lang.Boolean' />
     </method>
-    <method name='validate' artefact='Domain' type='org.weceem.content.WcmExternalLink'>
+    <method name='validate' artefact='Domain' type='org.weceem.content.WcmVirtualContent'>
       <description />
       <argument type='java.util.List' />
     </method>
-    <method name='methodMissing' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+    <method name='methodMissing' artefact='Domain' type='org.weceem.content.WcmComment'>
       <description />
       <argument type='java.lang.String' />
       <argument type='java.lang.Object' />
     </method>
-    <method name='save' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+    <method name='save' artefact='Domain' type='org.weceem.content.WcmComment'>
       <description />
       <argument type='java.lang.Boolean' />
     </method>
-    <method name='save' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+    <method name='save' artefact='Domain' type='org.weceem.content.WcmComment'>
       <description />
       <argument type='java.util.Map' />
     </method>
-    <method name='save' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+    <method name='save' artefact='Domain' type='org.weceem.content.WcmComment'>
       <description />
     </method>
-    <method name='merge' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+    <method name='merge' artefact='Domain' type='org.weceem.content.WcmComment'>
       <description />
       <argument type='java.util.Map' />
     </method>
-    <method name='merge' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+    <method name='merge' artefact='Domain' type='org.weceem.content.WcmComment'>
       <description />
     </method>
-    <method name='instanceOf' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+    <method name='instanceOf' artefact='Domain' type='org.weceem.content.WcmComment'>
       <description />
       <argument type='java.lang.Class' />
     </method>
-    <method name='delete' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+    <method name='delete' artefact='Domain' type='org.weceem.content.WcmComment'>
       <description />
     </method>
-    <method name='delete' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='refresh' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
-      <description />
-    </method>
-    <method name='discard' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
-      <description />
-    </method>
-    <method name='attach' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
-      <description />
-    </method>
-    <method name='isAttached' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
-      <description />
-    </method>
-    <method name='isDirty' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
-      <description />
-    </method>
-    <method name='isDirty' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='getDirtyPropertyNames' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
-      <description />
-    </method>
-    <method name='getPersistentValue' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='lock' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
-      <description />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
-      <description />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+    <method name='delete' artefact='Domain' type='org.weceem.content.WcmComment'>
       <description />
       <argument type='java.util.Map' />
     </method>
-    <method name='validate' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
+    <method name='refresh' artefact='Domain' type='org.weceem.content.WcmComment'>
+      <description />
+    </method>
+    <method name='discard' artefact='Domain' type='org.weceem.content.WcmComment'>
+      <description />
+    </method>
+    <method name='attach' artefact='Domain' type='org.weceem.content.WcmComment'>
+      <description />
+    </method>
+    <method name='isAttached' artefact='Domain' type='org.weceem.content.WcmComment'>
+      <description />
+    </method>
+    <method name='isDirty' artefact='Domain' type='org.weceem.content.WcmComment'>
+      <description />
+    </method>
+    <method name='isDirty' artefact='Domain' type='org.weceem.content.WcmComment'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='getDirtyPropertyNames' artefact='Domain' type='org.weceem.content.WcmComment'>
+      <description />
+    </method>
+    <method name='getPersistentValue' artefact='Domain' type='org.weceem.content.WcmComment'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='lock' artefact='Domain' type='org.weceem.content.WcmComment'>
+      <description />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.content.WcmComment'>
+      <description />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.content.WcmComment'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.content.WcmComment'>
       <description />
       <argument type='java.lang.Boolean' />
     </method>
-    <method name='validate' artefact='Domain' type='org.weceem.css.WcmStyleSheet'>
-      <description />
-      <argument type='java.util.List' />
-    </method>
-    <method name='methodMissing' artefact='Domain' type='org.weceem.files.WcmContentFile'>
-      <description />
-      <argument type='java.lang.String' />
-      <argument type='java.lang.Object' />
-    </method>
-    <method name='save' artefact='Domain' type='org.weceem.files.WcmContentFile'>
-      <description />
-      <argument type='java.lang.Boolean' />
-    </method>
-    <method name='save' artefact='Domain' type='org.weceem.files.WcmContentFile'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='save' artefact='Domain' type='org.weceem.files.WcmContentFile'>
-      <description />
-    </method>
-    <method name='merge' artefact='Domain' type='org.weceem.files.WcmContentFile'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='merge' artefact='Domain' type='org.weceem.files.WcmContentFile'>
-      <description />
-    </method>
-    <method name='instanceOf' artefact='Domain' type='org.weceem.files.WcmContentFile'>
-      <description />
-      <argument type='java.lang.Class' />
-    </method>
-    <method name='delete' artefact='Domain' type='org.weceem.files.WcmContentFile'>
-      <description />
-    </method>
-    <method name='delete' artefact='Domain' type='org.weceem.files.WcmContentFile'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='refresh' artefact='Domain' type='org.weceem.files.WcmContentFile'>
-      <description />
-    </method>
-    <method name='discard' artefact='Domain' type='org.weceem.files.WcmContentFile'>
-      <description />
-    </method>
-    <method name='attach' artefact='Domain' type='org.weceem.files.WcmContentFile'>
-      <description />
-    </method>
-    <method name='isAttached' artefact='Domain' type='org.weceem.files.WcmContentFile'>
-      <description />
-    </method>
-    <method name='isDirty' artefact='Domain' type='org.weceem.files.WcmContentFile'>
-      <description />
-    </method>
-    <method name='isDirty' artefact='Domain' type='org.weceem.files.WcmContentFile'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='getDirtyPropertyNames' artefact='Domain' type='org.weceem.files.WcmContentFile'>
-      <description />
-    </method>
-    <method name='getPersistentValue' artefact='Domain' type='org.weceem.files.WcmContentFile'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='lock' artefact='Domain' type='org.weceem.files.WcmContentFile'>
-      <description />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.files.WcmContentFile'>
-      <description />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.files.WcmContentFile'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.files.WcmContentFile'>
-      <description />
-      <argument type='java.lang.Boolean' />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.files.WcmContentFile'>
-      <description />
-      <argument type='java.util.List' />
-    </method>
-    <method name='methodMissing' artefact='Domain' type='org.weceem.content.WcmTemplate'>
-      <description />
-      <argument type='java.lang.String' />
-      <argument type='java.lang.Object' />
-    </method>
-    <method name='save' artefact='Domain' type='org.weceem.content.WcmTemplate'>
-      <description />
-      <argument type='java.lang.Boolean' />
-    </method>
-    <method name='save' artefact='Domain' type='org.weceem.content.WcmTemplate'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='save' artefact='Domain' type='org.weceem.content.WcmTemplate'>
-      <description />
-    </method>
-    <method name='merge' artefact='Domain' type='org.weceem.content.WcmTemplate'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='merge' artefact='Domain' type='org.weceem.content.WcmTemplate'>
-      <description />
-    </method>
-    <method name='instanceOf' artefact='Domain' type='org.weceem.content.WcmTemplate'>
-      <description />
-      <argument type='java.lang.Class' />
-    </method>
-    <method name='delete' artefact='Domain' type='org.weceem.content.WcmTemplate'>
-      <description />
-    </method>
-    <method name='delete' artefact='Domain' type='org.weceem.content.WcmTemplate'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='refresh' artefact='Domain' type='org.weceem.content.WcmTemplate'>
-      <description />
-    </method>
-    <method name='discard' artefact='Domain' type='org.weceem.content.WcmTemplate'>
-      <description />
-    </method>
-    <method name='attach' artefact='Domain' type='org.weceem.content.WcmTemplate'>
-      <description />
-    </method>
-    <method name='isAttached' artefact='Domain' type='org.weceem.content.WcmTemplate'>
-      <description />
-    </method>
-    <method name='isDirty' artefact='Domain' type='org.weceem.content.WcmTemplate'>
-      <description />
-    </method>
-    <method name='isDirty' artefact='Domain' type='org.weceem.content.WcmTemplate'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='getDirtyPropertyNames' artefact='Domain' type='org.weceem.content.WcmTemplate'>
-      <description />
-    </method>
-    <method name='getPersistentValue' artefact='Domain' type='org.weceem.content.WcmTemplate'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='lock' artefact='Domain' type='org.weceem.content.WcmTemplate'>
-      <description />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.content.WcmTemplate'>
-      <description />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.content.WcmTemplate'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.content.WcmTemplate'>
-      <description />
-      <argument type='java.lang.Boolean' />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.content.WcmTemplate'>
-      <description />
-      <argument type='java.util.List' />
-    </method>
-    <method name='methodMissing' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
-      <description />
-      <argument type='java.lang.String' />
-      <argument type='java.lang.Object' />
-    </method>
-    <method name='save' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
-      <description />
-      <argument type='java.lang.Boolean' />
-    </method>
-    <method name='save' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='save' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
-      <description />
-    </method>
-    <method name='merge' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='merge' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
-      <description />
-    </method>
-    <method name='instanceOf' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
-      <description />
-      <argument type='java.lang.Class' />
-    </method>
-    <method name='delete' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
-      <description />
-    </method>
-    <method name='delete' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='refresh' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
-      <description />
-    </method>
-    <method name='discard' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
-      <description />
-    </method>
-    <method name='attach' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
-      <description />
-    </method>
-    <method name='isAttached' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
-      <description />
-    </method>
-    <method name='isDirty' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
-      <description />
-    </method>
-    <method name='isDirty' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='getDirtyPropertyNames' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
-      <description />
-    </method>
-    <method name='getPersistentValue' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='lock' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
-      <description />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
-      <description />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
-      <description />
-      <argument type='java.lang.Boolean' />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.js.WcmJavaScript'>
-      <description />
-      <argument type='java.util.List' />
-    </method>
-    <method name='methodMissing' artefact='Domain' type='org.weceem.content.WcmFolder'>
-      <description />
-      <argument type='java.lang.String' />
-      <argument type='java.lang.Object' />
-    </method>
-    <method name='save' artefact='Domain' type='org.weceem.content.WcmFolder'>
-      <description />
-      <argument type='java.lang.Boolean' />
-    </method>
-    <method name='save' artefact='Domain' type='org.weceem.content.WcmFolder'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='save' artefact='Domain' type='org.weceem.content.WcmFolder'>
-      <description />
-    </method>
-    <method name='merge' artefact='Domain' type='org.weceem.content.WcmFolder'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='merge' artefact='Domain' type='org.weceem.content.WcmFolder'>
-      <description />
-    </method>
-    <method name='instanceOf' artefact='Domain' type='org.weceem.content.WcmFolder'>
-      <description />
-      <argument type='java.lang.Class' />
-    </method>
-    <method name='delete' artefact='Domain' type='org.weceem.content.WcmFolder'>
-      <description />
-    </method>
-    <method name='delete' artefact='Domain' type='org.weceem.content.WcmFolder'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='refresh' artefact='Domain' type='org.weceem.content.WcmFolder'>
-      <description />
-    </method>
-    <method name='discard' artefact='Domain' type='org.weceem.content.WcmFolder'>
-      <description />
-    </method>
-    <method name='attach' artefact='Domain' type='org.weceem.content.WcmFolder'>
-      <description />
-    </method>
-    <method name='isAttached' artefact='Domain' type='org.weceem.content.WcmFolder'>
-      <description />
-    </method>
-    <method name='isDirty' artefact='Domain' type='org.weceem.content.WcmFolder'>
-      <description />
-    </method>
-    <method name='isDirty' artefact='Domain' type='org.weceem.content.WcmFolder'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='getDirtyPropertyNames' artefact='Domain' type='org.weceem.content.WcmFolder'>
-      <description />
-    </method>
-    <method name='getPersistentValue' artefact='Domain' type='org.weceem.content.WcmFolder'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='lock' artefact='Domain' type='org.weceem.content.WcmFolder'>
-      <description />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.content.WcmFolder'>
-      <description />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.content.WcmFolder'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.content.WcmFolder'>
-      <description />
-      <argument type='java.lang.Boolean' />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.content.WcmFolder'>
-      <description />
-      <argument type='java.util.List' />
-    </method>
-    <method name='methodMissing' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
-      <description />
-      <argument type='java.lang.String' />
-      <argument type='java.lang.Object' />
-    </method>
-    <method name='save' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
-      <description />
-      <argument type='java.lang.Boolean' />
-    </method>
-    <method name='save' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='save' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
-      <description />
-    </method>
-    <method name='merge' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='merge' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
-      <description />
-    </method>
-    <method name='instanceOf' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
-      <description />
-      <argument type='java.lang.Class' />
-    </method>
-    <method name='delete' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
-      <description />
-    </method>
-    <method name='delete' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='refresh' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
-      <description />
-    </method>
-    <method name='discard' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
-      <description />
-    </method>
-    <method name='attach' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
-      <description />
-    </method>
-    <method name='isAttached' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
-      <description />
-    </method>
-    <method name='isDirty' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
-      <description />
-    </method>
-    <method name='isDirty' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='getDirtyPropertyNames' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
-      <description />
-    </method>
-    <method name='getPersistentValue' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='lock' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
-      <description />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
-      <description />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
-      <description />
-      <argument type='java.lang.Boolean' />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
+    <method name='validate' artefact='Domain' type='org.weceem.content.WcmComment'>
       <description />
       <argument type='java.util.List' />
     </method>
@@ -1487,81 +1331,237 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
       <description />
       <argument type='java.util.List' />
     </method>
-    <method name='methodMissing' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+    <method name='methodMissing' artefact='Domain' type='org.weceem.files.WcmContentFile'>
       <description />
       <argument type='java.lang.String' />
       <argument type='java.lang.Object' />
     </method>
-    <method name='save' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+    <method name='save' artefact='Domain' type='org.weceem.files.WcmContentFile'>
       <description />
       <argument type='java.lang.Boolean' />
     </method>
-    <method name='save' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+    <method name='save' artefact='Domain' type='org.weceem.files.WcmContentFile'>
       <description />
       <argument type='java.util.Map' />
     </method>
-    <method name='save' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+    <method name='save' artefact='Domain' type='org.weceem.files.WcmContentFile'>
       <description />
     </method>
-    <method name='merge' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+    <method name='merge' artefact='Domain' type='org.weceem.files.WcmContentFile'>
       <description />
       <argument type='java.util.Map' />
     </method>
-    <method name='merge' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+    <method name='merge' artefact='Domain' type='org.weceem.files.WcmContentFile'>
       <description />
     </method>
-    <method name='instanceOf' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+    <method name='instanceOf' artefact='Domain' type='org.weceem.files.WcmContentFile'>
       <description />
       <argument type='java.lang.Class' />
     </method>
-    <method name='delete' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+    <method name='delete' artefact='Domain' type='org.weceem.files.WcmContentFile'>
       <description />
     </method>
-    <method name='delete' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
-      <description />
-      <argument type='java.util.Map' />
-    </method>
-    <method name='refresh' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
-      <description />
-    </method>
-    <method name='discard' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
-      <description />
-    </method>
-    <method name='attach' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
-      <description />
-    </method>
-    <method name='isAttached' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
-      <description />
-    </method>
-    <method name='isDirty' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
-      <description />
-    </method>
-    <method name='isDirty' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='getDirtyPropertyNames' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
-      <description />
-    </method>
-    <method name='getPersistentValue' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
-      <description />
-      <argument type='java.lang.String' />
-    </method>
-    <method name='lock' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
-      <description />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
-      <description />
-    </method>
-    <method name='validate' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+    <method name='delete' artefact='Domain' type='org.weceem.files.WcmContentFile'>
       <description />
       <argument type='java.util.Map' />
     </method>
-    <method name='validate' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+    <method name='refresh' artefact='Domain' type='org.weceem.files.WcmContentFile'>
+      <description />
+    </method>
+    <method name='discard' artefact='Domain' type='org.weceem.files.WcmContentFile'>
+      <description />
+    </method>
+    <method name='attach' artefact='Domain' type='org.weceem.files.WcmContentFile'>
+      <description />
+    </method>
+    <method name='isAttached' artefact='Domain' type='org.weceem.files.WcmContentFile'>
+      <description />
+    </method>
+    <method name='isDirty' artefact='Domain' type='org.weceem.files.WcmContentFile'>
+      <description />
+    </method>
+    <method name='isDirty' artefact='Domain' type='org.weceem.files.WcmContentFile'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='getDirtyPropertyNames' artefact='Domain' type='org.weceem.files.WcmContentFile'>
+      <description />
+    </method>
+    <method name='getPersistentValue' artefact='Domain' type='org.weceem.files.WcmContentFile'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='lock' artefact='Domain' type='org.weceem.files.WcmContentFile'>
+      <description />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.files.WcmContentFile'>
+      <description />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.files.WcmContentFile'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.files.WcmContentFile'>
       <description />
       <argument type='java.lang.Boolean' />
     </method>
-    <method name='validate' artefact='Domain' type='org.weceem.html.WcmHTMLContent'>
+    <method name='validate' artefact='Domain' type='org.weceem.files.WcmContentFile'>
+      <description />
+      <argument type='java.util.List' />
+    </method>
+    <method name='methodMissing' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+      <description />
+      <argument type='java.lang.String' />
+      <argument type='java.lang.Object' />
+    </method>
+    <method name='save' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+      <description />
+      <argument type='java.lang.Boolean' />
+    </method>
+    <method name='save' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='save' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+      <description />
+    </method>
+    <method name='merge' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='merge' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+      <description />
+    </method>
+    <method name='instanceOf' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+      <description />
+      <argument type='java.lang.Class' />
+    </method>
+    <method name='delete' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+      <description />
+    </method>
+    <method name='delete' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='refresh' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+      <description />
+    </method>
+    <method name='discard' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+      <description />
+    </method>
+    <method name='attach' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+      <description />
+    </method>
+    <method name='isAttached' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+      <description />
+    </method>
+    <method name='isDirty' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+      <description />
+    </method>
+    <method name='isDirty' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='getDirtyPropertyNames' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+      <description />
+    </method>
+    <method name='getPersistentValue' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='lock' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+      <description />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+      <description />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+      <description />
+      <argument type='java.lang.Boolean' />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.wiki.WcmWikiItem'>
+      <description />
+      <argument type='java.util.List' />
+    </method>
+    <method name='methodMissing' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
+      <description />
+      <argument type='java.lang.String' />
+      <argument type='java.lang.Object' />
+    </method>
+    <method name='save' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
+      <description />
+      <argument type='java.lang.Boolean' />
+    </method>
+    <method name='save' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='save' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
+      <description />
+    </method>
+    <method name='merge' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='merge' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
+      <description />
+    </method>
+    <method name='instanceOf' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
+      <description />
+      <argument type='java.lang.Class' />
+    </method>
+    <method name='delete' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
+      <description />
+    </method>
+    <method name='delete' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='refresh' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
+      <description />
+    </method>
+    <method name='discard' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
+      <description />
+    </method>
+    <method name='attach' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
+      <description />
+    </method>
+    <method name='isAttached' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
+      <description />
+    </method>
+    <method name='isDirty' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
+      <description />
+    </method>
+    <method name='isDirty' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='getDirtyPropertyNames' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
+      <description />
+    </method>
+    <method name='getPersistentValue' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
+      <description />
+      <argument type='java.lang.String' />
+    </method>
+    <method name='lock' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
+      <description />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
+      <description />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
+      <description />
+      <argument type='java.util.Map' />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
+      <description />
+      <argument type='java.lang.Boolean' />
+    </method>
+    <method name='validate' artefact='Domain' type='org.weceem.files.WcmContentDirectory'>
       <description />
       <argument type='java.util.List' />
     </method>
@@ -1757,30 +1757,6 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     <property name='all' type='org.weceem.content.WcmContent' artefact='Domain'>
       <description />
     </property>
-    <property name='attached' type='org.weceem.content.WcmComment' artefact='Domain'>
-      <description />
-    </property>
-    <property name='dirty' type='org.weceem.content.WcmComment' artefact='Domain'>
-      <description />
-    </property>
-    <property name='dirtyPropertyNames' type='org.weceem.content.WcmComment' artefact='Domain'>
-      <description />
-    </property>
-    <property name='all' type='org.weceem.content.WcmComment' artefact='Domain'>
-      <description />
-    </property>
-    <property name='attached' type='org.weceem.content.WcmVirtualContent' artefact='Domain'>
-      <description />
-    </property>
-    <property name='dirty' type='org.weceem.content.WcmVirtualContent' artefact='Domain'>
-      <description />
-    </property>
-    <property name='dirtyPropertyNames' type='org.weceem.content.WcmVirtualContent' artefact='Domain'>
-      <description />
-    </property>
-    <property name='all' type='org.weceem.content.WcmVirtualContent' artefact='Domain'>
-      <description />
-    </property>
     <property name='attached' type='org.weceem.script.WcmScript' artefact='Domain'>
       <description />
     </property>
@@ -1791,6 +1767,66 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
       <description />
     </property>
     <property name='all' type='org.weceem.script.WcmScript' artefact='Domain'>
+      <description />
+    </property>
+    <property name='attached' type='org.weceem.html.WcmHTMLContent' artefact='Domain'>
+      <description />
+    </property>
+    <property name='dirty' type='org.weceem.html.WcmHTMLContent' artefact='Domain'>
+      <description />
+    </property>
+    <property name='dirtyPropertyNames' type='org.weceem.html.WcmHTMLContent' artefact='Domain'>
+      <description />
+    </property>
+    <property name='all' type='org.weceem.html.WcmHTMLContent' artefact='Domain'>
+      <description />
+    </property>
+    <property name='attached' type='org.weceem.js.WcmJavaScript' artefact='Domain'>
+      <description />
+    </property>
+    <property name='dirty' type='org.weceem.js.WcmJavaScript' artefact='Domain'>
+      <description />
+    </property>
+    <property name='dirtyPropertyNames' type='org.weceem.js.WcmJavaScript' artefact='Domain'>
+      <description />
+    </property>
+    <property name='all' type='org.weceem.js.WcmJavaScript' artefact='Domain'>
+      <description />
+    </property>
+    <property name='attached' type='org.weceem.content.WcmExternalLink' artefact='Domain'>
+      <description />
+    </property>
+    <property name='dirty' type='org.weceem.content.WcmExternalLink' artefact='Domain'>
+      <description />
+    </property>
+    <property name='dirtyPropertyNames' type='org.weceem.content.WcmExternalLink' artefact='Domain'>
+      <description />
+    </property>
+    <property name='all' type='org.weceem.content.WcmExternalLink' artefact='Domain'>
+      <description />
+    </property>
+    <property name='attached' type='org.weceem.content.WcmTemplate' artefact='Domain'>
+      <description />
+    </property>
+    <property name='dirty' type='org.weceem.content.WcmTemplate' artefact='Domain'>
+      <description />
+    </property>
+    <property name='dirtyPropertyNames' type='org.weceem.content.WcmTemplate' artefact='Domain'>
+      <description />
+    </property>
+    <property name='all' type='org.weceem.content.WcmTemplate' artefact='Domain'>
+      <description />
+    </property>
+    <property name='attached' type='org.weceem.css.WcmStyleSheet' artefact='Domain'>
+      <description />
+    </property>
+    <property name='dirty' type='org.weceem.css.WcmStyleSheet' artefact='Domain'>
+      <description />
+    </property>
+    <property name='dirtyPropertyNames' type='org.weceem.css.WcmStyleSheet' artefact='Domain'>
+      <description />
+    </property>
+    <property name='all' type='org.weceem.css.WcmStyleSheet' artefact='Domain'>
       <description />
     </property>
     <property name='attached' type='org.weceem.blog.WcmBlog' artefact='Domain'>
@@ -1817,16 +1853,16 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     <property name='all' type='org.weceem.script.WcmAction' artefact='Domain'>
       <description />
     </property>
-    <property name='attached' type='org.weceem.wiki.WcmWikiItem' artefact='Domain'>
+    <property name='attached' type='org.weceem.content.WcmFolder' artefact='Domain'>
       <description />
     </property>
-    <property name='dirty' type='org.weceem.wiki.WcmWikiItem' artefact='Domain'>
+    <property name='dirty' type='org.weceem.content.WcmFolder' artefact='Domain'>
       <description />
     </property>
-    <property name='dirtyPropertyNames' type='org.weceem.wiki.WcmWikiItem' artefact='Domain'>
+    <property name='dirtyPropertyNames' type='org.weceem.content.WcmFolder' artefact='Domain'>
       <description />
     </property>
-    <property name='all' type='org.weceem.wiki.WcmWikiItem' artefact='Domain'>
+    <property name='all' type='org.weceem.content.WcmFolder' artefact='Domain'>
       <description />
     </property>
     <property name='attached' type='org.weceem.blog.WcmBlogEntry' artefact='Domain'>
@@ -1841,88 +1877,28 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     <property name='all' type='org.weceem.blog.WcmBlogEntry' artefact='Domain'>
       <description />
     </property>
-    <property name='attached' type='org.weceem.content.WcmExternalLink' artefact='Domain'>
+    <property name='attached' type='org.weceem.content.WcmVirtualContent' artefact='Domain'>
       <description />
     </property>
-    <property name='dirty' type='org.weceem.content.WcmExternalLink' artefact='Domain'>
+    <property name='dirty' type='org.weceem.content.WcmVirtualContent' artefact='Domain'>
       <description />
     </property>
-    <property name='dirtyPropertyNames' type='org.weceem.content.WcmExternalLink' artefact='Domain'>
+    <property name='dirtyPropertyNames' type='org.weceem.content.WcmVirtualContent' artefact='Domain'>
       <description />
     </property>
-    <property name='all' type='org.weceem.content.WcmExternalLink' artefact='Domain'>
+    <property name='all' type='org.weceem.content.WcmVirtualContent' artefact='Domain'>
       <description />
     </property>
-    <property name='attached' type='org.weceem.css.WcmStyleSheet' artefact='Domain'>
+    <property name='attached' type='org.weceem.content.WcmComment' artefact='Domain'>
       <description />
     </property>
-    <property name='dirty' type='org.weceem.css.WcmStyleSheet' artefact='Domain'>
+    <property name='dirty' type='org.weceem.content.WcmComment' artefact='Domain'>
       <description />
     </property>
-    <property name='dirtyPropertyNames' type='org.weceem.css.WcmStyleSheet' artefact='Domain'>
+    <property name='dirtyPropertyNames' type='org.weceem.content.WcmComment' artefact='Domain'>
       <description />
     </property>
-    <property name='all' type='org.weceem.css.WcmStyleSheet' artefact='Domain'>
-      <description />
-    </property>
-    <property name='attached' type='org.weceem.files.WcmContentFile' artefact='Domain'>
-      <description />
-    </property>
-    <property name='dirty' type='org.weceem.files.WcmContentFile' artefact='Domain'>
-      <description />
-    </property>
-    <property name='dirtyPropertyNames' type='org.weceem.files.WcmContentFile' artefact='Domain'>
-      <description />
-    </property>
-    <property name='all' type='org.weceem.files.WcmContentFile' artefact='Domain'>
-      <description />
-    </property>
-    <property name='attached' type='org.weceem.content.WcmTemplate' artefact='Domain'>
-      <description />
-    </property>
-    <property name='dirty' type='org.weceem.content.WcmTemplate' artefact='Domain'>
-      <description />
-    </property>
-    <property name='dirtyPropertyNames' type='org.weceem.content.WcmTemplate' artefact='Domain'>
-      <description />
-    </property>
-    <property name='all' type='org.weceem.content.WcmTemplate' artefact='Domain'>
-      <description />
-    </property>
-    <property name='attached' type='org.weceem.js.WcmJavaScript' artefact='Domain'>
-      <description />
-    </property>
-    <property name='dirty' type='org.weceem.js.WcmJavaScript' artefact='Domain'>
-      <description />
-    </property>
-    <property name='dirtyPropertyNames' type='org.weceem.js.WcmJavaScript' artefact='Domain'>
-      <description />
-    </property>
-    <property name='all' type='org.weceem.js.WcmJavaScript' artefact='Domain'>
-      <description />
-    </property>
-    <property name='attached' type='org.weceem.content.WcmFolder' artefact='Domain'>
-      <description />
-    </property>
-    <property name='dirty' type='org.weceem.content.WcmFolder' artefact='Domain'>
-      <description />
-    </property>
-    <property name='dirtyPropertyNames' type='org.weceem.content.WcmFolder' artefact='Domain'>
-      <description />
-    </property>
-    <property name='all' type='org.weceem.content.WcmFolder' artefact='Domain'>
-      <description />
-    </property>
-    <property name='attached' type='org.weceem.files.WcmContentDirectory' artefact='Domain'>
-      <description />
-    </property>
-    <property name='dirty' type='org.weceem.files.WcmContentDirectory' artefact='Domain'>
-      <description />
-    </property>
-    <property name='dirtyPropertyNames' type='org.weceem.files.WcmContentDirectory' artefact='Domain'>
-      <description />
-    </property>
-    <property name='all' type='org.weceem.files.WcmContentDirectory' artefact='Domain'>
+    <property name='all' type='org.weceem.content.WcmComment' artefact='Domain'>
       <description />
     </property>
     <property name='attached' type='org.weceem.content.WcmWidget' artefact='Domain'>
@@ -1937,16 +1913,40 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
     <property name='all' type='org.weceem.content.WcmWidget' artefact='Domain'>
       <description />
     </property>
-    <property name='attached' type='org.weceem.html.WcmHTMLContent' artefact='Domain'>
+    <property name='attached' type='org.weceem.files.WcmContentFile' artefact='Domain'>
       <description />
     </property>
-    <property name='dirty' type='org.weceem.html.WcmHTMLContent' artefact='Domain'>
+    <property name='dirty' type='org.weceem.files.WcmContentFile' artefact='Domain'>
       <description />
     </property>
-    <property name='dirtyPropertyNames' type='org.weceem.html.WcmHTMLContent' artefact='Domain'>
+    <property name='dirtyPropertyNames' type='org.weceem.files.WcmContentFile' artefact='Domain'>
       <description />
     </property>
-    <property name='all' type='org.weceem.html.WcmHTMLContent' artefact='Domain'>
+    <property name='all' type='org.weceem.files.WcmContentFile' artefact='Domain'>
+      <description />
+    </property>
+    <property name='attached' type='org.weceem.wiki.WcmWikiItem' artefact='Domain'>
+      <description />
+    </property>
+    <property name='dirty' type='org.weceem.wiki.WcmWikiItem' artefact='Domain'>
+      <description />
+    </property>
+    <property name='dirtyPropertyNames' type='org.weceem.wiki.WcmWikiItem' artefact='Domain'>
+      <description />
+    </property>
+    <property name='all' type='org.weceem.wiki.WcmWikiItem' artefact='Domain'>
+      <description />
+    </property>
+    <property name='attached' type='org.weceem.files.WcmContentDirectory' artefact='Domain'>
+      <description />
+    </property>
+    <property name='dirty' type='org.weceem.files.WcmContentDirectory' artefact='Domain'>
+      <description />
+    </property>
+    <property name='dirtyPropertyNames' type='org.weceem.files.WcmContentDirectory' artefact='Domain'>
+      <description />
+    </property>
+    <property name='all' type='org.weceem.files.WcmContentDirectory' artefact='Domain'>
       <description />
     </property>
     <property name='attached' type='org.grails.taggable.Tag' artefact='Domain'>

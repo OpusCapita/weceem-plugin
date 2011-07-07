@@ -9,7 +9,7 @@ class WeceemGrailsPlugin {
     def _log = LogFactory.getLog('org.weceem.WeceemGrailsPlugin')
 
     // the plugin version
-    def version = "1.0.RC2"
+    def version = "1.0"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.2.2 > *"
     
@@ -145,11 +145,7 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         // returns file if so
         
         log.info("Adding servlet filter")
-        
-        //def repSvc = applicationContext.wcmContentRepositoryService
-        def uploadUrl = WcmContentRepositoryService.getUploadUrlFromConfig(ConfigurationHolder.config)
-        log.info("Uploaded file filter will be at ${uploadUrl}")
-        
+                
         def listeners = webXml.listener[0]
         listeners + {
             'listener' {
@@ -169,7 +165,7 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         lastMapping + {
             'filter-mapping' {
                 'filter-name'("WeceemFileFilter")
-                'url-pattern'("${uploadUrl}*")
+                'url-pattern'("/*")
             }
         }
         

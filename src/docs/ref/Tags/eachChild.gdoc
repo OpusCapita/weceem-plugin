@@ -1,0 +1,7 @@
+This tag will iterate over the children of the current or specified content node.
+
+h2. Attributes
+
+path -
+node -
+max - 

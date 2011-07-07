@@ -217,7 +217,10 @@ class WcmContentController {
             
                         if (content) {
                             // @todo parameterize this default max age
-                            def cacheMaxAge = (content.validFor ?: template?.validFor) ?: 1
+                            def cacheMaxAge = 1
+                            if (!template?.userSpecificContent) {
+                                cacheMaxAge = (content.validFor ?: template?.validFor) ?: 1
+                            }
                             
                             // @todo parameterize the defaut publicly cacheable (shared) setting
                             def publiclyCacheable = template ? !template.userSpecificContent : true

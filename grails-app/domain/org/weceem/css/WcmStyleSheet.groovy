@@ -28,7 +28,7 @@ class WcmStyleSheet extends WcmContent {
     String getMimeType() { "text/css" }
 
     static constraints = {
-        content(nullable: false, maxSize: 65536)
+        content(nullable: false, maxSize: WcmContent.MAX_CONTENT_SIZE)
         status(nullable: false) // Workaround for Grails 1.1.1 constraint inheritance bug
     }
     

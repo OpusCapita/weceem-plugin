@@ -813,24 +813,23 @@ class WcmContentRepositoryService implements InitializingBean {
         }
 
         // Do an ugly check for unique uris at root
-        if (!targetContent){
-            def criteria = WcmContent.createCriteria()
-            def nodes = criteria {
-                if (targetContent){
-                    eq("parent.id", targetContent.id)
-                }else{
-                    isNull("parent")
-                }
-                eq("aliasURI", sourceContent.aliasURI)
-                not{
-                    eq("id", sourceContent.id)
-                }
+        def criteria = WcmContent.createCriteria()
+        def nodes = criteria {
+            eq("space", sourceContent.space)
+            if (!targetContent) {
+                isNull("parent")
+            } else {
+                eq('parent.id', targetContent.ident())
             }
-            
-            if (nodes.size() > 0){
-                throw new IllegalArgumentException("Another node at the root of your repository has the same aliasURI")
-            } 
+            eq("aliasURI", sourceContent.aliasURI)
+            not {
+                idEq(sourceContent.ident())
+            }
         }
+        
+        if (nodes.size() > 0){
+            throw new IllegalArgumentException("Another node at the root of your repository has the same aliasURI")
+        } 
 
         // We need this to invalidate caches
         def originalURI = sourceContent.absoluteURI
@@ -1107,7 +1106,9 @@ class WcmContentRepositoryService implements InitializingBean {
      * @return a map containing an optional "errors" list property and optional notFound boolean property
      */
     def updateNode(String id, def params) {
-        WcmContent content = WcmContent.get(id)
+        // Eager fetch to avoid problems with lazy loading if errors occur
+        WcmContent content = WcmContent.findById(id, [fetch:[children:'eager']])
+        
         requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_EDIT])        
 
         if (content) {
@@ -1209,10 +1210,16 @@ class WcmContentRepositoryService implements InitializingBean {
                 content.createAliasURI(content.parent)
             }
 
-            // Auto-set publishFrom to now if content is created as public but no publishFrom specified
-            // Required for blogs and sort by publishFrom to work
             if (content.status.publicContent && (content.publishFrom == null)) {
+                // Auto-set publishFrom to now if content is created as public but no publishFrom specified
+                // Required for blogs and sort by publishFrom to work
                 content.publishFrom = new Date()
+            } else if (!content.status.publicContent && content.publishFrom && (content.publishFrom < new Date())) {
+                // Automatically clear the publishFrom if it was in the past, as it does not make sense and will
+                // be automatically re-published. Future publishFrom must have been manually set so 
+                // its ok to keep it. Doing this stops content with auto publishFrom being pushed
+                // back to published soon after edit to non-published without manually clearing publishFrom
+                content.publishFrom = null
             }
 
             def ok = content.validate()
