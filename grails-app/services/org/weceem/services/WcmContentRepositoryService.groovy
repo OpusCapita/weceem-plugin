@@ -819,7 +819,7 @@ class WcmContentRepositoryService implements InitializingBean {
             if (!targetContent) {
                 isNull("parent")
             } else {
-                eq('parent.id', target.ident())
+                eq('parent.id', targetContent.ident())
             }
             eq("aliasURI", sourceContent.aliasURI)
             not {
