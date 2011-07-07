@@ -251,7 +251,7 @@ class WeceemTagLib {
     def breadcrumb = { attrs, body -> 
         def node = request[WcmContentController.REQUEST_ATTRIBUTE_NODE]
         def lineage = request[WcmContentController.REQUEST_ATTRIBUTE_PAGE].lineage
-        def div = attrs.divider?.decodeHTML() ?: ' &gt; '
+        def div = (attrs.divider != null) ? attrs.divider.decodeHTML() : ' &gt; '
         def first = true
         if (!attrs.custom?.toString()?.toBoolean()) {
             body = { args -> 
@@ -260,23 +260,24 @@ class WeceemTagLib {
                     o << div
                 }
 
-                o << wcm.link(node:args.node) {
-                    out << args.node.titleForMenu.encodeAsHTML() 
-                } 
+                def title = args.breadcrumbNode.titleForMenu.encodeAsHTML() 
+                if (!args.last) {
+                    o << wcm.link(node:args.breadcrumbNode) {
+                        out << title
+                    } 
+                } else {
+                    o << "<span class=\"last\">${title}</span>"
+                }
                 return o.toString()
             }
         }
         
-        lineage.each { parent ->
-            if (parent != node) {
-                out << body(first:first, node:parent)
-            }
+        def nodes = lineage
+        println "Nodes: ${nodes}"
+        nodes.each { current ->
+            out << body(first:first, last: current.ident() == node.ident(), breadcrumbNode:current)
             first = false
         }
-        if (!first) {
-            out << div
-        }
-        out << node.titleForMenu.encodeAsHTML()
     }
 
     static DEFAULT_MENU_BODY = { args -> 
