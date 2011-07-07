@@ -273,7 +273,6 @@ class WeceemTagLib {
         }
         
         def nodes = lineage
-        println "Nodes: ${nodes}"
         nodes.each { current ->
             out << body(first:first, last: current.ident() == node.ident(), breadcrumbNode:current)
             first = false
