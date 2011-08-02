@@ -1,6 +1,6 @@
 import groovy.xml.DOMBuilder
 import groovy.xml.dom.DOMCategory
-import groovy.xml.dom.DOMUtil
+import groovy.xml.XmlUtil
 
 void sortFilterMappingNodes(dom, filterOrder) {
     def sortedMappingNodes = []
@@ -49,7 +49,7 @@ eventWebXmlEnd = { filename ->
         sortFilterMappingNodes(wxml, filterOrder)
     }
 
-    webXmlFile.withWriter { w -> w << DOMUtil.serialize(wxml) }
+    webXmlFile.withWriter { w -> w << XmlUtil.serialize(wxml) }
 }
 
 
