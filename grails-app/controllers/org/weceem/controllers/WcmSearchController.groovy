@@ -19,20 +19,24 @@ class WcmSearchController {
             log.debug "Searching in space [$space] under URI [$uri]"
         }
         if (space) {
-            def searchHits
+            def searchHits = [total:0]
             def searchType = params.mode ?: 'text'
             switch (searchType) {
                 case 'tag':
-                    searchHits = wcmContentRepositoryService.searchForPublicContentByTag(params.query, space, uri, 
-                        [types:params.types, offset:params.int('offset'), max: Math.min(100, params.int('max') ?: DEFAULT_RESULTS_PER_PAGE)])
-                    if (log.debugEnabled) {
-                        log.debug "Seach by tag ${params.query} results: ${searchHits}"
+                    if (params.query) {
+                        searchHits = wcmContentRepositoryService.searchForPublicContentByTag(params.query, space, uri, 
+                            [types:params.types, offset:params.int('offset'), max: Math.min(100, params.int('max') ?: DEFAULT_RESULTS_PER_PAGE)])
+                        if (log.debugEnabled) {
+                            log.debug "Seach by tag ${params.query} results: ${searchHits}"
+                        }
                     }
                     break
                 case 'text':
                 default:
-                    searchHits = wcmContentRepositoryService.searchForPublicContent(params.query, space, uri, 
-                        [types:params.types, offset:params.int('offset'), max: Math.min(100, params.int('max') ?: DEFAULT_RESULTS_PER_PAGE)])
+                    if (params.query) {
+                        searchHits = wcmContentRepositoryService.searchForPublicContent(params.query, space, uri, 
+                            [types:params.types, offset:params.int('offset'), max: Math.min(100, params.int('max') ?: DEFAULT_RESULTS_PER_PAGE)])
+                    }
                     break
             }
             return [
