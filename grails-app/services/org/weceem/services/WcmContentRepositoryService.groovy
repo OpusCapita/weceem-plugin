@@ -2233,6 +2233,10 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
     }
 
     def searchForPublicContent(String query, WcmSpace space, contentOrPath = null, args = null) {
+        if (!query) {
+            return [total:0]
+        }
+        
         def baseURI
         if (contentOrPath) {
             if (contentOrPath instanceof WcmContent) {
