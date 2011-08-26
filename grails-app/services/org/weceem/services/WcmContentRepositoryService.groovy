@@ -2186,8 +2186,20 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
     }
 
     def filterToTypes(listOfContent, String typeNames) {
-        def types = typeNames.tokenize(',').collect { n -> grailsApplication.getClassForName(n.trim()) }
-        listOfContent.findAll { c -> types.any { t -> t.isAssignableFrom(c.class) } }
+        def types = []
+        typeNames.tokenize(',').each { n -> 
+            def cls = grailsApplication.getClassForName(n.trim()) 
+            if (cls) {
+                types << cls
+            } else {
+                log.warn "Attempt to filter content nodes by type ${n} but this class is not known"
+            }
+        }
+        return listOfContent.findAll { c -> 
+            types.any { t -> 
+                t.isAssignableFrom(c.class)
+            }
+        }
     }
 
     def searchForPublicContentByTag(String tag, WcmSpace space, contentOrPath = null, args = [:]) {
