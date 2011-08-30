@@ -109,7 +109,7 @@ class WcmContent implements Comparable, Taggable {
         space(nullable: false)
         status(nullable: false)
         orderIndex(nullable: true)
-        validFor(nullable: true, inList:[0, 60, VALID_FOR_5MIN, VALID_FOR_HOUR, VALID_FOR_DAY, 60*60*24*7, 60*60*24*30, 60*60*24*300])
+        validFor(nullable: true, inList:[null, 0, 60, VALID_FOR_5MIN, VALID_FOR_HOUR, VALID_FOR_DAY, 60*60*24*7, 60*60*24*30, 60*60*24*300])
         parent(nullable: true, lazy:true)
         createdBy(nullable: true)
         createdOn(nullable: true)

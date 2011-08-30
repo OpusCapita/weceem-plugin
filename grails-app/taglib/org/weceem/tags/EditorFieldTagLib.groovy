@@ -141,7 +141,8 @@ class EditorFieldTagLib {
 
     def editorFieldCacheMaxAge = { attrs ->
         out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
-            optionValue: { g.message(code:'editor.max.age.seconds.'+it) } )
+            optionKey: { it == null ? '' : it },
+            optionValue: { g.message(code:'editor.max.age.seconds.'+(it == null ? 'template' : it) ) } )
     }
 
     def editorFieldWcmScript = { attrs ->
