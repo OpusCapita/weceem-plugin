@@ -858,7 +858,12 @@ class WeceemTagLib {
             if (_log.infoEnabled) {
                 _log.info "Retrieving feed ${url}"
             }
-            new URL(url).getText('utf-8')
+            try {
+                return new URL(url).getText('utf-8')
+            } catch (IOException ioe) {
+                log.warn "Unable to retrieve data feed at ${url}: ${ioe}"
+                return null
+            }
         })
         
         if (feedData == null) {
