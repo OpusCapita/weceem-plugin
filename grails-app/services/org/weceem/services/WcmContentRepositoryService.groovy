@@ -128,7 +128,7 @@ class WcmContentRepositoryService implements InitializingBean {
 
     static getUploadDirFromConfig(configObject) {
         def uploadDirConf = configObject.weceem.upload.dir
-        (uploadDirConf instanceof String) && uploadDirConf ? uploadDirConf : "/WeceemFiles/"
+        uploadDirConf ? uploadDirConf.toString() : "/WeceemFiles/"
     }
     
     static getUploadUrlFromConfig(configObject) {

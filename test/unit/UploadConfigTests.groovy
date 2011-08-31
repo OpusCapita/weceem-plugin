@@ -86,4 +86,29 @@ class UploadConfigTests extends grails.test.GrailsUnitTestCase {
         assertEquals '/uploads/', service.uploadUrl
         assertEquals basePath.absolutePath, service.uploadDir.absolutePath
     }
+
+    void testGStringUploadDir() {
+        
+        def basePath = new File('.', 'test-uploads-folder')
+
+        service.with {
+            grailsApplication = [
+                config: [
+                    weceem: [
+                        upload: [
+                            dir: "file:${basePath.absolutePath}"
+                        ]
+                    ]
+                ],
+                mainContext: [
+                    getResource: { path -> fail("getResource should not be called!") }
+                ]
+            ]
+            loadConfig()
+        }
+        
+        assertFalse service.uploadInWebapp
+        assertEquals '/uploads/', service.uploadUrl
+        assertEquals basePath.absolutePath, service.uploadDir.absolutePath
+    }
 }
