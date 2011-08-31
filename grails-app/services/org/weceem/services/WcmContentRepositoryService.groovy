@@ -303,7 +303,7 @@ class WcmContentRepositoryService implements InitializingBean {
         [space:space, uri:uri]
     }
     
-    WcmSpace createSpace(params, templateName = 'default') {
+    WcmSpace createSpace(params, templateURLOrName = 'default') throws IllegalArgumentException {
         
         def s
         WcmContent.withTransaction { txn ->
@@ -315,8 +315,18 @@ class WcmContentRepositoryService implements InitializingBean {
                     spaceDir.mkdirs()
                 }
 
-                if (templateName) {
-                    importSpaceTemplate(templateName, s)
+                if (templateURLOrName) {
+                    def templateLocation
+                    // Only map template name via config if not already given a path
+                    if (templateURLOrName.startsWith('file:') || templateURLOrName.startsWith('classpath:')) {
+                        templateLocation = templateURLOrName
+                    } else {
+                        templateLocation = grailsApplication.config.weceem.space.templates[templateURLOrName]
+                    }
+                    if (templateLocation instanceof ConfigObject) {
+                        throw new IllegalArgumentException("No space template defined with name [${templateURLOrName}]")
+                    }
+                    importSpaceTemplate(templateLocation, s)
                 }
             } else {
                 log.error "Unable to create space with properties: ${params} - errors occurred: ${s.errors}"
@@ -339,22 +349,22 @@ class WcmContentRepositoryService implements InitializingBean {
     
     /**
      * Import a named space template (import zip) into the specified space
-     * @param templateName Name of a template in classpath:/org/weceem/resources/ or file: or classpath: url to ZIP file
+     * @param templateLocationOrName Name of a template in classpath:/org/weceem/resources/ or file: or classpath: url to ZIP file
      * @param space The space into which the import is to be performed
      */
-    void importSpaceTemplate(String templateName, WcmSpace space) {
+    void importSpaceTemplate(String templateLocationOrName, WcmSpace space) {
         
-        log.info "Importing space template [${templateName}] into space [${space.name}]"
+        log.info "Importing space template [${templateLocationOrName}] into space [${space.name}]"
         // For now we only load files, in future we may get them as blobs from DB
         def f = File.createTempFile("weceem-space-import", null)
     
-        def resourceName = templateName.startsWith('file:') || templateName.startsWith('classpath:') ?
-            templateName :
-            "classpath:/org/weceem/resources/${templateName}-space-template.zip"
+        def resourceName = templateLocationOrName.startsWith('file:') || templateLocationOrName.startsWith('classpath:') ?
+            templateLocationOrName :
+            "classpath:/org/weceem/resources/${templateLocationOrName}-space-template.zip"
             
         def res = ApplicationHolder.application.parentContext.getResource(resourceName).inputStream
         if (!res) {
-            log.error "Unable to import space template [${templateName}] into space [${space.name}], space template not found at resource ${resourceName}"
+            log.error "Unable to import space template [${templateLocationOrName}] into space [${space.name}], space template not found at resource ${resourceName}"
             return
         }
         f.withOutputStream { os ->
@@ -363,11 +373,11 @@ class WcmContentRepositoryService implements InitializingBean {
         try {
             wcmImportExportService.importSpace(space, 'simpleSpaceImporter', f)
         } catch (Throwable t) {
-            log.error "Unable to import space template [${templateName}] into space [${space.name}]", t
+            log.error "Unable to import space template [${templateLocationOrName}] into space [${space.name}]", t
             throw t // rethrow, this is sort of fatal
         }
 
-        log.info "Successfully imported space template [${templateName}] into space [${space.name}]"
+        log.info "Successfully imported space template [${templateLocationOrName}] into space [${space.name}]"
         
         invalidateCachingForSpace(space)
     }

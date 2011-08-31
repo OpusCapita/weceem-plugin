@@ -43,4 +43,19 @@ class ContentRepositoryDefaultSpaceTests extends AbstractWeceemIntegrationTest {
         assertNotNull contentInfo.content
         assertTrue contentInfo.content.title.indexOf('elcome') >= 0
     }
+
+    void testSpaceCreatedCustomTemplate() {
+        def f = new File(servletContext.getRealPath('/Alternative.zip'))
+
+        grailsApplication.config.weceem.space.templates.DUMMY = f.toURL().toString()
+
+        wcmContentRepositoryService.createSpace([name:'testing', aliasURI:'testing'], 'DUMMY')
+        
+        assertEquals 1, WcmSpace.count()
+        def contentInfo = wcmContentRepositoryService.findContentForPath('alternative-test', WcmSpace.findByName('testing'))
+        
+        assertNotNull contentInfo
+        assertNotNull contentInfo.content
+        assertTrue contentInfo.content.title.indexOf('elcome') >= 0
+    }
 }
