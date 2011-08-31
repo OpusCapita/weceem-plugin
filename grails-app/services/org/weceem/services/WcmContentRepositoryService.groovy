@@ -1121,7 +1121,6 @@ class WcmContentRepositoryService implements InitializingBean {
     // @todo This is a hack so we can bind without x.properties = y which is broken in production on Grails 1.2-M2
     public hackedBindData(obj, params) {
         def transientProps = obj.metaClass.hasProperty(null, 'transients') ? obj.class.transients : []
-        println "Binding, excluding x: ${transientProps}"
         new BindDynamicMethod().invoke(this /* dummy value */, 'bindData', obj, params, [exclude:transientProps])
     }
 
