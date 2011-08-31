@@ -1022,7 +1022,7 @@ ${node.content}
             throwTagError("The [$ATTR_TYPE] attribute is required to indicate what kind of resource you are linking to")
         }
 
-        attrs.url = node.absoluteURI
+        attrs.url = wcm.createLink(path:node)
         out << jqui.resourceLink(attrs)
     }
 }
