@@ -3,6 +3,7 @@ package org.weceem.export
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.apache.commons.logging.LogFactory
 import org.apache.commons.logging.Log
+import org.springframework.beans.BeanWrapperImpl
 
 import org.weceem.content.*
 import org.weceem.files.*
@@ -192,6 +193,14 @@ class SimpleSpaceImporter implements SpaceImporter {
         params.remove "id"
         params.remove "space"
         params.remove "space.id"
+        
+        // Remove any read-only or transient properties first, stop any bad imports from old exports
+        def wrappedContent = new BeanWrapperImpl(content)
+        for (p in wrappedContent.propertyDescriptors) {
+            if (!wrappedContent.isWritableProperty(p.name)) {
+                params.remove(p.name)
+            }
+        }
         
         // @todo remove this and revert to x.properties = y after Grails 1.2-RC1
         def grailsApp = ApplicationHolder.application
