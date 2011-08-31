@@ -72,3 +72,9 @@ span.loadingMessage {
   color: red;
   text-decoration: underline;
 }
+
+.ui-datepicker {
+    display: none;
+}
+
+
