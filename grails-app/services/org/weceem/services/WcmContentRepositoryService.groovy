@@ -2280,6 +2280,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
         // Filter by type if required
         if (args.types) {
             results.results = filterToTypes(results.results, args.types)
+            results.total = results.results.size()
         }
         
         return results
