@@ -29,6 +29,22 @@ class ContentRepositoryDefaultSpaceTests extends AbstractWeceemIntegrationTest {
         super.setUp()
     }
     
+    void testDefaultSpaceCreateWorksWithoutLoggedInUser() {
+        wcmContentRepositoryService.wcmSecurityService.securityDelegate.getUserRoles = { -> [] }
+
+        wcmContentRepositoryService.createDefaultSpace()
+        
+        assertEquals 1, WcmSpace.count()
+
+        // Need perms to view the content!
+        wcmContentRepositoryService.wcmSecurityService.securityDelegate.getUserRoles = { -> ['ROLE_ADMIN'] }
+        def contentInfo = wcmContentRepositoryService.findContentForPath('about', WcmSpace.findByName('Default'))
+        
+        assertNotNull contentInfo
+        assertNotNull contentInfo.content
+        assertTrue contentInfo.content.title.indexOf('bout') >= 0
+    }
+
     void testDefaultSpaceCreatedWithAppTemplate() {
         def f = new File(servletContext.getRealPath('/Alternative.zip'))
 

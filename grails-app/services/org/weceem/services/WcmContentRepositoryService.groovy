@@ -173,7 +173,9 @@ class WcmContentRepositoryService implements InitializingBean {
         if (WcmSpace.count() == 0) {
             def configValue = grailsApplication.config.weceem.default.space.template
             def templateName = configValue instanceof String ? configValue : 'default'
-            createSpace([name:'Default'], templateName)
+            withPermissionsBypass {
+                createSpace([name:'Default'], templateName)
+            }
         }
     }
     
@@ -304,6 +306,7 @@ class WcmContentRepositoryService implements InitializingBean {
     }
     
     WcmSpace createSpace(params, templateURLOrName = 'default') throws IllegalArgumentException {
+        // @todo need to enforce ADMIN permission here, but not per-space, its general admin
         
         def s
         WcmContent.withTransaction { txn ->
@@ -353,6 +356,7 @@ class WcmContentRepositoryService implements InitializingBean {
      * @param space The space into which the import is to be performed
      */
     void importSpaceTemplate(String templateLocationOrName, WcmSpace space) {
+        // @todo enforce ADMIN permission here
         
         log.info "Importing space template [${templateLocationOrName}] into space [${space.name}]"
         // For now we only load files, in future we may get them as blobs from DB
