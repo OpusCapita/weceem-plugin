@@ -28,7 +28,7 @@ class WcmAction extends WcmContent {
     }
 
     static constraints = {
-        script(nullable: false)
+        script(nullable: true)
         description(maxSize:200)
         allowedMethods(maxSize:40)
     }

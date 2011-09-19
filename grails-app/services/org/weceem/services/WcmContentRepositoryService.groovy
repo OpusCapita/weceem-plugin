@@ -100,7 +100,22 @@ class WcmContentRepositoryService implements InitializingBean {
         unmoderatedStatusCode = code instanceof Number ? code : DEFAULT_UNMODERATED_STATUS_CODE
             
         loadConfig()
+        
+        checkDomainModel()
     }
+    
+    void checkDomainModel() {
+        grailsApplication.domainClasses.each { artefact ->
+            if ( WcmContent.isAssignableFrom(artefact.clazz) ) {
+                def assocProps = findDomainClassContentAssociations(artefact)
+                if (!assocProps.every( { it.optional } )) {
+                    throw new IllegalArgumentException( 
+                        "Content class ${artefact.clazz} has an association to other content that is not nullable. All such references must be nullable")
+                }
+            }
+        }
+    }
+    
     /**
      * Workaround for replaceAll problems with \ in Java
      */
@@ -938,6 +953,12 @@ class WcmContentRepositoryService implements InitializingBean {
     }
     
     
+    def findDomainClassContentAssociations(domainArtefact) {
+        domainArtefact.persistentProperties.findAll { p -> 
+            p.isAssociation() && WcmContent.isAssignableFrom(p.referencedPropertyType)
+        }        
+    }
+    
     /**
      * Use introspection to find all references to the specified content. Requires finding all
      * associations/relationships to other WcmContent and querying them all individually. Hideous but
@@ -951,9 +972,7 @@ class WcmContentRepositoryService implements InitializingBean {
         // and then run a query for each association, which - with caching - should run a lot faster than
         // checking every property on every node
         for (cont in WcmContent.list()){
-            def perProps = grailsApplication.getDomainClass(cont.class.name).persistentProperties.findAll { p -> 
-                p.isAssociation() && WcmContent.isAssignableFrom(p.referencedPropertyType)
-            }
+            def perProps = findDomainClassContentAssociations(grailsApplication.getDomainClass(cont.class.name))
             for (p in perProps){
                 if (cont."${p.name}" instanceof Collection){
                     for (inst in cont."${p.name}"){

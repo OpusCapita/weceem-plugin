@@ -48,7 +48,7 @@ class WcmVirtualContent extends WcmContent {
     boolean contentShouldAcceptChildren() { false }
 
     static constraints = {
-        target(nullable: false)
+        target(nullable: true)
     }
     
     static mapping = {
