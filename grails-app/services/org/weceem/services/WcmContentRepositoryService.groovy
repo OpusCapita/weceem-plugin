@@ -433,16 +433,20 @@ class WcmContentRepositoryService implements InitializingBean {
         }
         // @todo This code is very naïve and probably broken
         // It needs leaf-first dependency ordering and/or brute force clearing of all refs
-        def wasDelete = true
-        while (wasDelete){
+        def wasDeleted = true
+        while (wasDeleted){
             contentList = WcmContent.findAllBySpace(space)
-            wasDelete = false
+            wasDeleted = false
             for (content in contentList){
+                log.debug "Finding references to content [${content.aliasURI}] in space [$space]"
                 def refs = findReferencesTo(content)
-                if (refs.size() == 0){
-                    deleteNode(content)
-                    wasDelete = true
+                log.debug "Found references to content [${content.aliasURI}] in space [$space] from [${refs.referringProperty}] in [${refs.referencingContent}], nulling them"
+                refs.each { ref ->
+                    ref.referencingContent[ref.referringProperty] = null
                 }
+                log.debug "Nulled ${refs.size()} references to content [${content.aliasURI}], now deleting it"
+                deleteNode(content)
+                wasDeleted = true
             }
         }
         log.info "Finished Deleting content from space [$space]"
@@ -980,7 +984,7 @@ class WcmContentRepositoryService implements InitializingBean {
                             results << new ContentReference(referringProperty: p.name, referencingContent: cont, targetContent: content)
                         }
                     }
-                }else{
+                } else {
                     if (content.equals(cont."${p.name}")){
                         results << new ContentReference(referringProperty: p.name, referencingContent: cont, targetContent: content)
                     }
