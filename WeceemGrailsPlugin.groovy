@@ -25,7 +25,7 @@ class WeceemGrailsPlugin {
         jquery:'1.4.4.1 > *',
         jqueryUi:'1.8.6.1 > *',
         cacheHeaders:'1.1.5 > *',
-        taggable:'0.6.2 > *'
+        taggable:'1.0.BUILD-SNAPSHOT > *'
     ]
     def observe = ["hibernate", 'services']
     
