@@ -433,24 +433,28 @@ class WcmContentRepositoryService implements InitializingBean {
         }
         // @todo This code is very naïve and probably broken
         // It needs leaf-first dependency ordering and/or brute force clearing of all refs
-        def wasDeleted = true
-        while (wasDeleted){
-            contentList = WcmContent.findAllBySpace(space)
-            wasDeleted = false
-            for (content in contentList){
-                log.debug "Finding references to content [${content.aliasURI}] in space [$space]"
-                def refs = findReferencesTo(content)
-                log.debug "Found references to content [${content.aliasURI}] in space [$space] from [${refs.referringProperty}] in [${refs.referencingContent}], nulling them"
-                refs.each { ref ->
-                    ref.referencingContent[ref.referringProperty] = null
-                }
-                log.debug "Nulled ${refs.size()} references to content [${content.aliasURI}], now deleting it"
-                deleteNode(content)
-                wasDeleted = true
+        eachContentDepthFirst(space) { node ->
+            log.debug "Finding references to content [${node.aliasURI}] in space [$space]"
+            def refs = findReferencesTo(node)
+            log.debug "Found references to content [${node.aliasURI}] in space [$space] from [${refs.referringProperty}] in [${refs.referencingContent}], nulling them"
+            refs.each { ref ->
+                ref.referencingContent[ref.referringProperty] = null
             }
+            log.debug "Nulled ${refs.size()} references to content [${node.aliasURI}], now deleting it"
+            deleteNode(node)
         }
-        log.info "Finished Deleting content from space [$space]"
+        log.info "Finished deleting content from space [$space]"
     }
+    
+    void eachContentDepthFirst(WcmSpace space, Closure code) {
+        def rootNodes = findAllRootContent(space, [sort:'orderIndex'])
+        rootNodes.each { root ->
+            findDescendentsDepthFirst(root).each { d ->
+                code(d)
+            }
+            code(root)
+        }
+    } 
     
     void deleteSpace(WcmSpace space) {
         requirePermissions(space, [WeceemSecurityPolicy.PERMISSION_ADMIN])        
@@ -1747,9 +1751,25 @@ class WcmContentRepositoryService implements InitializingBean {
     /**
      * Return a flattened list of all the descendents of this node
      */
+    def findDescendentsDepthFirst(WcmContent parent, Set<WcmContent> alreadyVisited = []) {
+        alreadyVisited << parent
+        def r = findChildren(parent, [sort:'orderIndex'])
+        def result = []
+        r.each { c ->
+            if (!alreadyVisited.contains(c)) {
+                result.addAll(findDescendentsDepthFirst(c, alreadyVisited))
+            }
+            result << c
+        }
+        return result
+    }
+
+    /**
+     * Return a flattened list of all the descendents of this node
+     */
     def findDescendents(WcmContent parent, Set<WcmContent> alreadyVisited = []) {
         alreadyVisited << parent
-        def r = findChildren(parent)
+        def r = findChildren(parent, [sort:'orderIndex'])
         def result = r.clone()
         r.each { c ->
             if (!alreadyVisited.contains(c)) {

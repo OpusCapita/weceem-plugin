@@ -712,6 +712,21 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         assertTrue descendents.contains(virtContent1)
         assertTrue descendents.contains(virtContent2)
         assertTrue descendents.contains(virtContent3)
+
+        assertEquals([nodeB, nodeC, nodeWiki, virtContent1, virtContent2, virtContent3]*.absoluteURI, descendents*.absoluteURI)
+    }
+
+    void testFindDescendentsDepthFirst() {
+        def descendents = wcmContentRepositoryService.findDescendentsDepthFirst(nodeA)
+        assertEquals 6, descendents.size()
+        assertTrue descendents.contains(nodeB)
+        assertTrue descendents.contains(nodeC)
+        assertTrue descendents.contains(nodeWiki)
+        assertTrue descendents.contains(virtContent1)
+        assertTrue descendents.contains(virtContent2)
+        assertTrue descendents.contains(virtContent3)
+
+        assertEquals([nodeB, virtContent1, nodeC, virtContent2, virtContent3, nodeWiki ]*.absoluteURI, descendents*.absoluteURI)
     }
 
     void testFindChildrenWithType() {
