@@ -98,32 +98,7 @@ class WeceemTagLib {
         def var = attrs[ATTR_VAR] ?: null
         out << body(var ? [(var):user] : user)
     }
-    
-/*
-    def title = { attrs -> 
-        renderNodeProperty('title', attrs)
-    }
 
-    def createdBy = { attrs -> 
-        renderNodeProperty('createdBy', attrs)
-    }
-
-    def createdOn = { attrs -> 
-        def codec = extractCodec(attrs)
-        def format = attrs.format ?: 'yyyy/mm/dd hh:MM:ss'
-        out << new SimpleDateFormat(format).format(request['activeNode'].createdOn)."encodeAs$codec"()
-    }
-
-    def changedBy = { attrs -> 
-        renderNodeProperty('changedBy', attrs)
-    }
-
-    def changedOn = { attrs -> 
-        def codec = extractCodec(attrs)
-        def format = attrs[ATTR_FORMAT] ?: 'yyyy/mm/dd hh:MM:ss'
-        out << new SimpleDateFormat(format).format(request['activeNode'].changedOn)."encodeAs$codec"()
-    }
-*/    
     private makeFindParams(attrs) {
         def r = [:]
         r.max = attrs[ATTR_MAX]?.toInteger()
@@ -657,11 +632,17 @@ class WeceemTagLib {
     }
     
     def loggedInUserName = { attrs ->
-        out << wcmSecurityService.userName?.encodeAsHTML()
+        def u = wcmSecurityService.userName
+        if (u) {
+            out << u.encodeAsHTML()
+        }
     }
     
     def loggedInUserEmail = { attrs ->
-        out << wcmSecurityService.userEmail?.encodeAsHTML()
+        def u = wcmSecurityService.userEmail
+        if (u) {
+            out << u.encodeAsHTML()
+        }
     }
     
     def ifUserCanEdit = { attrs, body ->

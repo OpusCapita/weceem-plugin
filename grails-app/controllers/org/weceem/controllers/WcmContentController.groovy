@@ -212,8 +212,7 @@ class WcmContentController {
                     }
                     
                     generate {
-                        def activeUser = wcmSecurityService.userName
-                        request[REQUEST_ATTRIBUTE_USER] = activeUser
+                        request[REQUEST_ATTRIBUTE_USER] = WcmContentController.makeUserInfo(wcmSecurityService)
             
                         if (content) {
                             // @todo parameterize this default max age
@@ -292,6 +291,20 @@ class WcmContentController {
 		] as PageInfo
     }
     
+	static UserInfo makeUserInfo(wcmSecurityService)
+	{
+		def activeUser = wcmSecurityService.userName
+		def u = wcmSecurityService.userPrincipal
+		boolean isAuth = !(u instanceof String)
+		[
+		    username: activeUser,
+		    email: isAuth,
+		    email: isAuth ? u.email : null,
+		    firstName: isAuth ? u.firstName : null,
+		    lastName: isAuth ? u.lastName : null
+		] as UserInfo
+	}
+
     /**
      * Evaluate some content with the specified model, the result can be converted to a string or written to output
      */
@@ -332,7 +345,7 @@ class WcmContentController {
 
         // User info might have been resolved already, if not get it - remember we are static
         if (!request[REQUEST_ATTRIBUTE_USER]) {
-            request[REQUEST_ATTRIBUTE_USER] = ApplicationHolder.application.mainContext.wcmSecurityService.userName
+            request[REQUEST_ATTRIBUTE_USER] = WcmContentController.makeUserInfo(wcmContentRepositoryService.wcmSecurityService)
         }
         
         // Render pipeline might have already supplied page info, if not generate it
@@ -461,4 +474,15 @@ class PageInfo {
     String title
     String titleForHTML
     String titleForMenu
+}
+
+/**
+ * The object passed to the model representing the user
+ */
+class UserInfo
+{
+	String username
+	String email
+	String firstName
+	String lastName
 }
