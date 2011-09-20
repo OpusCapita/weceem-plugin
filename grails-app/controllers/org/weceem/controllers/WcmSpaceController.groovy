@@ -116,7 +116,7 @@ class WcmSpaceController {
             }
         } else {
             flash.message = message(code: 'error.import.emptyFile')
-            redirect(action: importSpace)
+            redirect(action: 'importSpace', params:[id:space.ident()])
         }
     }
 
