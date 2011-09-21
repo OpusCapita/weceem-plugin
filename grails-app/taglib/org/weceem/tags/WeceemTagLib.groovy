@@ -810,9 +810,9 @@ class WeceemTagLib {
 
     def dataFeed = { attrs, body -> 
         def type = attrs.remove(ATTR_TYPE) ?: 'rss'
-        def max = attrs.int(ATTR_MAX) ?: 5
+        def max = attrs[ATTR_MAX] ? attrs[ATTR_MAX].toInteger() : 5
         
-        def custom = attrs.boolean(ATTR_CUSTOM)
+        def custom = attrs[ATTR_CUSTOM] != null ? attrs[ATTR_CUSTOM].toString().toBoolean() : false
         def bodyClosure = custom ? body : null
         if (!custom) { 
             bodyClosure = { args ->
@@ -852,6 +852,7 @@ class WeceemTagLib {
             return
         }
         
+        // @todo cache the actual DOM not the text of the feed
         def feedDOM = new XmlSlurper().parseText(feedData)
         def nodeSet = feedDOM
         gpath.tokenize('.').each { t ->
@@ -861,8 +862,9 @@ class WeceemTagLib {
         if (!custom) {
             out << '<ul>'
         }
-        nodeSet[0..max-1].each { n ->
-            custom ? out << bodyClosure(item:n) : bodyClosure(item:n)
+        int limit = Math.min(nodeSet.size(), max)
+        for (int i = 0; i < limit; i++) {
+            custom ? out << bodyClosure(item:nodeSet[i]) : bodyClosure(item:nodeSet[i])
         }
         if (!custom) {
             out << '</ul>'

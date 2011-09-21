@@ -24,7 +24,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         spc.name = 'testing'
         taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_SPACE, spc)
         
-        String.metaClass.encodeAsHTML = { return delegate }
+        Object.metaClass.encodeAsHTML = { return delegate }
         
         taglib.space([:])
         
@@ -266,5 +266,39 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
             assertTrue d[0] >= o.size()
             assertEquals d[2], o
         }
+    }
+
+    void testDataFeedWithMaxGreaterThanEntries() {
+
+        def mockCacheService = [
+            getOrPutValue : { String cacheName, String key, Closure creator ->
+                """
+<rss>
+    <channel>
+        <item>
+            <title>Test item 1</title>
+            <link>none</link>
+        </item>
+        <item>
+            <title>Test item 2</title>
+            <link>none</link>
+        </item>
+    </channel>
+</rss>"""
+            }
+        ]
+        
+        mockTagLib(WeceemTagLib)
+        def taglib = new WeceemTagLib()
+        taglib.wcmCacheService = mockCacheService
+        
+        taglib.dataFeed(url:'http://localhost/dummyfeed', max:10) { 
+            // no body
+        }
+
+        def o = taglib.out.toString()
+        assertTrue o.contains('Test item 1')
+        assertTrue o.contains('Test item 2')
+        
     }
 }
