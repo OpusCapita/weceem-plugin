@@ -30,7 +30,8 @@ log4j = {
             'grails.app.task',
 //            'org.codehaus.groovy.grails.web.servlet',  //  controllers
 //    	    'org.codehaus.groovy.grails.web.pages', //  GSP
-            'grails.app.domain'
+            'grails.app.domain',
+            'net.sf.ehcache'
 //            'org.codehaus.groovy.grails.web.mapping' // URL mapping
 
 }

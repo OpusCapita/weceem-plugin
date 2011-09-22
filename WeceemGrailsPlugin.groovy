@@ -60,8 +60,21 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         // Register our custom binding beans
         customPropertyEditorRegistrar(org.weceem.binding.CustomPropertyEditorRegistrar)
         
-        weceemCacheManager(net.sf.ehcache.CacheManager) { bean -> 
-            bean.destroyMethod = 'shutdown'
+        // Configure caching
+        boolean hasEhCacheConfigXML = application.class.getResource('/ehcache.xml')
+        if (hasEhCacheConfigXML) {
+            // We assume app dev is managing cache with their own ehcache.xml
+            println "Weceem: Initializing ehcache with default ehcache.xml from application"
+            weceemCacheManager(net.sf.ehcache.CacheManager) { bean -> 
+                bean.destroyMethod = 'shutdown'
+            }
+        } else {
+            // init with default Weceem caching
+            def configURL = application.class.getResource('/weceem-default-ehcache.xml')
+            println "Weceem: Initializing ehcache with default weceem ehcache.xml from plugin"
+            weceemCacheManager(net.sf.ehcache.CacheManager, configURL) { bean -> 
+                bean.destroyMethod = 'shutdown'
+            }
         }
     }
 

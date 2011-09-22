@@ -19,7 +19,6 @@ grails.project.dependency.resolution = {
         compile 'org.apache.ant:ant-launcher:1.7.1'
 
         // Our specific dependencies
-        compile 'com.lowagie:iText:2.1.3'
         compile 'net.java.textilej:net.java.textilej:2.2.854'
         compile 'xstream:xstream:1.2.1'
     }
