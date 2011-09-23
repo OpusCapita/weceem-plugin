@@ -2,27 +2,27 @@ import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 class WeceemPluginUrlMappings {
-    static CONTENT_PREFIX = ((ConfigurationHolder.config.weceem.content.prefix instanceof String) ? 
-        ConfigurationHolder.config.weceem.content.prefix : '')
-    static TOOLS_PREFIX = ((ConfigurationHolder.config.weceem.tools.prefix instanceof String) ? 
-        ConfigurationHolder.config.weceem.tools.prefix : 'wcm')
-    static ADMIN_PREFIX = ((ConfigurationHolder.config.weceem.admin.prefix instanceof String) ?
-        ConfigurationHolder.config.weceem.admin.prefix : 'wcm/admin')
-    
-    static FORBIDDEN_SPACE_URIS = [
-        // Internal/app resources
-        "_weceem/",
-        "plugins/",
-        "WEB-INF/",
-        "ck",
-        // Admin links
-        "${WeceemPluginUrlMappings.ADMIN_PREFIX}/",
-        "${WeceemPluginUrlMappings.TOOLS_PREFIX}/"
-    ]
-    
     static mappings = {
+        final CONTENT_PREFIX = ((ConfigurationHolder.config.weceem.content.prefix instanceof String) ? 
+            ConfigurationHolder.config.weceem.content.prefix : '')
+        final TOOLS_PREFIX = ((ConfigurationHolder.config.weceem.tools.prefix instanceof String) ? 
+            ConfigurationHolder.config.weceem.tools.prefix : 'wcm')
+        final ADMIN_PREFIX = ((ConfigurationHolder.config.weceem.admin.prefix instanceof String) ?
+            ConfigurationHolder.config.weceem.admin.prefix : 'wcm/admin')
 
-        def adminURI = "/${WeceemPluginUrlMappings.ADMIN_PREFIX}"
+        final FORBIDDEN_SPACE_URIS = [
+            // Internal/app resources
+            "_weceem/",
+            "plugins/",
+            "WEB-INF/",
+            "ck",
+            // Admin links
+            "${ADMIN_PREFIX}/",
+            "${TOOLS_PREFIX}/"
+        ]
+
+
+        def adminURI = "/${ADMIN_PREFIX}"
         
         delegate.(adminURI+"/$action?")(controller: 'wcmPortal')
                 
@@ -42,7 +42,7 @@ class WeceemPluginUrlMappings {
 
         delegate.(adminURI+"/space/$action?/$id?")(controller: 'wcmSpace')
 
-        def toolFunctionsPrefix = (WeceemPluginUrlMappings.TOOLS_PREFIX ? '/' : '')+"${WeceemPluginUrlMappings.TOOLS_PREFIX}"
+        def toolFunctionsPrefix = (TOOLS_PREFIX ? '/' : '')+"${TOOLS_PREFIX}"
 
         name contentSubmission: delegate.(toolFunctionsPrefix+"/submit/$action?") {
             controller = "wcmContentSubmission"
@@ -72,7 +72,7 @@ class WeceemPluginUrlMappings {
         }
 */
         // This is tricky
-        def contentURI = (WeceemPluginUrlMappings.CONTENT_PREFIX ? '/' : '')+"${WeceemPluginUrlMappings.CONTENT_PREFIX}/$uri**"
+        def contentURI = (CONTENT_PREFIX ? '/' : '')+"${CONTENT_PREFIX}/$uri**"
         
         invokeMethod(contentURI, {
             controller = "wcmContent"
@@ -81,14 +81,14 @@ class WeceemPluginUrlMappings {
                 // @todo this is very ugly, clean up
                 uri(validator: { v ->
                     def uploadsPath = wcmContentRepositoryService.uploadUrl - '/'
-                    return !v?.startsWith(uploadsPath) && !WeceemPluginUrlMappings.FORBIDDEN_SPACE_URIS.find { p -> 
+                    return !v?.startsWith(uploadsPath) && !FORBIDDEN_SPACE_URIS.find { p -> 
                         return v?.startsWith(p) 
                     }
                 })
             }
         })
         
-        def rootURI = "/${WeceemPluginUrlMappings.CONTENT_PREFIX}"
+        def rootURI = "/${CONTENT_PREFIX}"
         invokeMethod(rootURI, {
             controller = "wcmContent"
             action = "show"
