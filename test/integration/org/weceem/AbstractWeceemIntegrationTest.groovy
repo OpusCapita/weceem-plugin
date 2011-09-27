@@ -22,7 +22,9 @@ abstract class AbstractWeceemIntegrationTest extends GroovyTestCase {
         }
         
         wcmContentRepositoryService.wcmCacheService = new WcmCacheService()
-        wcmContentRepositoryService.wcmCacheService.weceemCacheManager = new net.sf.ehcache.CacheManager()
+
+        def configURL = grailsApplication.class.getResource('/weceem-default-ehcache.xml')
+        wcmContentRepositoryService.wcmCacheService.weceemCacheManager = new net.sf.ehcache.CacheManager(configURL)
 
         wcmContentRepositoryService.wcmSecurityService.securityDelegate.getUserRoles = { -> ['ROLE_ADMIN'] }
 
