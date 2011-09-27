@@ -46,7 +46,8 @@ class WcmSpaceController {
         def space = wcmContentRepositoryService.createSpace(params, params.templateName)
         if (!space.hasErrors()) {
             flash.message = "Space '${space.name}' created"
-            redirect(action: list, id: space.id)
+            session.currentAdminSpace = space.ident()
+            redirect(controller:'wcmRepository')
         } else {
             render(view: 'create', model: [space: space])
         }
@@ -112,6 +113,7 @@ class WcmSpaceController {
                 log.error("Unable to import space", e)
                 flash.message = e instanceof ImportException ? e.message : e.toString()
             } finally {
+                session.currentAdminSpace = space.ident()
                 redirect(controller: 'wcmRepository', action: 'treeTable', params: ["space": space.name])
             }
         } else {

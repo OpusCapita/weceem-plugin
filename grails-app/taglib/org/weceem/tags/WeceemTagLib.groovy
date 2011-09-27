@@ -380,7 +380,10 @@ class WeceemTagLib {
         // Filter the nodes if we did a promiscuous query due to multiple types
         if (types.size() > 1) {
             levelnodes = levelnodes.findAll { n -> 
-                types.find { cls -> cls.isAssignableFrom(n.class) }
+                types.find { cls -> 
+                    println "ixxxxs ${n} a ${cls} ? "
+                    n.instanceOf(cls) 
+                }
             }
         }
         
@@ -672,7 +675,7 @@ class WeceemTagLib {
         if (!targetClass)
             throwTagError("Attribute [${ATTR_TYPE}] specified class [${targetType}] but it could not be located")
         
-        if (targetClass.isAssignableFrom(node.class)) {
+        if (node.instanceOf(targetClass)) {
             out << body()
         }
     }
@@ -681,7 +684,7 @@ class WeceemTagLib {
         def node = request[WcmContentController.REQUEST_ATTRIBUTE_NODE]
         def targetType = attrs[ATTR_TYPE]
         
-        if (!grailsApplication.getClassForName(targetType).isAssignableFrom(node.class)) {
+        if (!node.instanceOf(grailsApplication.getClassForName(targetType))) {
             out << body()
         }
     }
@@ -986,7 +989,7 @@ ${node.content}
         }
         def typeClass = wcmContentRepositoryService.getContentClassForType(type)
         
-        while (node && !typeClass.isAssignableFrom(node.class)) {
+        while (node && !node.instanceOf(typeClass)) {
             node = node.parent
         }
         
