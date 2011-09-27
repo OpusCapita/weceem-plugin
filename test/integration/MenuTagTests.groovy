@@ -71,11 +71,12 @@ class MenuTagTests extends AbstractWeceemIntegrationTest {
         }
         
         def space = spaceA
-        
+
+        def eng = wcmRenderEngine
         taglib.request.with {
-            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, parentA)
-            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_PAGE, WcmContentController.makePageInfo(parentA.aliasURI, parentA))
-            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_SPACE, space.aliasURI)
+            setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, parentA)
+            setAttribute(RenderEngine.REQUEST_ATTRIBUTE_PAGE, eng.makePageInfo(parentA.aliasURI, parentA))
+            setAttribute(RenderEngine.REQUEST_ATTRIBUTE_SPACE, space.aliasURI)
         }
     
         def out = taglib.menu() 
@@ -154,10 +155,11 @@ class MenuTagTests extends AbstractWeceemIntegrationTest {
         
         def space = spaceA
         
+        def eng = wcmRenderEngine
         taglib.request.with {
-            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, parentA)
-            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_PAGE, WcmContentController.makePageInfo(parentA.aliasURI, parentA))
-            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_SPACE, space.aliasURI)
+            setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, parentA)
+            setAttribute(RenderEngine.REQUEST_ATTRIBUTE_PAGE, eng.makePageInfo(parentA.aliasURI, parentA))
+            setAttribute(RenderEngine.REQUEST_ATTRIBUTE_SPACE, space.aliasURI)
         }
     
         def r = taglib.menu(custom:true) { args ->
@@ -234,10 +236,11 @@ ACTIVE: false
 
         def space = spaceA
 
+        def eng = wcmRenderEngine
         taglib.request.with {
-            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, childA2)
-            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_PAGE, WcmContentController.makePageInfo(parentA.aliasURI, parentA))
-            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_SPACE, space.aliasURI)
+            setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, childA2)
+            setAttribute(RenderEngine.REQUEST_ATTRIBUTE_PAGE, eng.makePageInfo(parentA.aliasURI, parentA))
+            setAttribute(RenderEngine.REQUEST_ATTRIBUTE_SPACE, space.aliasURI)
         }
 
         def r = taglib.menu(custom:true) { args ->
@@ -272,12 +275,12 @@ ACTIVE: false
 |LAST-0|
 """, r
 
-        def pi = WcmContentController.makePageInfo(parentA.aliasURI, childA1)
+        def pi = wcmRenderEngine.makePageInfo(parentA.aliasURI, childA1)
         // Now try again using lineage of childA1
         taglib.request.with {
-            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, childA1)
-            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_PAGE, pi)   
-            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_SPACE, space.aliasURI)
+            setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, childA1)
+            setAttribute(RenderEngine.REQUEST_ATTRIBUTE_PAGE, pi)   
+            setAttribute(RenderEngine.REQUEST_ATTRIBUTE_SPACE, space.aliasURI)
         }
         
         println "Page info: ${pi.dump()}"
@@ -369,10 +372,11 @@ ACTIVE: false
         
         def space = spaceA
         
+        def eng = wcmRenderEngine
         taglib.request.with {
-            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, parentA)
-            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_PAGE, WcmContentController.makePageInfo(parentA.aliasURI, parentA))
-            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_SPACE, space.aliasURI)
+            setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, parentA)
+            setAttribute(RenderEngine.REQUEST_ATTRIBUTE_PAGE, eng.makePageInfo(parentA.aliasURI, parentA))
+            setAttribute(RenderEngine.REQUEST_ATTRIBUTE_SPACE, space.aliasURI)
         }
     
         def out = taglib.menu(levels:3) 
@@ -495,10 +499,11 @@ ACTIVE: false
         
         def space = spaceA
         
+        def eng = wcmRenderEngine
         taglib.request.with {
-            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, parentA)
-            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_PAGE, WcmContentController.makePageInfo(parentA.aliasURI, parentA))
-            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_SPACE, space.aliasURI)
+            setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, parentA)
+            setAttribute(RenderEngine.REQUEST_ATTRIBUTE_PAGE, eng.makePageInfo(parentA.aliasURI, parentA))
+            setAttribute(RenderEngine.REQUEST_ATTRIBUTE_SPACE, space.aliasURI)
         }
     
         def out = taglib.menu(node:childA2, levels:3) 
@@ -580,10 +585,11 @@ ACTIVE: false
         
         def space = spaceA
         
+        def eng = wcmRenderEngine
         taglib.request.with {
-            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, parentA)
-            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_PAGE, WcmContentController.makePageInfo(parentA.aliasURI, parentA))
-            setAttribute(WcmContentController.REQUEST_ATTRIBUTE_SPACE, space.aliasURI)
+            setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, parentA)
+            setAttribute(RenderEngine.REQUEST_ATTRIBUTE_PAGE, eng.makePageInfo(parentA.aliasURI, parentA))
+            setAttribute(RenderEngine.REQUEST_ATTRIBUTE_SPACE, space.aliasURI)
         }
     
         def out = taglib.menu(levels:1) 

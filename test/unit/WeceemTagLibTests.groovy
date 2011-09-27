@@ -22,7 +22,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         
         def spc = new WcmSpace()
         spc.name = 'testing'
-        taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_SPACE, spc)
+        taglib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_SPACE, spc)
         
         Object.metaClass.encodeAsHTML = { return delegate }
         
@@ -46,7 +46,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
 
         def node = new WcmHTMLContent(aliasURI:'someNode', space: new WcmSpace(name:'default', aliasURI:'default'))
         taglib.wcmContentRepositoryService = [findContentForPath : { path, space -> [content: node]}]
-        taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_SPACE, node.space)
+        taglib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_SPACE, node.space)
         taglib.createLink(path: 'someNode', null)
         // @todo Need to test the output!!!?
     }
@@ -63,7 +63,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
     }
 
     taglib.wcmContentRepositoryService = mockCRService.proxyInstance()
-    taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, parent)
+    taglib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, parent)
 
     try {
       taglib.countChildren([path:"some/path", node: parent])
@@ -91,7 +91,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
 
     taglib.wcmContentRepositoryService = mockCRService.proxyInstance()
 
-    taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, anotherNode)
+    taglib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, anotherNode)
 
     try {
       taglib.eachChild([path:"some/path", node: parent], {})
@@ -124,7 +124,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
             }
         ]
 
-        taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, parent)
+        taglib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, parent)
         
         taglib.wcmContentRepositoryService = mockCRService
         
@@ -151,7 +151,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
             }
         ]
 
-        taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, parent)
+        taglib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, parent)
         
         taglib.wcmContentRepositoryService = mockCRService
         
@@ -179,7 +179,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
             }
         ]
 
-        taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, parent)
+        taglib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, parent)
         
         taglib.wcmContentRepositoryService = mockCRService
         
@@ -208,7 +208,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
             }
         ]
 
-        taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, nodeA)
+        taglib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, nodeA)
         
         taglib.wcmContentRepositoryService = mockCRService
         
@@ -236,7 +236,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
             }
         ]
 
-        taglib.request.setAttribute(WcmContentController.REQUEST_ATTRIBUTE_NODE, nodeA)
+        taglib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, nodeA)
         
         taglib.wcmContentRepositoryService = mockCRService
         

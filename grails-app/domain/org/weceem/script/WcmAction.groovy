@@ -37,9 +37,6 @@ class WcmAction extends WcmContent {
         // @todo enforceAllowedMethods here
         
         // Now call the code
-        Closure code = getWcmScriptInstance(content.script)
-        code.delegate = delegate
-        code.resolveStrategy = Closure.DELEGATE_FIRST
-        return code()
+        return executeScript(content.script)
     }
 }

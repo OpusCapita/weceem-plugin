@@ -2,7 +2,8 @@ package org.weceem.tags
 
 import org.weceem.controllers.WcmContentController
 import grails.util.Environment
-
+import org.weceem.content.RenderEngine
+ 
 class CacheTagLib {
     static namespace = "wcm"
 
@@ -22,15 +23,15 @@ class CacheTagLib {
         def key = attrs.key
         if (!key) {
             def n = request[REQUEST_ATTRIBUTE_CURRENT_CACHE_SECTION]
-            if (n == null) {
+            if (n == null) { 
                 n = 0
             } else {
                 n += 1
             }
             request[REQUEST_ATTRIBUTE_CURRENT_CACHE_SECTION] = 1
-            key = request[WcmContentController.REQUEST_ATTRIBUTE_PAGE].URI+n
+            key = request[RenderEngine.REQUEST_ATTRIBUTE_PAGE].URI+n
             if (log.warnEnabled) {
-                log.warn "Auto-generating cache key for ${request[WcmContentController.REQUEST_ATTRIBUTE_PAGE].URI}"
+                log.warn "Auto-generating cache key for ${request[RenderEngine.REQUEST_ATTRIBUTE_PAGE].URI}"
             }
         }
         def content = wcmCacheService.getOrPutValue(cacheName, key, body) // body is conveniently a callable closure

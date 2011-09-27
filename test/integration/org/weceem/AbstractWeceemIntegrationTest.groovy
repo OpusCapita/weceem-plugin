@@ -7,6 +7,7 @@ import org.weceem.content.*
 
 abstract class AbstractWeceemIntegrationTest extends GroovyTestCase {
     def wcmContentRepositoryService
+    def wcmRenderEngine
     def grailsApplication
     
     void setUp() {
@@ -22,7 +23,7 @@ abstract class AbstractWeceemIntegrationTest extends GroovyTestCase {
         }
         
         wcmContentRepositoryService.wcmCacheService = new WcmCacheService()
-
+        wcmRenderEngine = new RenderEngine()
         def configURL = grailsApplication.class.getResource('/weceem-default-ehcache.xml')
         wcmContentRepositoryService.wcmCacheService.weceemCacheManager = new net.sf.ehcache.CacheManager(configURL)
 
@@ -32,6 +33,9 @@ abstract class AbstractWeceemIntegrationTest extends GroovyTestCase {
 
         // Need to kill everything between tests
         wcmContentRepositoryService.resetAllCaches()
+
+        wcmRenderEngine.wcmContentRepositoryService = wcmContentRepositoryService
+        wcmRenderEngine.wcmSecurityService = wcmContentRepositoryService.wcmSecurityService
     }
     
     void createContent(Closure c) {

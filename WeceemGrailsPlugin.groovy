@@ -57,6 +57,10 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         defaultSpaceImporter(org.weceem.export.DefaultSpaceImporter)
         confluenceSpaceImporter(org.weceem.export.ConfluenceSpaceImporter)
 
+        wcmRenderEngine(org.weceem.content.RenderEngine) {
+            // We can't wire up here, dependency pain
+        }
+
         // Register our custom binding beans
         customPropertyEditorRegistrar(org.weceem.binding.CustomPropertyEditorRegistrar)
         
@@ -120,6 +124,10 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         }
 
         applicationContext.wcmContentDependencyService.reset()
+        
+        applicationContext.wcmRenderEngine.wcmSecurityService = applicationContext.wcmSecurityService
+        applicationContext.wcmRenderEngine.wcmContentRepositoryService = applicationContext.wcmContentRepositoryService
+        
     }
 
     def configureCKEditor(uploadInWebapp, dir, url){

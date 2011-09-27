@@ -23,6 +23,7 @@ import org.weceem.files.WcmContentFile
 import org.weceem.services.WcmContentRepositoryService
 import org.weceem.util.ContentUtils
 import org.weceem.content.WcmSpace
+import org.weceem.content.RenderEngine
 
 import org.weceem.css.WcmStyleSheet
 import org.weceem.js.WcmJavaScript
@@ -82,12 +83,12 @@ class WeceemTagLib {
     
     private renderNodeProperty(propname, attrs) {
         def codec = extractCodec(attrs)
-        out << request[WcmContentController.REQUEST_ATTRIBUTE_NODE].propname."encodeAs$codec"()
+        out << request[RenderEngine.REQUEST_ATTRIBUTE_NODE].propname."encodeAs$codec"()
     }
     
     def space = { attrs -> 
         def codec = extractCodec(attrs)
-        out << request[WcmContentController.REQUEST_ATTRIBUTE_SPACE].name."encodeAs$codec"()
+        out << request[RenderEngine.REQUEST_ATTRIBUTE_SPACE].name."encodeAs$codec"()
     }
     
     /**
@@ -142,7 +143,7 @@ class WeceemTagLib {
     def eachParent = { attrs, body -> 
         def params = makeFindParams(attrs)
         def status = attrs[ATTR_STATUS] ?: WcmContentRepositoryService.STATUS_ANY_PUBLISHED
-        def parents = wcmContentRepositoryService.findParents(request[WcmContentController.REQUEST_ATTRIBUTE_NODE],
+        def parents = wcmContentRepositoryService.findParents(request[RenderEngine.REQUEST_ATTRIBUTE_NODE],
             [type:attrs[ATTR_TYPE], status:status, params:params])
         if (attrs[ATTR_FILTER]) parents = parents?.findAll(attrs[ATTR_FILTER])
         def var = attrs[ATTR_VAR] ?: null
@@ -162,13 +163,13 @@ class WeceemTagLib {
    
     def eachSibling = { attrs, body -> 
         def params = makeFindParams(attrs)
-        def lineage = request[WcmContentController.REQUEST_ATTRIBUTE_PAGE].lineage
+        def lineage = request[RenderEngine.REQUEST_ATTRIBUTE_PAGE].lineage
         def parentHierarchyNode = lineage.size() > 0 ? lineage[-1] : null
         def status = attrs[ATTR_STATUS] ?: WcmContentRepositoryService.STATUS_ANY_PUBLISHED
         def siblings 
         if (!parentHierarchyNode) {
             siblings = wcmContentRepositoryService.findAllRootContent( 
-                request[WcmContentController.REQUEST_ATTRIBUTE_SPACE],attrs[ATTR_TYPE])
+                request[RenderEngine.REQUEST_ATTRIBUTE_SPACE],attrs[ATTR_TYPE])
         } else {
             siblings = wcmContentRepositoryService.findChildren( parentHierarchyNode.parent, 
                 [type:attrs[ATTR_TYPE], params:params, status:status])
@@ -197,7 +198,7 @@ class WeceemTagLib {
      * Executes the body for each content in the given/current space. 
      */
     def eachContent = { attrs, body -> 
-        def space = request[WcmContentController.REQUEST_ATTRIBUTE_SPACE]
+        def space = request[RenderEngine.REQUEST_ATTRIBUTE_SPACE]
         if (attrs[ATTR_SPACE] != null) {
             space = WcmSpace.findByAliasURI(attrs[ATTR_SPACE])
             if (!space) {
@@ -224,8 +225,8 @@ class WeceemTagLib {
      *     item in the trail. Variables "first" and "node" are passed to the body
      */
     def breadcrumb = { attrs, body -> 
-        def node = request[WcmContentController.REQUEST_ATTRIBUTE_NODE]
-        def lineage = request[WcmContentController.REQUEST_ATTRIBUTE_PAGE].lineage
+        def node = request[RenderEngine.REQUEST_ATTRIBUTE_NODE]
+        def lineage = request[RenderEngine.REQUEST_ATTRIBUTE_PAGE].lineage
         def div = (attrs.divider != null) ? attrs.divider.decodeHTML() : ' &gt; '
         def first = true
         if (!attrs.custom?.toString()?.toBoolean()) {
@@ -287,7 +288,7 @@ class WeceemTagLib {
                         }
                     }
                 } else {
-                    space = request[WcmContentController.REQUEST_ATTRIBUTE_SPACE]
+                    space = request[RenderEngine.REQUEST_ATTRIBUTE_SPACE]
                     if (!space) {
                         throwTagError "Tag invoked from outside a Weceem request requires the [${ATTR_SPACE}] attribute to be set to the aliasURI of the space or a space instance"
                     }
@@ -306,7 +307,7 @@ class WeceemTagLib {
         }
 
         if (!node && defaultToCurrentNode) {
-            node = request[WcmContentController.REQUEST_ATTRIBUTE_NODE]
+            node = request[RenderEngine.REQUEST_ATTRIBUTE_NODE]
         }
         node
     }
@@ -323,9 +324,9 @@ class WeceemTagLib {
         def node = resolveNode(attrs, false)        
         def rootNodeSpecified = node ? true : false
         if (node == null) {
-            node = request[WcmContentController.REQUEST_ATTRIBUTE_NODE]
+            node = request[RenderEngine.REQUEST_ATTRIBUTE_NODE]
         }
-        def lineage = request[WcmContentController.REQUEST_ATTRIBUTE_PAGE].lineage
+        def lineage = request[RenderEngine.REQUEST_ATTRIBUTE_PAGE].lineage
 
         def currentLevel = request['_weceem_menu_level'] == null ? 0 : request['_weceem_menu_level']
         def siblings = currentLevel > 0 || ((attrs[ATTR_SIBLINGS] ?: 'y').toString().toBoolean())
@@ -348,7 +349,7 @@ class WeceemTagLib {
         }
                 
         // Which node is considered "active"
-        def activeNode = attrs.activeNode ?: request[WcmContentController.REQUEST_ATTRIBUTE_NODE]
+        def activeNode = attrs.activeNode ?: request[RenderEngine.REQUEST_ATTRIBUTE_NODE]
 
         def levelnodes
         def args = [
@@ -482,7 +483,7 @@ class WeceemTagLib {
         if (node) {
             tmenu([node])
         } else {
-            tmenu(wcmContentRepositoryService.findAllRootContent(request[WcmContentController.REQUEST_ATTRIBUTE_SPACE], args))
+            tmenu(wcmContentRepositoryService.findAllRootContent(request[RenderEngine.REQUEST_ATTRIBUTE_SPACE], args))
         }
     }
 */
@@ -506,7 +507,7 @@ class WeceemTagLib {
                 throwTagError "Tag invoked with space attribute value [${attrs[ATTR_SPACE]}] but no space could be found with that aliasURI"
             }
         } else {
-            space = request[WcmContentController.REQUEST_ATTRIBUTE_SPACE]
+            space = request[RenderEngine.REQUEST_ATTRIBUTE_SPACE]
             if (!space) {
                 throwTagError "Tag [createLink] invoked from outside a Weceem request requires the [${ATTR_SPACE}] attribute to be set to the aliasURI of the space"
             }
@@ -563,7 +564,7 @@ class WeceemTagLib {
             c = WcmContent.findByTitle(title, params)
         } else if (path) {
             c = wcmContentRepositoryService.findContentForPath(path, 
-                request[WcmContentController.REQUEST_ATTRIBUTE_SPACE])?.content
+                request[RenderEngine.REQUEST_ATTRIBUTE_SPACE])?.content
         } else throwTagError("One of [id], [title] or [path] must be specified")
         
         return c
@@ -574,12 +575,12 @@ class WeceemTagLib {
      */
     def content = { attrs ->
         def codec = attrs.codec
-        def node = attrs.node ?: request[WcmContentController.REQUEST_ATTRIBUTE_NODE]
+        def node = attrs.node ?: request[RenderEngine.REQUEST_ATTRIBUTE_NODE]
         if (!node) {
             throwTagError "The wcm:content tag requires a node. There is no node associated with this request, and no node attribute specified"
         }
         // See if there is pre-rendered content (eg evaluated GSP content), if so use that
-        def text = request[WcmContentController.REQUEST_PRERENDERED_CONTENT]
+        def text = request[RenderEngine.REQUEST_PRERENDERED_CONTENT]
         if (text == null) {
             text = node.getContentAsHTML()
         }
@@ -587,7 +588,7 @@ class WeceemTagLib {
     }
     
     def createLinkToFile = { attrs ->
-        def space = attrs.space ? WcmSpace.findByAliasURI(attrs.space) : request[WcmContentController.REQUEST_ATTRIBUTE_SPACE]
+        def space = attrs.space ? WcmSpace.findByAliasURI(attrs.space) : request[RenderEngine.REQUEST_ATTRIBUTE_SPACE]
         if (!space) { throwTagError("Space [${attrs.space}] not found") }
         if (!attrs[ATTR_PATH]) {
             throwTagError("Attribute [${ATTR_PATH}] must be specified, eg the path to the file: images/icon.png")
@@ -665,7 +666,7 @@ class WeceemTagLib {
     }
     
     def ifContentIs = { attrs, body ->
-        def node = request[WcmContentController.REQUEST_ATTRIBUTE_NODE]
+        def node = request[RenderEngine.REQUEST_ATTRIBUTE_NODE]
         def targetType = attrs[ATTR_TYPE]
         if (!targetType)
             throwTagError("Attribute [${ATTR_TYPE}] is required on tag ifContentIs. It must be a fully qualified class name")
@@ -680,7 +681,7 @@ class WeceemTagLib {
     }
 
     def ifContentIsNot = { attrs ->
-        def node = request[WcmContentController.REQUEST_ATTRIBUTE_NODE]
+        def node = request[RenderEngine.REQUEST_ATTRIBUTE_NODE]
         def targetType = attrs[ATTR_TYPE]
         
         if (!node.instanceOf(grailsApplication.getClassForName(targetType))) {
@@ -721,7 +722,7 @@ class WeceemTagLib {
             if (s.isLong()) {
                 return WcmContent.get(s.toLong())
             } else {
-                return wcmContentRepositoryService.findContentForPath(s, request[WcmContentController.REQUEST_ATTRIBUTE_SPACE])?.content
+                return wcmContentRepositoryService.findContentForPath(s, request[RenderEngine.REQUEST_ATTRIBUTE_SPACE])?.content
             }
         }
     }
@@ -730,8 +731,8 @@ class WeceemTagLib {
         def parent = attributeToContent(attrs[ATTR_PARENT])
         def type = attrs[ATTR_TYPE]
         def success = attributeToContent(attrs[ATTR_SUCCESS])
-        def currentContentPath = request[WcmContentController.REQUEST_ATTRIBUTE_PAGE].URI
-        def space = request[WcmContentController.REQUEST_ATTRIBUTE_SPACE]
+        def currentContentPath = request[RenderEngine.REQUEST_ATTRIBUTE_PAGE].URI
+        def space = request[RenderEngine.REQUEST_ATTRIBUTE_SPACE]
         
         out << g.createLink(mapping:'contentSubmission', action:'submit', params:[
             spaceId:space.id,
@@ -746,8 +747,8 @@ class WeceemTagLib {
         def parent = attributeToContent(attrs[ATTR_PARENT])
         def type = attrs[ATTR_TYPE]
         def success = attributeToContent(attrs[ATTR_SUCCESS])
-        def currentContentPath = request[WcmContentController.REQUEST_ATTRIBUTE_PAGE].URI
-        def space = request[WcmContentController.REQUEST_ATTRIBUTE_SPACE]
+        def currentContentPath = request[RenderEngine.REQUEST_ATTRIBUTE_PAGE].URI
+        def space = request[RenderEngine.REQUEST_ATTRIBUTE_SPACE]
         
         def link = g.createLink(mapping:'contentSubmission', action:'submit')
         def o = out
@@ -884,7 +885,7 @@ class WeceemTagLib {
     }
     
     def search = { attrs ->
-        def spaceAlias = request[WcmContentController.REQUEST_ATTRIBUTE_SPACE].aliasURI
+        def spaceAlias = request[RenderEngine.REQUEST_ATTRIBUTE_SPACE].aliasURI
         def resPath = attrs.remove(ATTR_RESULTSPATH)
         def p = resPath ? [resultsPath:spaceAlias+'/'+resPath] : [:]
         // Search the current space only
@@ -919,7 +920,7 @@ ${node.content}
 </div>
 */
     def createSearchLink = { attrs ->
-        def spaceAlias = request[WcmContentController.REQUEST_ATTRIBUTE_SPACE].aliasURI
+        def spaceAlias = request[RenderEngine.REQUEST_ATTRIBUTE_SPACE].aliasURI
         def resPath = attrs.remove(ATTR_RESULTSPATH)
         def p = resPath ? [resultsPath:spaceAlias+'/'+resPath] : [:]
         // Search the current space only

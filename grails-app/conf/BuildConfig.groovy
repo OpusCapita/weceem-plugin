@@ -9,11 +9,10 @@ grails.project.dependency.resolution = {
 		grailsPlugins()
 		grailsHome()
 		grailsCentral()
+        flatDir dirs:"lib" // need this for textilej
     }
     
     dependencies {
-        flatDir dirs:"lib" // need this for textilej
-        
         // Workarounds for Grails 1.2 not shipping ant in WAR
         compile 'org.apache.ant:ant:1.7.1'
         compile 'org.apache.ant:ant-launcher:1.7.1'

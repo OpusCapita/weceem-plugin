@@ -1,6 +1,7 @@
 package org.weceem.controllers
 
 import org.weceem.services.WcmContentRepositoryService
+import org.weceem.content.RenderEngine
 
 /**
  * Controller for rendering archive of year/month/day of given content URI
@@ -69,7 +70,7 @@ class WcmArchiveController {
             return
         }
 
-        request[WcmContentController.REQUEST_ATTRIBUTE_PREPARED_MODEL] = [
+        request[RenderEngine.REQUEST_ATTRIBUTE_PREPARED_MODEL] = [
             archiveEntries:data.nodes,
             year:data.year,
             month:data.month,
