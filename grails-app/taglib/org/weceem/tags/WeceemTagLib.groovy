@@ -381,7 +381,6 @@ class WeceemTagLib {
         if (types.size() > 1) {
             levelnodes = levelnodes.findAll { n -> 
                 types.find { cls -> 
-                    println "ixxxxs ${n} a ${cls} ? "
                     n.instanceOf(cls) 
                 }
             }
