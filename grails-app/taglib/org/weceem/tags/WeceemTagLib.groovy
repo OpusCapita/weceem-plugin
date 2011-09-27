@@ -515,7 +515,7 @@ class WeceemTagLib {
         def content = resolveNode(attrs)
         if (!content) {
             log.error ("Tag [wcm:createLink] cannot create a link to the content as "+
-                "there is no content node at that URI")
+                "there is no content node at [${path}]")
             out << g.createLink(controller:'wcmContent', action:'notFound', params:[path:path])
         } else {
             attrs.params = [uri:WeceemTagLib.makeFullContentURI(content)]
