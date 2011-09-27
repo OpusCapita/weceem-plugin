@@ -288,14 +288,17 @@ class SimpleSpaceImporter implements SpaceImporter {
     }
     
     static importConverters = [
-        (java.util.Date): {value->
-            def dateConv = new SimpleDateFormat("EEE MMM dd hh:mm:ss yyyy", Locale.UK);
-            dateConv.parse(value)},
-        (java.lang.Number): {value->
-            value.toInteger()},
-        (java.lang.String): {value -> value},
-        (java.lang.Boolean): {value -> value.toBoolean()},
-        (org.weceem.content.WcmStatus): {value-> WcmStatus.findByCode(value)}
+           (java.util.Date): {value->
+               def dateConv = new SimpleDateFormat("EEE MMM dd hh:mm:ss yyyy", Locale.UK);
+               dateConv.parse(value)},
+           (java.lang.Float): {value->
+               value.toFloat()},
+           (java.lang.Double): {value->
+               value.toDouble()},
+           (java.lang.Number): {value->
+               value.toInteger()},
+           (java.lang.String): {value -> value},
+           (java.lang.Boolean): {value -> value.toBoolean()},
+           (org.weceem.content.WcmStatus): {value-> WcmStatus.findByCode(value)}
     ]
-
 }
