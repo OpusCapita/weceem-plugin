@@ -3,7 +3,6 @@ package org.weceem.services
 import java.util.concurrent.ConcurrentHashMap
 
 import org.apache.commons.logging.LogFactory
-import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 import org.springframework.beans.factory.InitializingBean
 import grails.util.Environment
@@ -381,7 +380,7 @@ class WcmContentRepositoryService implements InitializingBean {
             templateLocationOrName :
             "classpath:/org/weceem/resources/${templateLocationOrName}-space-template.zip"
             
-        def res = ApplicationHolder.application.parentContext.getResource(resourceName).inputStream
+        def res = grailsApplication.parentContext.getResource(resourceName).inputStream
         if (!res) {
             log.error "Unable to import space template [${templateLocationOrName}] into space [${space.name}], space template not found at resource ${resourceName}"
             return

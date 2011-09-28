@@ -5,7 +5,6 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import org.springframework.core.io.FileSystemResourceLoader
 import org.springframework.mock.web.MockServletContext
-import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 
 import org.weceem.content.*
@@ -25,6 +24,7 @@ class ImportExportTests extends GroovyTestCase
 
     def wcmImportExportService
     def applicationContext
+    def grailsApplication
 
     protected void setUp() {
         ServletContextHolder.servletContext = new MockServletContext(
@@ -32,7 +32,7 @@ class ImportExportTests extends GroovyTestCase
         ServletContextHolder.servletContext.setAttribute(
                 GrailsApplicationAttributes.APPLICATION_CONTEXT,
                 applicationContext)
-        ApplicationHolder.application.mainContext.servletContext = ServletContextHolder.servletContext
+        grailsApplication.mainContext.servletContext = ServletContextHolder.servletContext
         new WcmSpace(name: 'testSpace', aliasURI:'main').save(flush: true)
     }
 /*

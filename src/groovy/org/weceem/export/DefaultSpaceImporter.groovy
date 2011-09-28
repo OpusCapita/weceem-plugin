@@ -4,7 +4,6 @@ import com.thoughtworks.xstream.XStream
 
 import org.apache.commons.logging.LogFactory
 import org.apache.commons.logging.Log
-import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 import org.weceem.content.*
 import org.weceem.files.*
@@ -18,12 +17,14 @@ class DefaultSpaceImporter implements SpaceImporter {
     
     Log log = LogFactory.getLog(DefaultSpaceImporter)
     
+    def grailsApplication
+    
     void execute(WcmSpace space, File file) {
         def tmpDir = File.createTempFile("unzip-import-", null)
         tmpDir.delete()
         tmpDir.mkdir()
 
-        def grailsApp = ApplicationHolder.application
+        def grailsApp = grailsApplication
 
         def ant = new AntBuilder()
 

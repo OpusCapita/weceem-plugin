@@ -2,7 +2,6 @@ package org.weceem.export
 
 import javax.xml.parsers.SAXParserFactory
 import org.apache.commons.logging.LogFactory
-import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.apache.commons.logging.Log
 
 import org.weceem.content.*
@@ -16,9 +15,11 @@ import org.weceem.wiki.* // Nasty
 class ConfluenceSpaceImporter implements SpaceImporter {
 
     Log log = LogFactory.getLog(DefaultSpaceImporter)
-
+    
+    def grailsApplication
+    
     public void execute(WcmSpace space, File file) {
-        def grailsApp = ApplicationHolder.application
+        def grailsApp = grailsApplication
 
         def defStatus = WcmStatus.findByPublicContent(true)
         def parser = SAXParserFactory.newInstance().newSAXParser()

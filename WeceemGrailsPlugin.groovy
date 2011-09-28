@@ -15,9 +15,9 @@ class WeceemGrailsPlugin {
     
     // the other plugins this plugin depends on
     def dependsOn = [
-        searchable:'0.5.5 > *', 
+        searchable:'0.6.3 > *', 
         quartz:'0.4.2 > *', 
-        navigation:'1.2 > *',
+        navigation:'1.3 > *',
         ckeditor:'3.4.1 > *',
         feeds:'1.5 > *',
         beanFields:'1.0-RC3 > *',
@@ -52,10 +52,18 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
 
     def doWithSpring = {
 
-        simpleSpaceExporter(org.weceem.export.SimpleSpaceExporter)
-        simpleSpaceImporter(org.weceem.export.SimpleSpaceImporter)
-        defaultSpaceImporter(org.weceem.export.DefaultSpaceImporter)
-        confluenceSpaceImporter(org.weceem.export.ConfluenceSpaceImporter)
+        simpleSpaceExporter(org.weceem.export.SimpleSpaceExporter) {
+            grailsApplication = ref('grailsApplication')
+        }
+        simpleSpaceImporter(org.weceem.export.SimpleSpaceImporter) {
+            grailsApplication = ref('grailsApplication')
+        }
+        defaultSpaceImporter(org.weceem.export.DefaultSpaceImporter) {
+            grailsApplication = ref('grailsApplication')
+        }
+        confluenceSpaceImporter(org.weceem.export.ConfluenceSpaceImporter) {
+            grailsApplication = ref('grailsApplication')
+        }
 
         wcmRenderEngine(org.weceem.content.RenderEngine) {
             // We can't wire up here, dependency pain

@@ -1,7 +1,6 @@
 package org.weceem.export
 
 import java.text.SimpleDateFormat
-import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 import groovy.xml.MarkupBuilder
 
@@ -17,6 +16,8 @@ import org.weceem.files.*
  * @author Viktor Fedorov
  */
 class SimpleSpaceExporter implements SpaceExporter {
+    
+    def grailsApplication
     
     File execute(WcmSpace spc) {
         def ts = new SimpleDateFormat('yyMMddHHmmssSSS').format(new Date())
@@ -96,7 +97,7 @@ class SimpleSpaceExporter implements SpaceExporter {
     }
     
     def getDeclaredProperties(def obj){
-        def grailsApp = ApplicationHolder.application
+        def grailsApp = grailsApplication
         def props = grailsApp.getDomainClass(obj.class.name).
             getPersistentProperties().findAll{prop -> 
                 !(prop.name in ["space"])}

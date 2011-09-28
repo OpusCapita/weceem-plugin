@@ -14,8 +14,6 @@
 
 package org.weceem.content
 
-import org.codehaus.groovy.grails.commons.ApplicationHolder
-
 import org.weceem.util.ContentUtils
 
 /**
@@ -58,7 +56,10 @@ class WcmComment extends WcmContent {
         ipAddress(maxSize:50, nullable: false, blank: false)
     }
     
-    static transients = WcmContent.transients
+    // Injected
+    def wcmContentRepositoryService
+    
+    static transients = WcmContent.transients + ['wcmContentRepositoryService']
 
     static editors = {
         content editor: 'RichHTML'
@@ -73,7 +74,7 @@ class WcmComment extends WcmContent {
     public void createAliasURI(parent) {
         // Create an aliasURI that is sequential and unique under the parent, using the highest orderIndex
         WcmContent.withNewSession {
-            def kidList = ApplicationHolder.application.mainContext.wcmContentRepositoryService.findChildren(parent, [
+            def kidList = wcmContentRepositoryService.findChildren(parent, [
                  type:'org.weceem.content.WcmComment',
                  params:[sort:'aliasURI']
             ])

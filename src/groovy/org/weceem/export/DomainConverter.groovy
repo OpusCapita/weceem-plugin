@@ -5,7 +5,6 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter
 import com.thoughtworks.xstream.converters.MarshallingContext
 import com.thoughtworks.xstream.io.HierarchicalStreamReader
 import com.thoughtworks.xstream.converters.UnmarshallingContext
-import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 import org.weceem.content.*
 

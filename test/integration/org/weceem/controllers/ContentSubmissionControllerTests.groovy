@@ -5,7 +5,6 @@ import org.weceem.services.*
 import org.weceem.content.*
 import org.weceem.html.*
 import org.springframework.context.ApplicationContext
-import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.springframework.mock.web.MockServletContext
 import org.springframework.core.io.FileSystemResourceLoader
 import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
@@ -22,6 +21,7 @@ class ContentSubmissionControllerTests extends GroovyTestCase {
     def nodeA
     def nodeB
     def applicationContext
+    def grailsApplication
     
     WcmContentSubmissionController mockedController() {
         def con = new WcmContentSubmissionController()
@@ -52,7 +52,7 @@ class ContentSubmissionControllerTests extends GroovyTestCase {
         con.wcmContentRepositoryService.afterPropertiesSet()
 
         con.wcmSecurityService = secSvc
-        con.grailsApplication = ApplicationHolder.application
+        con.grailsApplication = grailsApplication
         return con
     }
 

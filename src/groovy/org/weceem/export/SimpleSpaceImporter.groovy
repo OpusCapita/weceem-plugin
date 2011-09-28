@@ -1,6 +1,5 @@
 package org.weceem.export
 
-import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.apache.commons.logging.LogFactory
 import org.apache.commons.logging.Log
 import org.springframework.beans.BeanWrapperImpl
@@ -23,6 +22,8 @@ class SimpleSpaceImporter implements SpaceImporter {
     def childrenMap = [:]
     def defStatus
 
+    def grailsApplication
+
     void execute(WcmSpace space, File file) {
         def tmpDir = File.createTempFile("unzip-import-", null)
         tmpDir.delete()
@@ -43,7 +44,7 @@ class SimpleSpaceImporter implements SpaceImporter {
             throw new ImportException("Uploaded file doesn't contain 'content.xml' file.")
         }
         backrefMap.clear()
-        def grailsApp = ApplicationHolder.application
+        def grailsApp = grailsApplication
         def xml = new XmlSlurper().parseText(contentXmlFile.getText('UTF-8'))
         def contents = [:]
         def cont_parent = [:]
@@ -203,7 +204,7 @@ class SimpleSpaceImporter implements SpaceImporter {
         }
         
         // @todo remove this and revert to x.properties = y after Grails 1.2-RC1
-        def grailsApp = ApplicationHolder.application
+        def grailsApp = grailsApplication
         grailsApp.mainContext.wcmContentRepositoryService.hackedBindData(content, params)
         
         content.space = space
@@ -218,7 +219,7 @@ class SimpleSpaceImporter implements SpaceImporter {
     */
     def saveContent(def content){
         if (content == null) return
-        def grailsApp = ApplicationHolder.application
+        def grailsApp = grailsApplication
         //if status isn't set then set default status
         if ((content instanceof WcmContent) && (content.status == null)){
             content.status = defStatus
@@ -274,7 +275,7 @@ class SimpleSpaceImporter implements SpaceImporter {
     }
 
     def getDomainClassArtefact(def className){
-        def grailsApp = ApplicationHolder.application
+        def grailsApp = grailsApplication
         def c = grailsApp.getDomainClass(className)
         if (!c) {
             def newName = convertLegacyClassNames(className)

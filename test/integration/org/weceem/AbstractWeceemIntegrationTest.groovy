@@ -1,7 +1,5 @@
 package org.weceem
 
-import org.codehaus.groovy.grails.commons.ApplicationHolder
-
 import org.weceem.services.*
 import org.weceem.content.*
 
