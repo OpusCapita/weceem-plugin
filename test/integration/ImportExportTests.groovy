@@ -121,7 +121,7 @@ class ImportExportTests extends GroovyTestCase
 
         def ant = new AntBuilder()
 
-        def tmpDir = new File("./export-test-${System.nanoTime()}")
+        def tmpDir = new File("./test/files/importExport/export-test-${System.nanoTime()}")
         tmpDir.mkdir()
         ant.unzip(src: file.absolutePath, dest: tmpDir.absolutePath)
 
@@ -130,7 +130,7 @@ class ImportExportTests extends GroovyTestCase
         assert td.exists()
         assert new File(td, 'test_file.txt').exists()
 
-        def xmlFile = new File(servletContext.getRealPath('/unzip/content.xml'))
+        def xmlFile = new File(tmpDir, 'content.xml')
         def result = new XmlSlurper().parseText(xmlFile.text)
         assert result.children().size() == 5
         assertEquals 'org.weceem.content.WcmTemplate', result.children()[0].name().toString()
