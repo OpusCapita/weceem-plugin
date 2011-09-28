@@ -1,5 +1,4 @@
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
-import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 class WeceemPluginUrlMappings {
     static mappings = {
@@ -61,16 +60,7 @@ class WeceemPluginUrlMappings {
             controller = "wcmSearch"
             action = "search"
         }
-        
-        def wcmContentRepositoryService = ApplicationHolder.application.mainContext.wcmContentRepositoryService
 
-/*
-        def u = wcmContentRepositoryService.uploadUrl
-        delegate.(u+'$uri**') {
-            controller = "wcmContent"
-            action = "showUploadedFile"
-        }
-*/
         // This is tricky
         def contentURI = (CONTENT_PREFIX ? '/' : '')+"${CONTENT_PREFIX}/$uri**"
         
@@ -80,7 +70,8 @@ class WeceemPluginUrlMappings {
             constraints {
                 // @todo this is very ugly, clean up
                 uri(validator: { v ->
-                    def uploadsPath = wcmContentRepositoryService.uploadUrl - '/'
+                    // ***************** NOTE THIS HAS BEEN HACKED FOR 2.0, NEEDS wcmContentRepositoryService *****************
+                    def uploadsPath = '/uploads' - '/'
                     return !v?.startsWith(uploadsPath) && !FORBIDDEN_SPACE_URIS.find { p -> 
                         return v?.startsWith(p) 
                     }

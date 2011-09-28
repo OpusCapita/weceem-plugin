@@ -78,8 +78,8 @@ $(function(){
                                                     	        <option value="${it.fullName}"><g:message code="content.item.name.${it.fullName}" encodeAs="HTML"/></option>
                                                     	    </g:each>
                                                     	</select>,
-            			status: <g:select id="statusFilter" from="${[['description': 'all', 'code': 0]] + org.weceem.content.WcmStatus.list()}" optionKey="code" optionValue="description" />
-            			and date <g:select id="fieldFilter" from="[[id:'createdOn', value:'created'], [id:'changedOn', value:'changed']]"  optionKey="id" optionValue="value"/> from <input id="fromDate" type="text"/> to <input id="toDate" type="text"/>
+            			status: <g:select name="statusFilter" id="statusFilter" from="${[['description': 'all', 'code': 0]] + org.weceem.content.WcmStatus.list()}" optionKey="code" optionValue="description" />
+            			and date <g:select name="fieldFilter" id="fieldFilter" from="[[id:'createdOn', value:'created'], [id:'changedOn', value:'changed']]"  optionKey="id" optionValue="value"/> from <input id="fromDate" type="text"/> to <input id="toDate" type="text"/>
             	</div>
             </form>
             </div>
