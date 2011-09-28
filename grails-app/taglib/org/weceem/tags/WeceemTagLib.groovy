@@ -15,8 +15,6 @@ package org.weceem.tags
 
 import java.text.DateFormatSymbols
 
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
-
 import org.weceem.controllers.WcmContentController
 import org.weceem.content.WcmContent
 import org.weceem.files.WcmContentFile
@@ -76,6 +74,7 @@ class WeceemTagLib {
     def wcmSecurityService
     def pluginManager
     def wcmCacheService
+    def grailsApplication
     
     private extractCodec(attrs) {
         attrs[ATTR_CODEC] == null ? 'HTML' : attrs[ATTR_CODEC]        
@@ -970,7 +969,7 @@ ${node.content}
      */
     def config = { attrs ->
         def codec = attrs.encodeAs
-        def s = ConfigurationHolder.config.flatten()[attrs.property]
+        def s = grailsApplication.config.flatten()[attrs.property]
         out << (codec ? s."encodeAs$codec"() : s)
     }
     

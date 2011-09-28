@@ -1,7 +1,6 @@
 package org.weceem.services
 
 import grails.util.GrailsNameUtils
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 import org.weceem.content.*
 
