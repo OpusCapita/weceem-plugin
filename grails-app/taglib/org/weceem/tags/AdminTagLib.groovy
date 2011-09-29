@@ -1,10 +1,10 @@
 package org.weceem.tags
 
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
-
 class AdminTagLib { 
     static namespace = "wcm"
  
+    def grailsApplication
+    
     def userProfileEditUrl = { attrs ->
         def appUrl = grailsApplication.config.weceem.profile.url
         if (!appUrl) appUrl = [controller:'wcmRepository']
@@ -18,7 +18,7 @@ class AdminTagLib {
     }
     
     def adminLayout = { attrs ->
-        def layoutSetting = ConfigurationHolder.config.weceem.admin.layout
+        def layoutSetting = grailsApplication.config.weceem.admin.layout
         def layoutName = layoutSetting instanceof String ? layoutSetting : 'weceemadmin'
         out << layoutName
     }

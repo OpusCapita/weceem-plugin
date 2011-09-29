@@ -1,5 +1,4 @@
 import org.apache.commons.logging.LogFactory
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 import org.weceem.services.WcmContentRepositoryService
 
@@ -114,11 +113,11 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         def repSvc = applicationContext.wcmContentRepositoryService
         repSvc.loadConfig()
         applicationContext.wcmEditorService.cacheEditorInfo()
-        configureCKEditor(repSvc.uploadInWebapp, repSvc.uploadDir, repSvc.uploadUrl)
+        configureCKEditor(repSvc.uploadInWebapp, repSvc.uploadDir, repSvc.uploadUrl, application)
 
         repSvc.createDefaultStatuses()
         
-        def createDefSpace = ConfigurationHolder.config.weceem.create.default.space
+        def createDefSpace = application.config.weceem.create.default.space
         if (createDefSpace instanceof ConfigObject) {
             createDefSpace = true
         } else {
@@ -138,8 +137,8 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         
     }
 
-    def configureCKEditor(uploadInWebapp, dir, url){
-        def settings = ConfigurationHolder.config
+    def configureCKEditor(uploadInWebapp, dir, url, application) {
+        def settings = application.config
         def co = new ConfigObject()
         if (uploadInWebapp) {
             co.ckeditor.upload.basedir = url.toString()

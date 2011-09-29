@@ -4,7 +4,6 @@ import org.springframework.web.multipart.MultipartFile
 import org.apache.commons.io.FileUtils
 
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 
 import org.weceem.content.*
 

@@ -35,8 +35,8 @@ public class DateAndTimeDateEditor extends CustomDateEditor implements Structure
     public Object assemble(Class type, Map fieldValues) {
         def d = fieldValues.date
 
-        int hour = getIntegerValue(fieldValues, "hour", 0);
-        int minute = getIntegerValue(fieldValues, "minute", 0);
+        Integer hour = getIntegerValue(fieldValues, "hour", 0);
+        Integer minute = getIntegerValue(fieldValues, "minute", 0);
 
         if (d?.trim() && (minute != null) && (hour != null)) {
             // Get the date part

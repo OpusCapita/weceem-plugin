@@ -1,5 +1,3 @@
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
-
 /**
  * This {@link groovy.util.ConfigObject} script provides Grails Searchable Plugin configuration.
  *

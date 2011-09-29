@@ -1,13 +1,17 @@
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 class WeceemPluginUrlMappings {
     static mappings = {
-        final CONTENT_PREFIX = ((ConfigurationHolder.config.weceem.content.prefix instanceof String) ? 
-            ConfigurationHolder.config.weceem.content.prefix : '')
-        final TOOLS_PREFIX = ((ConfigurationHolder.config.weceem.tools.prefix instanceof String) ? 
-            ConfigurationHolder.config.weceem.tools.prefix : 'wcm')
-        final ADMIN_PREFIX = ((ConfigurationHolder.config.weceem.admin.prefix instanceof String) ?
-            ConfigurationHolder.config.weceem.admin.prefix : 'wcm/admin')
+        def app = ApplicationHolder.application
+        def appContext = app.mainContext
+        def config = app.config
+        
+        final CONTENT_PREFIX = (config.weceem.content.prefix instanceof String) ? 
+            config.weceem.content.prefix : ''
+        final TOOLS_PREFIX = (config.weceem.tools.prefix instanceof String) ? 
+            config.weceem.tools.prefix : 'wcm'
+        final ADMIN_PREFIX = (config.weceem.admin.prefix instanceof String) ?
+            config.weceem.admin.prefix : 'wcm/admin'
 
         final FORBIDDEN_SPACE_URIS = [
             // Internal/app resources
@@ -60,7 +64,16 @@ class WeceemPluginUrlMappings {
             controller = "wcmSearch"
             action = "search"
         }
+        
+        def wcmContentRepositoryService = appContext.wcmContentRepositoryService
 
+/*
+        def u = wcmContentRepositoryService.uploadUrl
+        delegate.(u+'$uri**') {
+            controller = "wcmContent"
+            action = "showUploadedFile"
+        }
+*/
         // This is tricky
         def contentURI = (CONTENT_PREFIX ? '/' : '')+"${CONTENT_PREFIX}/$uri**"
         
@@ -70,8 +83,7 @@ class WeceemPluginUrlMappings {
             constraints {
                 // @todo this is very ugly, clean up
                 uri(validator: { v ->
-                    // ***************** NOTE THIS HAS BEEN HACKED FOR 2.0, NEEDS wcmContentRepositoryService *****************
-                    def uploadsPath = '/uploads' - '/'
+                    def uploadsPath = wcmContentRepositoryService.uploadUrl - '/'
                     return !v?.startsWith(uploadsPath) && !FORBIDDEN_SPACE_URIS.find { p -> 
                         return v?.startsWith(p) 
                     }

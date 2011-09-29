@@ -1,0 +1,5 @@
+/web-app/testing/
+/web-app/WeceemFiles/
+export-test-*
+/target
+/stacktrace.log
