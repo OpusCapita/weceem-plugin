@@ -1,10 +1,8 @@
 import org.codehaus.groovy.grails.commons.ApplicationHolder
 
 class WeceemPluginUrlMappings {
-    static mappings = {
-        def app = ApplicationHolder.application
-        def appContext = app.mainContext
-        def config = app.config
+    static mappings = { appContext ->
+        def config = appContext.grailsApplication.config
         
         final CONTENT_PREFIX = (config.weceem.content.prefix instanceof String) ? 
             config.weceem.content.prefix : ''

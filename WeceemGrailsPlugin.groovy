@@ -82,7 +82,7 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         } else {
             // init with default Weceem caching
             def configURL = application.class.getResource('/weceem-default-ehcache.xml')
-            println "Weceem: Initializing ehcache with default weceem ehcache.xml from plugin"
+            println "Weceem: Initializing ehcache with default weceem ehcache.xml from plugin resource: ${configURL}"
             weceemCacheManager(net.sf.ehcache.CacheManager, configURL) { bean -> 
                 bean.destroyMethod = 'shutdown'
             }
