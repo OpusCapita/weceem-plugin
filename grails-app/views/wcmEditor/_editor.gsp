@@ -9,7 +9,7 @@ $( function() {
         var form = $(event.target).parents('form');
         form.attr('target', '_preview');
         var prevURL = form.attr('action')
-        form.attr('action', prevURL + '/preview')
+        form.attr('action', prevURL + '/preview/'+$('form input[name=id]').val())
         
         // Now submit form using workaround for onsubmit calls
         $('#preview-action-submitter').click()

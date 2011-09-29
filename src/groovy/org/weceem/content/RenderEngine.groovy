@@ -180,7 +180,7 @@ class RenderEngine {
                 controllerDelegate.response.contentType = content.mimeType
                 controllerDelegate.render(text:contentText)
             } else {
-                controllerDelegate.response.sendError(500, "Unable to render content at ${uri}, no content property and no template defined")
+                controllerDelegate.response.sendError(500, "Unable to render content at ${content.absoluteURI}, no content property and no template defined")
                 return null
             }
             return
@@ -272,7 +272,7 @@ class RenderEngine {
             }
 
             def handler = contentClass.handleRequest.clone()
-            handler.delegate = delegate
+            handler.delegate = new HandleRequestDelegator(controllerDelegate:delegate, renderEngine:this)
             handler.resolveStrategy = Closure.DELEGATE_FIRST
             log.debug "Calling handler with delegate: ${handler.delegate}"
             try {
@@ -289,6 +289,39 @@ class RenderEngine {
     }
 }
 
+class HandleRequestDelegator {
+    def controllerDelegate
+    def renderEngine 
+    
+    def methodMissing(String name, args) {
+        if (controllerDelegate.metaClass.respondsTo(name, args.collect { a -> a != null ? a.class : null } )) {
+            return controllerDelegate."$name"(*args)
+        } else {
+            return renderEngine."$name"(*args)
+        }
+    }
+
+    def propertyMissing(String name) {
+        if (controllerDelegate.metaClass.hasProperty(name)) {
+            return controllerDelegate["$name"]
+        } else {
+            return renderEngine[name]
+        }
+    }
+
+    def renderGSPContent(content, model = null) {
+        renderEngine.renderGSPContent(controllerDelegate, content, model)
+    }
+    
+    def renderContent(content) {
+        renderEngine.renderContent(controllerDelegate, content)
+    }
+    
+    def executeScript(WcmScript script) {
+        renderEngine.executeScript(controllerDelegate, script)
+    }
+    
+}
 
 /** 
  * The object passed to the model representing info about the current page (not same as content!)

@@ -12,7 +12,8 @@ import org.weceem.content.*
 class WcmEditorController {
     def wcmContentRepositoryService
     def wcmEditorService
-
+    def wcmRenderEngine
+    
     // the delete, save and update actions only accept POST requests
     static allowedMethods = [create:['GET'], delete: ['POST'], save: 'POST', update: 'POST']
     
@@ -94,8 +95,18 @@ class WcmEditorController {
     }
 
     def preview = {
-        params._preview = true
-        update()
+        def content
+        if (params.type) {
+            content = wcmContentRepositoryService.newContentInstance(params.type)
+        } else {
+            WcmContent c = WcmContent.findById(params.id)
+            content = wcmContentRepositoryService.newContentInstance(c.class)
+        }
+        workaroundBlankAssociationBug()
+        wcmContentRepositoryService.hackedBindData(content, params)
+        println "xParams: $params"
+        println "Node: ${content.dump()}"
+        wcmRenderEngine.showContent(this, content)
     }
     
     def update = {
@@ -106,45 +117,22 @@ class WcmEditorController {
             def content
             def errors
             def notFound = false
-            if (!params.id && params._preview) {
-                def result = wcmContentRepositoryService.createNode(params.type, params)
-                errors = result.hasErrors() ? result.errors : null
-                content = result
-            } else {
-                def result = wcmContentRepositoryService.updateNode(params.id, params)
-                errors = result.errors
-                content = result.content
-                notFound = result.notFound
-            }
-            if (errors || params._preview) {
+            def result = wcmContentRepositoryService.updateNode(params.id, params)
+            errors = result.errors
+            content = result.content
+            notFound = result.notFound
+            if (errors) {
                 txn.setRollbackOnly()
                 if (errors) {
                     if (log.debugEnabled) {
                         log.debug "Couldn't update content, has errors: ${errors}"
                     }
                     flash.message =  message(code:'message.content.has.errors')
-                    if (params._preview) {
-                        render "Cannot preview, content has errors. Please return to editor"
-                        return
-                    } else {
-                        render(view: 'edit', model: [content: content, 
-                            // Get history in a new session so we don't see unsaved revision
-                            changeHistory: WcmContent.withNewSession { wcmContentRepositoryService.getChangeHistory(content) },
-                            editableProperties: wcmEditorService.getEditorInfo(content.class)])
-                        return
-                    }
-                } else if (params._preview) {
-                    if (log.debugEnabled) {
-                        log.debug "Not updating content, preview mode for: ${content}"
-                    }
-                    if (!wcmContentRepositoryService.contentIsRenderable(content)) {
-                        log.warn "Request for [${params.uri}] resulted in content node that is not standalone and cannot be previewed directly"
-                        response.sendError(406 /* Not acceptable */, "This content is not intended for rendering")
-                    } else {
-                        request[WcmContentController.REQUEST_ATTRIBUTE_PREVIEWNODE] = content
-                        forward(controller:'wcmContent', action:'preview')
-                    }
-                    return null
+                    render(view: 'edit', model: [content: content, 
+                        // Get history in a new session so we don't see unsaved revision
+                        changeHistory: WcmContent.withNewSession { wcmContentRepositoryService.getChangeHistory(content) },
+                        editableProperties: wcmEditorService.getEditorInfo(content.class)])
+                    return
                 }
             } else if (notFound) {
                 response.sendError(404, "Cannot update node, no node found with id ${params.id}")

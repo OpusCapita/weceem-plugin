@@ -195,17 +195,4 @@ class WcmContentController {
         def msg = "No content was found for path: ${params.path}"
         response.sendError(404, msg)
     }
-    
-    protected renderGSPContent(content, model = null) {
-        wcmRenderEngine.renderGSPContent(this, content, model)
-    }
-    
-    protected renderContent(content) {
-        wcmRenderEngine.renderContent(this, content)
-    }
-    
-    protected executeScript(WcmScript script) {
-        wcmRenderEngine.executeScript(this, script)
-    }
-    
 }
