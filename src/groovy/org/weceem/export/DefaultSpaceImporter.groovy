@@ -52,7 +52,7 @@ class DefaultSpaceImporter implements SpaceImporter {
             
             def xstream = new XStream()
             xstream.setClassLoader(getClass().getClassLoader())            
-            xstream.registerConverter(new ImportExportConverter(child.name()))
+            xstream.registerConverter(new ImportExportConverter(child.name(), grailsApplication))
             def deserialized = xstream.fromXML(baos.toString())
             
             switch (deserialized.class) {

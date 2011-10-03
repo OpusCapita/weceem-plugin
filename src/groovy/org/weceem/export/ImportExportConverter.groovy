@@ -16,10 +16,11 @@ import org.weceem.content.*
 class ImportExportConverter implements Converter {
 
     def rootClassName
+    def grailsApplication
 
-
-    ImportExportConverter(rootClassName) {
+    ImportExportConverter(rootClassName, grailsApplication) {
         this.rootClassName = rootClassName
+        this.grailsApplication = grailsApplication
     }
 
     public boolean canConvert(Class clazz) {
@@ -79,7 +80,7 @@ class ImportExportConverter implements Converter {
                 break
  
             default:
-                result = ApplicationHolder.application.getClassForName(className)?.get(id)
+                result = grailsApplication.getClassForName(className)?.get(id)
         }
         return result
     }

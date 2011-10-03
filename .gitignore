@@ -3,3 +3,4 @@
 export-test-*
 /target
 /stacktrace.log
+/test/files/default-space-tests/WeceemFiles
