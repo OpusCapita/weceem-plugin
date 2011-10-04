@@ -284,7 +284,7 @@ class RenderEngine {
             }
         } else {
             // Fall back to standard rendering
-            return renderContent(content)
+            return renderContent(delegate, content)
         }
     }
 }
