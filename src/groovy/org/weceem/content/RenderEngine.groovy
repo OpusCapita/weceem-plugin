@@ -8,6 +8,7 @@ import org.codehaus.groovy.grails.web.pages.GSPResponseWriter
 import org.weceem.script.WcmScript
 import org.apache.commons.logging.LogFactory
 import org.apache.commons.logging.Log
+import org.weceem.util.MimeUtils
 
 
 class RenderEngine {
@@ -224,6 +225,19 @@ class RenderEngine {
         return code()
     }
     
+    /**
+     * Render a file
+     */
+    def renderFile(controllerDelegate, File f, String mimeType) {
+        def mt = mimeType ?: MimeUtils.getDefaultMimeType(f.name)
+        controllerDelegate.response.setContentType(mt)    
+        // @todo set caching headers just as for normal content
+        // @todo is this fast enough?    
+        controllerDelegate.response.outputStream << f.newInputStream()
+        return null
+    }
+    
+    
    /** 
     * Do the full default render pipeline on the supplied content instance.
     * NOTE: Only this exact instance will be rendered, `so it must be pre-resolved if it is a WcmVirtualContent node
@@ -266,7 +280,7 @@ class RenderEngine {
         // See if the content will handle rendering itself
         if (contentClass.metaClass.hasProperty(contentClass, 'handleRequest')) {
             if (log.debugEnabled) {
-                log.debug "Content of type ${contentClass} at uri ${params.uri} is handling its own rendering"
+                log.debug "Content of type ${contentClass} at uri ${content.absoluteURI} is handling its own rendering"
 
                 assert contentClass.handleRequest instanceof Closure
             }
@@ -289,6 +303,10 @@ class RenderEngine {
     }
 }
 
+/**
+ * This class is the API we provide for handleRequest actions, delegating to the controller anything
+ * we don't handle
+ */
 class HandleRequestDelegator {
     def controllerDelegate
     def renderEngine 
@@ -317,6 +335,9 @@ class HandleRequestDelegator {
         renderEngine.renderContent(controllerDelegate, content)
     }
     
+    def renderFile(File file, String mimetype) {
+        renderEngine.renderFile(controllerDelegate, file, mimetype)
+    }
     def executeScript(WcmScript script) {
         renderEngine.executeScript(controllerDelegate, script)
     }
