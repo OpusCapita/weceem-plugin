@@ -95,7 +95,6 @@ class WcmEditorController {
     }
 
     def preview = {
-        println "Params: ${params}"
         def content
         if (params.type) {
             content = wcmContentRepositoryService.newContentInstance(params.type)
@@ -104,7 +103,6 @@ class WcmEditorController {
         }
         workaroundBlankAssociationBug()
         wcmContentRepositoryService.hackedBindData(content, params)
-        println "Node: ${content.dump()}"
         wcmRenderEngine.showContent(this, content)
     }
     
