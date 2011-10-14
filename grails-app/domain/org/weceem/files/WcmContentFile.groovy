@@ -49,9 +49,6 @@ class WcmContentFile extends WcmContent {
     }
 
     void setUploadedFile(MultipartFile file) {
-        println "set Uploaded file is: ${file}"
-        println "set Uploaded file props: ${file?.dump()}"
-
         this.@uploadedFile = file
         if (!title) {
             title = file.originalFilename
@@ -89,8 +86,6 @@ class WcmContentFile extends WcmContent {
      * Files are *not* stored in the repository database
      */
     boolean contentWillBeCreated(WcmContent parentContent) {
-        println "Uploaded file is: ${uploadedFile}"
-        println "Uploaded file props: ${uploadedFile?.dump()}"
         
         def path = ''
         if (parentContent instanceof WcmContentDirectory) {
@@ -127,6 +122,13 @@ class WcmContentFile extends WcmContent {
     }
     
     void contentDidMove(String originalURI, WcmContent originalParent) {
+        if (originalParent?.ident() == parent?.ident()) {
+            if (log.debugEnabled) {
+                log.debug "Not moving server file ${originalURI} because parent has not changed"
+            }
+            return
+        }
+        
         def srcPath = originalURI
         def dstPath = ''
 

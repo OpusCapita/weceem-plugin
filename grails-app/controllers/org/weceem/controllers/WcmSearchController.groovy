@@ -37,7 +37,6 @@ class WcmSearchController {
                         searchHits = wcmContentRepositoryService.searchForPublicContent(params.query, space, uri, 
                             [types:params.types, offset:params.int('offset'), max: Math.min(100, params.int('max') ?: DEFAULT_RESULTS_PER_PAGE)])
                     }
-                    println "Results: ${searchHits}"
                     break
             }
             

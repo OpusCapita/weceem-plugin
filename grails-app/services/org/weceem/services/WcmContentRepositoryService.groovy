@@ -599,8 +599,6 @@ class WcmContentRepositoryService implements InitializingBean {
      */
     def createNode(type, params, Closure postInit = null) {
         
-        println "Creating with bind: ${params}"
-        
         def content = newContentInstance(type)
         def tags = params.remove('tags')
         hackedBindData(content, params)
@@ -667,8 +665,6 @@ class WcmContentRepositoryService implements InitializingBean {
      */
     Boolean createNode(WcmContent content, WcmContent parentContent = null) {
         requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_CREATE])        
-
-        println "PREP TO CREATE: ${content.dump()}"
         
         if (parentContent == null) parentContent = content.parent
 
