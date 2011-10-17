@@ -48,7 +48,15 @@ class WcmContentFile extends WcmContent {
         syncStatus(hidden: true)
     }
 
-    public void createAliasURI(parent) {
+    void setUploadedFile(MultipartFile file) {
+        this.@uploadedFile = file
+        if (!title) {
+            title = file.originalFilename
+        }
+        aliasURI = file.originalFilename
+    }
+    
+    void createAliasURI(parent) {
         if (!aliasURI) {
             aliasURI = title
         }
@@ -65,20 +73,20 @@ class WcmContentFile extends WcmContent {
     
     boolean contentShouldAcceptChildren() { false }
 
+    boolean contentShouldBeCreated(WcmContent parentContent) {
+        if (parentContent == null) {
+            return false // cannot be at root
+        } else {
+            return true
+        }
+    }
+
     /**
      * Handle the create event to copy the file from the upload form into the filesystem
      * Files are *not* stored in the repository database
      */
-    boolean contentShouldBeCreated(WcmContent parentContent) {
-        if (parentContent == null) {
-            return false // cannot be at root
-        }
+    boolean contentWillBeCreated(WcmContent parentContent) {
         
-        if (!title) {
-            title = uploadedFile?.originalFilename
-        }
-        aliasURI = uploadedFile?.originalFilename
-        assert title
         def path = ''
         if (parentContent instanceof WcmContentDirectory) {
             assert parentContent.save()
@@ -90,16 +98,10 @@ class WcmContentFile extends WcmContent {
         
         if (uploadedFile) {
             def f = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, "$path/${uploadedFile.originalFilename}")
-            try {
-                uploadedFile.transferTo(f)
-                fileMimeType = uploadedFile.contentType ?: MimeUtils.getDefaultMimeType(uploadedFile.originalFilename)
-                fileSize = f.length()
-            } catch (Exception e) {
-                return false
-            }
+            uploadedFile.transferTo(f)
+            fileMimeType = uploadedFile.contentType ?: MimeUtils.getDefaultMimeType(uploadedFile.originalFilename)
+            fileSize = f.length()
         }
-        
-        return true
     }
 
     boolean contentDidChangeTitle(String oldTitle) {
@@ -120,6 +122,13 @@ class WcmContentFile extends WcmContent {
     }
     
     void contentDidMove(String originalURI, WcmContent originalParent) {
+        if (originalParent?.ident() == parent?.ident()) {
+            if (log.debugEnabled) {
+                log.debug "Not moving server file ${originalURI} because parent has not changed"
+            }
+            return
+        }
+        
         def srcPath = originalURI
         def dstPath = ''
 

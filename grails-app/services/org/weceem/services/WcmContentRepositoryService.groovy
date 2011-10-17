@@ -251,6 +251,7 @@ class WcmContentRepositoryService implements InitializingBean {
      * Take a URI and work out what space it refers to, and what the remaining URI is
      *
      * Note, this is perhaps one of our most evil pieces of logic. Enter at your peril.
+     * @return A map with "space" and "uri" values, with the space resolved to a WcmSpace and uri amended
      */
     Map resolveSpaceAndURI(String uri) {
         def spaceName
@@ -598,9 +599,11 @@ class WcmContentRepositoryService implements InitializingBean {
      * @param content
      */
     def createNode(type, params, Closure postInit = null) {
+        
         def content = newContentInstance(type)
         def tags = params.remove('tags')
         hackedBindData(content, params)
+
         if (postInit) {
             postInit(content)
         }
@@ -663,7 +666,7 @@ class WcmContentRepositoryService implements InitializingBean {
      */
     Boolean createNode(WcmContent content, WcmContent parentContent = null) {
         requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_CREATE])        
-
+        
         if (parentContent == null) parentContent = content.parent
 
         if (log.debugEnabled) {
@@ -1160,8 +1163,9 @@ class WcmContentRepositoryService implements InitializingBean {
     
     // @todo This is a hack so we can bind without x.properties = y which is broken in production on Grails 1.2-M2
     public hackedBindData(obj, params) {
-        def transientProps = obj.metaClass.hasProperty(null, 'transients') ? obj.class.transients : []
-        new BindDynamicMethod().invoke(this /* dummy value */, 'bindData', obj, params, [exclude:transientProps])
+//        def transientProps = obj.metaClass.hasProperty(null, 'transients') ? obj.class.transients : []
+        def excludes
+        new BindDynamicMethod().invoke(this /* dummy value */, 'bindData', obj, params, [exclude:excludes])
     }
 
     String makeURICacheKey(WcmSpace space, uri) {

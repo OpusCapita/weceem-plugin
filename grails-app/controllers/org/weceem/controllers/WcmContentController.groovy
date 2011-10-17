@@ -45,7 +45,7 @@ class WcmContentController {
     def showUploadedFile = {
         // @todo See if content node exists for file, if so use that for meta info like mod date
         def f = new File(wcmContentRepositoryService.uploadDir, params.uri)
-        renderFile(f, null)
+        wcmRenderEngine.renderFile(f, null)
     }
     
     def show = { 
@@ -177,18 +177,6 @@ class WcmContentController {
             }
         }
         return requestedContent
-    }
-    
-    /**
-     * Render a file
-     */
-    def renderFile(File f, String mimeType) {
-        def mt = mimeType ?: MimeUtils.getDefaultMimeType(f.name)
-        response.setContentType(mt)    
-        // @todo set caching headers just as for normal content
-        // @todo is this fast enough?    
-        response.outputStream << f.newInputStream()
-        return null
     }
     
     def notFound = {

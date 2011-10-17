@@ -41,7 +41,6 @@ class SimpleSpaceExporter implements SpaceExporter {
                     id("class": cnt.id.class.name, "${cnt.id}")
                     //Getting Grails Domain object properties
                     getDeclaredProperties(cnt).each{prop->
-                        println "Writing out: ${prop.name} which is persistent? ${prop.persistent}"
                         def cntProp = cnt."${prop.name}"
                         if (cntProp != null){
                             def cntPropClass = cntProp.class
