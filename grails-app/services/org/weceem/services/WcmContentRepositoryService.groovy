@@ -251,6 +251,7 @@ class WcmContentRepositoryService implements InitializingBean {
      * Take a URI and work out what space it refers to, and what the remaining URI is
      *
      * Note, this is perhaps one of our most evil pieces of logic. Enter at your peril.
+     * @return A map with "space" and "uri" values, with the space resolved to a WcmSpace and uri amended
      */
     Map resolveSpaceAndURI(String uri) {
         def spaceName
