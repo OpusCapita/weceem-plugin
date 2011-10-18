@@ -8,15 +8,15 @@ $( function() {
     $('.preview-button').click( function(event) {
         var form = $(event.target).parents('form');
         form.attr('target', '_preview');
-        var prevURL = form.attr('action')
-        form.attr('action', prevURL + '/preview/'+$('form input[name=id]').val())
+        var prevURL = '${g.createLink(controller:'wcmEditor', action:'preview', id:content.id).encodeAsJavaScript()}';
+        form.attr('action', prevURL);
         
         // Now submit form using workaround for onsubmit calls
-        $('#preview-action-submitter').click()
+        $('#preview-action-submitter').click();
         
         // Reset the form target so save works as expected
         form.attr('target', '');
-        form.attr('action', prevURL)
+        form.attr('action', prevURL);
     
         // Don't have a double-submit
         event.preventDefault();
@@ -26,7 +26,7 @@ $( function() {
 
     <bean:errorClass>ui-state-error</bean:errorClass>
 
-    <g:uploadForm controller="wcmEditor" method="post">
+    <g:uploadForm controller="wcmEditor" action="${content.id ? 'update' : 'save'}" method="post">
 
         <g:if test="${content.id}">
             <input type="hidden" name="id" value="${params.id.encodeAsHTML()}"/>
