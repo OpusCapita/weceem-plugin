@@ -1,6 +1,6 @@
 dataSource {
 	pooled = true
-	driverClassName = "org.h2.Driver"
+	driverClassName = "org.hsql.jdbcDriver"
 	username = "sa"
 	password = ""
 }
@@ -14,19 +14,19 @@ environments {
 	development {
 		dataSource {
 			dbCreate = "create-drop" // one of 'create', 'create-drop','update'
-			url = "jdbc:h2:mem:devDB;MVCC=true"
+			url = "jdbc:hsql:mem:devDB"
 		}
 	}
 	test {
 		dataSource {
 			dbCreate = "create-drop"
-			url = "jdbc:h2:mem:testDb;MVCC=true&LOCK_TIMEOUT=10000"
+			url = "jdbc:hsql:mem:testDb"
 		}
 	}
 	production {
 		dataSource {
 			dbCreate = "update"
-			url = "jdbc:h2:file:prodDb;shutdown=true"
+			url = "jdbc:hsql:file:prodDb;shutdown=true"
 		}
 	}
 }
