@@ -1,4 +1,5 @@
 class WeceemPluginUrlMappings {
+
     static mappings = { appContext ->
         def ctx
         // Look for Grails 2.0 context arg

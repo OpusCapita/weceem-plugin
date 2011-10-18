@@ -1,10 +1,12 @@
 <div class="container">
 <g:javascript>
 <%-- I dont want to do this here but have no choice until we can include resources in header --%>
-<%-- Highlight any accordion headers that have errors inside them --%>
 $( function() {
+    // Highlight any accordion headers that have errors inside them
     $('div .ui-state-error', $('#panels')).parentsUntil('#panels').prev('.ui-accordion-header').addClass('ui-state-error');
     var originalFormOnSubmits = $('.preview-button').parents('form').attr('onsubmit');
+
+    // Set up the preview action
     $('.preview-button').click( function(event) {
         var form = $(event.target).parents('form');
         form.attr('target', '_preview');
