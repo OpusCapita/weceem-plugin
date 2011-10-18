@@ -1,6 +1,5 @@
 import org.weceem.services.WcmEventService
 import org.weceem.event.WeceemEvents
-import org.weceem.event.EventManager
 
 import org.weceem.content.WcmContent
 
@@ -13,9 +12,8 @@ class EventServiceTests extends grails.test.GrailsUnitTestCase {
         super.setUp()
         mockLogging(WcmEventService)
 
-        EventManager.init()
-
         eventService = new WcmEventService()
+        eventService.afterPropertiesSet()
     }
 
     protected void tearDown() {
@@ -34,7 +32,7 @@ class EventServiceTests extends grails.test.GrailsUnitTestCase {
         assertTrue l.called
 
         // remove listener and test again
-        eventService.removeListener(l)
+        eventService.removeListener(l)  
         l.called = false
         eventService.event(WeceemEvents.contentDidGetCreated, new WcmContent())
         assertFalse l.called

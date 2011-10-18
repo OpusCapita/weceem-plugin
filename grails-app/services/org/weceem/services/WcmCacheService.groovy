@@ -17,7 +17,7 @@ class WcmCacheService implements InitializingBean {
         log.info "Caches configured: ${weceemCacheManager.cacheNames}"
     }
     
-    def clearCache(String name, boolean dontTellReplicators = false) {
+    def clearCache(String name,  boolean dontTellReplicators = false) {
         getCache(name)?.removeAll(dontTellReplicators)
     }
     

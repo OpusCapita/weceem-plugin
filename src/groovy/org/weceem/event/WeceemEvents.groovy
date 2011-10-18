@@ -20,8 +20,5 @@ class WeceemEvents {
         /* Called after a new node is moved to a new parent */
         contentDidMove { WcmContent node, String previousURL, WcmContent previousParent -> }
     }
-    
-    static {
-        EventManager.define(WeceemEvents)
-    }
 }
+

@@ -34,8 +34,4 @@ class WeceemDomainEvents {
         /* Called before a node is moved to become a child of this node. Return true to permit addition of the new child */
         contentShouldAcceptChild { WcmContent possibleChild -> }
     }
-    
-    static {
-        EventManager.define(WeceemDomainEvents)
-    }
 }
