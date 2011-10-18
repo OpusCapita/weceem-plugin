@@ -1,4 +1,5 @@
 grails.tomcat.jvmArgs = ["-Xmx1024m", "-XX:MaxPermSize=100m", '-verbose:class'] 
+grails.project.work.dir="target/work"
 
 grails.project.dependency.resolution = {
     inherits "global" // inherit Grails default dependencies

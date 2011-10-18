@@ -1,10 +1,15 @@
-import org.codehaus.groovy.grails.commons.ApplicationHolder
-
 class WeceemPluginUrlMappings {
-    static mappings = {
-        def app = ApplicationHolder.application
-        def appContext = app.mainContext
-        def config = app.config
+
+    static mappings = { appContext ->
+        def ctx
+        // Look for Grails 2.0 context arg
+        if (appContext) {
+            ctx = appContext
+        } else {
+            // Static holders are our only choice pre-2.0
+            ctx = org.codehaus.groovy.grails.commons.ApplicationHolder.application.mainContext
+        }
+        def config = ctx.grailsApplication.config
         
         final CONTENT_PREFIX = (config.weceem.content.prefix instanceof String) ? 
             config.weceem.content.prefix : ''
@@ -65,8 +70,6 @@ class WeceemPluginUrlMappings {
             action = "search"
         }
         
-        def wcmContentRepositoryService = appContext.wcmContentRepositoryService
-
 /*
         def u = wcmContentRepositoryService.uploadUrl
         delegate.(u+'$uri**') {
@@ -83,7 +86,7 @@ class WeceemPluginUrlMappings {
             constraints {
                 // @todo this is very ugly, clean up
                 uri(validator: { v ->
-                    def uploadsPath = wcmContentRepositoryService.uploadUrl - '/'
+                    def uploadsPath = ctx.wcmContentRepositoryService.uploadUrl - '/'
                     return !v?.startsWith(uploadsPath) && !FORBIDDEN_SPACE_URIS.find { p -> 
                         return v?.startsWith(p) 
                     }
