@@ -8,7 +8,7 @@ class WeceemGrailsPlugin {
     def _log = LogFactory.getLog('org.weceem.WeceemGrailsPlugin')
 
     // the plugin version
-    def version = "1.1.BUILD-SNAPSHOT"
+    def version = "1.1"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.2.2 > *"
     
@@ -16,10 +16,10 @@ class WeceemGrailsPlugin {
     def dependsOn = [
         searchable:'0.6.3 > *', 
         quartz:'0.4.2 > *', 
-        navigation:'1.3 > *',
+        navigation:'1.3.2 > *',
         ckeditor:'3.4.1 > *',
         feeds:'1.5 > *',
-        beanFields:'1.0-RC3 > *',
+        beanFields:'1.0-RC4 > *',
         blueprint:'0.9.1.1 > *',
         jquery:'1.4.4.1 > *',
         jqueryUi:'1.8.6.1 > *',
