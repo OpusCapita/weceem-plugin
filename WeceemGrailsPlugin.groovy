@@ -8,7 +8,7 @@ class WeceemGrailsPlugin {
     def _log = LogFactory.getLog('org.weceem.WeceemGrailsPlugin')
 
     // the plugin version
-    def version = "1.1"
+    def version = "1.1.SNAP1"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.2.2 > *"
     
@@ -72,7 +72,7 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         customPropertyEditorRegistrar(org.weceem.binding.CustomPropertyEditorRegistrar)
         
         // Configure caching
-        boolean hasEhCacheConfigXML = application.class.getResource('/ehcache.xml')
+        boolean hasEhCacheConfigXML = application.parentContext.getResource('classpath:/ehcache.xml').exists()
         if (hasEhCacheConfigXML) {
             // We assume app dev is managing cache with their own ehcache.xml
             println "Weceem: Initializing ehcache with default ehcache.xml from application"
@@ -81,9 +81,9 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
             }
         } else {
             // init with default Weceem caching
-            def configURL = application.class.getResource('/weceem-default-ehcache.xml')
-            println "Weceem: Initializing ehcache with default weceem ehcache.xml from plugin resource: ${configURL}"
-            weceemCacheManager(net.sf.ehcache.CacheManager, configURL) { bean -> 
+            def configRes = application.parentContext.getResource('classpath:/weceem-default-ehcache.xml')
+            println "Weceem: Initializing ehcache with default weceem ehcache.xml from plugin resource: ${configRes}"
+            weceemCacheManager(net.sf.ehcache.CacheManager, configRes.URL) { bean -> 
                 bean.destroyMethod = 'shutdown'
             }
         }
