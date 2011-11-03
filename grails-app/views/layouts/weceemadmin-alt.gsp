@@ -20,6 +20,9 @@
 
     <nav:resources/>
     <g:javascript library="jquery" plugin="jquery"/>
+    <plugin:isAvailable name="resources">
+        <r:layoutResources/>
+    </plugin:isAvailable>
     <jqui:resources themeCss="${g.resource(dir:'_weceem/jquery-ui/themes/cupertino', file:'jquery-ui-1.8.4.custom.css', plugin:'weceem')}"/>
     <blueprint:resources plugins="buttons"/>
 
@@ -44,5 +47,8 @@
     <g:layoutBody/>
   </div>
   
+      <plugin:isAvailable name="resources">
+          <r:layoutResources/>
+      </plugin:isAvailable>
   </body>
 </html>

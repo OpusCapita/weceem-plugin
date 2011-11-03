@@ -20,6 +20,11 @@
     <link rel="shortcut icon" href="${g.resource(plugin:'weceem', dir:'_weceem/images/favicon.ico')}"/>
     <nav:resources/>
     <g:javascript library="jquery" plugin="jquery"/>
+
+    <plugin:isAvailable name="resources">
+        <r:layoutResources/>
+    </plugin:isAvailable>
+
     <jqui:resources themeCss="${g.resource(dir:'_weceem/jquery-ui/themes/cupertino', file:'jquery-ui-1.8.4.custom.css', plugin:'weceem')}"/>
     <blueprint:resources plugins="buttons"/>
 
@@ -31,7 +36,6 @@
 	<link rel="stylesheet" href="${g.resource(plugin:'weceem', dir: '_weceem/css',file:'weceem.css')}"/>
 
     <g:layoutHead/>
-
   </head>
   
   <body onload="${pageProperty(name:'body.onload')}" class="${pageProperty(name:'body.class')}">
@@ -42,5 +46,8 @@
 
   </div>
   
+      <plugin:isAvailable name="resources">
+          <r:layoutResources/>
+      </plugin:isAvailable>
   </body>
 </html>
