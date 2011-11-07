@@ -25,14 +25,12 @@ log4j = {
 
     info   'grails.app'
 
-    debug   'grails.app.controller',
+    debug   'org.weceem',
+            'grails.app.controller',
             'grails.app.service',
             'grails.app.task',
-//            'org.codehaus.groovy.grails.web.servlet',  //  controllers
-//    	    'org.codehaus.groovy.grails.web.pages', //  GSP
             'grails.app.domain',
             'net.sf.ehcache'
-//            'org.codehaus.groovy.grails.web.mapping' // URL mapping
 
 }
 
