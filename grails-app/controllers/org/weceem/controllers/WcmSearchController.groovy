@@ -1,5 +1,7 @@
 package org.weceem.controllers
 
+import org.weceem.content.RenderEngine
+
 /**
  * Controller for rendering search results
  */
@@ -55,7 +57,7 @@ class WcmSearchController {
             return
         }
 
-        request[WcmContentController.REQUEST_ATTRIBUTE_PREPARED_MODEL] = [searchResults:data.results]
+        request[RenderEngine.REQUEST_ATTRIBUTE_PREPARED_MODEL] = [searchResults:data.results]
         def uri = params.resultsPath ?: data.space.aliasURI+'/views/search-results'
         params.clear()
         params.uri = uri
