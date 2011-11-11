@@ -2005,7 +2005,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
      */
     def findContentForTimePeriod(parentOrSpace, startDate, endDate, args = [:]) {
         if (log.debugEnabled) {
-            log.debug "Finding children of ${parentOrSpace} with args $args"
+            log.debug "Finding children of ${parentOrSpace} for time period ${startDate} - ${endDate} with args $args"
         }
         assert parentOrSpace != null
 
@@ -2031,14 +2031,12 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
 
             or {
                 isNull('publishFrom')
-                ge('publishFrom', startDate)
+                and {
+                    ge('publishFrom', startDate)
+                    le('publishFrom', endDate)
+                }
             }
             
-            or {
-                isNull('publishUntil')
-                le('publishUntil', endDate)
-            }
-
             order('publishFrom', 'desc')
             cache true
         }
