@@ -71,8 +71,8 @@ class WidgetTagLib {
 
         out << body()
 
-        def groovyTemplate = wcmContentRepositoryService.getGSPTemplate(widget)
         try {
+            def groovyTemplate = wcmContentRepositoryService.getGSPTemplate(widget)
             if (attrs.model instanceof Map) {
                 def model = [:] 
                 model.putAll( pageScope.variables)
@@ -89,9 +89,10 @@ class WidgetTagLib {
             }
         } catch (AccessDeniedException ade) {
             log.error "Security errors prevented widget from rendering", GrailsUtil.deepSanitize(ade)
+            out << "Security errors prevented widget ${widget.absoluteURI} from rendering"
         } catch (Throwable t) {
             log.error "Error executing widget page", GrailsUtil.deepSanitize(t)
-            throwTagError("There is an error in widget at [${path}], please see the logs. Error was: "+t)
+            out << "An error occurred in widget ${widget.absoluteURI}: ${t}"
         }
 
         //out << "</div>"
