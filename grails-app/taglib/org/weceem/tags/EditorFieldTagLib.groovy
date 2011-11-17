@@ -168,7 +168,7 @@ class EditorFieldTagLib {
         def contents =  WcmContent.findAllBySpace( pageScope.content.space, [sort:'title']).findAll( { c -> !c.is(pageScope.content) })
         out << bean.select(beanName:'content', property:attrs.property, noLabel:true,
             noSelection: ['':'- No content -'],
-            from: contents, optionValue:'title', optionKey:'id')
+            from: contents, optionValue: { o -> "${o.title} (${o.absoluteURI})" }, optionKey:'id')
     }
 
     def editorFieldInteger = { attrs ->
