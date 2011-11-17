@@ -10,7 +10,7 @@ grails.project.dependency.resolution = {
 		grailsPlugins()
 		grailsHome()
 		grailsCentral()
-        flatDir dirs:"lib" // need this for textilej
+        flatDir dirs:"lib" // need this for iText
     }
     
     dependencies {
@@ -19,7 +19,7 @@ grails.project.dependency.resolution = {
         compile 'org.apache.ant:ant-launcher:1.7.1'
 
         // Our specific dependencies
-        compile 'net.java.textilej:net.java.textilej:2.2.854'
+        compile 'net.java.dev.textile-j:textile-j:2.2.864'
         compile 'xstream:xstream:1.2.1'
     }
 
@@ -29,7 +29,9 @@ grails.project.dependency.resolution = {
         compile ":cache-headers:1.1.5"
         compile ":ckeditor:3.5.2.0"
         compile ":feeds:1.5"
-        test ":functional-test:1.3-RC1"
+        test(":functional-test:1.3-RC1") { 
+            export = false 
+        }
         compile ":jquery:1.4.4.1"
         compile ":jquery-ui:1.8.6.1"
         compile ":navigation:1.3.2"
