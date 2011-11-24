@@ -78,7 +78,7 @@ class WcmContentDependencyService {
             recurseDependencyPathsOf(content, results, visitedNodes)
             return results as List<WcmContent>
         } else {
-            return extractDependencyPathsOf(content) as List<WcmContent>
+            return extractDependencyPathsOf(content)
         }
     }
     
