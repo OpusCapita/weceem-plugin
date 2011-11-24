@@ -17,7 +17,7 @@ class ContentRepositoryDefaultSpaceTests extends AbstractWeceemIntegrationTest {
 
     def servletContext 
     
-    protected void setUp() {
+    public void setUp() {
         ServletContextHolder.servletContext = new MockServletContext(
                 'test/files/default-space-tests', new FileSystemResourceLoader())
         ServletContextHolder.servletContext.setAttribute(
