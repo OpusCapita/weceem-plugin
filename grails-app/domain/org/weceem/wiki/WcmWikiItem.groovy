@@ -36,6 +36,14 @@ class WcmWikiItem extends WcmContent {
     // 64Kb Unicode text with HTML/Wiki Markup
     String content
 
+    @Override
+    String getHardDependencies() {
+        // A template is an implicit dependency for the node, any changes to the template or its deps
+        // means we have to change too.
+        def t = TemplateUtils.getTemplateForContent(this)
+        return t ? t.absoluteURI : ''
+    }
+
     /**
      * Must be overriden by content types that can represent their content as text.
      * Used for search results and versioning

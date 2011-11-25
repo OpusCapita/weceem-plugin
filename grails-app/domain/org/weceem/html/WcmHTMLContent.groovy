@@ -3,6 +3,7 @@ package org.weceem.html
 import org.weceem.content.*
 
 import org.weceem.util.ContentUtils
+import org.weceem.content.TemplateUtils
 
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -42,6 +43,14 @@ class WcmHTMLContent extends WcmContent {
     String content
     String menuTitle
     String htmlTitle
+
+    @Override
+    String getHardDependencies() {
+        // A template is an implicit dependency for the node, any changes to the template or its deps
+        // means we have to change too.
+        def t = TemplateUtils.getTemplateForContent(this)
+        return t ? t.absoluteURI : ''
+    }
 
     /**
      * Must be overriden by content types that can represent their content as text.

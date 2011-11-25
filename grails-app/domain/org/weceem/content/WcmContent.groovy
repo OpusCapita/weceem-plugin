@@ -304,6 +304,14 @@ class WcmContent implements Comparable, Taggable {
         }
     }
 
+    /**
+     * Return list of content dependency URIs comma-delimited, that must always apply to this
+     * node based on its current state
+     */
+    String getHardDependencies() {
+        ''
+    }
+
     String calculateFingerprint() {
         "${ident()}:${version}".encodeAsSHA256()
     }

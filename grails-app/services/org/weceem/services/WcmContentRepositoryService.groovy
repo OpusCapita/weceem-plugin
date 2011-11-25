@@ -23,6 +23,7 @@ import org.weceem.event.EventMethod
 import org.weceem.event.WeceemEvents
 import org.weceem.event.WeceemDomainEvents
 import org.weceem.security.*
+import org.weceem.content.TemplateUtils
 
 /**
  * WcmContentRepositoryService class provides methods for WcmContent Repository tree
@@ -435,12 +436,7 @@ class WcmContentRepositoryService implements InitializingBean {
         // It needs leaf-first dependency ordering and/or brute force clearing of all refs
         eachContentDepthFirst(space) { node ->
             log.debug "Finding references to content [${node.aliasURI}] in space [$space]"
-            def refs = findReferencesTo(node)
-            log.debug "Found references to content [${node.aliasURI}] in space [$space] from [${refs.referringProperty}] in [${refs.referencingContent}], nulling them"
-            refs.each { ref ->
-                ref.referencingContent[ref.referringProperty] = null
-            }
-            log.debug "Nulled ${refs.size()} references to content [${node.aliasURI}], now deleting it"
+            removeAllReferencesTo(node)
             deleteNode(node)
         }
         log.info "Finished deleting content from space [$space]"
@@ -1005,6 +1001,53 @@ class WcmContentRepositoryService implements InitializingBean {
     }
     
     /**
+     * Null all non-hierarchy references to the content nodes listed.
+     * This is expensive. Parent and children associations are NOT affected
+     */
+    void removeAllReferencesTo(List<WcmContent> nodes) {
+        if (log.debugEnabled) {
+            log.debug "Removing all references to the following nodes: ${nodes.absoluteURI}"
+        }
+        for (node in nodes) {
+            def refs = findReferencesTo(node)
+            for (ref in refs) {
+                if ( !(ref.referringProperty in ['parent', 'children']) ) {
+                    if (log.debugEnabled) {
+                        log.debug "Removing references ${ref.referencingContent.absoluteURI}.${ref.referringProperty} to the node: ${node.absoluteURI}"
+                    }
+                    ref.referencingContent[ref.referringProperty] = null
+                    // Need to update this so that deps of this referencing node do not continue to reference this
+                    wcmContentDependencyService.updateDependencyInfoFor(ref.referencingContent)
+                }
+            }
+            wcmContentDependencyService.updateDependencyInfoFor(node)
+        }
+    }
+    
+    /**
+     * Delete multiple nodes at once, avoiding problems where parent is deleted before descendents
+     * If you try to delete X and X/P/Z, you have to do it in the right order and don't bother deleting children
+     * if already deleted.
+     */
+    void deleteNodes(List<WcmContent> nodesToDelete, boolean deleteChildren = false) throws DeleteNotPossibleException {
+        if (log.infoEnabled) {
+            log.info "Bulk deleting nodes: ${nodesToDelete.absoluteURI}"
+        }
+        
+        def deletionInAscendingURIOrder = nodesToDelete.collect({ [uri:it.absoluteURI, node:it] }).sort { it.uri }
+        def alreadyDeletedAncestorURIs = []
+        
+        for (nodeInfo in deletionInAscendingURIOrder) {
+            def node = nodeInfo.node
+            def nodeURI = nodeInfo.uri
+            if (!deleteChildren || !(alreadyDeletedAncestorURIs.any { uri -> nodeURI.startsWith(uri) })) {
+                deleteNode(node, deleteChildren)
+                alreadyDeletedAncestorURIs << (nodeURI + '/')
+            }
+        }
+    }
+    
+    /**
      * Deletes content node and all it's references.
      * All children of sourceContent will be assigned to all its parents.
      *
@@ -1012,7 +1055,7 @@ class WcmContentRepositoryService implements InitializingBean {
      */
     void deleteNode(WcmContent sourceContent, boolean deleteChildren = false) throws DeleteNotPossibleException {
         if (log.debugEnabled) {
-            log.debug "Deleting ${sourceContent.absoluteURI} (including children? $deleteChildren)"
+            log.debug "Deleting ${sourceContent?.absoluteURI} (including children? $deleteChildren)"
         }
 
         if (!sourceContent) {
@@ -1064,18 +1107,19 @@ class WcmContentRepositoryService implements InitializingBean {
         // if there is a parent  - we delete node from its association
         if (parent) {
             sourceContent.parent = null
-            parent.children = parent.children.findAll { it != sourceContent }
+            parent.children = parent.children.findAll { it.ident() != sourceContent.ident() }
             assert parent.save(flush:true)
         }
 
         // We don't want any dep info relating to us to persist
+        wcmContentFingerprintService.invalidateFingerprintFor(sourceContent)
         wcmContentDependencyService.removeDependencyInfoFor(sourceContent)
 
         // Strip off associations
         def artef = grailsApplication.getArtefact(org.codehaus.groovy.grails.commons.DomainClassArtefactHandler.TYPE, 
                 sourceContent.class.name)
                 
-        // Nuke all the references
+        // Nuke all the references from this node to other content
         artef.persistentProperties.each { p ->
             if (p.association && !p.owningSide) {
                 if (p.manyToMany || p.oneToMany) {
@@ -1793,12 +1837,7 @@ class WcmContentRepositoryService implements InitializingBean {
     }
     
     def getTemplateForContent(def content) {
-        def template = content.metaClass.hasProperty(content, 'template') ? content.template : null
-        if ((template == null) && (content.parent != null)) {
-            return getTemplateForContent(content.parent)
-        } else {
-            return template
-        }
+        TemplateUtils.getTemplateForContent(content)
     }
     
     def getLastModifiedDateFor(WcmContent content) {
@@ -1831,6 +1870,7 @@ class WcmContentRepositoryService implements InitializingBean {
         requirePermissions(space, [WeceemSecurityPolicy.PERMISSION_ADMIN])        
 
         def existingFiles = new TreeSet()
+        def clashingFiles = new TreeSet()
         def createdContent = []
         def spaceDir = WcmContentRepositoryService.getUploadPath(space)
         if (!spaceDir.exists()) spaceDir.mkdirs()
@@ -1858,20 +1898,28 @@ class WcmContentRepositoryService implements InitializingBean {
                 }
             } else {
                 log.info "Skipping server file ${relativePath}, already has content node"
-                existingFiles.add(content)
+                if (content.class in [WcmContentDirectory, WcmContentFile]) {
+                    existingFiles.add(content)
+                } else {
+                    log.info "Skipping server file ${relativePath}, a non-directory/file node already exists"
+                    clashingFiles.add(content)
+                }
             }
         }
-        def allFiles = WcmContentFile.findAllBySpace(space);
+        
+        // @todo Remove this findAll which is a workaround for Grails 2 RC1 bug where all types are returned.
+        def allFiles = WcmContentFile.findAllBySpace(space).findAll { n -> n instanceof WcmContentFile }
+        
         def existingIds = existingFiles*.id
         def missedFiles = allFiles.findAll { f ->
             def adding = !existingIds.contains(f.id)
             if (adding) {
-                log.info "Adding ${f.absoluteURI} to list of orphaned files who have no content node"
+                log.info "Adding ${f.absoluteURI} (${f.class}) to list of orphaned files who have no content node"
             }
             return adding
         }
         
-        return ["created": createdContent, "missed": missedFiles]
+        return ["created": createdContent, "missed": missedFiles, clashing: clashingFiles]
     }
     
     /**

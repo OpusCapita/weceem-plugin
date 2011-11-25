@@ -41,8 +41,8 @@ class WcmVirtualContent extends WcmContent {
      * Override the normal dependency mechanism and auto-depend on the target
      */
     @Override
-    String getContentDependencies() {
-        target?.absoluteURI ?: ''
+    String getHardDependencies() {
+        target ? super.hardDependencies + ',' + target?.absoluteURI : super.hardDependencies
     }
     
     boolean contentShouldAcceptChildren() { false }

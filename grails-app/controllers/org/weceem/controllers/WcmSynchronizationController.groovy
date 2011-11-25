@@ -41,11 +41,18 @@ class WcmSynchronizationController {
     def delete = {
         def pattern = ~/delete-\d+/
         def idpattern = ~/\d+/
+        // @todo these must happen in leaf --> parent order or we get errors
+        // Alternatively we delete parents first and skip descendents.
+        def nodes = []
         for (p in params){
             if (pattern.matcher(p.key).matches()){
                 def id = idpattern.matcher(p.key)[0]
-                wcmContentRepositoryService.deleteNode(WcmContentFile.get(id), true)
+                nodes << WcmContentFile.get(id)
             }
+        }
+        if (nodes) {
+            wcmContentRepositoryService.removeAllReferencesTo(nodes)
+            wcmContentRepositoryService.deleteNodes(nodes, true)
         }
         redirect(controller: "wcmRepository")
      }

@@ -13,6 +13,14 @@ class WcmBlog extends WcmContent {
     
     static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "blog-32.png"]
 
+    @Override
+    String getHardDependencies() {
+        // A template is an implicit dependency for the node, any changes to the template or its deps
+        // means we have to change too.
+        def t = TemplateUtils.getTemplateForContent(this)
+        return t ? t.absoluteURI : ''
+    }
+
     static searchable = {
         alias WcmBlog.name.replaceAll("\\.", '_')
         only = ['title', 'status']

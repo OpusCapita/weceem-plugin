@@ -360,11 +360,9 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
 
         // We deleted without using the service...
         wcmContentRepositoryService.wcmContentDependencyService.reload()
-
+        
         // Now remove the node
         wcmContentRepositoryService.deleteNode(nodeA)
-        nodeA = WcmContent.findByTitle('contentA')
-        nodeB = WcmContent.findByTitle('contentB')
 
         // check that contentA was deleted
         assertTrue "Content should not exist!", WcmContent.findByTitle('contentA') == null
@@ -378,6 +376,13 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
 
         def spaceAcA = wcmContentRepositoryService.getCachedContentInfoFor(spaceA, 'contentA')
         assertEquals "Space A contentA cached info should have been invalidated", null, spaceAcA
+
+        // We use the old pre-deletion instance to look up cache info here, to make sure they are flushed
+        
+        assertNull "Fingerprint was not flushed", 
+            wcmContentRepositoryService.wcmContentFingerprintService.getFingerprintFor(nodeA, false)
+        assertEquals "Dependency info was not flushed", 0, 
+            wcmContentRepositoryService.wcmContentDependencyService.getDependencyPathsOf(nodeA).size()
     }
 
     void testDeleteNodeB() {
@@ -418,6 +423,36 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         // check that there are no children for contentC and contentD
         assertEquals 0, nodeC.children.size()
         assertEquals 1, nodeWiki.children.size()
+    }
+
+    void testDeleteMultipleNodesOrder1() {
+        def ids = [nodeWiki.ident(), nodeC.ident(), nodeA.ident()]
+        println "Deleting multi nodes 1 - A"
+        wcmContentRepositoryService.deleteNodes(WcmVirtualContent.list())
+        println "Deleting multi nodes 1 - B"
+        wcmContentRepositoryService.removeAllReferencesTo([nodeA, nodeWiki, nodeC])
+        println "Deleting multi nodes 1 - C"
+        wcmContentRepositoryService.deleteNodes([nodeWiki, nodeC, nodeA], true)
+        
+        ids.each { id ->
+            assertNull "Content node $id should have been deleted", WcmContent.get(id)
+        }
+    }
+    
+    void testDeleteMultipleNodesOrder2() {
+        def ids = [nodeWiki.ident(), nodeC.ident(), nodeA.ident()]
+        println "Deleting multi nodes 2 - A"
+        wcmContentRepositoryService.deleteNodes(WcmVirtualContent.list())
+
+        println "Deleting multi nodes 2 - B"
+        wcmContentRepositoryService.removeAllReferencesTo([nodeA, nodeWiki, nodeC])
+        
+        println "Deleting multi nodes 2 - C"
+        wcmContentRepositoryService.deleteNodes([nodeA, nodeWiki, nodeC], true)
+        
+        ids.each { id ->
+            assertNull "Content node $id should have been deleted", WcmContent.get(id)
+        }
     }
 
     void testDeleteVirtualContent() {

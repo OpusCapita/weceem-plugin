@@ -38,29 +38,18 @@ class WcmContentDependencyService {
             contentDependenciesBySpace.clear()
         }
         
-        // Find all nodes with contentDependencies
-        List<Class> classesWithDeps = grailsApplication.domainClasses.findAll { d -> d.clazz.metaClass.hasProperty(d, 'contentDependencies') }
         if (log.debugEnabled) {
-            log.debug "Content classes with contentDependencies: ${classesWithDeps*.clazz}"
+            log.debug "Loading content instances for ${dc} to load dependency info..."
         }
-
-        // Find all nodes with templates, this is an implicit dependency
-        List<Class> classesWithTemplates = grailsApplication.domainClasses.findAll { d -> d.clazz.metaClass.hasProperty(d, 'template') }
-        if (log.debugEnabled) {
-            log.debug "Content classes with template: ${classesWithTemplates*.clazz}"
-        }
-
-        (classesWithDeps + classesWithTemplates).unique().clazz.each { dc ->
+        def instances = space ? WcmContent.findAllBySpace(space) : WcmContent.list()
+        // @todo this could use a lot of RAM... need to scroll it in future
+        println "A"
+        instances.each { content ->
+            println "B: ${content.absoluteURI}"
             if (log.debugEnabled) {
-                log.debug "Loading content instances for ${dc} to load dependency info..."
+                log.debug "Content instance ${content.absoluteURI} dependency info being loaded..."
             }
-            def instances = space ? dc.findAllBySpace(space) : dc.list()
-            instances.each { content ->
-                if (log.debugEnabled) {
-                    log.debug "Content instance ${content.absoluteURI} dependency info being loaded..."
-                }
-                updateDependencyInfoFor(content)
-            }
+            updateDependencyInfoFor(content)
         }
     }
     
@@ -109,18 +98,27 @@ class WcmContentDependencyService {
         WcmTemplate template = wcmContentRepositoryService.withPermissionsBypass {
             wcmContentRepositoryService.getTemplateForContent(content)
         }
-        // A template is an implicit dependency for the node, any changes to the template or its deps
-        // means we have to change too.
-        def results = template ? [template.absoluteURI] : []
-    
+
+        def results = []
+
+        def deps = content.hardDependencies
+        println "Hard deps ${deps} of ${content.absoluteURI} - ${content.dump()}"
         if (content.metaClass.hasProperty(content, 'contentDependencies')) {
-            def deps = content.contentDependencies?.split(',')*.trim()
-            if (deps) {
-                results.addAll(deps)
+            if (content.contentDependencies) {
+                deps = ','+content.contentDependencies
+            }
+        }
+
+        println "C: ${deps}"
+
+        deps?.split(',')*.trim().each { uri ->
+            if (uri) {
+                results << uri
             }
         }
         
-        return results
+        println "D: ${results}"
+        return results.unique()
     }
     
     List<WcmContent> getDependenciesOf(WcmContent content) {
