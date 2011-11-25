@@ -12,6 +12,7 @@ import grails.converters.JSON
 class WcmSynchronizationController {
 
     def wcmContentRepositoryService
+    def wcmContentDependencyService
 
     def index = {}
 
@@ -30,8 +31,17 @@ class WcmSynchronizationController {
         def missedFiles = result.missed
         def dirnum = createdContent.findAll{c-> c instanceof WcmContentDirectory}.size()
         def filenum = createdContent.size() - dirnum
-        render (view: "fileList", model: [missingFiles: missedFiles, createdContent: createdContent, 
-            space: space, dirnum: dirnum, filenum: filenum])
+        def hardRefs = [:]
+        missedFiles.each { f ->
+            hardRefs[f.ident()] = wcmContentDependencyService.getDependenciesOf(f).any { r -> r.isInstanceOf(WcmVirtualContent)  }
+        }
+        render (view: "fileList", model: [
+            missingFiles: missedFiles, 
+            missingFilesHardRefs: hardRefs,
+            createdContent: createdContent, 
+            space: space, 
+            dirnum: dirnum, 
+            filenum: filenum])
     }
     
     /**
