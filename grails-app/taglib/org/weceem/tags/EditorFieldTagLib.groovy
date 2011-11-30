@@ -11,6 +11,7 @@ class EditorFieldTagLib {
     
     static namespace = "wcm"
     
+    def proxyHandler
     TagLibraryLookup gspTagLibraryLookup // Tag lookup bean from Grails injection
     
     def editorLabel = { attrs ->
@@ -37,7 +38,7 @@ class EditorFieldTagLib {
 
     def argsWithRequiredOverride(attrs, args) {
         def con = pageScope.content
-        if (con.metaClass.hasProperty(con.class, 'overrideRequired')) {
+        if (con.metaClass.hasProperty(proxyHandler.unwrapIfProxy(con).class, 'overrideRequired')) {
             def r = con.overrideRequired[attrs.property]
             if (r != null) {
                 if (!r) {

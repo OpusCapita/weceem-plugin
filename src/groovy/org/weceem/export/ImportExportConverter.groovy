@@ -30,20 +30,22 @@ class ImportExportConverter implements Converter {
 
     public void marshal(Object value, HierarchicalStreamWriter writer,
             MarshallingContext context) {
+        def obj = proxyHandler.unwrapIfProxy(value)
+        
         writer.startNode('className')
-        writer.setValue(value.class.name)
+        writer.setValue(obj.class.name)
         writer.endNode()
         writer.startNode('id')
         writer.setValue(value.id.toString())
         writer.endNode()
-        if (value instanceof WcmTemplate) {
+        if (obj instanceof WcmTemplate) {
             writer.startNode('aliasURI')
             writer.setValue(value.aliasURI)
             writer.endNode()
             writer.startNode('spaceName')
             writer.setValue(value.space.name)
             writer.endNode()
-        } else if (value instanceof WcmSpace) {
+        } else if (obj instanceof WcmSpace) {
             writer.startNode('name')
             writer.setValue(value.name)
             writer.endNode()

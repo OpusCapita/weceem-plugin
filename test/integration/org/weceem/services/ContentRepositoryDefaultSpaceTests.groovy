@@ -16,7 +16,7 @@ class ContentRepositoryDefaultSpaceTests extends AbstractWeceemIntegrationTest {
     static transactional = true
 
     def servletContext 
-    
+
     public void setUp() {
         ServletContextHolder.servletContext = new MockServletContext(
                 'test/files/default-space-tests', new FileSystemResourceLoader())
@@ -24,20 +24,25 @@ class ContentRepositoryDefaultSpaceTests extends AbstractWeceemIntegrationTest {
                 GrailsApplicationAttributes.APPLICATION_CONTEXT,
                 grailsApplication.mainContext)
         servletContext = grailsApplication.mainContext.servletContext = ServletContextHolder.servletContext
+        grailsApplication.mainContext.simpleSpaceImporter.proxyHandler = [unwrapIfProxy: { o -> o}]
 
         super.setUp()
     }
     
     void testDefaultSpaceCreateWorksWithoutLoggedInUser() {
         wcmContentRepositoryService.wcmSecurityService.securityDelegate.getUserRoles = { -> [] }
-
+        
         wcmContentRepositoryService.createDefaultSpace()
         
         assertEquals 1, WcmSpace.count()
 
         // Need perms to view the content!
         wcmContentRepositoryService.wcmSecurityService.securityDelegate.getUserRoles = { -> ['ROLE_ADMIN'] }
-        def contentInfo = wcmContentRepositoryService.findContentForPath('about', WcmSpace.findByName('Default'))
+        
+        def spc = WcmSpace.findByName('Default')
+        assertNotNull spc
+        
+        def contentInfo = wcmContentRepositoryService.findContentForPath('about', spc)
         
         assertNotNull contentInfo
         assertNotNull contentInfo.content

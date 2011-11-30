@@ -24,6 +24,7 @@ class RenderEngine {
 
     def wcmSecurityService
     def wcmContentRepositoryService
+    def proxyHandler
     
     /**
      * Construct the page info object for custom-rendering situations where you have not yet resolved the node
@@ -264,7 +265,7 @@ class RenderEngine {
 	   def pageInfo = makePageInfo(content.absoluteURI, contentInfo, content)
        request[REQUEST_ATTRIBUTE_PAGE] = pageInfo
 
-       def contentClass = content.class
+       def contentClass = proxyHandler.unwrapIfProxy(content).class
        
        if (!wcmContentRepositoryService.contentIsRenderable(content)) {
            log.warn "Request for [${params.uri}] resulted in content node that is not standalone and cannot be rendered directly"

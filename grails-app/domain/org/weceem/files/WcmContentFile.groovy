@@ -159,7 +159,7 @@ class WcmContentFile extends WcmContent {
         def path = getPathTo(this.parent)
 
         def parentContent = this.parent ? WcmContent.get(this.parent.id) : this.parent
-        if (parentContent && (parentContent.class == WcmContentDirectory.class)) {
+        if (parentContent && (proxyHandler.unwrapIfProxy(parentContent).class == WcmContentDirectory.class)) {
             parentContent.filesCount -= 1
             parentContent.children.remove(this)
             assert parentContent.save()

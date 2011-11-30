@@ -36,6 +36,8 @@ class ContentControllerTests extends GroovyTestCase {
         con.wcmContentRepositoryService = app.mainContext.wcmContentRepositoryService
         con.wcmContentFingerprintService = app.mainContext.wcmContentFingerprintService
         con.wcmSecurityService = app.mainContext.wcmSecurityService
+        con.wcmRenderEngine.proxyHandler = [unwrapIfProxy: { o -> o}]
+        
         return con
     }
 

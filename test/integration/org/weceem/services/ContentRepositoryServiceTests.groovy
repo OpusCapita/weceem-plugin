@@ -296,8 +296,9 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         assertTrue(!result.notFound)
         assertTrue(!result.errors)
         
-        assertNull wcmContentRepositoryService.findContentForPath('contentA', spaceA)
-        assertNull wcmContentRepositoryService.findContentForPath('contentA/contentB', spaceA)
+        println "Trying to get content info"
+        assertNull wcmContentRepositoryService.getCachedContentInfoFor(spaceA, 'contentA')
+        assertNull wcmContentRepositoryService.getCachedContentInfoFor(spaceA, 'contentA/contentB')
         assertEquals nodeA.id, wcmContentRepositoryService.findContentForPath('changed-alias', spaceA).content.id
         assertEquals nodeB.id, wcmContentRepositoryService.findContentForPath('changed-alias/contentB', spaceA).content.id
     }    
@@ -315,8 +316,9 @@ class ContentRepositoryServiceTests extends AbstractWeceemIntegrationTest {
         assertTrue(!result.notFound)
         assertTrue(!result.errors)
         
-        assertNull wcmContentRepositoryService.findContentForPath('contentA', spaceA)
-        assertNull wcmContentRepositoryService.findContentForPath('contentA/contentB', spaceA)
+        
+        assertNull wcmContentRepositoryService.getCachedContentInfoFor(spaceA, 'contentA')
+        assertNull wcmContentRepositoryService.getCachedContentInfoFor(spaceA, 'contentA/contentB')
         assertEquals nodeA.id, wcmContentRepositoryService.findContentForPath('changed-alias', spaceA).content.id
         assertEquals nodeB.id, wcmContentRepositoryService.findContentForPath('changed-alias/contentB', spaceA).content.id
     }    

@@ -33,6 +33,7 @@ class WcmContent implements Comparable, Taggable {
     static MAX_CONTENT_SIZE = 500000
     
     transient def wcmSecurityService
+    transient def proxyHandler
     
     // we only index title and space
     static searchable = {
@@ -92,6 +93,7 @@ class WcmContent implements Comparable, Taggable {
         'contentAsHTML', 
         'mimeType', 
         'wcmSecurityService',
+        'proxyHandler',
         'absoluteURI',
         'lineage'
     ]
@@ -359,7 +361,7 @@ class WcmContent implements Comparable, Taggable {
         def xml = output.toString()
         def cv = new WcmContentVersion(objectKey: ident(),
                 revision: (lastRevision ? lastRevision + 1 : 1),
-                objectClassName: self.class.name,
+                objectClassName: proxyHandler.unwrapIfProxy(self).class.name,
                 objectContent: xml,
                 contentTitle: latestTitle,
                 spaceName: latestSpaceName,

@@ -3,7 +3,7 @@
 	  <div class="item">
             <wcm:renderContentItemIcon type="${c}" id="content-icon-${c.id}"/>
 			<h2 class="title">
-			    <g:link controller="wcmEditor" action="edit" id="${c.id}">${c.title.encodeAsHTML()} <span class="type"> (/${c.aliasURI.encodeAsHTML()} - <g:message code="content.item.name.${c.class.name}"/>)</span>
+			    <g:link controller="wcmEditor" action="edit" id="${c.id}">${c.title.encodeAsHTML()} <span class="type"> (/${c.aliasURI.encodeAsHTML()} - <g:message code="content.item.name.${wcm.getClassName(node:c)}"/>)</span>
 			    </g:link>
 			</h2>
 		</div>		
@@ -26,7 +26,7 @@
 
 <jq:jquery>
     jQuery('#content-node-${c.id}').data('orderindex', ${c.orderIndex == null ? 0 : c.orderIndex});
-    jQuery('#content-node-${c.id}').data('type',"${c.class.name.encodeAsJavaScript()}"); 
+    jQuery('#content-node-${c.id}').data('type',"${wcm.getClassName(node:c).encodeAsJavaScript()}"); 
 </jq:jquery>
 
 <g:if test="${c.children.size()}">

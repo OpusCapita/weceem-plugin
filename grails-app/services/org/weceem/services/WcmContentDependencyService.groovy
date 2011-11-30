@@ -43,9 +43,7 @@ class WcmContentDependencyService {
         }
         def instances = space ? WcmContent.findAllBySpace(space) : WcmContent.list()
         // @todo this could use a lot of RAM... need to scroll it in future
-        println "A"
         instances.each { content ->
-            println "B: ${content.absoluteURI}"
             if (log.debugEnabled) {
                 log.debug "Content instance ${content.absoluteURI} dependency info being loaded..."
             }
@@ -102,14 +100,14 @@ class WcmContentDependencyService {
         def results = []
 
         def deps = content.hardDependencies
-        println "Hard deps ${deps} of ${content.absoluteURI} - ${content.dump()}"
+        if (log.debugEnabled) {
+            log.debug "Hard deps ${deps} of ${content.absoluteURI} - ${content.dump()}"
+        }
         if (content.metaClass.hasProperty(content, 'contentDependencies')) {
             if (content.contentDependencies) {
                 deps = ','+content.contentDependencies
             }
         }
-
-        println "C: ${deps}"
 
         deps?.split(',')*.trim().each { uri ->
             if (uri) {
@@ -117,7 +115,6 @@ class WcmContentDependencyService {
             }
         }
         
-        println "D: ${results}"
         return results.unique()
     }
     

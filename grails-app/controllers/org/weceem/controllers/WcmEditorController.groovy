@@ -13,6 +13,8 @@ class WcmEditorController {
     def wcmContentRepositoryService
     def wcmEditorService
     def wcmRenderEngine
+
+    def proxyHandler
     
     // the delete, save and update actions only accept POST requests
     static allowedMethods = [create:['GET'], delete: ['POST'], save: 'POST', update: 'POST']
@@ -24,7 +26,7 @@ class WcmEditorController {
         // Using bindData to work around Grails 1.2m2 bugs, change to .properties when 1.2-RC1 is live
         bindData(content, params)
 
-        return [content: content, editableProperties: wcmEditorService.getEditorInfo(content.class)]
+        return [content: content, editableProperties: wcmEditorService.getEditorInfo(proxyHandler.unwrapIfProxy(content).class)]
     }
 
     def edit = {
@@ -34,7 +36,7 @@ class WcmEditorController {
             redirect(controller:'wcmRepository')
         } else {
             return [content: content, changeHistory: wcmContentRepositoryService.getChangeHistory(content), 
-                editableProperties: wcmEditorService.getEditorInfo(content.class)]
+                editableProperties: wcmEditorService.getEditorInfo(proxyHandler.unwrapIfProxy(content).class)]
         }
     }
 
@@ -63,7 +65,7 @@ class WcmEditorController {
             def content = wcmContentRepositoryService.createNode(params.type, params)
 
             if (!content.hasErrors()) {
-                flash.message = message(code:'message.content.saved', args:[content.title, message(code:'content.item.name.'+content.class.name)])
+                flash.message = message(code:'message.content.saved', args:[content.title, message(code:'content.item.name.'+proxyHandler.unwrapIfProxy(content).class.name)])
                 if (log.debugEnabled) {
                     log.debug "Saved content: ${content}"
                 }
@@ -79,7 +81,7 @@ class WcmEditorController {
                 log.error "Unable to save content: ${content.errors}"
                 render(view: 'create', model: [content: content, 
                     changeHistory: wcmContentRepositoryService.getChangeHistory(content),
-                    editableProperties: wcmEditorService.getEditorInfo(content.class)])
+                    editableProperties: wcmEditorService.getEditorInfo(proxyHandler.unwrapIfProxy(content).class)])
             }
         }
     }
@@ -128,7 +130,7 @@ class WcmEditorController {
                     render(view: 'edit', model: [content: content, 
                         // Get history in a new session so we don't see unsaved revision
                         changeHistory: WcmContent.withNewSession { wcmContentRepositoryService.getChangeHistory(content) },
-                        editableProperties: wcmEditorService.getEditorInfo(content.class)])
+                        editableProperties: wcmEditorService.getEditorInfo(proxyHandler.unwrapIfProxy(content).class)])
                     return
                 }
             } else if (notFound) {
@@ -137,7 +139,7 @@ class WcmEditorController {
             } else {
                 flash.message = message(code:'message.content.updated', args:[
                     content.title, 
-                    message(code:'content.item.name.'+content.class.name)] )
+                    message(code:'content.item.name.'+proxyHandler.unwrapIfProxy(content).class.name)] )
                 if (!params['continue']) {
                     redirect(controller:'wcmRepository', action:'treeTable')
                     return

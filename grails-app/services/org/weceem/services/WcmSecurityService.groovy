@@ -16,6 +16,7 @@ class WcmSecurityService implements InitializingBean {
     def policy = new WeceemSecurityPolicy()
     
     def grailsApplication
+    def proxyHandler
 
     void afterPropertiesSet() {
         loadPolicy()
@@ -80,7 +81,7 @@ class WcmSecurityService implements InitializingBean {
             content.absoluteURI, 
             getUserRoles(), 
             permList,
-            [type:content.class, content:content])
+            [type:proxyHandler.unwrapIfProxy(content).class, content:content])
     }
 
     boolean hasPermissions(WcmSpace space, String uri, permList, Class<WcmContent> type = null) {

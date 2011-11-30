@@ -75,6 +75,7 @@ class WeceemTagLib {
     def pluginManager
     def wcmCacheService
     def grailsApplication
+    def proxyHandler
     
     private extractCodec(attrs) {
         attrs[ATTR_CODEC] == null ? 'HTML' : attrs[ATTR_CODEC]        
@@ -998,7 +999,7 @@ ${node.content}
     def resource = { attrs -> 
         def node = resolveNode(attrs)
         if (!attrs[ATTR_TYPE]) { 
-            switch (node.class) {
+            switch (proxyHandler.unwrapIfProxy(node).class) {
                 case WcmStyleSheet: 
                     attrs[ATTR_TYPE] = "css"
                     break;
@@ -1014,5 +1015,9 @@ ${node.content}
 
         attrs.url = wcm.createLink(path:node)
         out << jqui.resourceLink(attrs)
+    }
+    
+    def getClassName = { attrs ->
+        out << proxyHandler.unwrapIfProxy(attrs.node)?.class.name
     }
 }

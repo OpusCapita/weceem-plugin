@@ -33,6 +33,9 @@ class ImportExportTests extends GroovyTestCase
                 GrailsApplicationAttributes.APPLICATION_CONTEXT,
                 applicationContext)
         grailsApplication.mainContext.servletContext = ServletContextHolder.servletContext
+        grailsApplication.mainContext.simpleSpaceImporter.proxyHandler = [unwrapIfProxy: { o -> o}]
+        grailsApplication.mainContext.simpleSpaceExporter.proxyHandler = [unwrapIfProxy: { o -> o}]
+        
         new WcmSpace(name: 'testSpace', aliasURI:'main').save(flush: true)
     }
 /*

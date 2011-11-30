@@ -94,7 +94,7 @@ $( function() {
                 </div>
                 <div class="prepend-1 span-20 last">
                     <g:if test="${content.parent}">
-                        ${content.parent.title.encodeAsHTML()} (${message(code:'content.item.name.'+content.parent.class.name, encodeAs:'HTML')})
+                        ${content.parent.title.encodeAsHTML()} (${message(code:'content.item.name.'+wcm.getClassName(node:content.parent), encodeAs:'HTML')})
                         <input type="hidden" name="parent.id" value="${content.parent.id}"/>
                     </g:if><br/>
                 </div>
@@ -107,7 +107,7 @@ $( function() {
                         <g:if test="${content.children?.size()}">
                             <ul>
                             <g:each in="${content.children}" var="child">
-                                <li>${child.title.encodeAsHTML()} (${message(code:'content.item.name.'+child.class.name, encodeAs:'HTML')})</li>
+                                <li>${child.title.encodeAsHTML()} (${message(code:'content.item.name.'+wcm.getClassName(node:child), encodeAs:'HTML')})</li>
                             </g:each>
                             </ul>
                         </g:if>

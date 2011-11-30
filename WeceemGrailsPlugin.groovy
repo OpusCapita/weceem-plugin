@@ -52,12 +52,11 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
 
         simpleSpaceExporter(org.weceem.export.SimpleSpaceExporter) {
             grailsApplication = ref('grailsApplication')
+            proxyHandler = ref('proxyHandler')
         }
         simpleSpaceImporter(org.weceem.export.SimpleSpaceImporter) {
             grailsApplication = ref('grailsApplication')
-        }
-        defaultSpaceImporter(org.weceem.export.DefaultSpaceImporter) {
-            grailsApplication = ref('grailsApplication')
+            proxyHandler = ref('proxyHandler')
         }
         confluenceSpaceImporter(org.weceem.export.ConfluenceSpaceImporter) {
             grailsApplication = ref('grailsApplication')
@@ -65,6 +64,7 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
 
         wcmRenderEngine(org.weceem.content.RenderEngine) {
             // We can't wire up here, dependency pain
+            proxyHandler = ref('proxyHandler')
         }
 
         // Register our custom binding beans

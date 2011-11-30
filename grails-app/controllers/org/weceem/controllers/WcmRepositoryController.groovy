@@ -128,8 +128,7 @@ class WcmRepositoryController {
     }
     
     def list = {
-        return [availableContentTypes: getAvailableContentTypes() - 
-        WcmVirtualContent.class.name]
+        return [availableContentTypes: getAvailableContentTypes() - WcmVirtualContent.class.name]
     }
 
     def getList = {
@@ -148,11 +147,11 @@ class WcmRepositoryController {
         def map = [:]
         def items = []
         contents.each {
-            items << [path: "${it.space.id}/${it.class.name}/${it.id}",
+            items << [path: "${it.space.id}/${proxyHandler.unwrapIfProxy(it).class.name}/${it.id}",
                     title: it.title,
                     createdOn: dateFormat.format(it.createdOn),
                     createdBy: it.createdBy,
-                    'class': message(code: "content.item.name.${it.class.name}")]
+                    'class': message(code: "content.item.name.${proxyHandler.unwrapIfProxy(it).class.name}")]
         }
         map.items = items
         render map as JSON
@@ -303,7 +302,7 @@ class WcmRepositoryController {
         def children = wcmContentRepositoryService.findChildren(
                 getContent(params.contentPath, space), space).collect {
             [path: "${params.contentPath}/${it.id}",
-                label: it.title, type: it.class.name,
+                label: it.title, type: proxyHandler.unwrapIfProxy(it).class.name,
                 hasChildren: it.children ? true : false,
                 canHaveChildren: wcmContentRepositoryService.triggerDomainEvent(it, WeceemDomainEvents.contentShouldAcceptChildren)]
         }
@@ -347,7 +346,7 @@ class WcmRepositoryController {
         }else{
             def indexes = [:]
             wcmContentRepositoryService.findChildren(targetContent)?.collect{indexes.put(it.id, it.orderIndex)}
-            render ([result: 'success', id: vcont.id, indexes: indexes, ctype: vcont.class.name] as JSON)
+            render ([result: 'success', id: vcont.id, indexes: indexes, ctype: proxyHandler.unwrapIfProxy(vcont).class.name] as JSON)
         }
     }
 
@@ -484,7 +483,7 @@ class WcmRepositoryController {
         def rootNodes = wcmContentRepositoryService.findAllRootContent(space, [type:contentType])
         def result = rootNodes.collect { content ->
             [path: generateContentName(space.id, contentType, content.id),
-                label: content.title, type: content.class.name,
+                label: content.title, type: proxyHandler.unwrapIfProxy(content).class.name,
                 hasChildren: content.children ? true : false,
                 canHaveChildren: wcmContentRepositoryService.triggerDomainEvent(content, WeceemDomainEvents.contentShouldAcceptChildren)
             ]
@@ -496,7 +495,7 @@ class WcmRepositoryController {
         def items = wcmContentRepositoryService.findAllRootContent(space, [type:WcmContentFile])
         def result = items.collect {
              [path: generateContentName(space.id, 'Files', it.id),
-                    label: it.title, type: it.class.name,
+                    label: it.title, type: proxyHandler.unwrapIfProxy(it).class.name,
                     hasChildren: it.children ? true : false,
                     canHaveChildren: wcmContentRepositoryService.triggerDomainEvent(it, WeceemDomainEvents.contentShouldAcceptChildren)
              ]
@@ -653,7 +652,7 @@ class WcmRepositoryController {
         
         def filterClass = WcmContent
         if (params.classFilter != "none") 
-            filterClass = Class.forName("${params.classFilter}", true, this.class.classLoader)
+            filterClass = Class.forName("${params.classFilter}", true, proxyHandler.unwrapIfProxy(this).class.classLoader)
 //        def searchResults = filterClass.search("*$searchStr* +name:$space".toString(), [reload: true])
         def searchResults = wcmContentRepositoryService.searchForContent("*$searchStr*", space, null, [type:filterClass])
         def searchResult = []
@@ -707,10 +706,10 @@ class WcmRepositoryController {
             "aliasURI": it.aliasURI, "status": it.status?.description, 
             "createdBy": it.createdBy.toString(), 
             "changedOn": wcm.humanDate(date: it.changedOn).toString(), 
-            "iconHref": wcm.contentIconURL(type:it.class),
+            "iconHref": wcm.contentIconURL(type:proxyHandler.unwrapIfProxy(it).class),
             "href": createLink(controller: "wcmEditor", action: "edit", id: it.id),
             "parentURI": (it.parent == null ? "": "/${it.parent.absoluteURI}"), 
-            "type": message(code: "content.item.name.${it.class.name}")]
+            "type": message(code: "content.item.name.${proxyHandler.unwrapIfProxy(it).class.name}")]
         } 
 
         render ([result: result] as JSON)

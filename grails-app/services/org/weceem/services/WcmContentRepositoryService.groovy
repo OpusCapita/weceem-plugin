@@ -68,6 +68,8 @@ class WcmContentRepositoryService implements InitializingBean {
     def archivedStatusCode
     def unmoderatedStatusCode
     
+    def proxyHandler
+    
     ThreadLocal permissionsBypass = new ThreadLocal()
     
     static uploadDir
@@ -162,12 +164,18 @@ class WcmContentRepositoryService implements InitializingBean {
     void loadConfig() {
         def uploadDirConf = getUploadDirFromConfig(grailsApplication.config)
 
+        println "Upload dir is: ${uploadDirConf}"
         if (!uploadDirConf.startsWith('file:')) {
             uploadInWebapp = true
-            uploadDir = grailsApplication.mainContext.getResource("$uploadDirConf").file
+            def homeDir = new File(System.getProperty("user.home"))
+            def weceemHomeDir = new File(homeDir, 'weceem-uploads')
+            uploadDir = new File(weceemHomeDir, uploadDirConf) 
+            println "Upload dir is: ${uploadDir}"
         } else {
             def f = new File(new URI(uploadDirConf))
+            println "Upload file is: ${f}"
             if (!f.exists()) {
+                println "Upload file is being created: ${f}"
                 def ok = f.mkdirs()
                 if (!ok) {
                     throw new RuntimeException("Cannot start Weceem - upload directory is set to [${uploadDirConf}] but cannot make the directory and it doesn't exist")
@@ -531,13 +539,13 @@ class WcmContentRepositoryService implements InitializingBean {
      */
     Map getContentDetails(WcmContent content) {
         requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_VIEW])        
-        return [id: content.id, className: content.class.name,
+        return [id: content.id, className: proxyHandler.unwrapIfProxy(content).class.name,
                 title: content.title, createdBy: content.createdBy,
                 createdOn: content.createdOn, changedBy: content.changedBy,
                 changedOn: content.changedOn,
                 // @todo replace this ugliness with polymorphic calls
                 summary: content.metaClass.hasProperty(content, 'summary') ? content.summary : null,
-                contentType: content.class.name]
+                contentType: proxyHandler.unwrapIfProxy(content).class.name]
     }
 
     /**
@@ -578,7 +586,8 @@ class WcmContentRepositoryService implements InitializingBean {
         if (!args.sort) {
             args += [sort:'createdOn', order: 'desc']
         }
-        def changes = WcmContentVersion.findAllByObjectKeyAndObjectClassName(content.ident(), content.class.name, args)
+        def changes = WcmContentVersion.findAllByObjectKeyAndObjectClassName(content.ident(), 
+            proxyHandler.unwrapIfProxy(content).class.name, args)
         return changes
     }
 
@@ -964,6 +973,11 @@ class WcmContentRepositoryService implements InitializingBean {
             p.isAssociation() && WcmContent.isAssignableFrom(p.referencedPropertyType)
         }        
     }
+
+    def getDomainClassArtefact(domainInstance) {
+        def realClass = proxyHandler.unwrapIfProxy(domainInstance).class
+        grailsApplication.getDomainClass(realClass.name)
+    }
     
     /**
      * Use introspection to find all references to the specified content. Requires finding all
@@ -978,7 +992,8 @@ class WcmContentRepositoryService implements InitializingBean {
         // and then run a query for each association, which - with caching - should run a lot faster than
         // checking every property on every node
         for (cont in WcmContent.list()){
-            def perProps = findDomainClassContentAssociations(grailsApplication.getDomainClass(cont.class.name))
+            println "Getting dom cls artefact for [${proxyHandler.unwrapIfProxy(cont).class.name}]"
+            def perProps = findDomainClassContentAssociations(getDomainClassArtefact(cont))
             for (p in perProps){
                 if (cont."${p.name}" instanceof Collection){
                     for (inst in cont."${p.name}"){
@@ -1050,7 +1065,7 @@ class WcmContentRepositoryService implements InitializingBean {
     /**
      * Deletes content node and all it's references.
      * All children of sourceContent will be assigned to all its parents.
-     *
+     *  
      * @param sourceContent
      */
     void deleteNode(WcmContent sourceContent, boolean deleteChildren = false) throws DeleteNotPossibleException {
@@ -1117,7 +1132,7 @@ class WcmContentRepositoryService implements InitializingBean {
 
         // Strip off associations
         def artef = grailsApplication.getArtefact(org.codehaus.groovy.grails.commons.DomainClassArtefactHandler.TYPE, 
-                sourceContent.class.name)
+                proxyHandler.unwrapIfProxy(sourceContent).class.name)
                 
         // Nuke all the references from this node to other content
         artef.persistentProperties.each { p ->
@@ -1242,10 +1257,12 @@ class WcmContentRepositoryService implements InitializingBean {
     void invalidateCachingForURI( WcmSpace space, uri) {
         // If this was content that created a cached GSP class, clear it now
         def key = makeURICacheKey(space,uri)
+        println "Invalidating cache key: ${key}"
         if (log.debugEnabled) {
             log.debug "Removing cached info for cache key [$key]"
         }
         
+        println "removing cache key: ${key}"
         gspClassCache.remove(key) // even if its not a GSP/script lets just assume so, quicker than checking & remove
         uriToIdCache.remove(key)
         
@@ -1271,6 +1288,8 @@ class WcmContentRepositoryService implements InitializingBean {
     def updateNode(WcmContent content, def params) {
         requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_EDIT])        
 
+        println "uN: ${content.absoluteURI}"
+
         // firstly we save revision: to prevent errors that we have 2 objects
         // in session with the same identifiers
         if (log.debugEnabled) {
@@ -1279,13 +1298,14 @@ class WcmContentRepositoryService implements InitializingBean {
         def oldAbsURI = content.absoluteURI
         
         // Get read-only instance now, for persisting revision info after we bind and successfully update
-        def contentForRevisionSave = content.class.read(content.id)
+        def contentForRevisionSave = proxyHandler.unwrapIfProxy(content).class.read(content.id)
 
         def oldTitle = content.title
         // map in new values
         hackedBindData(content, params)
         
         if (!content.hasErrors()) {
+            println "uN: ${content.absoluteURI} has no errors!"
         
             if (params.tags != null) {
                 content.setTags(params.tags.tokenize(',').collect { it.trim().toLowerCase()} )
@@ -1312,7 +1332,9 @@ class WcmContentRepositoryService implements InitializingBean {
             }
 
             def ok = content.validate()
+            println "uN: ${content.absoluteURI} saving... (AliasURI: ${content.aliasURI})"
             if (content.save()) {
+                println "uN: ${content.absoluteURI} saved! (AliasURI: ${content.aliasURI})"
                 // Save the revision now
                 contentForRevisionSave.saveRevision(params.title ?: oldTitle, content.space.name)
 
@@ -1320,10 +1342,12 @@ class WcmContentRepositoryService implements InitializingBean {
                     log.debug("Update node with id ${content.id} saved OK")
                 }
             
+                println "uN: ${content.absoluteURI} invalidating caches"
                 // Invalidate the old URI's info
                 invalidateCachingForURI(content.space, oldAbsURI)
                 // Invalidate the new URI's info - it might exist already but with no data (not found)
                 invalidateCachingForURI(content.space, content.absoluteURI)
+                println "uN: ${content.absoluteURI} updating caches"
                 updateCachingMetadataFor(content)
 
                 triggerEvent(content, WeceemEvents.contentDidGetUpdated)
@@ -1335,6 +1359,7 @@ class WcmContentRepositoryService implements InitializingBean {
         if (log.debugEnabled) {
             log.debug("Update node with id ${content.id} failed with errors: ${content.errors}")
         }
+        println "uN: ${content.absoluteURI} returning errors: ${content.errors}"
         return [errors:content.errors, content:content]
     }
     
@@ -1568,7 +1593,7 @@ class WcmContentRepositoryService implements InitializingBean {
         def typeRestriction = args.type ? getContentClassForType(args.type) : null
         def parents = []
         references?.unique()?.each { 
-            if (typeRestriction ? typeRestriction.isAssignableFrom(it.class) : true) {
+            if (typeRestriction ? typeRestriction.isAssignableFrom(proxyHandler.unwrapIfProxy(it).class) : true) {
                 parents << it
             }
         }
@@ -1580,6 +1605,7 @@ class WcmContentRepositoryService implements InitializingBean {
      * Locate a root node by uri, type, status and space
      */ 
     def findRootContentByURI(String aliasURI, WcmSpace space, Map args = Collections.EMPTY_MAP) {
+        println "findRootContentByURI: aliasURI $aliasURI, space ${space?.name}, args ${args}"
         if (log.debugEnabled) {
             log.debug "findRootContentByURI: aliasURI $aliasURI, space ${space?.name}, args ${args}"
         }
@@ -1590,6 +1616,7 @@ class WcmContentRepositoryService implements InitializingBean {
             maxResults(1)
             cache true
         }
+        println "findRootContentByURI 2 found: $r"
         WcmContent node = r ? r[0] : null
         if (node) {
             requirePermissions(node, [WeceemSecurityPolicy.PERMISSION_VIEW])        
@@ -1630,6 +1657,7 @@ class WcmContentRepositoryService implements InitializingBean {
 
     def getCachedContentInfoFor(space, uriPath) {
         def cacheKey = makeURICacheKey(space, uriPath)
+        println "Getting cached content info for: ${cacheKey}"
         def cachedElement = uriToIdCache.get(cacheKey)
         cachedElement?.getValue()
     }
@@ -1686,10 +1714,12 @@ class WcmContentRepositoryService implements InitializingBean {
         }
 
         if (useCache) {
+            println "FCfP $uriPath using cache"
             // This looks up the uriPath in the cache to see if we can get a Map of the content id and parentURI
             // If we call getValue on the cache hit, we lose 50% of our performance. Just retrieving
             // the cache hit is not expensive.
             def cachedContentInfo = getCachedContentInfoFor(space, uriPath)
+            println "FCfP $uriPath got cached: ${cachedContentInfo}"
             if (cachedContentInfo) {
                 if (log.debugEnabled) {
                     log.debug "Found content info in cache for uri $uriPath: ${cachedContentInfo}"
@@ -1713,8 +1743,11 @@ class WcmContentRepositoryService implements InitializingBean {
         def tokens = uriPath.split('/')
 
         // @todo: optimize query 
+        println "finding root content..."
         WcmContent content = findRootContentByURI(tokens[0], space)
+        println "found root content... for [${tokens[0]}]: ${content}"
         if (!content) content = findFileRootContentByURI(tokens[0], space)
+        println "found 2nd root content... for [${tokens[0]}]: ${content}"
         if (log.debugEnabled) {
             log.debug "findContentForPath $uriPath - root content node is $content"
         }
@@ -1762,11 +1795,13 @@ class WcmContentRepositoryService implements InitializingBean {
             wcmCacheService.putToCache(uriToIdCache, cacheKey, cacheValue)
         }
         
+        println "fcfp end: ${content}"
         if (content) {
             requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_VIEW])        
 
             [content:content, parentURI:parentURI, lineage:lineage]
         } else {
+            println "fcfp end: zilch"
             return null
         }
     }
@@ -1854,8 +1889,8 @@ class WcmContentRepositoryService implements InitializingBean {
      */
     boolean contentIsRenderable(WcmContent content) {
         // See if it is renderable directly - eg WcmWidget and WcmTemplate are not renderable on their own
-        if (content.metaClass.hasProperty(content.class, 'standaloneContent')) {
-            return content.class.standaloneContent
+        if (content.metaClass.hasProperty(proxyHandler.unwrapIfProxy(content).class, 'standaloneContent')) {
+            return proxyHandler.unwrapIfProxy(content).class.standaloneContent
         } else { 
             return true
         }
@@ -1898,7 +1933,7 @@ class WcmContentRepositoryService implements InitializingBean {
                 }
             } else {
                 log.info "Skipping server file ${relativePath}, already has content node"
-                if (content.class in [WcmContentDirectory, WcmContentFile]) {
+                if (proxyHandler.unwrapIfProxy(content).class in [WcmContentDirectory, WcmContentFile]) {
                     existingFiles.add(content)
                 } else {
                     log.info "Skipping server file ${relativePath}, a non-directory/file node already exists"
@@ -1914,7 +1949,7 @@ class WcmContentRepositoryService implements InitializingBean {
         def missedFiles = allFiles.findAll { f ->
             def adding = !existingIds.contains(f.id)
             if (adding) {
-                log.info "Adding ${f.absoluteURI} (${f.class}) to list of orphaned files who have no content node"
+                log.info "Adding ${f.absoluteURI} (${proxyHandler.unwrapIfProxy(f).class}) to list of orphaned files who have no content node"
             }
             return adding
         }
@@ -2304,7 +2339,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
         }
         return listOfContent.findAll { c -> 
             types.any { t -> 
-                t.isAssignableFrom(c.class)
+                t.isAssignableFrom(proxyHandler.unwrapIfProxy(c).class)
             }
         }
     }
@@ -2364,7 +2399,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
             // Restrict to space
             must {
                 listContentClassNames( { 
-                    def hasSCProp = it.metaClass.hasProperty(it.class, 'standaloneContent')
+                    def hasSCProp = it.metaClass.hasProperty(proxyHandler.unwrapIfProxy(it).class, 'standaloneContent')
                     !hasSCProp || it.standaloneContent
                 } ).each { n ->
                     def t = '$/'+n.replaceAll('\\.', '_')+'/space/id'

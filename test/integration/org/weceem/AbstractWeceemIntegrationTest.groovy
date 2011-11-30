@@ -34,6 +34,10 @@ abstract class AbstractWeceemIntegrationTest extends GroovyTestCase {
 
         wcmRenderEngine.wcmContentRepositoryService = wcmContentRepositoryService
         wcmRenderEngine.wcmSecurityService = wcmContentRepositoryService.wcmSecurityService
+
+        wcmContentRepositoryService.wcmSecurityService.proxyHandler = [unwrapIfProxy: { o -> o}]
+        wcmRenderEngine.proxyHandler = [unwrapIfProxy: { o -> o}]
+
     }
     
     void createContent(Closure c) {

@@ -18,6 +18,7 @@ import org.weceem.files.*
 class SimpleSpaceExporter implements SpaceExporter {
     
     def grailsApplication
+    def proxyHandler
     
     File execute(WcmSpace spc) {
         def ts = new SimpleDateFormat('yyMMddHHmmssSSS').format(new Date())
@@ -36,8 +37,9 @@ class SimpleSpaceExporter implements SpaceExporter {
         //Building XML structure
         xml.content(){
             for (cnt in contentList){
+                def node = proxyHandler.unwrapIfProxy(cnt)
                 
-                "${cnt.class.name}"(){
+                "${node.class.name}"(){
                     id("class": cnt.id.class.name, "${cnt.id}")
                     //Getting Grails Domain object properties
                     getDeclaredProperties(cnt).each{prop->
@@ -51,7 +53,8 @@ class SimpleSpaceExporter implements SpaceExporter {
                                 if (Collection.isAssignableFrom(cntPropClass)){
                                     "${prop.name}"("class": cntPropClassName){
                                         for (child in cntProp){
-                                            "${child.class.name}"("${child.id}")
+                                            def childNode = proxyHandler.unwrapIfProxy(child)
+                                            "${childNode.class.name}"("${child.id}")
                                         }
                                     }
                                 }else{
@@ -97,7 +100,8 @@ class SimpleSpaceExporter implements SpaceExporter {
     
     def getDeclaredProperties(def obj){
         def grailsApp = grailsApplication
-        def props = grailsApp.getDomainClass(obj.class.name).
+        def node = proxyHandler.unwrapIfProxy(obj)
+        def props = grailsApp.getDomainClass(node.class.name).
             getPersistentProperties().findAll{prop -> 
                 !(prop.name in ["space"])}
         return props

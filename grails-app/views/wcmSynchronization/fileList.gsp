@@ -55,7 +55,13 @@
                             <tr>
                                 <td>${cont.title}</td>
                                 <td>${cont.toRelativePath()}</td>
-                                <td><g:checkBox name="delete-${cont.id}" value="${false}" /></td>
+                                <td><g:if test="${missingFilesHardRefs[cont.ident()]}">
+                                    Cannot be deleted, is referenced
+                                    </g:if>
+                                    <g:else>
+                                        <g:checkBox name="delete-${cont.id}" value="${false}" />
+                                    </g:else>
+                                    </td>
                             </tr>
                          </g:each>
                     </tbody>

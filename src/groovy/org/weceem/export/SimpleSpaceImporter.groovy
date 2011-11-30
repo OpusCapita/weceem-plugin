@@ -23,6 +23,7 @@ class SimpleSpaceImporter implements SpaceImporter {
     def defStatus
 
     def grailsApplication
+    def proxyHandler
 
     void execute(WcmSpace space, File file) {
         def tmpDir = File.createTempFile("unzip-import-", null)
@@ -226,7 +227,8 @@ class SimpleSpaceImporter implements SpaceImporter {
         } 
         //If id != null , then element has been already saved
         if (content.id == null){
-            def props = grailsApp.getDomainClass(content.class.name).persistentProperties.findAll { p ->
+            def node = proxyHandler.unwrapIfProxy(content)
+            def props = grailsApp.getDomainClass(node.class.name).persistentProperties.findAll { p ->
                 p.isAssociation()
             }
             //If property wasn't saved then save it
