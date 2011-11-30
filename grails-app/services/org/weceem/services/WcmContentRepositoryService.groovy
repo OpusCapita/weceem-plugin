@@ -164,18 +164,17 @@ class WcmContentRepositoryService implements InitializingBean {
     void loadConfig() {
         def uploadDirConf = getUploadDirFromConfig(grailsApplication.config)
 
-        println "Upload dir is: ${uploadDirConf}"
         if (!uploadDirConf.startsWith('file:')) {
             uploadInWebapp = true
             def homeDir = new File(System.getProperty("user.home"))
             def weceemHomeDir = new File(homeDir, 'weceem-uploads')
             uploadDir = new File(weceemHomeDir, uploadDirConf) 
-            println "Upload dir is: ${uploadDir}"
+            if (!uploadDir.exists()) {
+                uploadDir.mkdirs()
+            }
         } else {
             def f = new File(new URI(uploadDirConf))
-            println "Upload file is: ${f}"
             if (!f.exists()) {
-                println "Upload file is being created: ${f}"
                 def ok = f.mkdirs()
                 if (!ok) {
                     throw new RuntimeException("Cannot start Weceem - upload directory is set to [${uploadDirConf}] but cannot make the directory and it doesn't exist")
@@ -444,7 +443,7 @@ class WcmContentRepositoryService implements InitializingBean {
         // It needs leaf-first dependency ordering and/or brute force clearing of all refs
         eachContentDepthFirst(space) { node ->
             log.debug "Finding references to content [${node.aliasURI}] in space [$space]"
-            removeAllReferencesTo(node)
+            removeAllReferencesTo([node])
             deleteNode(node)
         }
         log.info "Finished deleting content from space [$space]"
@@ -992,7 +991,6 @@ class WcmContentRepositoryService implements InitializingBean {
         // and then run a query for each association, which - with caching - should run a lot faster than
         // checking every property on every node
         for (cont in WcmContent.list()){
-            println "Getting dom cls artefact for [${proxyHandler.unwrapIfProxy(cont).class.name}]"
             def perProps = findDomainClassContentAssociations(getDomainClassArtefact(cont))
             for (p in perProps){
                 if (cont."${p.name}" instanceof Collection){
@@ -1257,12 +1255,10 @@ class WcmContentRepositoryService implements InitializingBean {
     void invalidateCachingForURI( WcmSpace space, uri) {
         // If this was content that created a cached GSP class, clear it now
         def key = makeURICacheKey(space,uri)
-        println "Invalidating cache key: ${key}"
         if (log.debugEnabled) {
             log.debug "Removing cached info for cache key [$key]"
         }
         
-        println "removing cache key: ${key}"
         gspClassCache.remove(key) // even if its not a GSP/script lets just assume so, quicker than checking & remove
         uriToIdCache.remove(key)
         
@@ -1288,8 +1284,6 @@ class WcmContentRepositoryService implements InitializingBean {
     def updateNode(WcmContent content, def params) {
         requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_EDIT])        
 
-        println "uN: ${content.absoluteURI}"
-
         // firstly we save revision: to prevent errors that we have 2 objects
         // in session with the same identifiers
         if (log.debugEnabled) {
@@ -1305,7 +1299,6 @@ class WcmContentRepositoryService implements InitializingBean {
         hackedBindData(content, params)
         
         if (!content.hasErrors()) {
-            println "uN: ${content.absoluteURI} has no errors!"
         
             if (params.tags != null) {
                 content.setTags(params.tags.tokenize(',').collect { it.trim().toLowerCase()} )
@@ -1332,9 +1325,7 @@ class WcmContentRepositoryService implements InitializingBean {
             }
 
             def ok = content.validate()
-            println "uN: ${content.absoluteURI} saving... (AliasURI: ${content.aliasURI})"
             if (content.save()) {
-                println "uN: ${content.absoluteURI} saved! (AliasURI: ${content.aliasURI})"
                 // Save the revision now
                 contentForRevisionSave.saveRevision(params.title ?: oldTitle, content.space.name)
 
@@ -1342,12 +1333,10 @@ class WcmContentRepositoryService implements InitializingBean {
                     log.debug("Update node with id ${content.id} saved OK")
                 }
             
-                println "uN: ${content.absoluteURI} invalidating caches"
                 // Invalidate the old URI's info
                 invalidateCachingForURI(content.space, oldAbsURI)
                 // Invalidate the new URI's info - it might exist already but with no data (not found)
                 invalidateCachingForURI(content.space, content.absoluteURI)
-                println "uN: ${content.absoluteURI} updating caches"
                 updateCachingMetadataFor(content)
 
                 triggerEvent(content, WeceemEvents.contentDidGetUpdated)
@@ -1359,7 +1348,6 @@ class WcmContentRepositoryService implements InitializingBean {
         if (log.debugEnabled) {
             log.debug("Update node with id ${content.id} failed with errors: ${content.errors}")
         }
-        println "uN: ${content.absoluteURI} returning errors: ${content.errors}"
         return [errors:content.errors, content:content]
     }
     
@@ -1605,7 +1593,6 @@ class WcmContentRepositoryService implements InitializingBean {
      * Locate a root node by uri, type, status and space
      */ 
     def findRootContentByURI(String aliasURI, WcmSpace space, Map args = Collections.EMPTY_MAP) {
-        println "findRootContentByURI: aliasURI $aliasURI, space ${space?.name}, args ${args}"
         if (log.debugEnabled) {
             log.debug "findRootContentByURI: aliasURI $aliasURI, space ${space?.name}, args ${args}"
         }
@@ -1616,7 +1603,6 @@ class WcmContentRepositoryService implements InitializingBean {
             maxResults(1)
             cache true
         }
-        println "findRootContentByURI 2 found: $r"
         WcmContent node = r ? r[0] : null
         if (node) {
             requirePermissions(node, [WeceemSecurityPolicy.PERMISSION_VIEW])        
@@ -1657,7 +1643,6 @@ class WcmContentRepositoryService implements InitializingBean {
 
     def getCachedContentInfoFor(space, uriPath) {
         def cacheKey = makeURICacheKey(space, uriPath)
-        println "Getting cached content info for: ${cacheKey}"
         def cachedElement = uriToIdCache.get(cacheKey)
         cachedElement?.getValue()
     }
@@ -1714,12 +1699,10 @@ class WcmContentRepositoryService implements InitializingBean {
         }
 
         if (useCache) {
-            println "FCfP $uriPath using cache"
             // This looks up the uriPath in the cache to see if we can get a Map of the content id and parentURI
             // If we call getValue on the cache hit, we lose 50% of our performance. Just retrieving
             // the cache hit is not expensive.
             def cachedContentInfo = getCachedContentInfoFor(space, uriPath)
-            println "FCfP $uriPath got cached: ${cachedContentInfo}"
             if (cachedContentInfo) {
                 if (log.debugEnabled) {
                     log.debug "Found content info in cache for uri $uriPath: ${cachedContentInfo}"
@@ -1743,11 +1726,8 @@ class WcmContentRepositoryService implements InitializingBean {
         def tokens = uriPath.split('/')
 
         // @todo: optimize query 
-        println "finding root content..."
         WcmContent content = findRootContentByURI(tokens[0], space)
-        println "found root content... for [${tokens[0]}]: ${content}"
         if (!content) content = findFileRootContentByURI(tokens[0], space)
-        println "found 2nd root content... for [${tokens[0]}]: ${content}"
         if (log.debugEnabled) {
             log.debug "findContentForPath $uriPath - root content node is $content"
         }
@@ -1795,13 +1775,11 @@ class WcmContentRepositoryService implements InitializingBean {
             wcmCacheService.putToCache(uriToIdCache, cacheKey, cacheValue)
         }
         
-        println "fcfp end: ${content}"
         if (content) {
             requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_VIEW])        
 
             [content:content, parentURI:parentURI, lineage:lineage]
         } else {
-            println "fcfp end: zilch"
             return null
         }
     }

@@ -60,13 +60,11 @@ class WcmContentFingerprintService implements InitializingBean {
         def out = stdout ? { println it } : { log.debug it }
         out "Content node fingerprints:"
         contentFingerprintCache.keys.each { k ->
-            println "Trying to get fingerprint content for [$k]"
             def n = WcmContent.get(k).absoluteURI
             out "$n ---> ${wcmCacheService.getObjectValue(contentFingerprintCache, k)}"
         }
         out "Content tree fingerprints:"
         contentTreeFingerprintCache.keys.each { k ->
-            println "Trying to get fingerprint tree content for [$k]"
             def n = WcmContent.get(k).absoluteURI
             out "$n ---> ${wcmCacheService.getObjectValue(contentTreeFingerprintCache, k)}"
         }
