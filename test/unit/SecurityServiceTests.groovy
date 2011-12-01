@@ -22,6 +22,7 @@ class SecurityServiceTests extends grails.test.GrailsUnitTestCase {
 
     void setupDefaultService() {
         service = new WcmSecurityService()
+        service.proxyHandler = [unwrapIfProxy: { a -> a}]
         
         service.with {
             grailsApplication = [
@@ -48,6 +49,7 @@ class SecurityServiceTests extends grails.test.GrailsUnitTestCase {
         
         def mockContent = new WcmHTMLContent(status:publishedStatus, aliasURI:'index')
         mockContent.space = mockSpace
+        mockContent.proxyHandler = [unwrapIfProxy: { a -> a}]
         
         service.securityDelegate = [
             getUserName : { -> "unknown" },
@@ -78,6 +80,7 @@ class SecurityServiceTests extends grails.test.GrailsUnitTestCase {
         ]
         
         service = new WcmSecurityService()
+        service.proxyHandler = [unwrapIfProxy: { a -> a}]
 
         service.with {
             grailsApplication = [
@@ -118,6 +121,7 @@ class SecurityServiceTests extends grails.test.GrailsUnitTestCase {
         ]
         
         service = new WcmSecurityService()
+        service.proxyHandler = [unwrapIfProxy: { a -> a}]
 
         service.with {
             grailsApplication = [
@@ -145,6 +149,7 @@ class SecurityServiceTests extends grails.test.GrailsUnitTestCase {
         def draftStatus = new WcmStatus(code:100, description:"draft", publicContent:false)
         
         def mockContent = new WcmHTMLContent(status:draftStatus, aliasURI:'index')
+        mockContent.proxyHandler = [unwrapIfProxy: { a -> a}]
         mockContent.space = mockSpace
         
         service.securityDelegate = [

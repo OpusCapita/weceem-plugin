@@ -251,7 +251,7 @@ class WcmContent implements Comparable, Taggable {
         def uri = new StringBuilder()
         uri << aliasURI
         def c = this
-        def visitedNodes = [this.ident()]
+        def visitedNodes = [c.ident()]
         while (c.parent != null) {
             c = c.parent
             uri.insert(0,'/')
