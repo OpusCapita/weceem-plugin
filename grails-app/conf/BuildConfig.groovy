@@ -38,6 +38,14 @@ grails.project.dependency.resolution = {
         compile ":quartz:0.4.2"
         compile ":searchable:0.6.3" 
         compile ":taggable:1.0"
+
+        compile ":hibernate:$grailsVersion"
+        compile(":release:1.0.0.RC3") {
+            export = false
+        }
+        build(":tomcat:$grailsVersion") {
+            export = false
+        }            
  	}
 }
 
