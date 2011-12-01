@@ -14,7 +14,7 @@ class UploadConfigTests extends grails.test.GrailsUnitTestCase {
     
     void testUploadDirNotSet() {
         
-        def basePath = new File('.')
+        def basePath = new File(System.getProperty('user.home')+File.separator+'weceem-uploads')
         
         service.with {
             grailsApplication = [
@@ -39,7 +39,7 @@ class UploadConfigTests extends grails.test.GrailsUnitTestCase {
 
     void testWarRelativePathUploadDir() {
         
-        def basePath = new File('.')
+        def basePath = new File(System.getProperty('user.home')+File.separator+'weceem-uploads')
         
         service.with {
             grailsApplication = [

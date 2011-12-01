@@ -67,8 +67,8 @@ class SecurityServiceTests extends grails.test.GrailsUnitTestCase {
                     String spaceAlias, String uri, List roleList, List permissionList, Map args = null ->
                 assertEquals 'test', spaceAlias
                 assertEquals 'about', uri
-                assertEquals([WeceemSecurityPolicy.ROLE_GUEST, 'USER_unknown'], roleList)
-                assertEquals([WeceemSecurityPolicy.PERMISSION_CREATE], permissionList)
+                assert [WeceemSecurityPolicy.ROLE_GUEST, 'USER_unknown'] == roleList
+                assert [WeceemSecurityPolicy.PERMISSION_CREATE] == permissionList
                 assertEquals WcmComment, args.type
             
                 hasPermsCalled = true
@@ -107,9 +107,9 @@ class SecurityServiceTests extends grails.test.GrailsUnitTestCase {
                     String spaceAlias, String uri, List roleList, List permissionList, Map args = null ->
                 assertEquals 'test', spaceAlias
                 assertEquals 'bla', uri
-                assertEquals([WeceemSecurityPolicy.ROLE_GUEST, 'USER_unknown'], roleList)
-                assertEquals([WeceemSecurityPolicy.PERMISSION_CREATE], permissionList)
-                assertEquals WcmHTMLContent, args.type
+                assert [WeceemSecurityPolicy.ROLE_GUEST, 'USER_unknown'] == roleList
+                assert [WeceemSecurityPolicy.PERMISSION_CREATE] == permissionList
+                assert WcmHTMLContent == args.type
             
                 hasPermsCalled = true
                 
