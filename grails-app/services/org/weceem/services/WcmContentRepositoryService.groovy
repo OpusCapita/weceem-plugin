@@ -162,7 +162,8 @@ class WcmContentRepositoryService implements InitializingBean {
     }
 
     void loadConfig() {
-        def uploadDirConf = getUploadDirFromConfig(grailsApplication.config)
+        def config = grailsApplication.config
+        def uploadDirConf = getUploadDirFromConfig(config)
 
         if (!uploadDirConf.startsWith('file:')) {
             uploadInWebapp = true
@@ -186,8 +187,20 @@ class WcmContentRepositoryService implements InitializingBean {
 
         uploadUrl = WcmContentRepositoryService.getUploadUrlFromConfig(grailsApplication.config)
         // In tests we don't have log
+        logOrPrint('info', "Weceem will use [${uploadDir}] as the directory for static uploaded files, and the url [${uploadUrl}] to serve them, files are inside webapp? [${uploadInWebapp}]")
+        
+        if ( !(config.grails.mime.file.extensions instanceof Boolean) ||
+            ((config.grails.mime.file.extensions instanceof Boolean) && (config.grails.mime.file.extensions == true)) ) {
+            throw new IllegalArgumentException(
+                "Cannot start Weceem - You must change the Config setting 'grails.mime.file.extensions' to false for Weceem to work correctly")
+        }
+    }
+    
+    void logOrPrint(String level, String s) {
         if (metaClass.hasProperty(this, 'log')) {
-            log?.info "Weceem will use [${uploadDir}] as the directory for static uploaded files, and the url [${uploadUrl}] to serve them, files are inside webapp? [${uploadInWebapp}]"
+            log?."$level"(s)
+        } else {
+            println s
         }
     }
     
@@ -328,6 +341,10 @@ class WcmContentRepositoryService implements InitializingBean {
         [space:space, uri:uri]
     }
     
+    String getSpaceTemplateLocationByName(String name) {
+        spaceTemplates[name]
+    }
+    
     WcmSpace createSpace(params, templateURLOrName = 'default') throws IllegalArgumentException {
         // @todo need to enforce ADMIN permission here, but not per-space, its general admin
         
@@ -347,7 +364,7 @@ class WcmContentRepositoryService implements InitializingBean {
                     if (templateURLOrName.startsWith('file:') || templateURLOrName.startsWith('classpath:')) {
                         templateLocation = templateURLOrName
                     } else {
-                        templateLocation = grailsApplication.config.weceem.space.templates[templateURLOrName]
+                        templateLocation = getSpaceTemplateLocationByName(templateURLOrName)
                     }
                     if (templateLocation instanceof ConfigObject) {
                         throw new IllegalArgumentException("No space template defined with name [${templateURLOrName}]")
