@@ -24,7 +24,6 @@ class WeceemGrailsPlugin {
         "web-app/testing/**/*"
     ]
 
-    // TODO Fill in these fields
     def author = "jCatalog AG"
     def authorEmail = "info@weceem.org"
     def title = "Weceem CMS"
@@ -34,6 +33,11 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
 
     // URL to the plugin's documentation
     def documentation = "http://grails.org/plugin/weceem"
+
+    def getWebXmlFilterOrder() {
+        def FilterManager = getClass().getClassLoader().loadClass('grails.plugin.webxml.FilterManager')
+        [   WeceemFileFilter: FilterManager.URL_MAPPING_POSITION + 10000 ]
+    }
 
     def doWithSpring = {
 
