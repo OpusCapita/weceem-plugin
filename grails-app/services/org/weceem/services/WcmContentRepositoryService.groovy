@@ -166,7 +166,7 @@ class WcmContentRepositoryService implements InitializingBean {
         def uploadDirConf = getUploadDirFromConfig(config)
 
         if (!uploadDirConf.startsWith('file:')) {
-            uploadInWebapp = true
+            uploadInWebapp = false
             def homeDir = new File(System.getProperty("user.home"))
             def weceemHomeDir = new File(homeDir, 'weceem-uploads')
             uploadDir = new File(weceemHomeDir, uploadDirConf) 
@@ -185,7 +185,7 @@ class WcmContentRepositoryService implements InitializingBean {
             uploadDir = f
         }
 
-        uploadUrl = WcmContentRepositoryService.getUploadUrlFromConfig(grailsApplication.config)
+        uploadUrl = uploadDirConf
         // In tests we don't have log
         logOrPrint('info', "Weceem will use [${uploadDir}] as the directory for static uploaded files, and the url [${uploadUrl}] to serve them, files are inside webapp? [${uploadInWebapp}]")
         

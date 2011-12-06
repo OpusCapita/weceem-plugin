@@ -314,7 +314,6 @@ class HandleRequestDelegator {
     
     def methodMissing(String name, args) {
         def argTypes = args.collect { a -> a != null ? a.getClass() : null }
-        println "Method $name - Arg types: ${argTypes}"
         if (this.metaClass.respondsTo(name, argTypes )) {
             return renderEngine."$name"(*args)
         } else {
