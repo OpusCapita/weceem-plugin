@@ -10,21 +10,8 @@ class WeceemGrailsPlugin {
     // the plugin version
     def version = "1.1.2.BUILD-SNAPSHOT"
     // the version or versions of Grails the plugin is designed for
-    def grailsVersion = "1.2.2 > *"
+    def grailsVersion = "1.3 > *"
 
-    def dependsOn = [
-        searchable:'0.6.3 > *', 
-        quartz:'0.4.2 > *', 
-        navigation:'1.3.2 > *',
-        ckeditor:'3.5.2.0 > *',
-        feeds:'1.5 > *',
-        beanFields:'1.0.RC5 > *',
-        blueprint:'0.9.1.1 > *',
-        jquery:'1.4.4.1 > *',
-        jqueryUi:'1.8.6.1 > *',
-        cacheHeaders:'1.1.5 > *',
-        taggable:'1.0 > *'
-    ]
     def observe = ["hibernate", 'services']
     
     def loadAfter = ['logging', 'hibernate', 'services']

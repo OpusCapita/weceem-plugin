@@ -27,7 +27,7 @@ grails.project.dependency.resolution = {
         compile ":bean-fields:1.0.RC5"
         compile ":blueprint:0.9.1.1"
         compile ":cache-headers:1.1.5"
-        compile ":ckeditor:3.5.2.0"
+        compile ":ckeditor:3.6.0.0"
         compile ":feeds:1.5"
         test(":functional-test:1.3-RC1") { 
             export = false 
