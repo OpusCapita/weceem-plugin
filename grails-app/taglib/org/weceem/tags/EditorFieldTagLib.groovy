@@ -224,7 +224,7 @@ class EditorFieldTagLib {
     }
     
     def editorFieldHTMLContent = { attrs ->
-        if (pageScope.content.allowGSP) {
+        if (pageScope.content.metaClass.hasProperty(pageScope.content, 'allowGSP') && pageScope.content.allowGSP) {
             out << editorFieldHtmlCode(attrs)
         } else {
             out << editorFieldRichHTML(attrs)
@@ -300,7 +300,7 @@ class EditorFieldTagLib {
     }
 
     def editorResourcesHTMLContent = { attrs ->
-        if (pageScope.content.allowGSP) {
+        if (pageScope.content.metaClass.hasProperty(pageScope.content, 'allowGSP') && pageScope.content.allowGSP) {
             out << editorResourcesHtmlCode(attrs)
         } else {
             out << editorResourcesRichHTML(attrs)
