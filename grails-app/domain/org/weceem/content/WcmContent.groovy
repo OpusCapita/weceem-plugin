@@ -95,6 +95,7 @@ class WcmContent implements Comparable, Taggable {
         'wcmSecurityService',
         'proxyHandler',
         'absoluteURI',
+        'hardDependencies',
         'lineage'
     ]
 

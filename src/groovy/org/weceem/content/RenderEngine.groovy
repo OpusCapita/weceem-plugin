@@ -313,10 +313,12 @@ class HandleRequestDelegator {
     def renderEngine 
     
     def methodMissing(String name, args) {
-        if (controllerDelegate.metaClass.respondsTo(name, args.collect { a -> a != null ? a.class : null } )) {
-            return controllerDelegate."$name"(*args)
-        } else {
+        def argTypes = args.collect { a -> a != null ? a.getClass() : null }
+        println "Method $name - Arg types: ${argTypes}"
+        if (this.metaClass.respondsTo(name, argTypes )) {
             return renderEngine."$name"(*args)
+        } else {
+            return controllerDelegate."$name"(*args)
         }
     }
 
