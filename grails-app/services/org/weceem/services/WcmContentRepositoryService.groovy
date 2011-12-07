@@ -1927,11 +1927,11 @@ class WcmContentRepositoryService implements InitializingBean {
                     log.warn "Skipping server file ${relativePath}, cannot be created"
                 }
             } else {
-                log.info "Skipping server file ${relativePath}, already has content node"
+                log.debug "Skipping server file ${relativePath}, already has content node"
                 if (proxyHandler.unwrapIfProxy(content).class in [WcmContentDirectory, WcmContentFile]) {
                     existingFiles.add(content)
                 } else {
-                    log.info "Skipping server file ${relativePath}, a non-directory/file node already exists"
+                    log.debug "Skipping server file ${relativePath}, a non-directory/file node already exists"
                     clashingFiles.add(content)
                 }
             }
