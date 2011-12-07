@@ -38,7 +38,9 @@ grails.project.dependency.resolution = {
         compile ":quartz:0.4.2"
         compile ":searchable:0.6.3" 
         compile ":taggable:1.0"
-        compile ":webxml:1.4.1"
+
+        // For serlvet filter ordering
+        provided ":webxml:1.4.1"
 
         compile ":hibernate:$grailsVersion"
         compile(":release:1.0.0.RC3") {
