@@ -8,7 +8,7 @@ class WeceemGrailsPlugin {
     def _log = LogFactory.getLog('org.weceem.WeceemGrailsPlugin')
 
     // the plugin version
-    def version = "1.1.2.BUILD-SNAPSHOT"
+    def version = "1.1.2"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.3 > *"
 
@@ -33,6 +33,13 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
 
     // URL to the plugin's documentation
     def documentation = "http://grails.org/plugin/weceem"
+    def license = "APACHE"
+    def organization = [ name: "jCatalog AG", url: "http://weceem.org/" ]
+    def developers = [
+            [ name: "Marc Palmer", email: "marc@grailsrocks.com" ]
+    ]
+    def issueManagement = [ system: "JIRA", url: "http://jira.jcatalog.com/browse/WCM" ]
+    def scm = [ url: "https://github.com/jCatalog/weceem-plugin" ]
 
     def getWebXmlFilterOrder() {
         def FilterManager = getClass().getClassLoader().loadClass('grails.plugin.webxml.FilterManager')

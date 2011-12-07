@@ -692,7 +692,7 @@ class WeceemTagLib {
     def renderContentItemIcon = { attrs ->
         def type = attrs[ATTR_TYPE]
         def id = attrs[ATTR_ID]
-        def iconconf = type.icon
+        def iconconf = proxyHandler.unwrapIfProxy(type)?.class.icon
         def plugin = iconconf.plugin
         out << "<div id='${id}' class='ui-content-icon'><img src='${g.resource(plugin:plugin, dir: iconconf.dir, file: iconconf.file)}'/></div>"
     }    
