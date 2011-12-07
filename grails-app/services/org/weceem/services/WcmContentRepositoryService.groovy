@@ -185,7 +185,7 @@ class WcmContentRepositoryService implements InitializingBean {
             uploadDir = f
         }
 
-        uploadUrl = uploadDirConf
+        uploadUrl = WcmContentRepositoryService.getUploadUrlFromConfig(grailsApplication.config)
         // In tests we don't have log
         logOrPrint('info', "Weceem will use [${uploadDir}] as the directory for static uploaded files, and the url [${uploadUrl}] to serve them, files are inside webapp? [${uploadInWebapp}]")
         
