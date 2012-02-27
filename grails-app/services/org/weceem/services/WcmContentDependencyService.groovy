@@ -39,7 +39,7 @@ class WcmContentDependencyService {
         }
         
         if (log.debugEnabled) {
-            log.debug "Loading content instances for ${dc} to load dependency info..."
+            log.debug "Loading content instances to load dependency info..."
         }
         def instances = space ? WcmContent.findAllBySpace(space) : WcmContent.list()
         // @todo this could use a lot of RAM... need to scroll it in future
