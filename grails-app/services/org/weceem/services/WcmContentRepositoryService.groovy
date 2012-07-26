@@ -209,7 +209,7 @@ class WcmContentRepositoryService implements InitializingBean {
             def configValue = grailsApplication.config.weceem.default.space.template
             def templateName = configValue instanceof String ? configValue : 'default'
             withPermissionsBypass {
-                createSpace([name:'Default'], templateName)
+                createSpace([name:'Default',aliasURI: null], templateName)
             }
         }
     }
