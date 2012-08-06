@@ -51,11 +51,11 @@ class WcmSpace {
     }
 
     // workaround for oracle WCM-383
-    public String getAliasURI() {
+    /*public String getAliasURI() {
         if (!aliasURI) {
             return ''
         } else {
             return aliasURI
         }
-    }
+    }*/
 }
