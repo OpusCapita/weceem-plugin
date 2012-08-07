@@ -32,8 +32,12 @@ grails.project.dependency.resolution = {
         test(":functional-test:1.3-RC1") { 
             export = false 
         }
-        compile ":jquery:1.4.4.1"
-        compile ":jquery-ui:1.8.6.1"
+        compile ":jquery:1.4.4.1" {
+            export = false
+        }
+        compile ":jquery-ui:1.8.6.1" {
+            export = false
+        }
         compile ":navigation:1.3.2"
         compile ":quartz:0.4.2"
         compile ":searchable:0.6.3" 
@@ -43,7 +47,7 @@ grails.project.dependency.resolution = {
         provided ":webxml:1.4.1"
 
         compile ":hibernate:$grailsVersion"
-        compile(":release:1.0.0.RC3") {
+        compile(":release:2.0.4") {
             export = false
         }
         build(":tomcat:$grailsVersion") {
