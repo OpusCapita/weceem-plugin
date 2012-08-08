@@ -209,7 +209,7 @@ class WcmContentRepositoryService implements InitializingBean {
             def configValue = grailsApplication.config.weceem.default.space.template
             def templateName = configValue instanceof String ? configValue : 'default'
             withPermissionsBypass {
-                createSpace([name:'Default'], templateName)
+                createSpace([name:'Default',aliasURI: null], templateName)
             }
         }
     }
@@ -254,7 +254,21 @@ class WcmContentRepositoryService implements InitializingBean {
         }        
         return space
     }
-    
+
+    WcmSpace findSpaceByBlankUri() {
+        def results =  WcmSpace.withCriteria() {
+            or {
+                isNull("aliasURI")
+                eq("aliasURI",'')
+            }
+        }
+        if (results instanceof ArrayList) {
+            return results.getAt(0)
+        } else {
+            return results
+        }
+    }
+
     WcmSpace findSpaceByURI(String uri) {
         WcmSpace.findByAliasURI(uri, [cache:true])
     }
@@ -277,7 +291,7 @@ class WcmContentRepositoryService implements InitializingBean {
     Map resolveSpaceAndURI(String uri) {
         def spaceName
         def space
-        
+
         // This is pretty horrible stuff. Beware.
         if (uri?.startsWith('/')) {
             if (uri.length() > 1) {
@@ -301,7 +315,7 @@ class WcmContentRepositoryService implements InitializingBean {
             if (log.debugEnabled) {
                 log.debug "WcmContent request for no space, looking for space with blank aliasURI"
             }
-            space = findSpaceByURI('')
+            space = findSpaceByBlankUri()
             if (!space) {
                 if (log.debugEnabled) {
                     log.debug "WcmContent request for no space, looking for any space, none with blank aliasURI"
@@ -319,7 +333,7 @@ class WcmContentRepositoryService implements InitializingBean {
                 if (log.debugEnabled) {
                     log.debug "WcmContent request has no space found in database, looking for space with blank aliasURI to see if doc is there"
                 }
-                space = findSpaceByURI('')
+                space = findSpaceByBlankUri()
                 if (space) {
                     // put the space name back into uri
                     if (spaceName) {
@@ -1609,14 +1623,20 @@ class WcmContentRepositoryService implements InitializingBean {
     /**
      * Locate a root node by uri, type, status and space
      */ 
-    def findRootContentByURI(String aliasURI, WcmSpace space, Map args = Collections.EMPTY_MAP) {
+    def findRootContentByURI(String aliasURI, WcmSpace space1, Map args = Collections.EMPTY_MAP) {
         if (log.debugEnabled) {
-            log.debug "findRootContentByURI: aliasURI $aliasURI, space ${space?.name}, args ${args}"
+            log.debug "findRootContentByURI: aliasURI $aliasURI, space ${space1?.name}, args ${args}"
+        }
+        if (space1.isDirty()) {
+            out.println("something changed this!!")
         }
         def r = doCriteria(getContentClassForType(args.type), args.status, args.params) {
             isNull('parent')
             eq('aliasURI', aliasURI)
-            eq('space', space)
+            space {
+                eq("id",space1.id)
+            }
+            //eq('space', space1)
             maxResults(1)
             cache true
         }
@@ -1804,13 +1824,16 @@ class WcmContentRepositoryService implements InitializingBean {
     /**
      * @deprecated Use normal content methods since 0.9
      */
-    def findFileRootContentByURI(String aliasURI, WcmSpace space, Map args = Collections.EMPTY_MAP) {
+    def findFileRootContentByURI(String aliasURI, WcmSpace space1, Map args = Collections.EMPTY_MAP) {
         if (log.debugEnabled) {
-            log.debug "findFileRootContentByURI: aliasURI $aliasURI, space ${space?.name}, args ${args}"
+            log.debug "findFileRootContentByURI: aliasURI $aliasURI, space ${space1?.name}, args ${args}"
         }
         def r = doCriteria(WcmContentFile, args.status, args.params) {
             eq('aliasURI', aliasURI)
-            eq('space', space)
+            //eq('space', space)
+            space {
+                eq("id",space1.id)
+            }
         }
         def res = r?.findAll(){it-> (it.parent == null) || !(it.parent instanceof WcmContentFile)}
         WcmContent result = res ? res[0] : null

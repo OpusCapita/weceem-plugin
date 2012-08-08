@@ -27,7 +27,7 @@ import org.weceem.services.*
 class WcmSpace {
     String name
 
-    String aliasURI = '' // Default to blank eg / uri namespace
+    String aliasURI //= '' // Default to blank eg / uri namespace
     
     static searchable = {
         root false // We con't want to search for WcmSpace instances
@@ -43,10 +43,19 @@ class WcmSpace {
 
     static constraints = {
         name(nullable: false, blank: false, unique: true)
-        aliasURI(nullable: false, blank: true, unique: true, size:0..80)
+        aliasURI(nullable: true, blank: true, unique: true, size:0..80)
     }
     
     public String makeUploadName(){
         return (aliasURI == "") ? WcmContentRepositoryService.EMPTY_ALIAS_URI : aliasURI
     }
+
+    // workaround for oracle WCM-383
+    /*public String getAliasURI() {
+        if (!aliasURI) {
+            return ''
+        } else {
+            return aliasURI
+        }
+    }*/
 }
