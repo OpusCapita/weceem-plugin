@@ -24,7 +24,7 @@ import org.weceem.services.*
  * @author July Karpey
  * @author Sergei Shushkevich
  */
-class WcmSpace {
+class WcmSpace implements Serializable {
     String name
 
     String aliasURI = '' // Default to blank eg / uri namespace
@@ -48,5 +48,20 @@ class WcmSpace {
     
     public String makeUploadName(){
         return (aliasURI == "") ? WcmContentRepositoryService.EMPTY_ALIAS_URI : aliasURI
+    }
+
+    boolean equals(o) {
+        if (this.is(o)) return true
+        if (getClass() != o.class) return false
+
+        WcmSpace wcmSpace = (WcmSpace) o
+
+        if (name != wcmSpace.name) return false
+
+        return true
+    }
+
+    int hashCode() {
+        return name.hashCode()
     }
 }

@@ -25,7 +25,7 @@ import org.grails.taggable.*
  * @author Marc Palmer
  */
 // @todo this SHOULD be abstract, but will it work?
-class WcmContent implements Comparable, Taggable {
+class WcmContent implements Comparable, Taggable, Serializable {
     
     static VALID_ALIAS_URI_CHARS = 'A-Za-z0-9_\\-\\.'
     static INVALID_ALIAS_URI_CHARS_PATTERN = "[^"+VALID_ALIAS_URI_CHARS+"]"
@@ -389,5 +389,26 @@ class WcmContent implements Comparable, Taggable {
     
     Date getLastModified() {
         changedOn ?: createdOn
+    }
+
+    boolean equals(o) {
+        if (this.is(o)) return true
+        if (getClass() != o.class) return false
+
+        WcmContent that = (WcmContent) o
+
+        if (aliasURI != that.aliasURI) return false
+        if (space != that.space) return false
+        if (parent != that.parent) return false
+
+        return true
+    }
+
+    int hashCode() {
+        int result
+        result = aliasURI.hashCode()
+        result = 31 * result + space.hashCode()
+        result = 31 * result + (parent != null ? parent.hashCode() : 0)
+        return result
     }
 }

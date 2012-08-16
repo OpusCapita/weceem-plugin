@@ -2229,6 +2229,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
                     ne('code', archivedStatusCode)
                 }
             }
+            cache false
         }
         def count = 0
         pendingContent?.each { content ->
@@ -2267,6 +2268,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
                     ne('code', archivedStatusCode)
                 }
             }
+            cache false
         }
         def count = 0
         def archivedCode
