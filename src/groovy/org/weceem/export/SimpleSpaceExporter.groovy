@@ -1,14 +1,12 @@
 package org.weceem.export
 
-import java.text.SimpleDateFormat
-
 import groovy.xml.MarkupBuilder
-
+import org.weceem.content.WcmContent
+import org.weceem.content.WcmSpace
+import org.weceem.content.WcmStatus
 import org.weceem.services.WcmContentRepositoryService
 
-import org.weceem.content.*
-
-import org.weceem.files.*
+import java.text.SimpleDateFormat
 
 /**
  * SimpleSpaceExporter.
@@ -62,7 +60,7 @@ class SimpleSpaceExporter implements SpaceExporter {
                                         cntProp.id)
                                 }
                             }else{
-                                def conv = exportConverters.find{k, v -> 
+                                def conv = SimpleImportExportConverters.exportConverters.find{k, v ->
                                     k.isAssignableFrom(cntPropClass)}?.value
                                 "${prop.name}"("class": cntPropClassName, 
                                     conv ? conv(cntProp) : cntProp)
@@ -106,17 +104,4 @@ class SimpleSpaceExporter implements SpaceExporter {
                 !(prop.name in ["space"])}
         return props
     }
-    
-    static def exportConverters = [
-        (java.util.Date): {value ->
-             def dateConv = new SimpleDateFormat("EEE MMM dd hh:mm:ss yyyy", Locale.UK);
-             dateConv.format(value)
-        },
-        (java.lang.Long): {value -> value},
-        (java.lang.Integer): {value-> value},
-        (java.lang.Short): {value-> value},
-        (java.lang.String): {value -> value},
-        (org.weceem.content.WcmStatus): {value -> value.code}
-    ]
-
 }
