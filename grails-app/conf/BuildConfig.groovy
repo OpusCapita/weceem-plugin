@@ -32,8 +32,8 @@ grails.project.dependency.resolution = {
         test(":functional-test:1.3-RC1") { 
             export = false 
         }
-        compile ":jquery:1.4.4.1"
-        compile ":jquery-ui:1.8.6.1"
+        compile ":jquery:1.8.3"
+        compile ":jquery-ui:1.8.24"
         compile ":navigation:1.3.2"
         compile ":quartz:0.4.2"
         compile ":searchable:0.6.3" 
