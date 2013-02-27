@@ -498,7 +498,7 @@ class WeceemTagLib {
     }
     
     def createLink = { attrs, body -> 
-        def space = attrs.remove(ATTR_SPACE)
+        def space = attrs[ATTR_SPACE]
         def path = attrs[ATTR_PATH]
         
         if (space != null) {
