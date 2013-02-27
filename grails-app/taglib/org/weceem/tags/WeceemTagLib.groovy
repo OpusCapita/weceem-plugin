@@ -602,7 +602,7 @@ class WeceemTagLib {
     def humanDate = { attrs ->
         def now = new Date()
         if (attrs.date) {
-            use(org.codehaus.groovy.runtime.TimeCategory) {
+            use(groovy.time.TimeCategory) {
                 def millisDelta = now - attrs.date
                 def daysElapsed = millisDelta.days
                 if (daysElapsed > 30) {
