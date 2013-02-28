@@ -11,6 +11,7 @@ grails.project.dependency.resolution = {
 		grailsHome()
 		grailsCentral()
         flatDir dirs:"lib" // need this for iText
+        mavenCentral() // need this to resolve junit 3.8.1 (with grails 2.2.1+)
     }
     
     dependencies {
