@@ -42,7 +42,9 @@ grails.project.dependency.resolution = {
         // For serlvet filter ordering
         provided ":webxml:1.4.1"
 
-        compile ":hibernate:$grailsVersion"
+        compile (":hibernate:$grailsVersion") {
+			export = false
+		}
         compile(":release:2.2.1") {
             export = false
         }
