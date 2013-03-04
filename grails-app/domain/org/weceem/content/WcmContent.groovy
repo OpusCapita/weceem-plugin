@@ -406,8 +406,6 @@ class WcmContent implements Comparable, Taggable, Serializable {
 
     int hashCode() {
         int result
-        println "Alias URI is: [${aliasURI}] (a ${aliasURI?.class})"
-        println "ident is: [${ident()}] (a ${ident()?.class})"
         result = aliasURI ? aliasURI.hashCode() : super.hashCode()
         if (space) {
             result = 31 * result + space.hashCode()
