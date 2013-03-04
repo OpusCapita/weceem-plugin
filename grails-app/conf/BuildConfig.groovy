@@ -29,21 +29,21 @@ grails.project.dependency.resolution = {
         compile ":cache-headers:1.1.5"
         compile ":ckeditor:3.6.0.0"
         compile ":feeds:1.5"
-        test(":functional-test:1.3-RC1") { 
+        test(":functional-test:2.0.RC1") { 
             export = false 
         }
         compile ":jquery:1.4.4.1"
         compile ":jquery-ui:1.8.6.1"
         compile ":navigation:1.3.2"
-        compile ":quartz:0.4.2"
-        compile ":searchable:0.6.3" 
-        compile ":taggable:1.0"
+        compile ":quartz:1.0-RC5"
+        compile ":searchable:0.6.4" 
+        compile ":taggable:1.0.1"
 
         // For serlvet filter ordering
         provided ":webxml:1.4.1"
 
         compile ":hibernate:$grailsVersion"
-        compile(":release:1.0.0.RC3") {
+        compile(":release:2.2.1") {
             export = false
         }
         build(":tomcat:$grailsVersion") {
