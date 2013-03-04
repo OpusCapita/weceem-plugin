@@ -8,18 +8,30 @@ class SimpleImportExportConverters {
 	private static DATE_FORMAT = "yyyy-mm-dd'T'HH:mm:ssZZ"
 
 	protected static importConverters = [
-		   (java.util.Date): {value->
-			   def dateConv = new SimpleDateFormat(DATE_FORMAT);
-			   dateConv.parse(value)},
-		   (java.lang.Float): {value->
+			(java.util.Date): {value->
+			    def dateConv = new SimpleDateFormat(DATE_FORMAT);
+			    try {
+			    	return dateConv.parse(value)
+			    } catch (java.text.ParseException pe) {
+			    	// Convert using legacy format
+					dateConv = new SimpleDateFormat("EEE MMM dd hh:mm:ss yyyy", Locale.UK)			    	
+				    try {
+				    	return dateConv.parse(value)
+				    } catch (java.text.ParseException pe2) {
+				    	log.warn "Could not parse date value [${value}], default to current date/time"
+				    	return new Date()
+				    }
+			    }
+			},
+			(java.lang.Float): {value->
 			   value.toFloat()},
-		   (java.lang.Double): {value->
+			(java.lang.Double): {value->
 			   value.toDouble()},
-		   (java.lang.Number): {value->
+			(java.lang.Number): {value->
 			   value.toInteger()},
-		   (java.lang.String): {value -> value},
-		   (java.lang.Boolean): {value -> value.toBoolean()},
-		   (org.weceem.content.WcmStatus): {value-> WcmStatus.findByCode(value)}
+			(java.lang.String): {value -> value},
+			(java.lang.Boolean): {value -> value.toBoolean()},
+			(org.weceem.content.WcmStatus): {value-> WcmStatus.findByCode(value)}
 	]
 	protected static def exportConverters = [
 		(java.util.Date): {value ->
