@@ -1,9 +1,11 @@
 package weceem
 
-import functionaltestplugin.*
+import com.grailsrocks.functionaltest.*
 
-class ConcurrentEditFunctionalTests extends FunctionalTestCase {
+class ConcurrentEditFunctionalTests extends BrowserTestCase {
     void testSaveWidgetWhileRenderingPageUsingIt() {
+
+        javaScriptEnabled = false
 
         def uriToGet = "index"
         def serverURL = baseURL
@@ -45,6 +47,8 @@ class ConcurrentEditFunctionalTests extends FunctionalTestCase {
         // Back at repo view?
         assertStatus 200
         assertContentContains 'welcome'
+
+        Thread.sleep(10000)
     }
     
     void concurrentGet(u) {
