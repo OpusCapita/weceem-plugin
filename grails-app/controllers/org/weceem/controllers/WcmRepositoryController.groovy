@@ -48,6 +48,7 @@ class WcmRepositoryController {
     def wcmContentRepositoryService
 
     def grailsApplication
+	def proxyHandler
 
     def beforeInterceptor = {
         if (!(actionName in ACTIONS_NEEDING_SPACE)) return true
