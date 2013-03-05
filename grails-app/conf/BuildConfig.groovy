@@ -29,7 +29,7 @@ grails.project.dependency.resolution = {
         compile ":cache-headers:1.1.5"
         compile ":ckeditor:3.6.0.0"
         compile ":feeds:1.5"
-        test(":functional-test:2.0.RC1") { 
+        test(":functional-test:2.0.RC2") { 
             export = false 
         }
         compile ":jquery:1.4.4.1"
@@ -43,9 +43,10 @@ grails.project.dependency.resolution = {
         provided ":webxml:1.4.1"
 
         compile ":hibernate:$grailsVersion"
-        compile(":release:2.2.1") {
-            export = false
-        }
+        // compile(":release:2.2.1") {
+        //     excludes "nekohtml", "xercesMinimal"
+        //     export = false
+        // }
         build(":tomcat:$grailsVersion") {
             export = false
         }            
