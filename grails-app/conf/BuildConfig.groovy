@@ -1,4 +1,4 @@
-grails.tomcat.jvmArgs = ["-Xmx1024m", "-XX:MaxPermSize=100m", '-verbose:class'] 
+grails.tomcat.jvmArgs = ["-Xmx1024m", "-XX:MaxPermSize=100m", '-verbose:class']
 grails.project.work.dir="target/work"
 
 grails.project.dependency.resolution = {
@@ -25,10 +25,10 @@ grails.project.dependency.resolution = {
     }
 
 	plugins { 
-        compile ":bean-fields:1.0.RC5" //newest: 1.0; replacement fields-plugin
-        compile ":blueprint:0.9.1.1" // newest: 1.0.2
+		compile ":bean-fields:1.0" // consider replacing with the fields plugin or even with the new Platform UI
+		compile ":blueprint:1.0.2"
         compile ":cache-headers:1.1.5"
-        compile ":ckeditor:3.6.0.0" // newest: 3.6.3.0
+		compile ":ckeditor:3.6.3.0"
         compile ":feeds:1.5"
         test(":functional-test:2.0.RC1") { 
             export = false 
