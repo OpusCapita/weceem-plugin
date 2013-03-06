@@ -30,9 +30,12 @@ grails.project.dependency.resolution = {
         compile ":cache-headers:1.1.5"
 		compile ":ckeditor:3.6.3.0"
         compile ":feeds:1.5"
-        test(":functional-test:2.0.RC1") { 
-            export = false 
-        }
+//		test(":functional-test:2.0.RC1") {
+//			export = false
+//			// this comes as transitive dependency via net.sourceforge.htmlunit#htmlunit;2.10
+//			// I currently do not know, how to resolve it
+//			excludes([ group: 'xerces' , name: 'xercesImpl' ])
+//		}
         compile ":jquery:1.8.3"
         compile ":jquery-ui:1.8.24"
         compile ":navigation:1.3.2"
