@@ -1,13 +1,11 @@
 package org.weceem.export
 
-import org.apache.commons.logging.LogFactory
 import org.apache.commons.logging.Log
+import org.apache.commons.logging.LogFactory
 import org.springframework.beans.BeanWrapperImpl
-
-import org.weceem.content.*
-import org.weceem.files.*
-
-import java.text.*
+import org.weceem.content.WcmContent
+import org.weceem.content.WcmSpace
+import org.weceem.content.WcmStatus
 
 /**
  * SimpleSpaceImporter
@@ -180,7 +178,7 @@ class SimpleSpaceImporter implements SpaceImporter {
                         params += [(child.name()) : association]
                     }    
                 }else{
-                    def conv = importConverters.find{ k, v -> 
+                    def conv = SimpleImportExportConverters.importConverters.find{ k, v ->
                         k.isAssignableFrom(getClass(child.@class.text()))}.value
                     params += [(child.name()) : conv(child.text())]
                 }
@@ -289,19 +287,4 @@ class SimpleSpaceImporter implements SpaceImporter {
     String getName() {
         'Weceem (ZIP)'
     }
-    
-    static importConverters = [
-           (java.util.Date): {value->
-               def dateConv = new SimpleDateFormat("EEE MMM dd hh:mm:ss yyyy", Locale.UK);
-               dateConv.parse(value)},
-           (java.lang.Float): {value->
-               value.toFloat()},
-           (java.lang.Double): {value->
-               value.toDouble()},
-           (java.lang.Number): {value->
-               value.toInteger()},
-           (java.lang.String): {value -> value},
-           (java.lang.Boolean): {value -> value.toBoolean()},
-           (org.weceem.content.WcmStatus): {value-> WcmStatus.findByCode(value)}
-    ]
 }

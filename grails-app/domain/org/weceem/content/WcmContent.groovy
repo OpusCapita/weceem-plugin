@@ -406,9 +406,13 @@ class WcmContent implements Comparable, Taggable, Serializable {
 
     int hashCode() {
         int result
-        result = aliasURI.hashCode()
-        result = 31 * result + space.hashCode()
-        result = 31 * result + (parent != null ? parent.hashCode() : 0)
+        result = aliasURI ? aliasURI.hashCode() : super.hashCode()
+        if (space) {
+            result = 31 * result + space.hashCode()
+        }
+        if (parent) {
+            result = 31 * result + parent.hashCode()
+        }
         return result
     }
 }

@@ -8,7 +8,6 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
   <documentation>http://grails.org/plugin/weceem</documentation>
   <type>WeceemGrailsPlugin</type>
   <resources>
-    <resource>BootStrap</resource>
     <resource>QuartzConfig</resource>
     <resource>Searchable</resource>
     <resource>WeceemPluginUrlMappings</resource>
