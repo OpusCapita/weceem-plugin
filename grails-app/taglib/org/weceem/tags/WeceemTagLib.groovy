@@ -404,6 +404,7 @@ class WeceemTagLib {
                 first:first,
                 active: (n.ident() == activeNode.ident()) || (lineage.find { it.ident() == n.ident() }),
                 custom:custom,
+				types: types,
                 level:currentLevel,
                 last: last, 
                 firstClass: firstClass,
