@@ -47,7 +47,7 @@ grails.project.dependency.resolution = {
         provided ":webxml:1.4.1"
 
         compile ":hibernate:$grailsVersion"
-        compile(":release:2.2.1") {
+        build(":release:2.2.1") {
             export = false
         }
         build(":tomcat:$grailsVersion") {
