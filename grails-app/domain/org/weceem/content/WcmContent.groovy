@@ -83,6 +83,8 @@ class WcmContent implements Comparable, Taggable, Serializable {
 
     String contentDependencies
 
+	static overrideRequired = [ 'aliasURI': false ]
+	
     static belongsTo = [space: WcmSpace, parent: WcmContent]
     static transients = [ 
         'lastModified', 
