@@ -135,4 +135,5 @@ Just change the color-values to apply your own color-scheme.
  */
 .CodeMirror-wrapping {
   overflow : scroll;
+  -webkit-overflow-scrolling: touch;
 }
