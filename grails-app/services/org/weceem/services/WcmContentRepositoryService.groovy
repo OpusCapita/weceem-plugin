@@ -74,8 +74,7 @@ class WcmContentRepositoryService implements InitializingBean {
     
     static uploadDir
     static uploadUrl
-    static uploadInWebapp
-    
+
     static DEFAULT_ARCHIVED_STATUS_CODE = 500
     static DEFAULT_UNMODERATED_STATUS_CODE = 150
     
@@ -166,7 +165,6 @@ class WcmContentRepositoryService implements InitializingBean {
         def uploadDirConf = getUploadDirFromConfig(config)
 
         if (!uploadDirConf.startsWith('file:')) {
-            uploadInWebapp = false
             def homeDir = new File(System.getProperty("user.home"))
             def weceemHomeDir = new File(homeDir, 'weceem-uploads')
             uploadDir = new File(weceemHomeDir, uploadDirConf) 
@@ -181,13 +179,12 @@ class WcmContentRepositoryService implements InitializingBean {
                     throw new RuntimeException("Cannot start Weceem - upload directory is set to [${uploadDirConf}] but cannot make the directory and it doesn't exist")
                 }
             }
-            uploadInWebapp = false
             uploadDir = f
         }
 
         uploadUrl = WcmContentRepositoryService.getUploadUrlFromConfig(grailsApplication.config)
         // In tests we don't have log
-        logOrPrint('info', "Weceem will use [${uploadDir}] as the directory for static uploaded files, and the url [${uploadUrl}] to serve them, files are inside webapp? [${uploadInWebapp}]")
+        logOrPrint('info', "Weceem will use [${uploadDir}] as the directory for static uploaded files, and the url [${uploadUrl}] to serve them")
         
         if ( !(config.grails.mime.file.extensions instanceof Boolean) ||
             ((config.grails.mime.file.extensions instanceof Boolean) && (config.grails.mime.file.extensions == true)) ) {

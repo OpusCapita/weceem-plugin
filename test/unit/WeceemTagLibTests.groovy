@@ -1,3 +1,5 @@
+import grails.test.mixin.Mock
+import grails.test.mixin.TestFor
 import groovy.mock.interceptor.MockFor
 
 import org.weceem.controllers.WcmContentController
@@ -9,106 +11,89 @@ import org.weceem.tags.*
 import org.weceem.services.*
 import org.codehaus.groovy.grails.plugins.web.taglib.ApplicationTagLib
 
-class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
-
-    void setUp() {
-        super.setUp()
-        mockDomain(WcmHTMLContent)
-    }
+@TestFor(WeceemTagLib)
+@Mock(WcmHTMLContent)
+class WeceemTagLibTests {
 
     void testSpace() {
-        mockTagLib(WeceemTagLib)
-        def taglib = new WeceemTagLib()
-        
         def spc = new WcmSpace()
         spc.name = 'testing'
-        taglib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_SPACE, spc)
+        tagLib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_SPACE, spc)
         
         Object.metaClass.encodeAsHTML = { return delegate }
         
-        taglib.space([:])
-        
-        assertEquals "testing", taglib.out.toString()
+        def output = applyTemplate("<wcm:space/>")
+
+        assertEquals "testing", output
     }
 
 
     void testCreateLink() {
-        mockTagLib(WeceemTagLib)
-        def taglib = new WeceemTagLib()
-
         def g = new MockFor(ApplicationTagLib)
         g.demand.createLink {hash ->
           assertEquals "wcmContent", hash.controller
           assertEquals "show", hash.action
         }
 
-        taglib.metaClass.g = g.proxyInstance()
+        tagLib.metaClass.g = g.proxyInstance()
 
         def node = new WcmHTMLContent(aliasURI:'someNode', space: new WcmSpace(name:'default', aliasURI:'default'))
-        taglib.wcmContentRepositoryService = [findContentForPath : { path, space -> [content: node]}]
-        taglib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_SPACE, node.space)
-        taglib.createLink(path: 'someNode', null)
+        tagLib.wcmContentRepositoryService = [findContentForPath : { path, space -> [content: node]}]
+        tagLib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_SPACE, node.space)
+        tagLib.createLink(path: 'someNode', null)
         // @todo Need to test the output!!!?
     }
 
-  void testCountChildren() {
-    mockTagLib(WeceemTagLib)
-    def taglib = new WeceemTagLib()
+    void testCountChildren() {
+        def parent = new WcmHTMLContent()
 
-    def parent = new WcmHTMLContent()
+        def mockCRService = new MockFor(WcmContentRepositoryService)
+        mockCRService.demand.countChildren {node, args ->
+          assertEquals parent, node
+        }
 
-    def mockCRService = new MockFor(WcmContentRepositoryService)
-    mockCRService.demand.countChildren {node, args ->
-      assertEquals parent, node
+        tagLib.wcmContentRepositoryService = mockCRService.proxyInstance()
+        tagLib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, parent)
+
+        try {
+          tagLib.countChildren([path:"some/path", node: parent])
+          fail "Expected exception with path and node attributes"
+        } catch(e) {
+            // we wanted an exception
+        }
+
+        // @todo Need to test the output!!!?
+        tagLib.countChildren([node: parent])
     }
 
-    taglib.wcmContentRepositoryService = mockCRService.proxyInstance()
-    taglib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, parent)
+    void testEachChildWithNode() {
+        def parent = new WcmHTMLContent(title: 'parent')
 
-    try {
-      taglib.countChildren([path:"some/path", node: parent])
-      fail "Expected exception with path and node attributes"
-    } catch(e) {
-        // we wanted an exception
+        def anotherNode = new WcmHTMLContent(title: 'another')
+
+        def mockCRService = new MockFor(WcmContentRepositoryService)
+        mockCRService.demand.findChildren { node, args ->
+            assertEquals parent, node
+        }
+
+        tagLib.wcmContentRepositoryService = mockCRService.proxyInstance()
+
+        tagLib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, anotherNode)
+
+        try {
+            tagLib.eachChild([path: "some/path", node: parent], {})
+            fail "Expected exception with path and node attributes"
+        } catch (e) {
+            assert e.message =~ "You cannot specify both node and path attributes"
+        }
+
+        // @todo Need to test the output!!!?
+        tagLib.eachChild([node: parent], {})
     }
-
-    // @todo Need to test the output!!!?
-    taglib.countChildren([node: parent])
-  }
-
-  void testEachChildWithNode() {
-    mockTagLib(WeceemTagLib)
-    def taglib = new WeceemTagLib()
-
-    def parent = new WcmHTMLContent(title: 'parent')
-
-    def anotherNode = new WcmHTMLContent(title: 'another')
-
-    def mockCRService = new MockFor(WcmContentRepositoryService)
-    mockCRService.demand.findChildren { node, args ->
-      assertEquals parent, node
-    }
-
-    taglib.wcmContentRepositoryService = mockCRService.proxyInstance()
-
-    taglib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, anotherNode)
-
-    try {
-      taglib.eachChild([path:"some/path", node: parent], {})
-      fail "Expected exception with path and node attributes"
-    } catch(e) {
-      assert e.message =~ "You cannot specify both node and path attributes"
-    }
-
-    // @todo Need to test the output!!!?
-    taglib.eachChild([node: parent], {})
-  }
 
 
     void testEachChildWithoutFilter() {
-        mockTagLib(WeceemTagLib)
-        def taglib = new WeceemTagLib()
-        
+
         def parent = new WcmHTMLContent()
         parent.title = 'Parent'
 
@@ -124,20 +109,17 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
             }
         ]
 
-        taglib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, parent)
+        tagLib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, parent)
         
-        taglib.wcmContentRepositoryService = mockCRService
+        tagLib.wcmContentRepositoryService = mockCRService
+
+        def o = applyTemplate("<wcm:eachChild var=\"c\">\${c.title}|</wcm:eachChild>")
         
-        taglib.eachChild([var:"c"], { params -> return params.c.title + "|"})
-        
-        assertEquals "Node A|Node B|", taglib.out.toString()
+        assertEquals "Node A|Node B|", o
     }
     
     
     void testEachChildWithType() {
-        mockTagLib(WeceemTagLib)
-        def taglib = new WeceemTagLib()
-        
         def parent = new WcmHTMLContent()
         parent.title = 'Parent'
 
@@ -146,24 +128,21 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         
         def mockCRService = [
             findChildren : { node, args ->
-                assertEquals WcmHTMLContent, args.type
+                assertEquals "WcmHTMLContent", args.type
                 [nodeA]
             }
         ]
 
-        taglib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, parent)
+        tagLib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, parent)
         
-        taglib.wcmContentRepositoryService = mockCRService
+        tagLib.wcmContentRepositoryService = mockCRService
+
+        def o = applyTemplate("<wcm:eachChild var=\"c\" type=\"WcmHTMLContent\">\${c.title}|</wcm:eachChild>")
         
-        taglib.eachChild([var:"c", type:WcmHTMLContent], { params -> return params.c.title + "|"})
-        
-        assertEquals "Node A|", taglib.out.toString()
+        assertEquals "Node A|", o
     }
     
     void testEachChildWithFilter() {
-        mockTagLib(WeceemTagLib)
-        def taglib = new WeceemTagLib()
-        
         def parent = new WcmHTMLContent()
         parent.title = 'Parent'
 
@@ -179,19 +158,16 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
             }
         ]
 
-        taglib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, parent)
+        tagLib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, parent)
         
-        taglib.wcmContentRepositoryService = mockCRService
+        tagLib.wcmContentRepositoryService = mockCRService
+
+        def o = applyTemplate("<wcm:eachChild var=\"c\" filter=\"\${ { it.title.contains('Wiki') } }\">\${c.title}|</wcm:eachChild>")
         
-        taglib.eachChild([var:"c", filter:{ it.title.contains('Wiki')}], { params -> return params.c.title + "|"})
-        
-        assertEquals "Wiki B|", taglib.out.toString()
+        assertEquals "Wiki B|", o
     }
     
     void testEachParentWithType() {
-        mockTagLib(WeceemTagLib)
-        def taglib = new WeceemTagLib()
-        
         def parent = new WcmWikiItem()
         parent.title = 'Parent A'
 
@@ -203,24 +179,21 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         
         def mockCRService = [
             findParents : { node, args ->
-                assertEquals WcmHTMLContent, args.type
+                assertEquals "WcmHTMLContent", args.type
                 [parentB]
             }
         ]
 
-        taglib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, nodeA)
+        tagLib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, nodeA)
         
-        taglib.wcmContentRepositoryService = mockCRService
+        tagLib.wcmContentRepositoryService = mockCRService
+
+        def o = applyTemplate("<wcm:eachParent var=\"c\" type=\"WcmHTMLContent\">\${c.title}|</wcm:eachParent>")
         
-        taglib.eachParent([var:"c", type:WcmHTMLContent], { params -> return params.c.title + "|"})
-        
-        assertEquals "Parent B|", taglib.out.toString()
+        assertEquals "Parent B|", o
     }
     
     void testEachParentWithFilter() {
-        mockTagLib(WeceemTagLib)
-        def taglib = new WeceemTagLib()
-        
         def parent = new WcmWikiItem()
         parent.title = 'Parent A'
 
@@ -236,13 +209,13 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
             }
         ]
 
-        taglib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, nodeA)
+        tagLib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_NODE, nodeA)
         
-        taglib.wcmContentRepositoryService = mockCRService
+        tagLib.wcmContentRepositoryService = mockCRService
+
+        def o = applyTemplate("<wcm:eachParent var=\"c\" filter=\"\${ { it.title.contains('A') } }\">\${c.title}|</wcm:eachParent>")
         
-        taglib.eachParent([var:"c", filter:{ it.title.contains('A')}], { params -> return params.c.title + "|"})
-        
-        assertEquals "Parent A|", taglib.out.toString()
+        assertEquals "Parent A|", o
     }
 
     
@@ -257,10 +230,7 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
         ]
         
         testData.each { d ->
-            mockTagLib(WeceemTagLib)
-            def taglib = new WeceemTagLib()
-            taglib.summarize(length:d[0], { d[1] })
-            def o = taglib.out.toString()
+            def o = applyTemplate("<wcm:summarize length=\"${d[0]}\">${d[1]}</wcm:summarize>")
             println "Testing with data: ${d}"
             println "Tag output is $o (length: ${o.size()})"
             assertTrue d[0] >= o.size()
@@ -288,15 +258,11 @@ class WeceemTagLibTests extends grails.test.GrailsUnitTestCase {
             }
         ]
         
-        mockTagLib(WeceemTagLib)
-        def taglib = new WeceemTagLib()
-        taglib.wcmCacheService = mockCacheService
+        tagLib.wcmCacheService = mockCacheService
         
-        taglib.dataFeed(url:'http://localhost/dummyfeed', max:10) { 
-            // no body
-        }
+        def output = applyTemplate("<wcm:dataFeed url='http://localhost/dummyfeed' max='10'/>")
 
-        def o = taglib.out.toString()
+        def o = output
         assertTrue o.contains('Test item 1')
         assertTrue o.contains('Test item 2')
         

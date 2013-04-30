@@ -2,7 +2,7 @@ package weceem
 
 import com.grailsrocks.functionaltest.*
 
-class ConcurrentEditFunctionalTests extends BrowserTestCase {
+class ConcurrentEditFunctionalTests extends BrowserTestCase  {
     void testSaveWidgetWhileRenderingPageUsingIt() {
 
         javaScriptEnabled = false
