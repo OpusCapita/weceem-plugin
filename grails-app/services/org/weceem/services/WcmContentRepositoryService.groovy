@@ -1007,15 +1007,17 @@ class WcmContentRepositoryService implements InitializingBean {
         for (cont in WcmContent.list()){
             def perProps = findDomainClassContentAssociations(getDomainClassArtefact(cont))
             for (p in perProps){
-                if (cont."${p.name}" instanceof Collection){
-                    for (inst in cont."${p.name}"){
-                        if (inst.equals(content)){
+                if (cont."${p.name}") {
+                    if (cont."${p.name}" instanceof Collection){
+                        for (inst in cont."${p.name}"){
+                            if (inst.equals(content)){
+                                results << new ContentReference(referringProperty: p.name, referencingContent: cont, targetContent: content)
+                            }
+                        }
+                    } else {
+                        if (content.equals(cont."${p.name}")){
                             results << new ContentReference(referringProperty: p.name, referencingContent: cont, targetContent: content)
                         }
-                    }
-                } else {
-                    if (content.equals(cont."${p.name}")){
-                        results << new ContentReference(referringProperty: p.name, referencingContent: cont, targetContent: content)
                     }
                 }
             }

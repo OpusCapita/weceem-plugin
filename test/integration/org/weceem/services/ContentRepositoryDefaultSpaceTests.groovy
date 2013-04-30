@@ -26,6 +26,10 @@ class ContentRepositoryDefaultSpaceTests extends AbstractWeceemIntegrationTest {
         servletContext = grailsApplication.mainContext.servletContext = ServletContextHolder.servletContext
         grailsApplication.mainContext.simpleSpaceImporter.proxyHandler = [unwrapIfProxy: { o -> o}]
 
+        // Reset to defaults!
+        grailsApplication.config.weceem.default.space.template = null
+        grailsApplication.config.weceem.space.templates = [:]
+
         super.setUp()
     }
     

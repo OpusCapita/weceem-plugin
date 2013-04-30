@@ -110,7 +110,7 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         def repSvc = applicationContext.wcmContentRepositoryService
         repSvc.loadConfig()
         applicationContext.wcmEditorService.cacheEditorInfo()
-        configureCKEditor(repSvc.uploadInWebapp, repSvc.uploadDir, repSvc.uploadUrl, application)
+        configureCKEditor(repSvc.uploadDir, repSvc.uploadUrl, application)
 
         repSvc.createDefaultStatuses()
         
@@ -134,15 +134,12 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         
     }
 
-    def configureCKEditor(uploadInWebapp, dir, url, application) {
+    def configureCKEditor(dir, url, application) {
         def settings = application.config
         def co = new ConfigObject()
-        if (uploadInWebapp) {
-            co.ckeditor.upload.basedir = url.toString()
-        } else {
-            co.ckeditor.upload.basedir = dir.toString()
-            co.ckeditor.upload.baseurl = url.toString()
-        }
+        co.ckeditor.upload.basedir = dir.toString()
+        co.ckeditor.upload.baseurl = url.toString()
+
         co.ckeditor.upload.overwrite = false
         co.ckeditor.defaultFileBrowser = "ofm"
         co.ckeditor.upload.image.browser = true
