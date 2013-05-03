@@ -56,9 +56,9 @@ abstract class AbstractWeceemIntegrationTest extends AbstractServletContextMocki
     }
 
     void tearDown() {
-        // WcmSpace.list().each { s ->
-        //     wcmContentRepositoryService.deleteSpaceContent(s)
-        // }
+        WcmSpace.list().each { s ->
+             wcmContentRepositoryService.deleteSpaceContent(s)
+        }
         wcmContentRepositoryService.wcmCacheService = oldCacheService
         wcmContentRepositoryService.wcmSecurityService.securityDelegate.getUserRoles = oldSecurityDelegateUserRoles
 

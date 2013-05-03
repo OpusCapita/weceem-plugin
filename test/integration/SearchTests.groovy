@@ -34,9 +34,8 @@ class SearchTests extends AbstractWeceemIntegrationTest {
         spaceB = new WcmSpace(name: 'b', aliasURI: 'b')
         assert spaceB.save(flush: true)
 
-        def folder = new WcmFolder(title:'folder', aliasURI:'folder1', space:spaceA, status:statusA)
-        assert folder.save()
-        
+        wcmContentRepositoryService.createNode(WcmFolder, [title:'folder', aliasURI:'folder1', space:spaceA, status:statusA])
+
         50.times {
             wcmContentRepositoryService.createNode(WcmHTMLContent, [
                 title: "Acontent-$it", aliasURI: "acontent-$it",
