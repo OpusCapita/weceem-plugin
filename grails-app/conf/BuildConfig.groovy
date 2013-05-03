@@ -41,22 +41,22 @@ grails.project.dependency.resolution = {
             export = false
         }
 
-        compile ":bean-fields:1.0.RC5"
+        compile ":bean-fields:1.0"
         compile ":blueprint:0.9.1.1"
         compile ":cache-headers:1.1.5"
         compile ":ckeditor:3.6.0.0"
-        compile ":feeds:1.5"
+        compile ":feeds:1.6"
 
         compile ":platform-core:1.0.RC5"
 //        test ":geb:$gebVersion"
         test(":functional-test:2.0.RC2-SNAPSHOT") { 
             excludes "xerces, xml-apis"
-            export = false 
+            export = false
         }
         compile ":jquery:1.4.4.1"
         compile ":jquery-ui:1.8.6.1"
         compile ":navigation:1.3.2"
-        compile ":quartz:1.0-RC5"
+        compile ":quartz:1.0-RC7"
         compile ":searchable:0.6.4" 
         compile ":taggable:1.0.1"
 

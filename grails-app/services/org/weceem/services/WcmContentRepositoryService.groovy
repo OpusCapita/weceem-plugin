@@ -451,6 +451,7 @@ class WcmContentRepositoryService implements InitializingBean {
             invalidateCachingForURI(content.space, content.absoluteURI)
 
             content.parent = null
+            content.unindex()
             content.save()
         }
         // @todo This code is very naïve and probably broken
@@ -725,7 +726,7 @@ class WcmContentRepositoryService implements InitializingBean {
                     maxResults(1)
                     order("orderIndex", "desc")
                 }
-                orderIndex = nodes ? nodes[0].orderIndex + 1 : 0
+                orderIndex = nodes ? (nodes[0].orderIndex ?: 0) + 1 : 0
             }
             content.orderIndex = orderIndex
 
@@ -788,6 +789,8 @@ class WcmContentRepositoryService implements InitializingBean {
             }
             
             if (result) {
+                content.index()
+
                 triggerEvent(content, WeceemEvents.contentDidGetCreated)
             }
 
@@ -850,6 +853,7 @@ class WcmContentRepositoryService implements InitializingBean {
                 return null
             }
         }
+        vcont.index()
         return vcont
     }
 
@@ -912,6 +916,7 @@ class WcmContentRepositoryService implements InitializingBean {
                 parent.children.remove(sourceContent)
                 sourceContent.parent = null
                 assert parent.save()
+                parent.reindex()
             }
         }
         
@@ -933,6 +938,7 @@ class WcmContentRepositoryService implements InitializingBean {
             requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
             
             assert targetContent.save()
+            targetContent.reindex()
         } else {
             // Check we can be saved there
             requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
@@ -943,7 +949,8 @@ class WcmContentRepositoryService implements InitializingBean {
 
         if (sourceContent.save(flush: true)) {
             updateCachingMetadataFor(sourceContent)
-            
+
+            sourceContent.reindex()
             triggerEvent(sourceContent, WeceemEvents.contentDidMove, [originalURI, originalParent])
         } else {
             log.error "Couldn't save node: ${sourceContent.errors}"
@@ -977,6 +984,7 @@ class WcmContentRepositoryService implements InitializingBean {
         nodes.each{it->
             it.orderIndex = ++orderIndex
             it.save()
+            it.reindex()
         }
     }
     
@@ -1138,6 +1146,7 @@ class WcmContentRepositoryService implements InitializingBean {
             sourceContent.parent = null
             parent.children = parent.children.findAll { it.ident() != sourceContent.ident() }
             assert parent.save(flush:true)
+            parent.reindex()
         }
 
         // We don't want any dep info relating to us to persist
@@ -1160,7 +1169,9 @@ class WcmContentRepositoryService implements InitializingBean {
         }
 
         sourceContent.delete(flush: true)
-        
+        sourceContent.unindex()
+
+
         triggerEvent(sourceContent, WeceemEvents.contentDidGetDeleted)
     }
 
@@ -1190,6 +1201,7 @@ class WcmContentRepositoryService implements InitializingBean {
 
         if (parentRef) {
             parentRef.children << child
+            parentRef.reindex()
             parentRef.save()
         }
 
@@ -1354,6 +1366,8 @@ class WcmContentRepositoryService implements InitializingBean {
                 // Invalidate the new URI's info - it might exist already but with no data (not found)
                 invalidateCachingForURI(content.space, content.absoluteURI)
                 updateCachingMetadataFor(content)
+
+                content.reindex()
 
                 triggerEvent(content, WeceemEvents.contentDidGetUpdated)
 
@@ -2056,7 +2070,11 @@ class WcmContentRepositoryService implements InitializingBean {
         requirePermissions(newContent, [WeceemSecurityPolicy.PERMISSION_CREATE])
 
         // Check for binding errors
-        return newContent.hasErrors() ? newContent : newContent.save() // it might not work, but hasErrors will be set if not
+        def result = newContent.hasErrors() ? newContent : newContent.save() // it might not work, but hasErrors will be set if not
+        if (result) {
+            newContent.index()
+        }
+        return result
     }
     
     /**
@@ -2243,6 +2261,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
             }
             content.status = status
             content.save() // This shouldn't be needed, but without it we get "collection not processed by flush"
+            content.reindex()
             count++
         }
         return count
@@ -2281,6 +2300,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
             }
             content.status = archivedCode
             content.save() // This shouldn't be needed, but without it we get "collection not processed by flush"
+            content.reindex()
             count++
         }
         return count
