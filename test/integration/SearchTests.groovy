@@ -34,12 +34,12 @@ class SearchTests extends AbstractWeceemIntegrationTest {
         spaceB = new WcmSpace(name: 'b', aliasURI: 'b')
         assert spaceB.save(flush: true)
 
-        wcmContentRepositoryService.createNode(WcmFolder, [title:'folder', aliasURI:'folder1', space:spaceA, status:statusA])
+        def folder = wcmContentRepositoryService.createNode(WcmFolder, [title:'folder', aliasURI:'folder1', space:spaceA, status:statusA])
 
         50.times {
             wcmContentRepositoryService.createNode(WcmHTMLContent, [
                 title: "Acontent-$it", aliasURI: "acontent-$it",
-                content: 'content number #$it', status: it % 2 == 0 ? statusA : statusB,
+                content: "content number #$it", status: it % 2 == 0 ? statusA : statusB,
                 createdBy: 'admin', createdOn: new Date(),
                 space: spaceA,
                 orderIndex: 1+it])
@@ -48,19 +48,24 @@ class SearchTests extends AbstractWeceemIntegrationTest {
         10.times {
             wcmContentRepositoryService.createNode(WcmHTMLContent, [
                 title: "Child-$it", aliasURI: "child-$it",
-                content: 'child number #$it', status: statusA,
+                content: "child number #$it", status: statusA,
                 createdBy: 'admin', createdOn: new Date(),
                 space: spaceA,
-                orderIndex: 1+it, parent:folder.ident()])
+                orderIndex: 1+it, 'parent.id':folder.ident()])
         }
 
         10.times {
             wcmContentRepositoryService.createNode(WcmHTMLContent, [
                 title: "Bcontent-$it", aliasURI: "bcontent-$it",
-                content: 'content number #$it', status: statusA,
+                content: "content number #$it", status: statusA,
                 createdBy: 'admin', createdOn: new Date(),
                 space: spaceB,
                 orderIndex: 1+it])
+        }
+
+        System.out.println "spaceA: \n"
+        wcmContentRepositoryService.findAllRootContent(spaceA).each { n ->
+            System.out.println n.debugDescription()
         }
     }
     

@@ -439,6 +439,22 @@ class WcmContentRepositoryService implements InitializingBean {
         }
     }       
 
+    void requirePermissionToCreateContent(WcmContent parentContent, WcmContent content) throws AccessDeniedException {
+        if (!permissionsBypass.get()) {
+            if (!wcmSecurityService.isUserAllowedToCreateContent(content.space, parentContent, content)) {
+                throw new AccessDeniedException("User [${wcmSecurityService.userName}] with roles [${wcmSecurityService.userRoles}] does not have the permissions [$permissionList] to create content under [${parentContent ? parentContent.absoluteURI + '/' + content.aliasURI : content.aliasURI}] in space [${content.space.name}]")
+            }
+        }
+    }
+
+    // Workaround for removeFromChildren breaking for us
+    private void removeContentFromParent(WcmContent content) {
+        if (content.parent) {
+            content.parent.children = content.parent.children.findAll { it.ident() != content.ident() }
+            content.parent = null
+        }
+    }
+
     void deleteSpaceContent(WcmSpace space) {
         requirePermissions(space, [WeceemSecurityPolicy.PERMISSION_ADMIN])        
 
@@ -450,6 +466,7 @@ class WcmContentRepositoryService implements InitializingBean {
             // Invalidate the caches before parent is changed
             invalidateCachingForURI(content.space, content.absoluteURI)
 
+            removeContentFromParent(content)
             content.parent = null
             content.unindex()
             content.save()
@@ -684,7 +701,7 @@ class WcmContentRepositoryService implements InitializingBean {
      * @param parentContent
      */
     Boolean createNode(WcmContent content, WcmContent parentContent = null) {
-        requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_CREATE])        
+        requirePermissionToCreateContent(parentContent, content)
         
         if (parentContent == null) parentContent = content.parent
 
@@ -796,6 +813,8 @@ class WcmContentRepositoryService implements InitializingBean {
 
             if (!result) {
                 parentContent?.discard() // revert the changes we made to parent
+            } else {
+                parentContent?.save(flush:true)
             }
             
             invalidateCachingForURI(content.space, content.absoluteURI)
@@ -1143,8 +1162,7 @@ class WcmContentRepositoryService implements InitializingBean {
         removeAllTagsFrom(sourceContent)
         // if there is a parent  - we delete node from its association
         if (parent) {
-            sourceContent.parent = null
-            parent.children = parent.children.findAll { it.ident() != sourceContent.ident() }
+            removeContentFromParent(sourceContent)
             assert parent.save(flush:true)
             parent.reindex()
         }
