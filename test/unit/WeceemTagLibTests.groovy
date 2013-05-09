@@ -41,7 +41,30 @@ class WeceemTagLibTests {
         tagLib.wcmContentRepositoryService = [findContentForPath : { path, space -> [content: node]}]
         tagLib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_SPACE, node.space)
         tagLib.createLink(path: 'someNode', null)
-        // @todo Need to test the output!!!?
+    }
+
+    void testLink() {
+        def g = new MockFor(ApplicationTagLib)
+        g.demand.createLink {hash ->
+          assertEquals "wcmContent", hash.controller
+          assertEquals "show", hash.action
+        }
+
+        tagLib.metaClass.g = g.proxyInstance()
+
+        def node = new WcmHTMLContent(aliasURI:'someNode', space: new WcmSpace(name:'default', aliasURI:'default'))
+        tagLib.wcmContentRepositoryService = [findContentForPath : { path, space -> [content: node]}]
+        tagLib.request.setAttribute(RenderEngine.REQUEST_ATTRIBUTE_SPACE, node.space)
+        def output = applyTemplate("<wcm:link path='someNode'>Click</wcm:link>")
+
+        assert output.contains("<a href=")
+        assert output.contains(">Click<")
+        assert output.contains("</a>")
+        assert !output.contains('path')
+        assert !output.contains('controller')
+        assert !output.contains('action')
+        assert !output.contains('uri')
+
     }
 
     void testCountChildren() {
