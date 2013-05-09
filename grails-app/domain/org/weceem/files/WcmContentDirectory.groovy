@@ -84,7 +84,7 @@ class WcmContentDirectory extends WcmContentFile {
         def file = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, "$path/$title")
         if (!file.exists()) return true
         if (FileUtils.deleteQuietly(file)) {
-            def childrenList = new ArrayList(this.children)
+            def childrenList = this.children ? new ArrayList(this.children) : null
             childrenList?.each() { child ->
                 if (child) {
                     // delete all virtual copies
