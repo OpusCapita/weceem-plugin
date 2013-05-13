@@ -53,8 +53,8 @@ grails.project.dependency.resolution = {
             excludes "xerces, xml-apis"
             export = false
         }
-        compile ":jquery:1.4.4.1"
-        compile ":jquery-ui:1.8.6.1"
+        compile ":jquery:1.8.3"
+        compile ":jquery-ui:1.8.24"
         compile ":navigation:1.3.2"
         compile ":quartz:1.0-RC7"
         compile ":searchable:0.6.4" 
