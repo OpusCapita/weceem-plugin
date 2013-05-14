@@ -12,12 +12,14 @@ import org.springframework.context.ApplicationContext
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.mock.web.MockMultipartHttpServletRequest
 
+import org.weceem.AbstractServletContextMockingTest
+
 /**
  * ContentRepositoryTests class contains tests for tree operations from
  * wcmContentRepositoryService.
  *
  */
-class RepositoryControllerTests extends GroovyTestCase {
+class RepositoryControllerTests extends AbstractServletContextMockingTest {
 
     static transactional = true
     
@@ -32,15 +34,11 @@ class RepositoryControllerTests extends GroovyTestCase {
     def servletContext
     def template
     def defStatus
-    
+
     void setUp() {
-        servletContext = new MockServletContext(
-                'test/files/contentRepository', new FileSystemResourceLoader())
-        servletContext.setAttribute(
-                GrailsApplicationAttributes.APPLICATION_CONTEXT,
-                applicationContext)
-        ServletContextHolder.servletContext = servletContext
-        
+    
+        initFakeServletContextPath('test/files/contentRepository')
+
         wcmContentRepositoryService.wcmSecurityService.securityDelegate.getUserRoles = { -> ['ROLE_ADMIN'] }
         
         
@@ -113,7 +111,7 @@ class RepositoryControllerTests extends GroovyTestCase {
         //   ----d
         //       ----b (3)
     }
-
+        
     void testNothing() {
         
     }

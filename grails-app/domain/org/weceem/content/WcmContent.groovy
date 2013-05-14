@@ -418,4 +418,15 @@ class WcmContent implements Comparable, Taggable, Serializable {
         }
         return result
     }
+
+    String debugDescription(String indent = "") {
+        StringBuilder sb = new StringBuilder()
+        sb <<= "${indent}${aliasURI} (${this.class} - ${this.toString()})\n"
+        if (children?.size()) {
+            children.each { c ->
+                sb <<= c.debugDescription(indent+"  ")
+            }
+        }
+        return sb.toString()
+    }
 }

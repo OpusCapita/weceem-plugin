@@ -18,17 +18,18 @@ class ContentRepositoryDefaultSpaceTests extends AbstractWeceemIntegrationTest {
     def servletContext 
 
     public void setUp() {
-        ServletContextHolder.servletContext = new MockServletContext(
-                'test/files/default-space-tests', new FileSystemResourceLoader())
-        ServletContextHolder.servletContext.setAttribute(
-                GrailsApplicationAttributes.APPLICATION_CONTEXT,
-                grailsApplication.mainContext)
+        initFakeServletContextPath('test/files/default-space-tests')
+
         servletContext = grailsApplication.mainContext.servletContext = ServletContextHolder.servletContext
         grailsApplication.mainContext.simpleSpaceImporter.proxyHandler = [unwrapIfProxy: { o -> o}]
 
+        // Reset to defaults!
+        grailsApplication.config.weceem.default.space.template = null
+        grailsApplication.config.weceem.space.templates = [:]
+
         super.setUp()
     }
-    
+            
     void testDefaultSpaceCreateWorksWithoutLoggedInUser() {
         wcmContentRepositoryService.wcmSecurityService.securityDelegate.getUserRoles = { -> [] }
         

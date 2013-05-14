@@ -9,10 +9,8 @@ import org.weceem.content.*
 import org.weceem.html.*
 
 import org.weceem.services.*
-import org.springframework.mock.web.MockServletContext
-import org.springframework.core.io.FileSystemResourceLoader
-import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
-import org.codehaus.groovy.grails.web.context.ServletContextHolder
+
+import org.weceem.AbstractServletContextMockingTest
 
 /**
  * ContentRepositoryTests class contains tests for tree operations from
@@ -20,14 +18,14 @@ import org.codehaus.groovy.grails.web.context.ServletContextHolder
  *
  * These old tests BAD because they are not mocking the services, so they are testing the services and controller
  */
-class ContentControllerTests extends GroovyTestCase {
+class ContentControllerTests extends AbstractServletContextMockingTest {
     def template
     def nodeA
     def nodeB
     def grailsApplication
     def folder
     def defaultDoc
-    
+
     WcmContentController mockedController() {
         def con = new WcmContentController()
 
@@ -42,9 +40,7 @@ class ContentControllerTests extends GroovyTestCase {
     }
 
     void setUp() {
-        def servletContext = new MockServletContext(
-                'test/files/contentRepository', new FileSystemResourceLoader())
-        ServletContextHolder.servletContext = servletContext
+        initFakeServletContextPath('test/files/contentRepository')
 
         def defStatus = new WcmStatus(code: 400, description: "published", publicContent: true)
         assert defStatus.save(flush:true)
@@ -124,7 +120,7 @@ class ContentControllerTests extends GroovyTestCase {
         assert folder.save(flush:true)
         assert defaultDoc.save(flush:true)
     }
-    
+
     void testDraftContentNotViewableByGuest() {
         def con = mockedController()
 

@@ -4,17 +4,12 @@ import org.weceem.controllers.WcmContentController
 import org.weceem.tags.*
 import org.weceem.content.RenderEngine
 
-class CacheTagLibTests extends grails.test.GrailsUnitTestCase {
-
-    void setUp() {
-        super.setUp()
-    }
+@TestFor(CacheTagLib)
+class CacheTagLibTests {
 
     void testCacheTag() {
-        mockTagLib(CacheTagLib)
-        def taglib = new CacheTagLib()
-        taglib.request[RenderEngine.REQUEST_ATTRIBUTE_PAGE] = [URI:'test']
-        taglib.wcmCacheService = [
+        tagLib.request[RenderEngine.REQUEST_ATTRIBUTE_PAGE] = [URI:'test']
+        tagLib.wcmCacheService = [
             getOrPutValue: { cacheName, key, valueCallable -> 
                 assertEquals 'contentCache', cacheName
                 assertEquals 'test0', key
@@ -24,11 +19,9 @@ class CacheTagLibTests extends grails.test.GrailsUnitTestCase {
             }
         ]
 
-        taglib.cache([:]) { ->
-            "HELLO"
-        }
-        
-        assertEquals "HELLO", taglib.out.toString()
+        def output = applyTemplate("<wcm:cache>HELLO</wcm:cache>")
+
+        assertEquals "HELLO", output.toString()
     }
 
 }

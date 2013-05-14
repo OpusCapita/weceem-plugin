@@ -518,10 +518,14 @@ class WeceemTagLib {
                 "there is no content node at [${path}]")
             out << g.createLink(controller:'wcmContent', action:'notFound', params:[path:path])
         } else {
-            attrs.params = [uri:WeceemTagLib.makeFullContentURI(content)]
-            attrs.controller = 'wcmContent'
-            attrs.action = 'show'
-            out << g.createLink(attrs)
+
+            def linkAttrs = attrs.clone()
+            linkAttrs.remove(ATTR_PATH)
+        
+            linkAttrs.params = [uri:WeceemTagLib.makeFullContentURI(content)]
+            linkAttrs.controller = 'wcmContent'
+            linkAttrs.action = 'show'
+            out << g.createLink(linkAttrs)
         }
     }
     

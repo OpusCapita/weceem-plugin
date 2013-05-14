@@ -16,15 +16,13 @@ class UploadConfigTests extends grails.test.GrailsUnitTestCase {
         
         def basePath = new File(System.getProperty('user.home')+File.separator+'weceem-uploads')
         
+        def dummyConfig = new ConfigObject()
+        dummyConfig.weceem.upload.dir = ''
+        dummyConfig.grails.mime.file.extensions = false
+
         service.with {
             grailsApplication = [
-                config: [
-                    weceem: [
-                        upload: [
-                            dir: ''
-                        ]
-                    ]
-                ],
+                config: dummyConfig,
                 mainContext: [
                     getResource: { path -> [file:new File(basePath, path-'/')] }
                 ]
@@ -32,7 +30,6 @@ class UploadConfigTests extends grails.test.GrailsUnitTestCase {
             loadConfig()
         }
         
-        assertTrue service.uploadInWebapp
         assertEquals '/WeceemFiles/', service.uploadUrl
         assertEquals new File(basePath, 'WeceemFiles'), service.uploadDir
     }
@@ -41,15 +38,13 @@ class UploadConfigTests extends grails.test.GrailsUnitTestCase {
         
         def basePath = new File(System.getProperty('user.home')+File.separator+'weceem-uploads')
         
+        def dummyConfig = new ConfigObject()
+        dummyConfig.weceem.upload.dir = '/uploaded-files/'
+        dummyConfig.grails.mime.file.extensions = false
+
         service.with {
             grailsApplication = [
-                config: [
-                    weceem: [
-                        upload: [
-                            dir: '/uploaded-files/'
-                        ]
-                    ]
-                ],
+                config: dummyConfig,
                 mainContext: [
                     getResource: { path -> [file:new File(basePath, path-'/')] }
                 ]
@@ -57,7 +52,6 @@ class UploadConfigTests extends grails.test.GrailsUnitTestCase {
             loadConfig()
         }
         
-        assertTrue service.uploadInWebapp
         assertEquals '/uploaded-files/', service.uploadUrl
         assertEquals new File(basePath, 'uploaded-files'), service.uploadDir
     }
@@ -66,15 +60,13 @@ class UploadConfigTests extends grails.test.GrailsUnitTestCase {
         
         def basePath = new File('.', 'test-uploads-folder')
 
+        def dummyConfig = new ConfigObject()
+        dummyConfig.weceem.upload.dir = 'file:'+basePath.absolutePath
+        dummyConfig.grails.mime.file.extensions = false
+
         service.with {
             grailsApplication = [
-                config: [
-                    weceem: [
-                        upload: [
-                            dir: 'file:'+basePath.absolutePath
-                        ]
-                    ]
-                ],
+                config: dummyConfig,
                 mainContext: [
                     getResource: { path -> fail("getResource should not be called!") }
                 ]
@@ -82,7 +74,6 @@ class UploadConfigTests extends grails.test.GrailsUnitTestCase {
             loadConfig()
         }
         
-        assertFalse service.uploadInWebapp
         assertEquals '/uploads/', service.uploadUrl
         assertEquals basePath.absolutePath, service.uploadDir.absolutePath
     }
@@ -91,15 +82,12 @@ class UploadConfigTests extends grails.test.GrailsUnitTestCase {
         
         def basePath = new File('.', 'test-uploads-folder')
 
+        def dummyConfig = new ConfigObject()
+        dummyConfig.weceem.upload.dir = "file:${basePath.absolutePath}"
+        dummyConfig.grails.mime.file.extensions = false
         service.with {
             grailsApplication = [
-                config: [
-                    weceem: [
-                        upload: [
-                            dir: "file:${basePath.absolutePath}"
-                        ]
-                    ]
-                ],
+                config: dummyConfig,
                 mainContext: [
                     getResource: { path -> fail("getResource should not be called!") }
                 ]
@@ -107,7 +95,6 @@ class UploadConfigTests extends grails.test.GrailsUnitTestCase {
             loadConfig()
         }
         
-        assertFalse service.uploadInWebapp
         assertEquals '/uploads/', service.uploadUrl
         assertEquals basePath.absolutePath, service.uploadDir.absolutePath
     }

@@ -242,6 +242,8 @@ class SimpleSpaceImporter implements SpaceImporter {
             def result = content.save()
             if (!result){
                 log.error("Can't save content: ${content.aliasURI}, error: ${content.errors}")
+            } else {
+                content.index()
             }
             return result
         } else return content

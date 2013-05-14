@@ -23,7 +23,6 @@ class SearchTests extends AbstractWeceemIntegrationTest {
         super.setUp()
         
         searchableService = grailsApplication.mainContext.searchableService
-        searchableService.stopMirroring()
         
         statusA = new WcmStatus(code: 400, description: "published", publicContent: true)
         assert statusA.save(flush:true)
@@ -35,43 +34,43 @@ class SearchTests extends AbstractWeceemIntegrationTest {
         spaceB = new WcmSpace(name: 'b', aliasURI: 'b')
         assert spaceB.save(flush: true)
 
-        def folder = new WcmFolder(title:'folder', aliasURI:'folder1', space:spaceA, status:statusA)
-        assert folder.save()
-        
+        def folder = wcmContentRepositoryService.createNode(WcmFolder, [title:'folder', aliasURI:'folder1', space:spaceA, status:statusA])
+
         50.times {
-            assert new WcmHTMLContent(title: "Acontent-$it", aliasURI: "acontent-$it",
-                content: 'content number #$it', status: it % 2 == 0 ? statusA : statusB,
+            wcmContentRepositoryService.createNode(WcmHTMLContent, [
+                title: "Acontent-$it", aliasURI: "acontent-$it",
+                content: "content number #$it", status: it % 2 == 0 ? statusA : statusB,
                 createdBy: 'admin', createdOn: new Date(),
                 space: spaceA,
-                orderIndex: 1+it).save()
+                orderIndex: 1+it])
         }
 
         10.times {
-            def n = new WcmHTMLContent(title: "Child-$it", aliasURI: "child-$it",
-                content: 'child number #$it', status: statusA,
+            wcmContentRepositoryService.createNode(WcmHTMLContent, [
+                title: "Child-$it", aliasURI: "child-$it",
+                content: "child number #$it", status: statusA,
                 createdBy: 'admin', createdOn: new Date(),
                 space: spaceA,
-                orderIndex: 1+it)
-            folder.addToChildren(n)
-            n.validate()
-            println "Errors: ${n.errors}"
-            assert n.save() 
+                orderIndex: 1+it, 'parent.id':folder.ident()])
         }
 
         10.times {
-            assert new WcmHTMLContent(title: "Bcontent-$it", aliasURI: "bcontent-$it",
-                content: 'content number #$it', status: statusA,
+            wcmContentRepositoryService.createNode(WcmHTMLContent, [
+                title: "Bcontent-$it", aliasURI: "bcontent-$it",
+                content: "content number #$it", status: statusA,
                 createdBy: 'admin', createdOn: new Date(),
                 space: spaceB,
-                orderIndex: 1+it).save(flush:true)
+                orderIndex: 1+it])
         }
 
-        searchableService.reindex()
-        searchableService.startMirroring()
+        System.out.println "spaceA: \n"
+        wcmContentRepositoryService.findAllRootContent(spaceA).each { n ->
+            System.out.println n.debugDescription()
+        }
     }
     
     void tearDown() {
-        
+        super.tearDown()
     }
     
     void testSearchForContentAsInRepository() {

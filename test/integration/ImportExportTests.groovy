@@ -12,12 +12,14 @@ import org.weceem.html.*
 import org.weceem.wiki.*
 import org.weceem.files.*
 
+import org.weceem.AbstractServletContextMockingTest
+
 /**
  * ImportExportTests.
  *
  * @author Sergei Shushkevich
  */
-class ImportExportTests extends GroovyTestCase
+class ImportExportTests extends AbstractServletContextMockingTest
         implements ApplicationContextAware {
 
     static transactional = true
@@ -27,17 +29,15 @@ class ImportExportTests extends GroovyTestCase
     def grailsApplication
 
     protected void setUp() {
-        ServletContextHolder.servletContext = new MockServletContext(
-                'test/files/importExport', new FileSystemResourceLoader())
-        ServletContextHolder.servletContext.setAttribute(
-                GrailsApplicationAttributes.APPLICATION_CONTEXT,
-                applicationContext)
+        initFakeServletContextPath('test/files/importExport')
+
         grailsApplication.mainContext.servletContext = ServletContextHolder.servletContext
         grailsApplication.mainContext.simpleSpaceImporter.proxyHandler = [unwrapIfProxy: { o -> o}]
         grailsApplication.mainContext.simpleSpaceExporter.proxyHandler = [unwrapIfProxy: { o -> o}]
         
         new WcmSpace(name: 'testSpace', aliasURI:'main').save(flush: true)
     }
+        
 /*
     void testDefaultImport() {
         def servletContext = ServletContextHolder.servletContext

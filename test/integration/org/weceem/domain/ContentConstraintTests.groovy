@@ -11,6 +11,8 @@ import org.weceem.content.*
 import org.weceem.html.*
 import org.weceem.wiki.*
 
+import org.weceem.AbstractServletContextMockingTest
+
 class ContentConstraintTests extends AbstractWeceemIntegrationTest {
     void testAllContentPropertyConstraintsAreCorrect() {
         grailsApplication.domainClasses.each { dca ->

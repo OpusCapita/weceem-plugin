@@ -10,13 +10,15 @@ import org.springframework.core.io.FileSystemResourceLoader
 import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
 
+import org.weceem.AbstractServletContextMockingTest
+
 /**
  * ContentRepositoryTests class contains tests for tree operations from
  * wcmContentRepositoryService.
  *
  * These old tests BAD because they are not mocking the services, so they are testing the services and controller
  */
-class ContentSubmissionControllerTests extends GroovyTestCase {
+class ContentSubmissionControllerTests extends AbstractServletContextMockingTest {
     def template
     def nodeA
     def nodeB
@@ -61,12 +63,8 @@ class ContentSubmissionControllerTests extends GroovyTestCase {
     }
 
     void setUp() {
-        def servletContext = new MockServletContext(
-            'test/files/contentRepository', new FileSystemResourceLoader())
-        servletContext.setAttribute(
-            GrailsApplicationAttributes.APPLICATION_CONTEXT,
-            applicationContext)
-        ServletContextHolder.servletContext = servletContext
+    
+        initFakeServletContextPath('test/files/contentRepository')
 
         def draftStatus = new WcmStatus(code: 100, description: "draft", publicContent: false)
         assert draftStatus.save(flush:true)
@@ -84,7 +82,7 @@ class ContentSubmissionControllerTests extends GroovyTestCase {
             template: template, orderIndex: 1)
         assert nodeA.save(flush: true)
     }
-   
+
     void testSubmitCommentAsGuest() {
        /* Can't get it to work as can't give grailsApplication to controller
         assertTrue WcmComment.count() == 0
