@@ -1,4 +1,4 @@
-<plugin name='weceem' version='1.1.3-SNAPSHOT' grailsVersion='2.1 &gt; *'>
+<plugin name='weceem' version='1.1.3.pano-SNAPSHOT' grailsVersion='2.1 &gt; *'>
   <author>jCatalog AG</author>
   <authorEmail>info@weceem.org</authorEmail>
   <title>Weceem CMS</title>
@@ -69,29 +69,33 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
   <repositories>
     <repository name='grailsCentral' url='http://grails.org/plugins' />
     <repository name='mavenCentral' url='http://repo1.maven.org/maven2/' />
+    <repository name='http://grails.org/plugins' url='http://grails.org/plugins' />
+    <repository name='http://repository.codehaus.org' url='http://repository.codehaus.org/' />
+    <repository name='http://repository.jboss.org/maven2' url='http://repository.jboss.org/maven2/' />
   </repositories>
   <dependencies>
     <compile>
+      <dependency group='org.apache.ant' name='ant-launcher' version='1.7.1' />
       <dependency group='net.java.dev.textile-j' name='textile-j' version='2.2.864' />
       <dependency group='xstream' name='xstream' version='1.2.1' />
-      <dependency group='org.apache.ant' name='ant-launcher' version='1.7.1' />
       <dependency group='org.apache.ant' name='ant' version='1.7.1' />
+      <dependency group='com.lowagie' name='itext' version='2.1.3' />
     </compile>
   </dependencies>
   <plugins>
     <compile>
-      <plugin group='org.grails.plugins' name='taggable' version='1.0.1' />
-      <plugin group='org.grails.plugins' name='jquery-ui' version='1.8.24' />
-      <plugin group='org.grails.plugins' name='jquery' version='1.8.3' />
-      <plugin group='org.grails.plugins' name='searchable' version='0.6.4' />
-      <plugin group='org.grails.plugins' name='feeds' version='1.5' />
-      <plugin group='org.grails.plugins' name='cache-headers' version='1.1.5' />
-      <plugin group='org.grails.plugins' name='ckeditor' version='3.6.3.0' />
-      <plugin group='org.grails.plugins' name='hibernate' version='2.2.1' />
-      <plugin group='org.grails.plugins' name='bean-fields' version='1.0' />
-      <plugin group='org.grails.plugins' name='navigation' version='1.3.2' />
-      <plugin group='org.grails.plugins' name='quartz' version='1.0-RC5' />
       <plugin group='org.grails.plugins' name='blueprint' version='1.0.2' />
+      <plugin group='org.grails.plugins' name='platform-core' version='1.0.RC5' />
+      <plugin group='org.grails.plugins' name='taggable' version='1.0.1' />
+      <plugin group='org.grails.plugins' name='ckeditor' version='3.6.3.0' />
+      <plugin group='org.grails.plugins' name='cache-headers' version='1.1.5' />
+      <plugin group='org.grails.plugins' name='feeds' version='1.6' />
+      <plugin group='org.grails.plugins' name='jquery-ui' version='1.8.24' />
+      <plugin group='org.grails.plugins' name='navigation' version='1.3.2' />
+      <plugin group='org.grails.plugins' name='quartz' version='1.0-RC7' />
+      <plugin group='org.grails.plugins' name='jquery' version='1.8.3' />
+      <plugin group='org.grails.plugins' name='bean-fields' version='1.0' />
+      <plugin group='org.grails.plugins' name='searchable' version='0.6.4' />
     </compile>
     <provided>
       <plugin group='org.grails.plugins' name='webxml' version='1.4.1' />
