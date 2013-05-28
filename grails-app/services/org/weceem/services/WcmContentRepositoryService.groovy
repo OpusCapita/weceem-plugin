@@ -461,6 +461,7 @@ class WcmContentRepositoryService implements InitializingBean {
         log.info "Deleting content from space [$space]"
         // Let's brute-force this
         // @todo remove/rework this for 0.2
+		// purge all parent-children relationships essentially flattening out the hierarchy
         def contentList = WcmContent.findAllBySpace(space)
         for (content in contentList){
             // Invalidate the caches before parent is changed
@@ -471,16 +472,82 @@ class WcmContentRepositoryService implements InitializingBean {
             content.unindex()
             content.save()
         }
-        // @todo This code is very naïve and probably broken
-        // It needs leaf-first dependency ordering and/or brute force clearing of all refs
-        eachContentDepthFirst(space) { node ->
-            log.debug "Finding references to content [${node.aliasURI}] in space [$space]"
-            removeAllReferencesTo([node])
-            deleteNode(node)
-        }
+		
+		// loop and delete unreferenced content
+		int size = contentList.size()
+		while (size > 0) {
+			log.debug "Deleting unreferenced content in space [$space]; ${size} items remain to be deleted"
+			contentList = deleteUnreferencedContent(contentList)
+			if (contentList.size() == size) {
+				throw new RuntimeException("Could not find any unreferenced content. So, cannot continue deleting.")
+			}
+			size = contentList.size()
+		}
+		
+		// old code which has issues: http://jira.jcatalog.com/browse/WCM-251
+//        // @todo This code is very naïve and probably broken
+//        // It needs leaf-first dependency ordering and/or brute force clearing of all refs
+//        eachContentDepthFirst(space) { node ->
+//            log.debug "Finding references to content [${node.aliasURI}] in space [$space]"
+//            removeAllReferencesTo([node])
+//            deleteNode(node)
+//        }
         log.info "Finished deleting content from space [$space]"
     }
     
+	/**
+	 * Deletes all items in a list which are not referenced by other items in the same list
+	 * and returns a list of those items which are referenced and which could not be deleted.
+	 * @param contentList the list of items to delete
+	 * @return the list of items which could not be deleted
+	 */
+	List<WcmContent> deleteUnreferencedContent(List<WcmContent> contentList) {
+		def result = []
+		for (content in contentList) {
+			if (isReferred(content, contentList)) {
+				result += content
+			}
+			else {
+				deleteNode(content)
+			}
+		}
+		result
+	}
+	
+	/**
+	 * Checks if a content item is referenced by some other content item in a list.
+	 * @param content the item to check
+	 * @param contentList the list of items within which we search for referers
+	 * @return true, iff the item is referenced by some other content item in the list
+	 */
+	boolean isReferred(WcmContent content, List<WcmContent> contentList) {
+		requirePermissions(content, [WeceemSecurityPolicy.PERMISSION_VIEW])
+		
+		// @todo this will perform rather poorly. We should find all assocation properties FIRST
+		// and then run a query for each association, which - with caching - should run a lot faster than
+		// checking every property on every node
+		for (cont in contentList) {
+			def perProps = findDomainClassContentAssociations(getDomainClassArtefact(cont))
+			for (p in perProps){
+				if (cont."${p.name}") {
+					if (cont."${p.name}" instanceof Collection){
+						for (inst in cont."${p.name}"){
+							if (inst.equals(content)) {
+								return true
+							}    
+						}
+					} else {
+						if (content.equals(cont."${p.name}")){
+							return true
+						}
+					}
+				}
+			}
+		}
+		
+        false
+	}
+	
     void eachContentDepthFirst(WcmSpace space, Closure code) {
         def rootNodes = findAllRootContent(space, [sort:'orderIndex'])
         rootNodes.each { root ->
