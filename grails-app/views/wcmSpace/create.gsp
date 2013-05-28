@@ -31,6 +31,7 @@
                   <g:select name="templateName" from="${templates}" 
                     optionValue="${ { v -> g.message(code:'weceem.template.name.'+v.key) } }"
                     optionKey="key"
+                    value="${selectedTemplate}"
                     />
                 </td>
               </tr>            

@@ -127,6 +127,7 @@ $(function(){
                     </table>
                 </div>
             </div>
+         </div>
 
 <div id="createNewDialog" class="ui-helper-hidden" title="${message(code:'content.title.create', encodeAs:"HTML")}">
     <g:form controller="wcmEditor" action="create" method="GET">

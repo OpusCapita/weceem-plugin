@@ -8,9 +8,9 @@ class WeceemGrailsPlugin {
     def _log = LogFactory.getLog('org.weceem.WeceemGrailsPlugin')
 
     // the plugin version
-    def version = "1.1.3-SNAPSHOT"
+    def version = "1.1.3.pano-SNAPSHOT"
     // the version or versions of Grails the plugin is designed for
-    def grailsVersion = "1.3 > *"
+    def grailsVersion = "2.1 > *"
 
     def observe = ["hibernate", 'services']
     

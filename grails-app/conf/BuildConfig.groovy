@@ -1,4 +1,4 @@
-grails.tomcat.jvmArgs = ["-Xmx1024m", "-XX:MaxPermSize=100m", '-verbose:class'] 
+grails.tomcat.jvmArgs = ["-Xmx1024m", "-XX:MaxPermSize=100m", '-verbose:class']
 grails.project.work.dir="target/work"
 
 
@@ -12,6 +12,7 @@ grails.project.dependency.resolution = {
 		grailsHome()
 		grailsCentral()
         flatDir dirs:"lib" // need this for iText
+        mavenCentral() // need this to resolve junit 3.8.1 (with grails 2.2.1+)
     }
 
     def gebVersion = "0.9.0-RC-1"
@@ -37,14 +38,14 @@ grails.project.dependency.resolution = {
     }
 
 	plugins {
-        build(":tomcat:$grailsVersion", ":release:2.2.0", ":hibernate:$grailsVersion") {
+        build(":tomcat:$grailsVersion", ":release:2.2.1", ":hibernate:$grailsVersion") {
             export = false
         }
 
-        compile ":bean-fields:1.0"
-        compile ":blueprint:0.9.1.1"
+        compile ":bean-fields:1.0" // consider replacing with the fields plugin or even with the new Platform UI
+        compile ":blueprint:1.0.2"
         compile ":cache-headers:1.1.5"
-        compile ":ckeditor:3.6.0.0"
+        compile ":ckeditor:3.6.3.0"
         compile ":feeds:1.6"
 
         compile ":platform-core:1.0.RC5"
@@ -53,6 +54,7 @@ grails.project.dependency.resolution = {
             excludes "xerces, xml-apis"
             export = false
         }
+
         compile ":jquery:1.8.3"
         compile ":jquery-ui:1.8.24"
         compile ":navigation:1.3.2"
