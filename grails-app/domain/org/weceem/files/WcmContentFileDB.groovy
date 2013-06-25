@@ -39,6 +39,7 @@ class WcmContentFileDB extends WcmContent {
 	static overrideRequired = [ 'title': false ]
 
 	static constraints = {
+        content(nullable: false, maxSize: WcmContent.MAX_CONTENT_SIZE)
 		// @todo this is ugly, WcmContentDirectory should never have one, and all files SHOULD
 		fileMimeType(nullable:true, blank:true)
 	}
@@ -86,6 +87,12 @@ class WcmContentFileDB extends WcmContent {
 		rawContent
 	}
 	
+    /**
+     * Must be overriden by content types that can represent their content as text.
+     * Used for search results and versioning
+     */
+    public String getContentAsText() { "BASE64: " + content }
+
 	// Get the servlet container to serve the file
 	static handleRequest = { content ->
 		renderFileDB(content.rawContent, content.fileMimeType)
