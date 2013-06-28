@@ -88,10 +88,33 @@ class WcmContentFileDB extends WcmContent {
 	}
 	
     /**
-     * Must be overriden by content types that can represent their content as text.
+     * Must be overridden by content types that can represent their content as text.
      * Used for search results and versioning
      */
-    public String getContentAsText() { "BASE64: " + content }
+    public String getContentAsText() { 
+		int count = 0;
+		StringBuilder out = new StringBuilder();
+		out << "Base64:"
+		if (content == null) {
+			out << " null"
+		}
+		else {
+			int len = 60
+			int pos = 0;
+			while (pos >= 0) {
+				out << '\n'
+				if (content.length() - pos > len) {
+					out << content.substring(pos, pos + len)
+					pos += len
+				}
+				else {
+					out << content.substring(pos)
+					pos = -1
+				}
+			}
+		}
+		out.toString()
+	}
 
 	// Get the servlet container to serve the file
 	static handleRequest = { content ->
