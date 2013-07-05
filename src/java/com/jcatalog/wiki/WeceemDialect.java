@@ -22,6 +22,9 @@ public class WeceemDialect extends ConfluenceDialect {
 
     private List<Block> supportedBlocks;
 
+    /**
+     * 
+     */
     public WeceemDialect() {
         supportedBlocks = new ArrayList<Block>();
         supportedBlocks.add(new HeadingBlock());
@@ -34,6 +37,10 @@ public class WeceemDialect extends ConfluenceDialect {
         supportedBlocks.add(new ParagraphBlock());
     }
 
+    /**
+     * @see net.java.textilej.parser.markup.confluence.ConfluenceDialect#getBlocks()
+     */
+    @Override
     public List<Block> getBlocks() {
         return supportedBlocks;
     }

@@ -1,7 +1,6 @@
-import org.weceem.services.WcmEventService
-import org.weceem.event.WeceemEvents
-
 import org.weceem.content.WcmContent
+import org.weceem.event.WeceemEvents
+import org.weceem.services.WcmEventService
 
 class EventServiceTests extends grails.test.GrailsUnitTestCase {
 
