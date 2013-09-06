@@ -7,7 +7,7 @@ class WcmFolder extends WcmContent {
 
     static transients = WcmContent.transients
 
-    static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "server-folder-32.png"]
+    static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "folder-32.png"]
 
     static standaloneContent = false
     

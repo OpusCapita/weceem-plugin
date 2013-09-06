@@ -238,6 +238,16 @@ class RenderEngine {
         return null
     }
     
+	/**
+	 * Renders a "file" stored in the database.
+	 */
+	def renderFileDB(controllerDelegate, byte[] rawContent, String mimeType) {
+		controllerDelegate.response.setContentType(mimeType)
+		// @todo set caching headers just as for normal content
+		// @todo is this fast enough?
+		controllerDelegate.response.outputStream << rawContent
+		return null
+	}
     
    /** 
     * Do the full default render pipeline on the supplied content instance.
@@ -339,6 +349,9 @@ class HandleRequestDelegator {
     
     def renderFile(File file, String mimetype) {
         renderEngine.renderFile(controllerDelegate, file, mimetype)
+    }
+    def renderFileDB(byte[] rawContent, String mimetype) {
+        renderEngine.renderFileDB(controllerDelegate, rawContent, mimetype)
     }
     def executeScript(WcmScript script) {
         renderEngine.executeScript(controllerDelegate, script)

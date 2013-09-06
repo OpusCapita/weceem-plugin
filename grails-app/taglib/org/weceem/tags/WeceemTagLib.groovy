@@ -404,6 +404,7 @@ class WeceemTagLib {
                 first:first,
                 active: (n.ident() == activeNode.ident()) || (lineage.find { it.ident() == n.ident() }),
                 custom:custom,
+				types: types,
                 level:currentLevel,
                 last: last, 
                 firstClass: firstClass,
@@ -496,7 +497,7 @@ class WeceemTagLib {
     }
     
     def createLink = { attrs, body -> 
-        def space = attrs.remove(ATTR_SPACE)
+        def space = attrs[ATTR_SPACE]
         def path = attrs[ATTR_PATH]
         
         if (space != null) {

@@ -49,7 +49,10 @@ class WcmSpaceController {
             session.currentAdminSpace = space.ident()
             redirect(controller:'wcmRepository')
         } else {
-            render(view: 'create', model: [space: space])
+    		def templs = new TreeMap()
+	    	templs.putAll(wcmContentRepositoryService.spaceTemplates)
+            render(view: 'create', model: [space: space, templates:templs, 
+				   selectedTemplate: params.templateName])
         }
     }
 

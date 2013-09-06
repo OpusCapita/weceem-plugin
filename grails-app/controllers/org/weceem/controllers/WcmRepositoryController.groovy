@@ -383,12 +383,13 @@ class WcmRepositoryController {
         log.debug "deleteNode called with id: ${params.id}"
         
         def node = WcmContent.get(params.id)
+		def recursion = params.recursion == null ? false : (params.recursion as boolean)
         if (!node) {
             render ([result:'error', error: message(code: 'error.content.repository.node.not.found')]) as JSON
         } else {
             def resp
             try {
-                wcmContentRepositoryService.deleteNode(node)
+                wcmContentRepositoryService.deleteNode(node, recursion)
                 resp = [result: 'success']
             } catch (DeleteNotPossibleException de) {
                 log.error de

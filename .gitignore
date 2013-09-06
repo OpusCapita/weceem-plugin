@@ -8,3 +8,8 @@ export-test-*
 *.iml
 *.ipr
 *.iws
+target-eclipse
+.settings
+.project
+.classpath
+.link_to_grails_plugins

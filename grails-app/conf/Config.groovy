@@ -27,7 +27,7 @@ log4j = {
 
     info   'grails.app'
 
-    debug   'org.weceem',
+    info   'org.weceem',
             'grails.app.controller',
             'grails.app.service',
             'grails.app.task',

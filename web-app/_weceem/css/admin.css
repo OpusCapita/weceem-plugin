@@ -129,3 +129,11 @@ Just change the color-values to apply your own color-scheme.
   color: #999999;
   text-align:right;
 }
+
+/*
+ * CodeMirror: Fixes an issue with Safari on Ipad where the code overflows the text area.
+ */
+.CodeMirror-wrapping {
+  overflow : scroll;
+  -webkit-overflow-scrolling: touch;
+}
