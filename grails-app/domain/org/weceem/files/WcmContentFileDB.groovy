@@ -36,7 +36,7 @@ class WcmContentFileDB extends WcmContent {
 
 	static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "server-file-32.png"]
 
-	static overrideRequired = [ 'title': false ]
+	static overrideRequired = WcmContent.overrideRequired + [ 'title': false ]
 
 	static constraints = {
         content(nullable: false, maxSize: WcmContent.MAX_CONTENT_SIZE)
