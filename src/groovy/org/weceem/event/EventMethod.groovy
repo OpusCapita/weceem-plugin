@@ -3,8 +3,10 @@ package org.weceem.event
 class EventMethod {
     final Class declaredIn
     final String name
+    @SuppressWarnings("rawtypes")
     final Class[] argTypes
     
+    @SuppressWarnings("rawtypes")
     EventMethod(String name, Class declaredIn, Class[] argTypes) {
         this.@name = name
         this.@declaredIn = declaredIn

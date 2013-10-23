@@ -1,7 +1,7 @@
 package org.weceem.tags
 
 import org.weceem.content.WcmContent
-
+import org.weceem.files.WcmContentFileDB
 import org.weceem.content.WcmStatus
 import org.weceem.content.WcmTemplate
 import org.weceem.script.WcmScript
@@ -179,7 +179,9 @@ class EditorFieldTagLib {
     def editorFieldContentFileUpload = { attrs ->
         if (pageScope.content.fileSize) {
             out << "<span class=\"field-readonly\">File already uploaded (${pageScope.content.fileSize} bytes)</span>"
-        } else {
+        } 
+		if (!pageScope.content.fileSize || 
+			pageScope.content.metaClass.hasProperty(proxyHandler.unwrapIfProxy(pageScope.content).class, 'allowUpDate') && pageScope.content.allowUpDate) {
             out << "<input type=\"file\" name=\"${attrs.property}\"/>"
         }
     }

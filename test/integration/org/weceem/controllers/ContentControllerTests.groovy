@@ -4,7 +4,6 @@ import org.springframework.context.ApplicationContext
 
 import groovy.mock.interceptor.*
 
-import org.weceem.controllers.*
 import org.weceem.content.*
 import org.weceem.html.*
 

@@ -6,7 +6,6 @@ import org.codehaus.groovy.grails.web.binding.StructuredPropertyEditor
 import org.springframework.beans.PropertyAccessException
 
 import java.text.DateFormat
-import java.util.*
 
 /**
  * Structured editor for editing dates that takes 1 date field and two for hour and minute
