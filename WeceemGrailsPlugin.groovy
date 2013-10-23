@@ -8,7 +8,7 @@ class WeceemGrailsPlugin {
     def _log = LogFactory.getLog('org.weceem.WeceemGrailsPlugin')
 
     // the plugin version
-    def version = "1.1.2"
+    def version = "1.1.2.1-SNAPSHOT"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "1.3 > *"
 
@@ -150,7 +150,7 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         co.ckeditor.upload.image.allowed = ['jpg', 'gif', 'jpeg', 'png']
         co.ckeditor.upload.image.denied = []
         co.ckeditor.upload.link.browser = true
-        co.ckeditor.upload.link.upload	= true
+        co.ckeditor.upload.link.upload = true
         co.ckeditor.upload.link.allowed = ['pdf', 'doc', 'docx', 'zip', 'jpg', 'jpeg', 'png']
         co.ckeditor.upload.media.upload = true
         co.ckeditor.upload.media.allowed = ['mpg','mpeg','avi','wmv','asf','mov']

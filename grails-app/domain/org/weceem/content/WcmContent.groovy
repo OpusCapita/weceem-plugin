@@ -26,28 +26,28 @@ import org.grails.taggable.*
  */
 // @todo this SHOULD be abstract, but will it work?
 class WcmContent implements Comparable, Taggable {
-    
+
     static VALID_ALIAS_URI_CHARS = 'A-Za-z0-9_\\-\\.'
     static INVALID_ALIAS_URI_CHARS_PATTERN = "[^"+VALID_ALIAS_URI_CHARS+"]"
     static VALID_ALIAS_URI_PATTERN = "["+VALID_ALIAS_URI_CHARS+"]+"
     static MAX_CONTENT_SIZE = 500000
-    
+
     transient def wcmSecurityService
     transient def proxyHandler
-    
+
     // we only index title and space
     static searchable = {
          alias WcmContent.name.replaceAll("\\.", '_')
-         
+
          only = ['title', 'status', 'absoluteURI']
-         
+
          absoluteURI excludeFromAll: true
-         space component: true 
+         space component: true
          status component: [prefix:'status_']
     }
-    
+
     static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "html-file-32.png"]
-    
+
     // that is also the subject for forums
     String title
 
@@ -59,17 +59,17 @@ class WcmContent implements Comparable, Taggable {
     SortedSet children
 
     String language
-    
+
     String createdBy
     Date createdOn
     String changedBy
     Date changedOn
-    
+
     Date publishFrom
     Date publishUntil
-    
+
     WcmStatus status
-    
+
     String description // Description/abstract of the content
     String identifier  // A unique ID
 
@@ -78,20 +78,20 @@ class WcmContent implements Comparable, Taggable {
     String metaPublisher   // Entity responsible for making content available
     String metaSource      // Entity that was original source of the content
     String metaCopyright   // Copyright for the content (aka Rights)
-    
+
     Integer validFor = VALID_FOR_HOUR  // cache maxAge
 
     String contentDependencies
 
     static belongsTo = [space: WcmSpace, parent: WcmContent]
-    static transients = [ 
-        'lastModified', 
-        'titleForHTML', 
-        'titleForMenu', 
-        'versioningProperties', 
-        'contentAsText', 
-        'contentAsHTML', 
-        'mimeType', 
+    static transients = [
+        'lastModified',
+        'titleForHTML',
+        'titleForMenu',
+        'versioningProperties',
+        'contentAsText',
+        'contentAsHTML',
+        'mimeType',
         'wcmSecurityService',
         'proxyHandler',
         'absoluteURI',
@@ -105,7 +105,7 @@ class WcmContent implements Comparable, Taggable {
     static final VALID_FOR_DAY = 60*60*24
     static final VALID_FOR_HOUR = 60*60
     static final VALID_FOR_5MIN = 60*5
-    
+
     static constraints = {
         title(size:1..100, nullable: false, blank: false)
         aliasURI(nullable: false, blank: false, unique: ['space', 'parent'], maxSize: 50)
@@ -119,7 +119,7 @@ class WcmContent implements Comparable, Taggable {
         changedBy(nullable: true)
         changedOn(nullable: true)
         publishFrom(nullable: true)
-        publishUntil(nullable: true, validator: { value, obj -> 
+        publishUntil(nullable: true, validator: { value, obj ->
             // Allow it to be null or greater than publishFrom
             if (value != null) {
                 if (value.time <= (obj.publishFrom ? obj.publishFrom.time : value.time-1)) {
@@ -132,8 +132,8 @@ class WcmContent implements Comparable, Taggable {
 
         contentDependencies(maxSize:500, nullable: true)
 
-        metaCreator nullable: true, blank: true, size:0..80   
-        metaPublisher nullable: true, blank: true, size:0..80   
+        metaCreator nullable: true, blank: true, size:0..80
+        metaPublisher nullable: true, blank: true, size:0..80
         description nullable: true, blank: true, size:0..500
         identifier nullable: true, blank: true, size:0..80
         metaSource nullable: true, blank: true, size:0..80
@@ -172,20 +172,19 @@ class WcmContent implements Comparable, Taggable {
         validFor group:'advanced', editor:'CacheMaxAge'   // cache maxAge
         contentDependencies group:'advanced'
 
-        metaCreator group:'meta'    
-        metaPublisher group:'meta'   
+        metaCreator group:'meta'
+        metaPublisher group:'meta'
         description group:'extra', editor:'LongString'
         identifier group:'extra'
-        metaSource group:'meta'      
+        metaSource group:'meta'
         metaCopyright group:'meta'
     }
-    
+
     int compareTo(Object o) {
         if (this.is(o)) return 0
-        
-        // NOTE: the orderIndex == a.orderIndex returning -1 is REQUIRED with Grails 1.1.1 to workaround
-        // issues where orderIndex for children is not unique - returning 0 stops a node being returned in the set!
-        if (!o || (o.orderIndex == null) || (o.orderIndex == orderIndex)) return -1
+        if (o.orderIndex == orderIndex) return 0
+
+        if (!o || (o.orderIndex == null)) return -1
         this.orderIndex <=> o.orderIndex
     }
 
@@ -194,7 +193,7 @@ class WcmContent implements Comparable, Taggable {
     boolean contentShouldAcceptChild(WcmContent newChild) { true }
 
     String getMimeType() { "text/plain" }
-    
+
     /**
      * Can be overriden by content types to customize the short title used for rendering menu items etc
      */
@@ -217,10 +216,10 @@ class WcmContent implements Comparable, Taggable {
      */
     public String getContentAsHTML() { contentAsText ? contentAsText.encodeAsHTML() : '' }
 
-    /** 
+    /**
      * Descendents must override and call super and add their own properties
      */
-    public Map getVersioningProperties() { 
+    public Map getVersioningProperties() {
         def t = this
         [
             title:t.title,
@@ -232,13 +231,13 @@ class WcmContent implements Comparable, Taggable {
             createdOn:t.createdOn,
             changedBy:t.changedBy,
             changedOn:t.changedOn,
-            metaCreator:metaCreator,    
+            metaCreator:metaCreator,
             metaPublisher:metaPublisher,
             description:description,
             identifier:identifier,
             metaSource:metaSource,
             metaCopyright:metaCopyright
-        ] 
+        ]
     }
 
     public void createAliasURI(parent) {
@@ -263,12 +262,12 @@ class WcmContent implements Comparable, Taggable {
                 log.error(msg)
                 throw new IllegalArgumentException(msg)
             } else {
-                visitedNodes << c.ident() 
+                visitedNodes << c.ident()
             }
         }
         return uri.toString()
     }
-    
+
     public List getLineage() {
         def result = []
         def c = this
@@ -278,7 +277,7 @@ class WcmContent implements Comparable, Taggable {
         }
         return result
     }
-    
+
     def beforeInsert = {
         def by
         WcmContent.withNewSession {
@@ -286,21 +285,21 @@ class WcmContent implements Comparable, Taggable {
         }
         if (by == null) by = "system"
         //assert by != null
-        
+
         if (createdBy == null) createdBy = by
         if (createdOn == null) createdOn = new Date()
-    }   
+    }
 
     def beforeUpdate = {
         // @todo check, its possible should be using 'delegate' here not normal property access
-        
+
         changedOn = new Date()
-        
+
         def by
         WcmContent.withNewSession {
             by = wcmSecurityService?.userName
         }
-        
+
         changedBy = by
         if (changedBy == null) {
             changedBy = "system"
@@ -318,19 +317,19 @@ class WcmContent implements Comparable, Taggable {
     String calculateFingerprint() {
         "${ident()}:${version}".encodeAsSHA256()
     }
-    
+
     /**
      * Save a new content revision object with the current state of this content node
      */
     void saveRevision(def latestTitle, def latestSpaceName) {
-        def self = this 
-        
+        def self = this
+
         def t = this
-        
+
         if (log.debugEnabled) {
             log.debug "Building revision info for ${this}"
         }
-        
+
         def lastRevision
         // Don't force this session to flush just so we can query!
         WcmContentVersion.withNewSession {
@@ -342,10 +341,10 @@ class WcmContent implements Comparable, Taggable {
                 }
             }
         }
-        
+
         // Ask the content instance what we should serialize in a version
         def verProps = getVersioningProperties()
-        
+
         def output = new StringBuilder()
         output << "<revision>"
         verProps.each { vp ->
@@ -378,7 +377,7 @@ class WcmContent implements Comparable, Taggable {
             assert false
         }
     }
-    
+
     def escapeToXML(s) {
         // MUST escape & first
         s = s?.replaceAll('&', '&amp;')
@@ -386,7 +385,7 @@ class WcmContent implements Comparable, Taggable {
         s = s?.replaceAll('>', '&gt;')
         return s
     }
-    
+
     Date getLastModified() {
         changedOn ?: createdOn
     }
