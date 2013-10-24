@@ -206,7 +206,7 @@ class WcmContentRepositoryService implements InitializingBean {
             def configValue = grailsApplication.config.weceem.default.space.template
             def templateName = configValue instanceof String ? configValue : 'default'
             withPermissionsBypass {
-                createSpace([name:'Default'], templateName)
+                createSpace([name:'Default',aliasURI: null], templateName)
             }
         }
     }
@@ -251,7 +251,21 @@ class WcmContentRepositoryService implements InitializingBean {
         }        
         return space
     }
-    
+
+    WcmSpace findSpaceByBlankUri() {
+        def results =  WcmSpace.withCriteria() {
+            or {
+                isNull("aliasURI")
+                eq("aliasURI",'')
+            }
+        }
+        if (results instanceof ArrayList) {
+            return results.getAt(0)
+        } else {
+            return results
+        }
+    }
+
     WcmSpace findSpaceByURI(String uri) {
         WcmSpace.findByAliasURI(uri, [cache:true])
     }
@@ -274,7 +288,7 @@ class WcmContentRepositoryService implements InitializingBean {
     Map resolveSpaceAndURI(String uri) {
         def spaceName
         def space
-        
+
         // This is pretty horrible stuff. Beware.
         if (uri?.startsWith('/')) {
             if (uri.length() > 1) {
@@ -298,7 +312,7 @@ class WcmContentRepositoryService implements InitializingBean {
             if (log.debugEnabled) {
                 log.debug "WcmContent request for no space, looking for space with blank aliasURI"
             }
-            space = findSpaceByURI('')
+            space = findSpaceByBlankUri()
             if (!space) {
                 if (log.debugEnabled) {
                     log.debug "WcmContent request for no space, looking for any space, none with blank aliasURI"
@@ -316,7 +330,7 @@ class WcmContentRepositoryService implements InitializingBean {
                 if (log.debugEnabled) {
                     log.debug "WcmContent request has no space found in database, looking for space with blank aliasURI to see if doc is there"
                 }
-                space = findSpaceByURI('')
+                space = findSpaceByBlankUri()
                 if (space) {
                     // put the space name back into uri
                     if (spaceName) {
@@ -1711,6 +1725,7 @@ class WcmContentRepositoryService implements InitializingBean {
         if (log.debugEnabled) {
             log.debug "findRootContentByURI: aliasURI $aliasURI, space ${space?.name}, args ${args}"
         }
+
         def r = doCriteria(getContentClassForType(args.type), args.status, args.params) {
             isNull('parent')
             eq('aliasURI', aliasURI)
