@@ -13,8 +13,8 @@ class WeceemGrailsPlugin {
     def grailsVersion = "2.1 > *"
 
     def observe = ["hibernate", 'services']
-    
-    def loadAfter = ['logging', 'hibernate', 'services']
+
+    def loadAfter = ['logging', 'hibernate', 'services', 'searchable']
     def loadBefore = ['controllers'] // Make sure taglib sees configured service
     
     // resources that are excluded from plugin packaging
@@ -83,6 +83,21 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
             weceemCacheManager(net.sf.ehcache.CacheManager, configRes.URL) { bean -> 
                 bean.destroyMethod = 'shutdown'
             }
+        }
+        //configure defaults for searchable plugin here
+        if (!application.config.searchable.compassConnection) {
+            def searchableConfig = new ConfigObject()
+            def userHome = System.getProperty("user.home")
+            searchableConfig.searchable.compassConnection = new File("${userHome}/.weceem/searchable-index").absolutePath
+            searchableConfig.searchable.defaultExcludedProperties = ["password"]
+            searchableConfig.searchable.defaultMethodOptions = [
+                    search: [reload: false, escape: false, offset: 0, max: 10, defaultOperator: "and"],
+                    suggestQuery: [userFriendly: true]
+            ]
+            searchableConfig.searchable.mirrorChanges = false
+            searchableConfig.searchable.bulkIndexOnStartup = true
+            searchableConfig.searchable.releaseLocksOnStartup = true
+            application.config.merge(searchableConfig)
         }
     }
 
