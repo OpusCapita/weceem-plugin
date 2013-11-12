@@ -15,7 +15,7 @@ class WeceemGrailsPlugin {
     def observe = ["hibernate", 'services']
 
     def loadAfter = ['logging', 'hibernate', 'services', 'searchable']
-    def loadBefore = ['controllers'] // Make sure taglib sees configured service
+    def loadBefore = ['controllers', 'ckeditor'] // Make sure taglib sees configured service
     
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
@@ -98,6 +98,7 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
             searchableConfig.searchable.bulkIndexOnStartup = true
             searchableConfig.searchable.releaseLocksOnStartup = true
             application.config.merge(searchableConfig)
+
         }
     }
 
