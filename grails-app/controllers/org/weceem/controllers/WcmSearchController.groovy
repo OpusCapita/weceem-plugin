@@ -58,7 +58,7 @@ class WcmSearchController {
         }
 
         request[RenderEngine.REQUEST_ATTRIBUTE_PREPARED_MODEL] = [searchResults:data.results]
-        def uri = params.resultsPath ?: data.space.aliasURI+'/views/search-results'
+        def uri = params.resultsPath ?: (data.space.aliasURI ?: '')+'/views/search-results'
         params.clear()
         params.uri = uri
         forward(controller:'wcmContent', action:'show', params:new LinkedHashMap(params))
