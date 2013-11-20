@@ -14,7 +14,7 @@ import org.weceem.content.WcmStatus
 */
 class SimpleSpaceImporter implements SpaceImporter {
     
-    Log log = LogFactory.getLog(DefaultSpaceImporter)
+    Log log = LogFactory.getLog(SimpleSpaceImporter)
     
     def backrefMap = [:]
     def childrenMap = [:]

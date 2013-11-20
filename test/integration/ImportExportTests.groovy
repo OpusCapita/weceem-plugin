@@ -28,7 +28,7 @@ class ImportExportTests extends AbstractServletContextMockingTest
     def applicationContext
     def grailsApplication
 
-    protected void setUp() {
+    public void setUp() {
         initFakeServletContextPath('test/files/importExport')
 
         grailsApplication.mainContext.servletContext = ServletContextHolder.servletContext

@@ -85,7 +85,7 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
             }
         }
         //configure defaults for searchable plugin here
-        if (!application.config.searchable.compassConnection) {
+        if (!application.config.searchable) {
             def searchableConfig = new ConfigObject()
             def userHome = System.getProperty("user.home")
             searchableConfig.searchable.compassConnection = new File("${userHome}/.weceem/searchable-index").absolutePath
@@ -99,6 +99,11 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
             searchableConfig.searchable.releaseLocksOnStartup = true
             application.config.merge(searchableConfig)
 
+        } else if (!application.config.searchable.compassConnection) {
+            def searchableConfig = new ConfigObject()
+            def userHome = System.getProperty("user.home")
+            searchableConfig.searchable.compassConnection = new File("${userHome}/.weceem/searchable-index").absolutePath
+            application.config.merge(searchableConfig)
         }
     }
 
