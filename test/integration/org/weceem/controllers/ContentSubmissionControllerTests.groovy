@@ -17,6 +17,10 @@ import org.weceem.AbstractServletContextMockingTest
  *
  * These old tests BAD because they are not mocking the services, so they are testing the services and controller
  */
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
+
+@TestMixin(IntegrationTestMixin)
 class ContentSubmissionControllerTests extends AbstractServletContextMockingTest {
     def template
     def nodeA

@@ -12,6 +12,10 @@ import org.weceem.tags.*
  *
  * These old tests BAD because they are not mocking the services, so they are testing the services and controller
  */
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
+
+@TestMixin(IntegrationTestMixin)
 class MenuTagTests extends AbstractWeceemIntegrationTest {
     def statusA
     def statusB
@@ -105,17 +109,17 @@ class MenuTagTests extends AbstractWeceemIntegrationTest {
         
         def markup = new XmlSlurper().parseText("<body>$out</body>")
         
-        assertEquals 1, markup.ul.size()
-        assertEquals 2, markup.ul.li.size()
-        assertEquals "Parent A", markup.ul.li[0].a.text()
-        assertEquals "Parent B", markup.ul.li[1].a.text()
+        assert 1.equals(markup.ul.size())
+        assert 2.equals(markup.ul.li.size())
+        assert "Parent A".equals(markup.ul.li[0].a.text())
+        assert "Parent B".equals(markup.ul.li[1].a.text())
         def pA = markup.ul.li[0]
         def lichildren = pA.dump()        
         println lichildren
         
-        assertEquals 2, pA.'*'.li.size()
-        assertEquals "Child A1", pA.'*'.li[0].a.text()
-        assertEquals "Child A2", pA.'*'.li[1].a.text()
+        assert 2.equals(pA.'*'.li.size())
+        assert "Child A1".equals(pA.'*'.li[0].a.text())
+        assert "Child A2".equals(pA.'*'.li[1].a.text())
     }
 
     void testCustomMenuWithChildrenOfCurrentPage() {
@@ -181,7 +185,7 @@ class MenuTagTests extends AbstractWeceemIntegrationTest {
         
         println "Menu tag yielded: ${r}"
         
-        assertEquals """|FIRST-0|
+        assert """|FIRST-0|
 NODE: Parent A
 ACTIVE: true
 |FIRST-1|
@@ -193,7 +197,7 @@ ACTIVE: false
 NODE: Parent B
 ACTIVE: false
 |LAST-0|
-""", r
+""".toString().equals(r)
         
     }
 
@@ -262,7 +266,7 @@ ACTIVE: false
 
         println "Menu tag yielded: ${r}"
 
-        assertEquals """|FIRST-0|
+        assert """|FIRST-0|
 NODE: Parent A
 ACTIVE: false
 |FIRST-1|
@@ -274,7 +278,7 @@ ACTIVE: true
 NODE: Parent B
 ACTIVE: false
 |LAST-0|
-""", r
+""".toString().equals(r)
 
         def pi = _wcmRenderEngine.makePageInfo(parentA.aliasURI, childA1)
         // Now try again using lineage of childA1
@@ -303,13 +307,13 @@ ACTIVE: false
 
         println "Menu tag yielded: ${r}"
 
-        assertEquals """|FIRST-0|
+        assert """|FIRST-0|
 NODE: Child A1
 ACTIVE: true
 NODE: Child A2
 ACTIVE: false
 |LAST-0|
-""", r
+""".toString().equals(r)
     }
 
     void testDeepMenuWithChildrenOfCurrentPage() {
@@ -416,26 +420,26 @@ ACTIVE: false
         
         def markup = new XmlSlurper().parseText("<body>$out</body>")
         
-        assertEquals 1, markup.ul.size()
-        assertEquals 2, markup.ul.li.size()
-        assertEquals "Parent A", markup.ul.li[0].a.text()
-        assertEquals "Parent B", markup.ul.li[1].a.text()
+        assert 1.equals(markup.ul.size())
+        assert 2.equals(markup.ul.li.size())
+        assert "Parent A".equals(markup.ul.li[0].a.text())
+        assert "Parent B".equals(markup.ul.li[1].a.text())
         def pA = markup.ul.li[0]
         def lichildren = pA.dump()        
         println lichildren
         
-        assertEquals 2, pA.'*'.li.size()
-        assertEquals "Child A1", pA.'*'.li[0].a.text()
-        assertEquals "Child A2", pA.'*'.li[1].a.text()        
+        assert 2.equals(pA.'*'.li.size())
+        assert "Child A1".equals(pA.'*'.li[0].a.text())
+        assert "Child A2".equals(pA.'*'.li[1].a.text())
 
         def subparent = pA.'*'.li[0].'*'
-        assertEquals 2, subparent.li.size()
-        assertEquals "Child A1_1", subparent.li[0].a.text()
-        assertEquals "Child A1_2", subparent.li[1].a.text()        
+        assert 2.equals(subparent.li.size())
+        assert "Child A1_1".equals(subparent.li[0].a.text())
+        assert "Child A1_2".equals(subparent.li[1].a.text())
 
         subparent = pA.'*'.li[1].'*'
-        assertEquals 1, subparent.li.size()
-        assertEquals "Child A2_1", subparent.li[0].a.text()
+        assert 1.equals(subparent.li.size())
+        assert "Child A2_1".equals(subparent.li[0].a.text())
     }
 
     void testDeepMenuWithChildrenOfAnotherContentNode() {
@@ -543,9 +547,9 @@ ACTIVE: false
         
         def markup = new XmlSlurper().parseText("<body>$out</body>")
         
-        assertEquals 1, markup.ul.size()
-        assertEquals 1, markup.ul.li.size()
-        assertEquals "Child A2_1", markup.ul.li[0].a.text()
+        assert 1.equals(markup.ul.size())
+        assert 1.equals(markup.ul.li.size())
+        assert "Child A2_1".equals(markup.ul.li[0].a.text())
     }
     
     void testShallowMenu() {
@@ -601,9 +605,9 @@ ACTIVE: false
         
         def markup = new XmlSlurper().parseText("<body>$out</body>")
         
-        assertEquals 1, markup.ul.size()
-        assertEquals 2, markup.ul.li.size()
-        assertEquals "Parent A", markup.ul.li[0].a.text()
-        assertEquals "Parent B", markup.ul.li[1].a.text()
+        assert 1.equals(markup.ul.size())
+        assert 2.equals(markup.ul.li.size())
+        assert "Parent A".equals(markup.ul.li[0].a.text())
+        assert "Parent B".equals(markup.ul.li[1].a.text())
     }
 }

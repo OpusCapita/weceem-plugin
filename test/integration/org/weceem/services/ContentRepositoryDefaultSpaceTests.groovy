@@ -10,7 +10,11 @@ import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 import org.weceem.content.*
 import org.weceem.html.*
 import org.weceem.wiki.*
+import grails.util.Holders
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
 
+@TestMixin(IntegrationTestMixin)
 class ContentRepositoryDefaultSpaceTests extends AbstractWeceemIntegrationTest {
 
     static transactional = true
@@ -20,12 +24,12 @@ class ContentRepositoryDefaultSpaceTests extends AbstractWeceemIntegrationTest {
     public void setUp() {
         initFakeServletContextPath('test/files/default-space-tests')
 
-        servletContext = grailsApplication.mainContext.servletContext = ServletContextHolder.servletContext
-        grailsApplication.mainContext.simpleSpaceImporter.proxyHandler = [unwrapIfProxy: { o -> o}]
+        servletContext = Holders.grailsApplication.mainContext.servletContext = ServletContextHolder.servletContext
+        Holders.grailsApplication.mainContext.simpleSpaceImporter.proxyHandler = [unwrapIfProxy: { o -> o}]
 
         // Reset to defaults!
-        grailsApplication.config.weceem.default.space.template = null
-        grailsApplication.config.weceem.space.templates = [:]
+        Holders.grailsApplication.config.weceem.default.space.template = null
+        Holders.grailsApplication.config.weceem.space.templates = [:]
 
         super.setUp()
     }
@@ -35,19 +39,19 @@ class ContentRepositoryDefaultSpaceTests extends AbstractWeceemIntegrationTest {
         
         wcmContentRepositoryService.createDefaultSpace()
         
-        assertEquals 1, WcmSpace.count()
+        assert WcmSpace.count().equals(1)
 
         // Need perms to view the content!
         wcmContentRepositoryService.wcmSecurityService.securityDelegate.getUserRoles = { -> ['ROLE_ADMIN'] }
         
         def spc = WcmSpace.findByName('Default')
-        assertNotNull spc
+        assert spc != null
         
         def contentInfo = wcmContentRepositoryService.findContentForPath('about', spc)
         
-        assertNotNull contentInfo
-        assertNotNull contentInfo.content
-        assertTrue contentInfo.content.title.indexOf('bout') >= 0
+        assert contentInfo != null
+        assert contentInfo.content != null
+        assert contentInfo.content.title.indexOf('bout') >= 0
     }
 
     void testDefaultSpaceCreatedWithAppTemplate() {
@@ -57,26 +61,26 @@ class ContentRepositoryDefaultSpaceTests extends AbstractWeceemIntegrationTest {
 
         wcmContentRepositoryService.createDefaultSpace()
         
-        assertEquals 1, WcmSpace.count()
+        assert WcmSpace.count().equals(1)
         def contentInfo = wcmContentRepositoryService.findContentForPath('alternative-test', WcmSpace.findByName('Default'))
         
-        assertNotNull contentInfo
-        assertNotNull contentInfo.content
-        assertTrue contentInfo.content.title.indexOf('elcome') >= 0
+        assert contentInfo != null
+        assert contentInfo.content != null
+        assert contentInfo.content.title.indexOf('elcome') >= 0
     }
 
     void testSpaceCreatedCustomTemplate() {
         def f = new File(servletContext.getRealPath('/Alternative.zip'))
 
-        grailsApplication.config.weceem.space.templates.DUMMY = f.toURL().toString()
+        Holders.grailsApplication.config.weceem.space.templates.DUMMY = f.toURL().toString()
 
         wcmContentRepositoryService.createSpace([name:'testing', aliasURI:'testing'], 'DUMMY')
         
-        assertEquals 1, WcmSpace.count()
+        assert WcmSpace.count().equals(1)
         def contentInfo = wcmContentRepositoryService.findContentForPath('alternative-test', WcmSpace.findByName('testing'))
         
-        assertNotNull contentInfo
-        assertNotNull contentInfo.content
-        assertTrue contentInfo.content.title.indexOf('elcome') >= 0
+        assert contentInfo != null
+        assert contentInfo.content != null
+        assert contentInfo.content.title.indexOf('elcome') >= 0
     }
 }

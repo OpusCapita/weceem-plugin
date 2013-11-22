@@ -13,12 +13,22 @@ import org.weceem.wiki.*
 import org.weceem.files.*
 
 import org.weceem.AbstractServletContextMockingTest
+import grails.util.Holders
+import org.weceem.services.WcmImportExportService
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
+import grails.test.mixin.TestFor
+import org.junit.Test
+import org.junit.Before
+import grails.test.mixin.support.GrailsUnitTestMixin
 
 /**
  * ImportExportTests.
  *
  * @author Sergei Shushkevich
  */
+
+@TestMixin(IntegrationTestMixin)
 class ImportExportTests extends AbstractServletContextMockingTest
         implements ApplicationContextAware {
 
@@ -28,12 +38,13 @@ class ImportExportTests extends AbstractServletContextMockingTest
     def applicationContext
     def grailsApplication
 
+    @Before
     public void setUp() {
         initFakeServletContextPath('test/files/importExport')
 
-        grailsApplication.mainContext.servletContext = ServletContextHolder.servletContext
-        grailsApplication.mainContext.simpleSpaceImporter.proxyHandler = [unwrapIfProxy: { o -> o}]
-        grailsApplication.mainContext.simpleSpaceExporter.proxyHandler = [unwrapIfProxy: { o -> o}]
+        Holders.grailsApplication.mainContext.servletContext = ServletContextHolder.servletContext
+        Holders.grailsApplication.mainContext.simpleSpaceImporter.proxyHandler = [unwrapIfProxy: { o -> o}]
+        Holders.grailsApplication.mainContext.simpleSpaceExporter.proxyHandler = [unwrapIfProxy: { o -> o}]
         
         new WcmSpace(name: 'testSpace', aliasURI:'main').save(flush: true)
     }
@@ -72,7 +83,8 @@ class ImportExportTests extends AbstractServletContextMockingTest
         def ant = new AntBuilder()
         ant.delete(dir: servletContext.getRealPath("/${org.weceem.services.WcmContentRepositoryService.uploadDir}/${space.makeUploadName()}"))
     }
-*/    
+*/
+   @Test
     void testSimpleImport() {
         def servletContext = ServletContextHolder.servletContext
         def importFile = new File(
@@ -91,21 +103,22 @@ class ImportExportTests extends AbstractServletContextMockingTest
         // check content
         assert WcmTemplate.findByAliasURIAndSpace('testTemplate', space)
         def htmlContent = WcmHTMLContent.findByAliasURIAndSpace('testHtmlContent', space)
-        assertNotNull htmlContent
+        assert htmlContent
     
-        assertNotNull WcmContentDirectory.findByAliasURIAndSpace('test_dir', space)
-        assertNotNull WcmContentFile.findByAliasURIAndSpace('test_file', space)
-        assertTrue WcmContentDirectory.findByAliasURIAndSpace('test_dir', space).children.size() != 0
+        assert WcmContentDirectory.findByAliasURIAndSpace('test_dir', space)
+        assert WcmContentFile.findByAliasURIAndSpace('test_file', space)
+        assert WcmContentDirectory.findByAliasURIAndSpace('test_dir', space).children.size() != 0
 
         // check unpacked files
-        assertTrue org.weceem.services.WcmContentRepositoryService.getUploadPath(space, 'test_dir').exists()
-        assertTrue org.weceem.services.WcmContentRepositoryService.getUploadPath(space, '/test_dir/test_file.txt').exists()
+        assert org.weceem.services.WcmContentRepositoryService.getUploadPath(space, 'test_dir').exists()
+        assert org.weceem.services.WcmContentRepositoryService.getUploadPath(space, '/test_dir/test_file.txt').exists()
 
         def ant = new AntBuilder()
         ant.delete(dir: 
             org.weceem.services.WcmContentRepositoryService.getUploadPath(space))
     }
-    
+
+    @Test
     void testSimpleExport() {
         initDefaultData()
         def servletContext = ServletContextHolder.servletContext
@@ -136,19 +149,20 @@ class ImportExportTests extends AbstractServletContextMockingTest
         def xmlFile = new File(tmpDir, 'content.xml')
         def result = new XmlSlurper().parseText(xmlFile.text)
         assert result.children().size() == 5
-        assertEquals 'org.weceem.content.WcmTemplate', result.children()[0].name().toString()
-        assertEquals 'org.weceem.content.WcmVirtualContent', result.children()[4].name().toString()
+        assert 'org.weceem.content.WcmTemplate'.equals(result.children()[0].name().toString())
+        assert 'org.weceem.content.WcmVirtualContent'.equals(result.children()[4].name().toString())
         
-        assertEquals 'testTemplate', result.children()[0].aliasURI.toString()
-        assertEquals 'test_file.txt', result.children()[3].aliasURI.toString()
+        assert 'testTemplate'.equals(result.children()[0].aliasURI.toString())
+        assert 'test_file.txt'.equals(result.children()[3].aliasURI.toString())
 
-        assertEquals 'virt_cont', result.children()[4].aliasURI.toString()
+        assert 'virt_cont'.equals(result.children()[4].aliasURI.toString())
         assert result.children()[4].parent.toString().length() != 0 
         assert result.children()[4].target.toString().length() != 0
 
         ant.delete(dir: tmpDir.absolutePath)
     }
 
+    @Test
     void testConfluenceImport() {
         def importFile = new File(
                 ServletContextHolder.servletContext.getRealPath('/test_confluence_import.xml'))
@@ -160,7 +174,8 @@ class ImportExportTests extends AbstractServletContextMockingTest
         // check content
         assert WcmWikiItem.findByAliasURIAndSpace('Home', space)
     }
-    
+
+    @Test
     void testFixOrderImport() {
         // test inport file without orderIndexes
         def servletContext = ServletContextHolder.servletContext

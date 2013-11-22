@@ -13,12 +13,15 @@ import org.springframework.mock.web.MockMultipartFile
 import org.springframework.mock.web.MockMultipartHttpServletRequest
 
 import org.weceem.AbstractServletContextMockingTest
-
 /**
  * ContentRepositoryTests class contains tests for tree operations from
  * wcmContentRepositoryService.
  *
  */
+import grails.test.mixin.TestMixin
+import grails.test.mixin.integration.IntegrationTestMixin
+
+@TestMixin(IntegrationTestMixin)
 class RepositoryControllerTests extends AbstractServletContextMockingTest {
 
     static transactional = true

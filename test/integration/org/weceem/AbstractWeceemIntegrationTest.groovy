@@ -19,7 +19,7 @@ abstract class AbstractWeceemIntegrationTest extends AbstractServletContextMocki
     def oldSecurityServiceProxyHandler
 
     void setUp() {
-        super.setUp()
+        //super.setUp()
         
 //        WcmContentRepositoryService.metaClass.getLog = { ->
 //            [
@@ -64,7 +64,7 @@ abstract class AbstractWeceemIntegrationTest extends AbstractServletContextMocki
 
         wcmContentRepositoryService.wcmSecurityService.proxyHandler = oldSecurityServiceProxyHandler
 
-        super.tearDown()
+       // super.tearDown()
 
     }
 

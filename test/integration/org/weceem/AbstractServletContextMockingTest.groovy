@@ -3,21 +3,17 @@ package org.weceem
 import org.springframework.web.context.WebApplicationContext
 import org.springframework.mock.web.MockServletContext
 import org.springframework.core.io.FileSystemResourceLoader
-import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 import org.codehaus.groovy.grails.web.context.ServletContextHolder
+import grails.util.Holders
 
-import org.weceem.services.*
-import org.weceem.content.*
-
-abstract class AbstractServletContextMockingTest extends GroovyTestCase {
+abstract class AbstractServletContextMockingTest {
     def oldServletContext
 
     void tearDown() {
-        super.tearDown()
-
         if (oldServletContext) {
             ServletContextHolder.servletContext = oldServletContext
         }
+
     }
 
     void initFakeServletContextPath(path) {
@@ -27,6 +23,6 @@ abstract class AbstractServletContextMockingTest extends GroovyTestCase {
             path, new FileSystemResourceLoader())
         ServletContextHolder.servletContext.setAttribute(
             WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE,
-            grailsApplication.mainContext)
+                Holders.grailsApplication.mainContext)
     }
 }
