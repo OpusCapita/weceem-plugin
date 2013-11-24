@@ -19,6 +19,10 @@ import grails.test.mixin.integration.IntegrationTestMixin
 
 @TestMixin(IntegrationTestMixin)
 class ContentConstraintTests extends AbstractWeceemIntegrationTest {
+    public void setUp() {
+        super.setUp()
+    }
+
     void testAllContentPropertyConstraintsAreCorrect() {
         Holders.grailsApplication.domainClasses.each { dca ->
             def con = dca.clazz.constraints.content

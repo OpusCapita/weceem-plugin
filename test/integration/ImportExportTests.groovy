@@ -17,10 +17,8 @@ import grails.util.Holders
 import org.weceem.services.WcmImportExportService
 import grails.test.mixin.TestMixin
 import grails.test.mixin.integration.IntegrationTestMixin
-import grails.test.mixin.TestFor
 import org.junit.Test
 import org.junit.Before
-import grails.test.mixin.support.GrailsUnitTestMixin
 
 /**
  * ImportExportTests.

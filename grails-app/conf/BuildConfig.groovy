@@ -1,5 +1,6 @@
 grails.servlet.version = "3.0"
 grails.tomcat.jvmArgs = ["-Xmx1024m", "-XX:MaxPermSize=100m", '-verbose:class']
+
 grails.project.work.dir="target/work"
 
 grails.project.dependency.resolver = "maven" // or ivy
@@ -37,11 +38,12 @@ grails.project.dependency.resolution = {
     //     test "org.seleniumhq.selenium:selenium-support:$seleniumVersion"
     //     test "org.gebish:geb-spock:$gebVersion"
     //     test "org.gebish:geb-junit4:$gebVersion"
+
     }
 
 	plugins {
         // plugins for the build system only
-        build ":tomcat:7.0.42"
+        build ":tomcat:7.0.47"
         build (":release:3.0.1") {
             export = false
         }
@@ -50,7 +52,7 @@ grails.project.dependency.resolution = {
         compile ':cache:1.1.1'
 
         // plugins needed at runtime but not for compilation
-        runtime ":hibernate:3.6.10.3" // or ":hibernate4:4.1.11.2"
+        runtime ":hibernate:3.6.10.4" // or ":hibernate4:4.1.11.2"
         runtime ":database-migration:1.3.8"
 
         compile ":bean-fields:1.0" // consider replacing with the fields plugin or even with the new Platform UI

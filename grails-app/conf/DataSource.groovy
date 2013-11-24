@@ -7,7 +7,7 @@ dataSource {
 hibernate {
     cache.use_second_level_cache=true
     cache.use_query_cache=true // Warning, turning this on causes lock contention
-    cache.provider_class='org.hibernate.cache.EhCacheProvider'
+    cache.region.factory_class = 'net.sf.ehcache.hibernate.EhCacheRegionFactory' // Hibernate 3
 }
 // environment specific settings
 environments {
