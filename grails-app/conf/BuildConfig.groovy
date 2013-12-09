@@ -4,12 +4,12 @@ grails.project.work.dir="target/work"
 grails.project.dependency.resolution = {
     inherits "global" // inherit Grails default dependencies
 
-	log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
+        log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
 
-	repositories {        
-		grailsPlugins()
-		grailsHome()
-		grailsCentral()
+        repositories {        
+                grailsPlugins()
+                grailsHome()
+                grailsCentral()
         flatDir dirs:"lib" // need this for iText
     }
     
@@ -23,11 +23,11 @@ grails.project.dependency.resolution = {
         compile 'xstream:xstream:1.2.1'
     }
 
-	plugins { 
+    plugins { 
         compile ":bean-fields:1.0.RC5"
         compile ":blueprint:0.9.1.1"
         compile ":cache-headers:1.1.5"
-        compile ":ckeditor:3.6.0.0"
+        compile ":ckeditor:3.6.6.1.0"
         compile ":feeds:1.5"
         test(":functional-test:1.3-RC1") { 
             export = false 
@@ -49,6 +49,6 @@ grails.project.dependency.resolution = {
         build(":tomcat:$grailsVersion") {
             export = false
         }            
- 	}
+        }
 }
 

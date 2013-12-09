@@ -164,7 +164,12 @@ var select = {};
   if (select.ie_selection) {
     function selRange() {
       var sel = document.selection;
-      return sel && (sel.createRange || sel.createTextRange)();
+      if (!sel) return;
+      if (sel.createRange) {
+          return sel.createRange();
+      } else if (sel.createTextRange) {
+          return sel.createTextRange();
+      }
     }
 
     function selectionNode(start) {
@@ -316,7 +321,7 @@ var select = {};
         else
           end = middle - 1;
       }
-      
+
       if (start == 0) {
         var test1 = selRange(), test2 = test1.duplicate();
         try {
