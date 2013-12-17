@@ -1,0 +1,15 @@
+*Hooking into the Admin interface of Weceem*
+
+Applications can add items to the Weceem "Administration" page by using the Navigation plugin that Weceem CMS uses, to add items to the navigation group "weceem.app.admin". The Weceem Application does this :
+
+{code}
+
+class UserController {
+        def authenticateService
+
+        static navigation = [group: 'weceem.app.admin', action: 'list', title: 'users']
+}
+
+{code}
+
+The navigation plugin uses this convention property to place the "list" action of the user controller into the "Administration" section of Weceem Admin.

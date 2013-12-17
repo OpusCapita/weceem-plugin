@@ -1,0 +1,29 @@
+﻿Templates are content nodes used to set page layouts on your site. Certain content types such as HTML and Blog, support setting a template when creating or editing nodes. If a template is not set, it is inherited from the content's ancestors.
+
+Typically the template will include the head and body tags, pull in the CSS and other resources required, and provide some common layout elements.
+
+They use standard Grails tags and Weceem tags to render content within the body of the page, as well as meta data about the current page e.g. dynamic titles.
+
+Here's a simple example that renders a dynamic title and renders the content of the current node.
+
+{code}
+
+<html>
+  <head>
+    <title>${page.title.encodeAsHTML()}</title>
+  </head>
+  <body>
+    <div id="content">
+      <wcm:content/>
+    </div>
+  </body>
+</html>
+
+{code}
+
+The @<wcm:content/>@ tag is used to render the content of the page the user requested. Its important to remember that your Template is not actually requested by the user by URI - it is simply used to decorate the content the user requested.
+
+You might add a news panel to this layout, by using the @<wcm:widget>@ tag to render a reusable block that iterates over children of the "News" node to list the titles of articles and links to them.
+
+
+

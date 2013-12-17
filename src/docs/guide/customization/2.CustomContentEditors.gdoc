@@ -1,0 +1,77 @@
+As mentioned in the create custom content type section, you can specify what kind of editor is used for each property of content types. By following some simple procedure, you can also create your own new editors.
+
+Weceem will locate the appropriate editor using the name of the type of the property, if a custom property editor name is not given.
+
+h4.  Content Editors
+
+Weceem has quite a few editors that are available to edit all the predefined content type properties.
+
+|_. Editor Field Name |_. Description |
+| String | for single-line strings |
+| LongString | for multi-line strings |
+| Integer | for whole numbers |
+| Boolean | for boolean fields |
+| Date | for dates, includes datepicker and HH and MM fields |
+| Title | uses a larger font for editing the title |
+| Tags | UI for displaying and add/remove tags via ajax | 
+| ContentFileUpload | renders a file upload field or file information if already uploaded |
+| RichHTML | HTML editing with rich editor |
+| HTMLContent | HTML content editor that checks allowGSP property on content and switches between RichHTML and HtmlCode as appropriate |
+| HtmlCode | Code editor with highlighting for HTML |
+| JSCode | Code editor with highlighting for JavaScript |
+| GroovyCode | Code editor with highlighting for Groovy code |
+|CSSCode | Code editor with highlighting for CSS code |
+| LanguageList | a language selection drop-down list |
+| WcmScript | For selecting any WcmScript node in the current space |
+| WcmStatus | For selecting any WcmStatus instance |
+|WcmTemplate | For selecting any WcmTemplate instance in the current space |
+| WcmSpace | For selecting a Space |
+| ReadOnly | a text-only rendering of the value with no editing capability |
+| ReadOnlyURI | a text-only URI value, using URL encoding of restricted chars |
+| ReadOnlyDate | a read-only display of a date |
+
+h4.  Writing your own content editor
+
+Creating a custom editor is simply a case of defining one or two Grails tags in the "wcm" namespace.
+
+Editors are resolved by looking for a tag with the target editor name appended to "wcm:editorField". So for example a new editor for choosing a colour might be called Colour and the tag would be called "editorFieldColour" :
+
+{code}
+
+class MyWeceemTagLib {
+    static namespace = "wcm"
+
+def editorFieldColour = { attrs -> 
+          out << someFancyColourPicker(pageScope.content[attrs.property])
+    }
+}
+
+{code}
+
+These tags are called with the following attributes:
+
+* property - property name of the content object for which the tag should render a field
+
+Your tags can access the current content object being edited using :
+
+{code} pageScope.content[attrs.property] {code}
+
+In the above example,  you would not need to specify editor:'Colour' on your custom content classes if the property type is actually an instance of a Colour class. 
+
+*Note :* Polymorphism is not yet supported in this scenario so only exact class matches will work.
+
+h4.  Providing resources needed by custom editors
+
+Some editors - e.g. the FCK and code editors used by Weceem, require JavaScript and CSS resources to be included in the <head> section of the editor page. To achieve this, Weceem looks for a tag with a name like "wcm:editorResourcesColour" where the type name is appended to "editorResources". This tag can output anything you like into the <head> section of the page:
+
+{code}
+
+def editorResourcesTags = { attrs ->
+        out << g.render(template:'/editors/tags_resources', plugin:'weceem', 
+            model:[name:attrs.property, value:pageScope.content[attrs.property]])
+    }
+
+{code}
+
+Here, the Tags editor uses another GSP to output the more complex resource elements it requires, setting up JS code in the <head> section to bind add/remove buttons using jQuery.
+

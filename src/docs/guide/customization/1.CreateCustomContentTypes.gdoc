@@ -1,0 +1,267 @@
+Weceem provides many content types as standard. Each content type has a specific purpose, with different fields in the editor.
+
+Some content types are directly rendered when requested, others are used by other content nodes to compose the page seen by the user.
+
+The standard content types available in Weceem are :
+
+* Action - A server-side action that will execute the code in a Groovy Script node, for example to create new content nodes or send an email
+* Blog - The root node of a Blog, which has Blog Entry nodes as children
+* Blog Entry - An entry (child of) a Blog node
+* Comment - A comment on a content node. Any nodes can have comments attached or created.
+* External Link - A URL of another website. When this URI is rendered, it redirects to the external site
+* Folder - A folder for grouping together content nodes and creating URI hierarchy
+* Groovy Script - A piece of Groovy code to execute on the server, used by Action nodes
+* HTML - A piece of HTML which may contain GSP (Grails Server Page) tags
+* JavaScript - A piece of JavaScript source 
+* Server File - A file uploaded to the Weceem repository and stored on the server filesystem, e.g. an image file
+* Server Directory - A directory on the server filesystem which contains Server File nodes
+* Stylesheet - A CSS style sheet
+* Template - A GSP template used to layout and decorate the current content node
+* Widget - A reusable GSP fragment for rendering sections of a page, e.g. a header/footer or a remote news feed.
+
+h4.  Creating custom content types
+
+You can add new content types that will be editable by your users and displayed in the repository along with the standard content types. 
+
+These custom types can have full control over how a request is handled (e.g. issue a redirect, like WcmExternalLink does) or delegate to established rendering mechanisms within Weceem. You might have it call out to a PDF generator for example, or render some data using an alternative presentation technology e.g. wiki rendering or Freemarker. They can also specify how their properties should be edited in the repository, and hook into events.
+ 
+To create a new content type, you just need to create a new Grails domain class that extends the WcmContent class and follow a few simple conventions. You can create a basic template for a new content type using the create-content-class script :
+
+{code} grails create-content-class com.mycompany.Product {code}
+
+This will create the domain class under grails-app/domain/, with some default placeholder code. Here is an of the contentions.  
+
+{code}
+
+import org.weceem.util.ContentUtils
+import org.weceem.content.WcmContent
+
+class PressRelease extends WcmContent {
+
+    // Set to false if this content node should never actually be rendered
+    // i.e. Groovy Script nodes cannot be rendered directly.
+    static standaloneContent = false
+
+    String getMimeType() { "text/html" }
+
+    String content
+
+    /**
+     * Must be overriden by content types that can represent their content as text.
+     * Used for search results and versioning
+     */
+    public String getContentAsText() { ContentUtils.htmlToText(content) }
+
+    /**
+     * Should be overriden by content types that can represent their content as HTML.
+     * Used for wcm:content tag (content rendering)
+     */
+    public String getContentAsHTML() { content }
+
+    static constraints = {
+        content(nullable: false, maxSize: 65536)
+    }
+
+    static editors = {
+        content(editor:'HtmlCode')
+    }
+
+    static transients = WcmContent.transients
+}
+
+{code}
+
+It declares a new type which, when created, will immediately become editable in the repository when you run your application.  There are several conventions that apply, described in more detail below - 
+
+*Basic considerations*
+
+Your descendent class has certain conventions it must honour for correct operation :
+ 
+-  the Grails "transients" property must be populated with the sum of the superclass transients and any new transient properties you add (should not be necessary for newer Grails versions)
+   
+-  the "searchable" property convention must be defined as per Grails Searchable plugin, to add any fields that should be indexed for searching
+
+h4.  Controlling the editing of your content type
+
+To customize behaviour for the properties of the domain class, the "editors" closure property is used, like Grails constraints closure - but in this case how they are treated in the Weceem editor. 
+
+For each field of the content domain class you can define the order in which they appear in the editor - based on the order in which they are listed in the editors closure.
+ 
+You can also set the editor used for each property. These have names like HtmlCode, ReadOnly, CssCode, GroovyCode etc. You can also define your own editors if the supplied editors are not suitable. See the section on [customizing content editors].
+ 
+Some properties are for internal use only, for those you can set hidden:true.
+ 
+Finally, you can push your properties into the "Extras" editor group that is displayed separately by setting "group" to "extra": 
+
+{code}
+
+static editors = {
+    isbn(editor:'ISBNEditor')
+    genre(editor:'GenrePopup', group:'extra')
+
+{code}
+
+h4.  Displaying content as text or HTML
+
+For various reasons such as search results and versioning, Weceem needs to be able to get some kind of representation of your custom content as both plain text and HTML. If your needs are different from the defaults, you can override the methods for getContentAsText and getContentAsHTML. 
+
+The default behaviour is:
+
+{code}
+
+/**  * Must be overriden by content types that can represent their content as text.
+ * Used for search results and versioning
+ */ String getContentAsText() { "" }
+/**
+ * Should be overriden by content types that can represent their content as HTML.
+ * Used for wcm:content tag (content rendering)
+ */ String getContentAsHTML() { contentAsText ? contentAsText.encodeAsHTML() : '' }
+
+{code}
+
+So as a minimum, override getContentAsText() - but if there is a reasonable HTML representation, e.g. for HTML, Wiki or other richly formatted content,  you should also implement getContentAsHTML().
+
+h4.  Defining mime type
+
+Weceem's content controller will ask the content for its MIME type when building the response. In many content types this is a constant value and is not persisted, but in types such as WcmContentFile this is persisted so that the type can be overridden by the user.
+ 
+To return the correct MIME type, just implement the getter:
+
+{code} String getMimeType() { "text/html" } {code}
+
+This non-static value is read whenever the content is to be served. This means that you can determine it on a per-node basis, which is how the WcmContentFile type specifies the mime types of downloadable files.
+
+h4.  Customizing rendering of your content 
+
+Weceem delegates rendering of content to the content node itself. If there is no rendering implementation provided, it will simply render the node as text to the client. This mechanism is used by the built in content types to render themselves appropriately. Some types render HTML decorated by a template, and others issue redirects.
+
+There are two conventions that control the custom rendering of content:
+
+* Static "standaloneContent" property is set to false if content type is not intended for direct rendering. This prevents node types used by other types from being rendered when their URI is requested - e.g. is the built-in template and widget types, which make no sense being rendered on their own.
+    
+* Static "handleRequest" Closure property provides custom implementation of rendering if you require it.
+
+The handleRequest closure is executed so that it delegates to Weceem's content controller. This means you can use all the regular Grails dynamic controller methods and properties (render, redirect, response, request, session) as well as some custom methods to render Weceem content nodes using the normal GSP and templating mechanisms.
+ 
+Here's an example of how WcmHTMLContent renders its regular HTML or GSP code :
+
+{code}
+
+ static handleRequest = { content ->
+    if (content.allowGSP) {
+        renderGSPContent(content)
+    } else {
+        renderContent(content)
+    }
+}
+
+{code}
+
+This implementation calls WcmContentController's renderContent method if the content is HTML, which will render the content inside a Template if the node has one. Alternatively if the content is classed as GSP content, it calls the controller's renderGSPContent method which renders the content as GSP code, inside a template if one is found for the node.
+ 
+Another example is the External Link type which redirects the browser to the target URL of the node :
+
+{code}
+
+ static handleRequest = { content ->
+   redirect(url:content.url)
+}
+
+{code}
+
+This implementation uses the standard Grails "redirect" method to redirect to the URL specified in the content's "url" property.
+
+The Template, Widget and HTML content nodes can use Weceem tags and other Grails tags to perform view rendering logic.
+
+h4.  Interacting with content events 
+
+Content nodes can hook into common events, such as deletion and updates. To do this your content class needs to implement methods for any events it wants to support. None of these are mandatory, and you can implement only those you need. The available event methods are defined in 
+"WeceemDomainEvents.groovy":https://fisheye.codehaus.org/browse/grails-plugins/grails-weceem/trunk/src/groovy/org/weceem/event/WeceemDomainEvents.groovy?r=HEAD
+
+The event methods are: 
+
+{code} boolean contentShouldBeCreated(WcmContent parentNodeOrNull) {code}
+
+This method allows the content to veto whether or not it can be created. This is called on the newly populated but not saved content node, and is passed the parent node that it would be attached to, which can be null if it is root level content.
+
+{code} void contentDidGetCreated() {code}
+
+This is called after the content node has been created and saved.
+
+{code} boolean contentShouldBeDeleted() {code}
+
+This allows the content type to veto whether or not the node can or should be deleted - e.g. it may not be possible to delete a content node if it has children.
+
+{code} void contentWillBeDeleted() {code}
+
+This event is triggered just before the node is deleted.
+
+{code} void contentDidGetDeleted() {code}
+
+This event is triggered immediately after the node is deleted.
+
+{code} void contentDidChangeTitle(String previousTitle) {code}
+
+This event is called when the title property of a node has changed.
+
+{code} void contentDidGetUpdated() {code}
+
+This event is triggered after a node has been edited and the new values saved.
+
+{code} boolean contentShouldMove(WcmContent targetParent) {code}
+
+This event is called to allow it to veto being moved to parent nodes that are not compatible. Returning false will prevent the user moving the node (changing its parent).
+
+{code} void contentDidMove() {code}
+
+This is called after the content's parent has been changed and saved.
+
+{code} boolean contentShouldAcceptChildren() {code}
+
+This event is called to find out if the current node can accept child nodes.
+
+{code} boolean contentShouldAcceptChild(WcmContent newChild){code}
+
+This event is called to find out if the current node can accept the new child node. There might be per-node reasons for vetoing new children.
+ 
+You can also hook into many events outside of the domain classes themselves, using the Event Service.
+
+h4.  Customizing the icon shown in the repository
+
+You can supply an icon for your custom content types, that will be used in the admin UI of Weceem, e.g. in the repository view. To do this, define a static "icon" property which contains the arguments you would pass to *Grails g:resource tag* to create a link to the resource :
+
+{code}
+
+ static icon = [
+   plugin: "weceem",
+   dir: "_weceem/images/weceem/content-icons",
+   file: "widget-32.png"
+] 
+
+{code}
+
+It is vital to include the "plugin" attribute and value if you are placing your custom content class in a plugin of your own.
+
+h4.  Content versioning
+
+In order to participate in Weceem's content versioning system, you need to add any properties you wish to have serialized to the getVersioningProperties() implementation of your class. This function returns a map of values that are stored in the content revision.
+ 
+These are simple values that must be expressible as strings. By necessity you may refer to objects not available at the time the user views your revision, so all complex object references that need to be versioned should be coerced to some kind of text representation.
+ 
+For a real example, here's the code from WcmHTMLContent :
+
+{code}
+
+ Map getVersioningProperties() {
+    def r = super.getVersioningProperties() + [
+        menuTitle:menuTitle,
+        htmlTitle:htmlTitle,
+        keywords:keywords,
+        template:template?.ident() // A string representation of template object
+    ] 
+    return r
+}
+
+{code}
+
+In almost all cases you will want to call the super method to ensure all inherited properties are correctly versioned.

@@ -1,0 +1,103 @@
+In custom Grails applications that use Weceem plugin you may need to perform actions when certain events occur on content.
+
+To do this, register a listener with the WcmEventService and implement any of the event notification methods you require.
+
+First, you inject the WcmEventService using Grails dependency injection, or obtain it via the Spring ApplicationContext, and then call the "addListener" method :
+
+{code}
+class MyService implements InitializingBean {
+    def wcmEventService
+
+    void afterPropertiesSet() {
+        wcmEventService.addListener(this)
+    }
+
+    void contentDidGetUpdated(WcmContent node) {
+        log.info "Look! Content ${node.title} was updated"
+    }
+}
+{code}
+
+The list of available events is defined in the WeceemEvents class, which uses an optional event callback method mechanism - 
+
+{code}
+
+package org.weceem.event
+
+import org.weceem.content.WcmContent
+
+class WeceemEvents {
+    static events = {
+        /* Called just before saving the node */
+        contentWillBeCreated { WcmContent contentNode, WcmContent parentNode -> }
+        /* Called after a new node has been created */
+        contentDidGetCreated { WcmContent node -> }
+
+        /* Called before a node is deleted */
+        contentWillBeDeleted { WcmContent node -> }
+        /* Called after a node is deleted */
+        contentDidGetDeleted { WcmContent node -> }
+        
+        /* Called after a new node is updated */
+        contentDidGetUpdated { WcmContent node -> }
+        
+        /* Called after a new node is moved to a new parent */
+        contentDidMove { WcmContent node, String previousURL, WcmContent previousParent -> }
+    }
+    
+    static {
+        EventManager.define(WeceemEvents)
+    }
+}
+
+{code}
+
+Implement the methods you need, using the signature defined in the WeceemEvents class.
+
+There is a separate event interface called WeceemDomainEvents (given below) for developers that supply custom content types and for this you do not need to register as a lister - they are called as part of the regular lifecycle.
+
+{code}
+
+package org.weceem.event
+
+import org.weceem.content.WcmContent
+
+class WeceemDomainEvents {
+    static events = {
+        /* Called before a new node is created. Return true to allow the creation */
+        contentShouldBeCreated { WcmContent parentConent -> }
+        /* Called just before saving the node */
+        contentWillBeCreated { WcmContent parentConent -> }
+        /* Called after a node has been created, so that it can intialize anything that depends on it */
+        contentDidGetCreated()
+
+
+        /* Called to see if a node can be deleted. Return true to permit the deletion */
+        contentShouldBeDeleted()
+        /* Called before a node is deleted. */
+        contentWillBeDeleted()
+        /* Called after a node is deleted. */
+        contentDidGetDeleted()
+        
+        /* Called after a node's title has changed (edited). */
+        contentDidChangeTitle { String previousTitle -> }
+        /* Called after a node is updated (edited). */
+        contentDidGetUpdated()
+        
+        /* Called before a node is moved to a new parent. Return true to permit the move. Parent may be null */
+        contentShouldMove { WcmContent newParent -> }
+        /* Called after a node is moved to a new parent. */
+        contentDidMove { String previousURL, WcmContent previousParent -> }
+
+        /* Called to establish whether this node can have children. Return true to permit addition of children */
+        contentShouldAcceptChildren()
+        /* Called before a node is moved to become a child of this node. Return true to permit addition of the new child */
+        contentShouldAcceptChild { WcmContent possibleChild -> }
+    }
+    
+    static {
+        EventManager.define(WeceemDomainEvents)
+    }
+}
+
+{code}

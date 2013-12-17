@@ -1,0 +1,78 @@
+﻿h3.  Content Publishing Workflow
+
+A simple workflow mechanism is implemented in Weceem.
+
+In Weceem, the workflow hinges on the Status of each content node. The following Status options are provided:
+
+* Draft
+* Unmoderated
+* Reviewed
+* Approved
+* Published
+* Archived
+
+There is no UI for editing the list of statuses, but if you are a developer and wish to add new ones, bear in mind the rules for the workflow as set out here.
+
+Each status has a numerical code - e.g. Draft is 100, Unmoderated - 150, Published - 400 etc. Each status also has a flag to indicate whether or not it is "public" content i.e. can be viewed by non-administrators. By default Published is the only status with this flag set.
+
+All changes to status are made manually by repository users, unless the *Publish From* or *Publish Until* fields have values,
+
+In the case of *Publish From*, once the date passes, the status of the content will change to the first status with "public content" flag switched on, which has a higher code number than the current status of the content. This offers scope for other statuses beyond the existing set, and migration upward through those states.
+
+The one caveat here is that the *Publish From* mechanism will never change the status on content that is currently in the "Unmoderated" or "Archived" status used for visitor-submitted or expired content. If you need to change which status is used for "Unmoderated" or "Archived" content you can do this by setting the configuration variables to the numerical code values of the desired status @weceem.unmoderated.status@ and @weceem.archived.status@
+
+With *Publish Until*, the status of any published content that has expired will be set to the "Archived" status or the status defined in the configuration variable @weceem.archived.status@
+
+h4.  Page Variables
+
+Templates, Widgets and HTML Content (with allow GSP enabled) have access to a data model that includes several variables used to render information about the current page, user or space.
+
+*Variable: page*
+
+This object presents information about the current page of the web site. The page is constructed from a template and content, and is located using a unique URI.  This is not to be confused with the "active" content node.
+
+*Properties*
+
+{table}
+*Name* | Description
+URI | uri of this page relative to the current space
+parentURI | uri of this page's content node's parent
+lineage | list of ancestor nodes, in top-down order
+title | page title
+titleForHTML | page title for HTML title tag, including SEO keywords
+titleForMenu | page title for rendering menus, usually a shorter version of the title
+{table}
+
+*Variable: user*
+
+This object presents information about the current user.
+
+*Properties*
+
+{table}
+*Name* | *Description*
+username | User's login name
+firstName | User's first name
+lastName | User's last name
+email | User's email address
+{table}
+
+*Variable: node*
+
+This object provides access to information about the primary content node of this page. The properties available will vary based on the content type.
+
+*Properties*
+
+{table}
+*Name* | *Description*
+title | content title
+content | content text
+aliasURI | primary URI for this content node
+language | language of this content, a Language object
+createdBy | name of the user who created the content
+createdOn | date the content was originally created
+changedBy | username of the last user to edit the content
+changedOn | date on which the content was last edited
+space | space (object) to which this content node belongs
+{table}
+

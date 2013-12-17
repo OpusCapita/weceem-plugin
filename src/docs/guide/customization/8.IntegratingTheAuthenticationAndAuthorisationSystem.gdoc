@@ -1,0 +1,69 @@
+The Weceem plugin neither provides an authentication mechanism nor depends on authentication plugins. Just wire-in whichever authentication system you want to use - e.g.  the Weceem CMS Application wires up the Weceem plugin to the Spring Security plugin for authentication and provides a simple user management UI as part of the Weceem Admin.
+Customizing Authentication
+
+The WcmSecurityService class has simple methods on it that the CMS uses to get information about the current logged-in user. To customize this, just replace or modify the delegate property on the service - e.g. to plug in Acegi (note that Spring Security replaces Acegi - see below for an off the shelf solution), you would place code like this in the BootStrap of your application :
+
+{code}
+
+def authenticateService = context.authenticateService
+
+context.wcmSecurityService.securityDelegate = [
+	getUserName : { ->
+		def princ = authenticateService.principal()
+		if (princ instanceof String) {
+			return null
+		} else {
+			return authenticateService.principal()?.username
+		}
+	},
+	getUserEmail : { ->
+		def princ = authenticateService.principal()
+		if (princ instanceof String) {
+			return null
+		} else {
+			return authenticateService.principal()?.email
+		}
+	}
+        getUserRoles : { -> 
+		authenticateService.userDomain()?.roleAuthorities ?: ['ROLE_GUEST'] 
+	},
+        getUserPrincipal : { -> 
+		authenticateService.principal()
+	}
+]
+
+{code}
+
+h4.  Integration with Spring Security
+
+If you create your own application using Weceem plugin and wish to use the Grails Spring Security plugin, install the weceem-spring-security plugin to provide the bridge between Weceem and your application's Spring Security authentication/authorization scheme.   
+
+When you use this plugin there is no need to write your own UserDetailsService for the Spring Security plugin.
+
+To do this, after installing the plugin you simply have to specify some configuration to tell the plugin how to map from your Spring Security domain classes, and the plugin will make this information available to Weceem :
+
+{code}
+
+weceem.springsecurity.details.mapper = { ->
+    [ // Stuff required by weceem spring sec
+        username: username,
+        password: password,
+        enabled: enabled,
+        authorities: authorities,
+        // optional stuff we add
+        email: email,
+        description: description,
+        firstName: firstName,
+        lastName: lastName,
+        id: id
+    ]
+}
+
+{code}
+
+This closure must return a map of data used by Spring Security to store the information about your domain class. The "it" passed to the closure is the domain class instance, so the above is returning a map with values copied from the domain class.
+
+*Note :* Only information required by Weceem is the username, password, enabled and authorities. Everything else is optional and only used by your application if you code it to do so.
+
+The application remains responsible for defining the domain classes and performing the relevant Spring Security configuration to protect your URIs.
+

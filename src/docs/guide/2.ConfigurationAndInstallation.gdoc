@@ -1,0 +1,146 @@
+﻿h3.  Installation
+
+Weceem is available either as a standalone Java web application (.war file) for deployment to standard Java server environments, or as a plugin for the [Grails application framework|http://grails.org/].
+
+h4.  Requirements
+
+Deploying Weceem CMS requires:
+
+*  Java 5 or higher
+*  A supported SQL server e.g. MySQL or Postgres
+*  A recommended 500MB RAM allocated to the Java VM
+*  A writeable filesystem folder for storing Lucene full-text search indexes
+
+You don't need to install or have any understanding of Grails to use Weceem, but if you want to develop a custom application that uses Weceem, you will also need to install Grails.
+
+h4. Upgrading all Weceem installations
+
+Prior to installing a new version of Weceem, always export each of your spaces to ensure you have a backup. Additionally, ensure your database and uploaded files (e.g. WeceemFiles/) folder are backed up.
+
+h4. Installing Weceem Plugin into the application
+
+To install the Weceem plugin, the dependency must be added into grails-app/conf/BuildConfig.groovy file in Grails application.
+{code}
+"runtime('com.jcatalog.grailsplugins:weceem:1.2-SNAPSHOT')"
+{code}
+
+The plugin should function with Grails versions 2.2 and higher.
+
+Once the plugin is installed into the application, a few Grails configuration changes may be required to make the CMS work in your application. These options are required for Weceem to operate correctly inside the application.
+
+*Note:* When upgrading from an earlier version of the Weceem plugin, you may need to manually uninstall some older Grails plugins, if your new release of Grails does not do it automatically.
+
+h3.  Configuration
+
+Once the plugin is installed, there may be some Grails configurations that need to be changed to make the CMS work in the application. These options are required for Weceem to operate correctly within the application.
+
+Configuration of Weceem is primarily through Grails configuration settings. In Weceem application these will come from a properties file that could be configured via system property {code}weceem.config.location{code} specified in the command line. But in the custom Grails application confuguration is typically loaded from Config.groovy.
+
+There are several configuration options that allow you to customize how it behaves and looks.
+
+h4.  Allowing file extensions
+
+By default, Grails applications have content negotiation enabled based on file extensions in the URI, and this file extension is then removed from the URI. For the CMS to function correctly with content URIs like "common.css" and "jquery.js", you need to turn this off. To do so, change your application's Config.groovy to :
+
+{code} grails.mime.file.extensions = false {code}
+
+h4.  URL mappings and Weceem
+
+To replicate the behaviour of the binary Weceem Application WAR that can serve content from the "/" URI of your application, you must ensure the default URL Grails mapping for "/" in your application is removed. You will also probably benefit from removing the generic "$controller/$action?/$id?" mapping which can cause confusion.
+
+You can namespace all Weceem controllers using configuration options to prefix all URIs that Weceem uses.
+
+h4. Setting URL prefix for all content served by Weceem
+
+Weceem by default maps all created content into the "root" URI of the application. URLs are formed by "/{space URI alias}/${document URI alias path....}". Having a space with a blank alias URI, allows you to map content into the root URI.  To achieve this Weceem has to be rather promiscuous with its URI mapping.
+
+If you would like your own controllers to be accessible with your own Grails URL mappings, you can prefix all content URIs by setting a single Config.groovy setting:
+
+{code} weceem.content.prefix = 'content' {code}
+
+With this, all Weceem content will be accessed under "/content/" - i.e.  http://localhost:8080/content/About
+
+h4. Setting URL prefix for non-content Weceem controllers
+
+Weceem has its own non-content controllers that provide publicly-accessible support functionality such as the search, archive and visitor content submission controllers. If there are name conflicts with your own controllers, prefix these URIs with the following Config.groovy setting:
+
+{code} weceem.tools.prefix = 'wcm-tools'{code}
+
+This will then ensure that all the Weceem tool controllers are accessed like this @http://localhost:8080/wcm-tools/search@
+
+h4. Setting URL prefix for Weceem administration UI
+
+The Weceem repository and administration UIs may also clash with your URI conventions, or you may have your own "admin" controller that you want at "/admin". For this, you can just change the prefix for the Weceem Admin controllers by adding the following to Config.groovy:
+
+weceem.admin.prefix = 'wcm-admin'
+
+The standard Weceem admin interfaces under http://localhost:8080/wcm-admin/
+
+h4.  Defining available default Space templates
+
+You must tell Weceem what default content spaces are available to users or your code. There are two default spaces provided by the plugin but usually your application will want to specify alternative defaults so that it "boots" with your own content in it.
+
+h4.  Setting the location of uploaded files
+
+Weceem, by default, will store files uploaded by you (e.g. images, CSS and so on) to a folder inside the application's folder on the server. However, during an application upgrade, this becomes inconvenient because the files will often need to be manually duplicated in the new location on the server.
+
+Since 1.0-M1 you can set the location of the upload folder or URL:
+
+{code}
+// Tell weceem to use a specific path /var/weceem/uploads
+/var/weceem/uploads weceem.upload.dir = 'file:///var/weceem/uploads'
+
+// or tell weceem to keep it in the application folder, but with a new URL
+weceem.upload.dir = '/weceem_uploads/'
+{code}
+
+Weceem auto-senses file URLs in the value and uses that location if it is a file URL. If it is not a file URL, then it assumes it is a new URL path and uses it when serving the files.
+
+Weceem will still store the files in @<app-dir>/WeceemFiles@, if a value is not specified for this config variable. These will be served from @http://<yourhost>/<yourapppath>/uploads/@
+
+h4. Customizing user profile and logout
+
+When integrating your own user authentication/authorization system, you will want the Profile and Log Out links in Weceem admin to point to the relevant functions in your application.  Specify a map of arguments that will be passed to the Grails *g:link* tag to create the links for these functions, with the following Config.groovy settings:
+
+{code}
+
+weceem.profile.url = [controller:'register', action:'edit'] weceem.logout.url = [controller:'logout']
+
+{code}
+
+Controller/action etc can be anything you like. You could use any arguments accepted by the Grails linking tags here e.g: uri, url, params, mapping and so on.
+
+h4. Customizing the look and feel of Weceem Admin
+
+For the Weceem Admin pages to fit in better with your application's own styling, you can specify a different layout GSP for it with this Config option:
+
+{code} weceem.admin.layout="mylayout" {code}
+
+This stops Weceem from using the standard "weceemadmin" GSP layout and uses yours instead.
+
+h4. Controlling creation of the default space
+
+You can configure whether or not Weceem should create a default space at startup, as well as what templates are available to the user:
+
+{code}
+
+// Turn off default space creation if no spaces found at startup weceem.create.default.space = false
+
+// Set the file: or classpath: URL of the default space zip if default creation is ON weceem.default.space.template = "file:/path/to/template.zip"
+
+{code}
+
+h4. Changing the list of space templates available to users
+
+To change the list of space templates available to users when they create a new space, list them in your Config:
+
+{code}
+// Set the list of available space templates when a user creates a new space
+weceem.space.templates = [
+    default: "classpath:/org/weceem/resources/default-space-template.zip",
+    basic:"classpath:/org/weceem/resources/basic-space-template.zip"]
+{code}
+
+Space templates are regular Weceem export ZIPs, and can reside in the file system (file:) or classpath (classpath:)
+
+Use this to hide the default Weceem spaces and restrict user access to the space templates. This list of space templates does not have to include the default space template, hence you can have a default initial space that is unavailable to the users.
