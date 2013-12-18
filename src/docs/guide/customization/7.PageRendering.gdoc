@@ -1,0 +1,18 @@
+When a request is made to Weceem, it goes through a number of steps to produce the final content.
+
+#  Weceem first locates the content at the URI path specified in the request 
+#  Once located, it checks if content can be rendered. Content which is not "standalone" and used by other content cannot be rendered directly (e.g. Templates cannot be rendered directly).
+#  Next, it checks to see if the content implements rendering itself. If it does, it will call the content's handleRequest method to perform the rendering of the response.
+#  If there is no handleRequest method, Weceem will look for a "template" property on the content object and if it finds one, will ask that template to render the content.
+
+Different content types may implement handleRequest differently - e.g. HTML Content first checks if the content is set to allow GSP tags to execute. If they are, it will execute the page and capture the output. The content is then passed to the template (if any) and returned to the client.
+
+*Note :* If the content supports templates and a template is not set,  Weceem will look up the content tree to see if any ancestors specify a template and will use the first one it finds.
+
+In this most common case, the HTML and Template will work together and render one or more Widget nodes using <wcm:widget> to render common page elements like the header and footer sections.
+
+Other types such as External Link will use handleRequest to issue a redirect to the browser.
+
+h4.  Default document handling
+
+Weceem supports httpd-style request URLs that end in /,  it will automatically check for a child node of the URI, with one of the default names ("index.html" or "index"), much like a regular webserver.

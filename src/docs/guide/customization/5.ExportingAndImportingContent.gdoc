@@ -1,0 +1,18 @@
+Each Weceem space (repository) can be individually exported and imported individually and is useful for backups or migrating content between servers or spaces.
+
+For this :
+
+# Go to the Administration section 
+# Select option - "Spaces" 
+# Click  the Export or Import buttons 
+# Select space when prompted.
+
+Use the default import/exporter - it is the native Weceem exporter.
+
+The exported ZIP file will include all content nodes and uploaded files for that space. You can then import this ZIP into another Weceem instance, or to a different space in the same instance.
+
+*Importing will replace any content in the space!*
+
+*Note :*
+
+Exported spaces will not include your user accounts or any custom WcmStatus nodes you created, as these are not Space-specific.

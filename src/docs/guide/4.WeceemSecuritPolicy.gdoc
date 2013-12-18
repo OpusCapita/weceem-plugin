@@ -1,0 +1,98 @@
+The Weceem security policy file is a Groovy script in your server filesystem, that lets you control who can access your content and what they can do with it.
+
+The security policy uses information about the currently-logged in user's roles as supplied by the integration with your authentication system.
+
+The security system gives you control over:
+
+* spaces that users in different roles can access
+* URI paths in each space these users can access
+* permissions (admin, create, update, delete, view) the users have for these URI paths
+* the types of content nodes for which the users have these permissions
+
+So in combination, you can control how people interact with your site - like offering protected areas for known users, and allowing comments from site visitors on some content and not others.
+
+h4. Setting a security policy
+
+The Weceem plugin automatically looks for a security policy - which is a Groovy script - using the following logic:
+
+# It looks to see if the Grails configuration variable "weceem.security.policy.path" has a value set by the Grails application's Config.groovy.
+# If so, it uses that as the file path. If that variable is not set, it will look for the system property "weceem.security.policy.path" and use that if set.
+# If neither are set, it will initialize with default permissions where ROLE_ADMIN can do anything, ROLE_USER can create/edit content, and ROLE_GUEST can only view.
+
+h4. How to write a Weceem security policy
+
+Weceem plugin does not predefine any security role names - role names are just strings that your authentication system associates with users. The Weceem application happens to use Acegi/Spring security and is coded to supply roles called ROLE_ADMIN, ROLE_USER and ROLE_GUEST, but you are not limited to using these names.
+
+Here's an example policy :
+
+{code}
+
+// The policy closure must be assigned to the policy variable
+policy = {
+
+  // Here we define a role - this can be anything your authentication
+  // system provides, but with Weceem Application edition, ROLE_GUEST, ROLE_USER,
+  // and ROLE_ADMIN are used.
+  // Note also that Weceem automatically adds the user's login as a special role
+  // eg. user "fred" automatically has a role added called "USER_fred" for easy per-user
+  // access control
+  'ROLE_ADMIN' {
+    // We're defining permissions for any space so use '*'. Alternatively
+    // specify a list of space alias URIs eg: space 'internal', 'extranet' (no square brackets!)
+    space '*'
+
+    // Control whether this role can access Weceem admin functions eg edit/create spaces
+    admin true
+
+    // Control whether this role can create new content in this space
+    create true
+
+    // Control whether this role can edit content in this space
+    edit true
+
+    // Control whether this role can view content in this space
+    view true
+
+    // Control whether this role can delete content in this space
+    delete true
+  }
+
+  'ROLE_USER' {
+    space '*'
+    admin false
+    create true
+    edit true
+    view true
+    delete false
+  }
+
+  'ROLE_GUEST' {
+    space '*'
+    admin false
+    create false
+    edit false
+    view true
+    delete false
+
+    // Here we have URI-specific access restriction
+    // We prevent guests from viewing the extranet
+    "customers/extranet" {
+      view false
+    }
+
+    "blog" {
+      // Limit creation to comments on blog only
+      create types:[org.weceem.content.WcmComment]
+    }
+
+}
+
+{code}
+
+Per-URI permissions can set the same permissions that can be set on the space, and these take precedence. The permissions defined for the space are used as a fallback if there is no matching per-URI permission defined for that role.
+
+So you can set "view false" on the spaces but then open up parts of the URI with "view true", or the other way around - however you like.
+
+To specify permissions for certain content types only - specify a list of types instead of true/false, as is the case in the example above that permits users with ROLE_GUEST to only create WcmComment nodes and even then, only under the /blog/ part of the site.
+
+This "types" list is a list of content classes that must be available on the classpath.

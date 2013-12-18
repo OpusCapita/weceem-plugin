@@ -1,0 +1,46 @@
+Capture data from forms and perform an action, such as sending mail after submission of a contact form by writing some Groovy code that you store in the content repository. This happens dynamically and you don't need to redeploy your Weceem application or restart it.
+
+Two content types work together in Weceem to enable you to write arbitrary server-side code. The Scripted Action node type is used to receive requests, and delegates the work to a Groovy Script node.
+
+For example, to create a Contact form that sends mail to a known address, you could implement it like this :
+
+1. Create a Groovy Script node in your repository, and paste into it the following code :
+
+{code}
+
+def args = [
+  recipients:'admin@yourserver.com',
+  subject:'Message from website visitor'
+]
+try {
+  sendMail {
+    to args.recipients
+    if (args.ccRecipients) {
+      cc args.ccRecipients
+    }
+    subject args.subject
+
+    from params.senderAddress
+    body params.message
+  }
+  redirect(uri:params.success)
+} catch (Exception e) {
+  log.error "Can't send mail", e
+  redirect(uri:params.error)
+}
+
+{code}
+
+This code expects the Grails "mail" plugin to be installed (as it is by default in the Weceem application WAR file). This code is exactly what you would write if you were writing your own "Grails controller action":https://grails.org/doc/latest/guide/theWebLayer.html#6.1%20Controllers.  You can call redirect, render and other Grails controller methods as usual. The request parameters are in "params".
+
+"WeceemDomainEvents.groovy":https://grails.org/doc/latest/guide/theWebLayer.html#6.1%20Controllers
+
+2. Now that you have a script to run, you need to create a Scripted Action node to respond to requests for a specific URI and run the script. When you do this, select the script you created in the "Script" field. The full repository URI of this Scripted Action content node is the URI that needs to be used in your HTML form's action attribute. You can create links to this action inside your own Widget or Template nodes using the wcm:createLink tag.
+
+With the above example, the HTML form needs to supply fields "senderAddress" and "message". It will redirect the user to the value of the "success" parameter which will usually be a URI in your content repository created using the wcm:createLink tag.
+
+You can write any Groovy code you like in the Groovy Script node. The possibilities are endless for example, you can call out to external web services, perform calculations, render complex results in alternative formats (e.g. JSON).
+
+However, you can easily degrade the performance of your server by writing inefficient code in a Groovy Script that is executed frequently.
+
+It is strongly recommended that you limit the users that can create Groovy Scripts using the Weceem Security Policy.
