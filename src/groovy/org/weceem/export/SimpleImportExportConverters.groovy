@@ -5,7 +5,7 @@ import org.weceem.content.WcmStatus
 import java.text.SimpleDateFormat
 
 class SimpleImportExportConverters {
-	private static DATE_FORMAT = "yyyy-mm-dd'T'HH:mm:ssZZ"
+	private static DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZZ"
 
 	protected static importConverters = [
 			(java.util.Date): {value->
