@@ -1,7 +1,7 @@
 <tr id="content-node-${c.id}" class="datarow ${ c.parent ? 'child-of-content-node-'+c.parent.id : ''} ${ c.parent == null ? '' : 'ui-helper-hidden'}">
 	<td>
 	  <div class="item">
-            <wcm:renderContentItemIcon type="${c}" id="content-icon-${c.id}"/>
+            <wcm:renderContentItemIcon node="${c}" id="content-icon-${c.id}"/>
 			<h2 class="title">
 			    <g:link controller="wcmEditor" action="edit" id="${c.id}">${c.title.encodeAsHTML()} <span class="type"> (/${c.aliasURI.encodeAsHTML()} - <g:message code="content.item.name.${wcm.getClassName(node:c)}"/>)</span>
 			    </g:link>

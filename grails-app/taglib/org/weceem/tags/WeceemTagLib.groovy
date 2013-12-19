@@ -66,7 +66,7 @@ class WeceemTagLib {
 
     static namespace = "wcm"
     
-    static returnObjectForTags = ['findNode', 'ancestorOfType']
+    static returnObjectForTags = ['findNode', 'ancestorOfType', 'contentIconURL', 'getClassName']
     
     def wcmContentRepositoryService
     def wcmSecurityService
@@ -693,18 +693,17 @@ class WeceemTagLib {
     }
     
     def renderContentItemIcon = { attrs ->
-        def type = attrs[ATTR_TYPE]
+        def node = resolveNode(attrs)
         def id = attrs[ATTR_ID]
-        def iconconf = proxyHandler.unwrapIfProxy(type)?.class.icon
-        def plugin = iconconf.plugin
-        out << "<div id='${id}' class='ui-content-icon'><img src='${g.resource(plugin:plugin, dir: iconconf.dir, file: iconconf.file)}'/></div>"
+        def iconconf = proxyHandler.unwrapIfProxy(node)?.class.icon
+        out << "<div id='${id}' class='ui-content-icon'><img src='${g.resource(plugin:iconconf.plugin, dir: iconconf.dir, file: iconconf.file)}'/></div>"
     }    
 
     def contentIconURL = { attrs ->
         def type = attrs[ATTR_TYPE]
         def iconconf = type.icon
         def plugin = iconconf.plugin
-        out << g.resource(plugin:plugin, dir: iconconf.dir, file: iconconf.file)
+        return g.resource(plugin:plugin, dir: iconconf.dir, file: iconconf.file)
     }    
 
     /**
@@ -1021,6 +1020,6 @@ ${node.content}
     }
     
     def getClassName = { attrs ->
-        out << proxyHandler.unwrapIfProxy(attrs.node)?.class.name
+        return proxyHandler.unwrapIfProxy(attrs.node)?.class.name
     }
 }

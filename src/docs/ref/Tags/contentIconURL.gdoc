@@ -1,0 +1,15 @@
+h4. Purpose
+
+Return content icon URL (String)
+
+*Example*
+
+{code}
+wcm.contentIconURL(type:WcmBlog)
+{code}
+
+h4. Description
+
+The supported attributes are:
+
+* type (required) - content class

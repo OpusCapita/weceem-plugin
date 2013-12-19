@@ -1,0 +1,9 @@
+h4. Purpose
+
+Render logged in user e-mail address.
+
+*Example*
+
+{code}
+Youк e-mail address is: <wcm:loggedInUserEmail/>
+{code}
