@@ -1,0 +1,24 @@
+h4. Purpose
+
+Grails has a g:join tag for creating a delimited list from a collection of values. 
+
+This tag allows you to supply a body that will be used to create the text for each item in the delimited list, so that you can use other tags to compose complex strings that will form the list.
+
+*Example* 
+
+A good example is the rendering of a list of blog entry tags, where each tag should be a link to the search results for that tag.
+
+{code}
+<span class="quiet">Tags:
+  <wcm:join in="${node.tags}" delimiter=", " var="tag">
+    <wcm:searchLink mode='tag' query="${tag}">${tag.encodeAsHTML()}</wcm:searchLink>
+  </wcm:join>
+</span>
+{code}
+
+h4. Description
+
+The supported attributes are:
+
+* in - collection of items to join
+* var (optional) - name of the variable to pass to the body. Defaults to "item"

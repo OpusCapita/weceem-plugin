@@ -1,0 +1,38 @@
+h4. Purpose
+
+The tag will render the HTML form tag which can be used to create new content from within a page.
+
+It does not include the fields of the target content type, but handles all of the mechanisms needed to successfully create the right content type and success redirects.
+
+This will create the @<form>@ tag and appropriate hidden fields to convey the attributes to the controller, but in the tag body you must add the fields, labels and formatting you require for the user to submit the content.
+
+*Example*
+
+A simple example for submitting blog comments might be:
+
+{code}
+<g:hasErrors bean="${submittedContent}">
+  There were some errors on your submission, please check below
+</g:hasErrors>
+<wcm:submitContentForm parent="${parentContent}" 
+        type="org.weceem.content.WcmComment" success="${parentContent}">
+
+    <bean:require beanName="submittedContent" className="org.weceem.content.WcmComment"/>
+    <bean:field beanName="submittedContent" property="author" label="Your name"/>
+    <bean:field beanName="submittedContent" property="email"/>
+    <bean:input beanName="submittedContent" property="websiteUrl" label="Website URL"/>
+    <bean:input beanName="submittedContent" property="title"/>
+    <bean:field beanName="submittedContent" property="content" label="Your comment"/>
+    <input type="submit" class="button positive" value="Send comment"/>
+</wcm:submitContentForm>
+{code}
+
+This example uses the "Grails bean-fields plugin":https://grails.org/plugin/bean-fields which ships with Weceem, to render simple templated label and input fields, ready for CSS styling.
+
+h4. Description
+
+The supported attributes are:
+
+* parent - parent node for the newly created content - can be a content node instance, a URI path to the content, or a content id
+* type - class name of the desired content type e.g. org.weceem.content.WcmComment
+* success - The content node to display after the new content has been successfully saved - can be a node instance, a URI path or an id.

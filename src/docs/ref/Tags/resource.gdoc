@@ -1,0 +1,26 @@
+h4. Purpose
+
+This tag is used to render links to JavaScript, CSS or other external resources inside your HTML @<head>@ section.
+
+You also typically use this to render a link to a stylesheet or JavaScript node:
+
+*Example* 
+
+{code}
+<head>
+  <wcm:resource path="css/main.css"/>
+  <wcm:resource path="js/code.js"/>
+</head>
+
+{code}
+
+This will result in the HTML @<link>@ tag, a @<script>@ tag and appropriate attributes.
+
+The type is automatically set if the target node is a StyleSheet or JavaScript node. For other node types or uploaded files you will need to add the "type" attribute to tell it what kind of resource it is.
+
+h4. Description
+
+The supported attributes are:
+
+* path - path to the content node containing the resource
+* type - e.g. "js", "css" or "favicon"

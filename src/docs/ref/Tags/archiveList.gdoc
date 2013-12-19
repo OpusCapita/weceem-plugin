@@ -1,0 +1,31 @@
+h4. Purpose
+
+You can list content nodes by month and year, so that a user can click the month/year and then see a list of matching nodes as a search result.
+ 
+This is often used in blogs, or in lists of press releases and you can achieve this with the single wcm:archiveList tag.
+
+*Example*
+
+{code}
+<wcm:archiveList type="org.weceem.html.WcmHTMLContent" path="news/pressreleases">
+   <a href="${link}">${year}/${month}</a><br/>
+</wcm:archiveList>
+{code}
+
+The body of the tag (your code) is passed the month, year and link to view the results, so that you can render them as you wish. 
+
+A month/year/link entry is created for every child node of the base path that matches the specified type that is viewable by the current user.
+ 
+h4. Description
+
+The supported attributes are:
+
+* path - URI of the content node that is the parent of those you wish to iterate over
+* type (optional) - type of content node to match. Defaults to org.weceem.blog.BlogEntry
+
+The variables passed to the body for each month/year with content are:
+
+* link - URL that will display list of matching nodes
+* month - month number (1-12)
+* year - year number
+

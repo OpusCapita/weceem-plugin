@@ -1,0 +1,15 @@
+h4. Purpose
+
+This tag uses the Weceem security system to decide if the body of the tag should be rendered or not. (Since 0.3)
+
+If the security service indicates that the currently logged in user is permitted to edit the current content node, then the body of this tag will be executed.
+
+*Example*
+
+{code}
+<wcm:ifUserCanEdit>
+  <g:link controller="editor" action="edit" id="${node.id.encodeAsHTML()}">Edit this page</g:link>
+</wcm:ifUserCanEdit> 
+{code}
+
+The above would create a link to edit the current content if the user is allowed to do so.

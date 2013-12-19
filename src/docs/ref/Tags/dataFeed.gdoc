@@ -1,0 +1,43 @@
+h4. Purpose
+
+This tag retrieves and renders an external XML data feed, including RSS and Atom feeds. Feeds are retrieved from remote URLs and cached internally (currently for 1 minute at a time) to prevent the server retrieving feeds for every request.
+
+*Example*
+
+For RSS the basic usage is:
+
+{code}
+<wcm:dataFeed url="http://somesite.com/some/rss/feed"/>
+{code}
+
+This retrieves the RSS feed and render links to the 5 most recent posts as @<ul>@ and @<li>@ tags.
+
+You can use this to retrieve other XML formats and iterate over the nodes retrieved, and provide customized rendering.
+
+h4. Description
+
+The supported attributes are:
+
+* url - URL of the feed
+* max (optional) - maximum number of entries to show, defaults to 5
+* type (optional) - type of the feed. Defaults to "rss". Also accepts "atom". To render xml set the type to "xml" and also set the gpath attribute
+* gpath (optional) - used only if type is not rss or atom. This is a Groovy GPath expression used to select the XML nodes from the feed. For example a value of "product.detail" will get all the "detail" nodes under "product" parents in the retrieved XML document.
+* custom (optional) - Set to true to customize the rendering. By default the rendering is a simple @<ul>@ list with a link to each "item.link" and "item.title" as the link text.
+
+The current node is passed as "item" to the body of the tag if you specify custom="true", so that you can completely customize the rendering of the feed - not even the default @<ul>@ will be written out. 
+
+For example you might render a news feed like this:
+
+{code}
+<div id="newspanel">
+  <wcm:dataFeed url="http://somesite.com/some/rss/feed" max="3" custom="true">
+    <div class="newsitem">
+      <h2>${item.title.encodeAsHTML()}</h2>
+      <p>${item.description.encodeAsHTML()}</p>
+    </div>
+  </wcm:dataFeed>
+</div>
+
+{code}
+
+This would render the feed as a series of divs without links.

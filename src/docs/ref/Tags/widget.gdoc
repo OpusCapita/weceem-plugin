@@ -1,0 +1,17 @@
+h4. Purpose
+
+The widget tag will locate a content node of type WcmWidget and render it.  This allows the reusable widget to execute Grails and Weceem tags in order to traverse the content repository and generate dynamic content, render data feeds etc.
+
+The aliasURI path of the widget is specified in the "path" attribute. The existing model variables are passed to the widget, and widgets can render nested widgets (as of version 0.3).
+
+*Example*
+
+{code}
+<wcm:widget path="mywidgets/news"/>
+{code}
+
+h4. Description
+
+The supported attributes are:
+
+* path - aliasURI path of the widget

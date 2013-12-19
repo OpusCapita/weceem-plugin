@@ -1,0 +1,16 @@
+h4. Purpose
+
+The userInfo tag retrieves current logged-in user's information so that you can render properties of it.
+
+The available user information is dependent on the security implication your application uses, but if you are using the Weceem Application the object will have at least the properties "username", "firstName", "lastName" and "email".
+
+There is an optional "var" attribute that defines the name of the variable to be passed to your code. If omitted, it will default to "it".
+
+*Example*
+
+{code}
+Welcome back,
+<wcm:userInfo var="user">
+  ${user.firstName.encodeAsHTML()} ${user.lastName.encodeAsHTML()}
+</wcm:userInfo>
+{code}

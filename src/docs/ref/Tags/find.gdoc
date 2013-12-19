@@ -1,0 +1,23 @@
+h4. Purpose
+
+The wcm:find tag allows you to load one or more content nodes from the space.
+
+*Example*
+
+{code}
+<wcm:find id="484" var="c">
+  ${c.title.encodeAsHTML()}<br/>
+</wcm:content>
+{code}
+
+The above form will retrieve a single content node identified by its internal unique id, and place it into a variable for rendering.
+
+If no body is supplied, it will simply return the content node - this is primarily for use when invoking as a function, to manipulate the content object directly.
+
+h4. Description
+
+The supported attributes are:
+
+* id (optional) - unique id of the content, numerical 
+* title (optional) - title to search for
+* var (optional) - name of the variable passed to the body containing each result

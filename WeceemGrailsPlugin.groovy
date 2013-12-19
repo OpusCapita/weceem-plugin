@@ -27,9 +27,7 @@ class WeceemGrailsPlugin {
     def author = "jCatalog AG"
     def authorEmail = "info@weceem.org"
     def title = "Weceem CMS"
-    def description = '''\\
-A CMS that you can install into your own applications, as used by the Weceem CMS application
-'''
+    def description = '''A CMS that you can install into your own applications, as used by the Weceem CMS application'''
 
     // URL to the plugin's documentation
     def documentation = "http://grails.org/plugin/weceem"
@@ -168,7 +166,7 @@ A CMS that you can install into your own applications, as used by the Weceem CMS
         co.ckeditor.upload.image.allowed = ['jpg', 'gif', 'jpeg', 'png']
         co.ckeditor.upload.image.denied = []
         co.ckeditor.upload.link.browser = true
-        co.ckeditor.upload.link.upload	= true
+        co.ckeditor.upload.link.upload  = true
         co.ckeditor.upload.link.allowed = ['pdf', 'doc', 'docx', 'zip', 'jpg', 'jpeg', 'png']
         co.ckeditor.upload.media.upload = true
         co.ckeditor.upload.media.allowed = ['mpg','mpeg','avi','wmv','asf','mov']

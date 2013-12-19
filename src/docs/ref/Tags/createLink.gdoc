@@ -1,0 +1,15 @@
+h4. Purpose
+
+This tag creates a URL to link to the content specified by path
+
+*Example*
+
+{code}
+Permalink URL: <wcm:createLink path="some/uri/path"/>
+{code}
+
+h4. Description
+
+The supported attributes are:
+
+* path - the path of aliasURIs to reach the content

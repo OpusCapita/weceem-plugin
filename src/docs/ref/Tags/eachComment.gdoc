@@ -1,0 +1,21 @@
+h4. Purpose
+
+In Weceem you can allow comments on any content type, and comments are just another type of content node.
+
+This tag provides a shortcut for iterating over the comments of a given content node, typically the current node (i.e. a blog entry) being viewed.
+
+The attributes supported by this tag are identical to those in wcm:eachChild but this tag will automatically set the type of the nodes iterated to *org.weceem.content.WcmComment* and the variable name to "comment".
+
+*Example* 
+
+Show the comments attached to the current BlogEntry node:
+
+{code}
+<div class="comment-list"
+  <wcm:eachComment max="10">
+    <li>
+      Comment: ${comment.content.encodeAsHTML()}
+    </li>
+  </wcm:eachComment>
+</div>
+{code}

@@ -1,0 +1,15 @@
+h4. Purpose
+
+The wcm:link tag creates a clickable link to the content rendered by a content node in the repository. You use this just like Grails g:link, but you pass in the path to a content node.
+
+*Example* 
+
+{code}
+<wcm:link path="some/uri/path">Click me</wcm:link>
+{code}
+
+h4. Description
+
+The supported attributes are:
+
+* path - URI path of the content to link to

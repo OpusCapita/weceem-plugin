@@ -1,0 +1,5 @@
+h4. Purpose
+
+This tag creates a clickable link to perform a search within the current space. The body of the tag represents the clickable content of the link.
+
+All attributes and semantics for rendering results are the same as for [wcm search].

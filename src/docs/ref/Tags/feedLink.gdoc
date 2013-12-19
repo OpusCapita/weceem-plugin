@@ -1,0 +1,21 @@
+h4. Purpose
+
+The feedLink tag renders a @<meta>@ tag in the HTML @<head>@ section, exposing an RSS/Atom feed to your users. Most browsers will show an "RSS" icon when they see this tag, allowing the user to view or subscribe to the feed.
+
+Weceem's feeds automatically render the title and text of a content node, for a list of childnodes that you define.
+
+*Example*
+
+{code}
+<head>
+  <wcm:feedLink type="rss" path="${node}"/>
+</head>
+{code}
+
+h4. Description
+
+The supported attributes are:
+
+* path - node or URI path to the node that is the parent of the nodes to include in the feed
+* type - (optional) the type of feed e.g. 'rss' or 'atom'. Defaults to 'rss'
+* version - (optional) the version of feed to support. There are various flavours of RSS or Atom, some of which are supported. Default is the newest supported version for the feed type.

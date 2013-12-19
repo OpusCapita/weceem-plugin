@@ -1,0 +1,64 @@
+h4. Purpose
+
+The menu tag will render simple HTML menus for a part of your content repository.
+
+*Example* 
+
+An example of the simplest usage to render a menu for the top two levels of your site is
+
+{code}
+<wcm:menu/>
+{code}
+
+This will render nested @<ul>@ and @<li>@ tags for the HTML content of the top two levels of your site. It automatically applies CSS classes to indicate the level of depth and whether the item is first, last and/or active.
+
+You can use these CSS classes to style the menu any way you like. However if you want different HTML markup you can also completely customize the rendering of every item by supplying a custom body to the tag.
+
+h4. Description
+
+The supported attributes are:
+
+* activeClass - CSS class to apply when the node being rendered is the "active" node i.e. the current page. Defaults to "weceem-menu-active"
+* firstClass - CSS class to apply to the first menu item at each level. Defaults to "weceem-menu-first"
+* lastClass - CSS class to apply to the last menu item at each level. Defaults to "weceem-menu-last"
+* levelClassPrefix - CSS class prefix to apply to each item, with the current level nesting depth appended after. Default is "weceem-menu-level" so the HTML output includes the CSS classes weceem-menu-level0 and weceem-menu-level1 for example.
+* custom - set to true to perform custom rendering of the menu items (see below)
+* levels - number of levels to recurse - how deep you want your menu. Defaults to 2.
+* path - URI path or node to form the base of the menu. Defaults to the root of the repository.
+* siblings - whether or not to include the siblings at the top level of the menu. Defaults to true.
+* types - list of content types to include in the menu. Defaults to org.weceem.html.WcmHTMLContent but you could change this e.g. to include blogs by setting types="[org.weceem.html.WcmHTMLContent,org.weceem.blog.Blog]"
+
+To perform a custom rendering, you supply a body to the tag and use GSP syntax to render whatever markup you like. A range of variables are passed to the body. 
+
+*Example*
+
+{code}
+<wcm:menu levels="2" custom="true">
+  <g:if test="${first}">
+    <ul class="${level == 0 ? 'sf-menu sf-navbar' : ''}">
+  </g:if>
+  <li class="${active ? 'current' : ''}"><a href="${link}">${menuNode.titleForMenu.encodeAsHTML()}</a>
+    ${nested}
+  </li>
+  <g:if test="${last}">
+    </ul>
+  </g:if>
+</wcm:menu>
+{code}
+
+The body is called once for every item in the menu, no matter what depth. The body needs to use the value of the variables to render the correct information based on the current depth, node and first/last/active values.
+
+Available variables are:
+
+* nested - content to render for the nested items. You must output this where children of the current menu item you are rendering should be shown.
+* link - URL of the node the menu item relates to
+* active - true if current menu item is the page being viewed by the user
+* first - true if current menu item is the first at this level of nesting
+* last - true if current menu item is the last at this level of nesting
+* menuNode - content node relating to this menu item
+* level - current nesting level, starts at zero
+* levels - number of levels left to render below this current level
+* levelClassPrefix - prefix to apply to any CSS class indicating the current nesting level. Defaults to "weceem-menu-level"
+* activeClass - CSS class to apply to active items
+* firstClass - CSS class to apply to the first item at each level
+* lastClass - CSS class to apply to the last item at each level

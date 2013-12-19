@@ -1,0 +1,22 @@
+h4. Purpose
+
+Long text can be summarized to word boundaries using this tag, with ellipsis added for text that is too long.
+
+This is useful for displaying blog entry summaries or summarized content for search results. Often you will want to pass the text through wcm:htmlToText first, to strip out any markup that might cause bad HTML when summarized.
+
+*Example*
+
+{code}
+Summary: 
+<wcm:summarize length="50" encodeAs="HTML">
+  <wcm:htmlToText>${node.content}</wcm:htmlToText>
+</wcm:summarize>
+{code}
+
+h4. Description
+
+The supported attributes are:
+
+* encodeAs - optional Grails codec to apply. i.e. pass HTML to perform HTML escaping on the result
+* length (optional) - maximum length of the resulting text. Defaults to 100. 
+* ellipsis (optional) - string to append to the end of the text if it is shortened. Defaults to "...".

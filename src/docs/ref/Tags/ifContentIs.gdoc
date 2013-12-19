@@ -1,0 +1,19 @@
+h4. Purpose
+
+This tag will execute the body if the current content is of a specific type. 
+
+*Example*
+
+{code}
+<wcm:ifContentIs type="org.weceem.blog.WcmBlogEntry">
+   This blog entry was posted on ${node.createdOn}
+</wcm:ifContentIs>
+{code}
+
+This check for the content type is polymorphic.
+
+h4. Description
+
+The supported attributes are:
+
+* type - The class name or class to test

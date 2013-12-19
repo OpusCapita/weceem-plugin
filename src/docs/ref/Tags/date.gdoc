@@ -1,0 +1,15 @@
+h4. Purpose
+
+The date tag renders the current date/time in the page.
+
+The only attribute supported is "format" which takes a Java date format pattern, in the same way the "Grails g.formateDate tag":https://grails.org/doc/latest/ref/Tags/formatDate.html does. 
+
+If no value is supplied, it defaults to "dd MMM yyyy".
+
+*Example* 
+
+The date is: @<wcm:date/>@ 
+
+This page is Copyright @<wcm:date format="yyyy"/>@ ACME Web Corp.
+
+

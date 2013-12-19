@@ -1,0 +1,26 @@
+h4. Purpose
+
+This tag allows you to cache a section of content within a Template or Widget, so that it is not executed again for a certain period of time. The content is also rendered into the page, but in future it will come from the cache until the cache expires.
+
+If you are processing intensive data access within a page, such as retrieving content from a remote service or iterating over many content nodes with eachChild for example, then wrapping this in a cache tag will greatly improve performance.
+
+*Example*
+{code}
+<!-- Caching with no key attribute caches the content only for the current request URI -->
+<wcm:cache>
+  This will be cached
+  <g:each in="${(5..10)}">This will be executed only when the cache needs refreshing</g:each>
+</wcm:cache>
+
+<!-- This uses a specific key so that this shared block can be used across different pages -->
+<wcm:cache key="shared-feed-info">
+     Some code here to get a feed from a remote site
+</wcm:cache>
+
+<!-- Caching with a name attribute selects a different cache -->
+<wcm:cache name="yourCustomEhCache">
+  This will be cached
+</wcm:cache>
+{code}
+
+The default cache is "contentCache" and currently has a time to live of 1 hour. During development in non-production environments you can force a refresh of the cache by adding a "refresh" parameter to your URL.
