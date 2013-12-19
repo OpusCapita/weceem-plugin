@@ -1,0 +1,9 @@
+h4. Purpose
+
+Render logged in user name.
+
+*Example*
+
+{code}
+Hello <wcm:loggedInUserName/>
+{code}

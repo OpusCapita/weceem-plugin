@@ -1,0 +1,33 @@
+h4. Purpose
+
+The wcm:eachParent tag allows you to iterate over all the parents of the current node being rendered, for cases where there might be VirtualContent nodes that project his node into multiple places in your site.
+
+*Example*
+
+{code}
+
+<wcm:eachParent type="HTMLContent" max="10" offset="0" sort="date" order="desc" var="parent">
+  ${parent.title.encodeAsHTML()}
+</wcm:eachParent>
+
+{code}
+
+The above will render an ordered list of parent content nodes in the current space relative to the current page.
+
+h4. Description
+
+The supported attributes are:
+
+* type - The name of a Content class to restrict the results to. Optional - if omitted, will return any type of child. Note that inheritence applies here so type="Content" is the same as specifying no type, as all content extends Content
+* max - maximum number of elements to return - optional, default is 50
+* offset - offset into the search results, for paging - optional, default is 0
+* sort - property of the content to sort on, e.g. "title" or "changedOn" - optional, will be "title" sorted if unspecified
+* order - ordering when sorting, either "asc" or "desc" - optional, asc is default
+* var - name of the variable passed to the body containing each result
+* changedSince - earliest changedOn date that a matching content node can have
+* changedBefore - latest changedOn date that a matching content node can have
+* createdSince - earliest createdOn date that a matching content node can have
+* createdBefore - latest createdOn date that a matching content node can have
+* filter - closure passed each content node, which must return true if the node is to be included in the results. Optional
+
+

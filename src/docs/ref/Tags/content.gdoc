@@ -1,0 +1,25 @@
+h4. Purpose
+
+This tag renders the content of the current page's node as HTML and used in Templates to render the html content of the node the user requested.
+
+*Example inside a Template node :*
+
+{code}
+<html>
+<body>
+    <div id="mainContent">
+          <wcm:content/>
+    </div>
+</body>
+</html>
+{code}
+
+h4. Description
+
+The supported attributes are:
+
+* codec (Optional) - The name of a Grails codec to encode the result. Defaults to no encoding, so HTML characters in the content will be interpreted as literal HTML in your template. 
+
+Setting codec to e.g. "HTML" will escape all the HTML special characters.
+
+

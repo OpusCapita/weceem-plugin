@@ -1,0 +1,15 @@
+h4. Purpose
+
+This tag strips HTML-style markup from the string by matching it and deleting the markup text.
+
+This is desirable when you have some pre-formatted HTML content but wish to have a plain text representation, for example in search results.
+
+*Example*
+
+{code}
+Overview: <wcm:htmlToText>${node.content}</wcm:htmlToText>
+{code}
+
+h4. Description
+
+There are no attributes.

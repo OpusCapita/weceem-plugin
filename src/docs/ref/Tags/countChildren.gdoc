@@ -1,0 +1,24 @@
+h4. Purpose
+
+The countChildren tag is used typically to count comments or similar content attached to a node.  This will output the number of children (not descendents) of the current content node. You can count by a specific content type and status.
+
+*Example*
+
+{code}
+<wcm:countChildren/>
+{code}
+
+By default it will only count published content.
+
+h4. Description
+
+The supported attributes are:
+
+* node - is the content node whose children you wish to count. Optional if not specified and no "path" specified, will default to the current page's content node
+* path - an aliasURI path to a content node whose children you wish to count. Optional - if not specified and no "node" specified, will default to the current page's content node
+* type - a fully qualified content class name e.g. 'org.weceem.html.HTMLContent' or class instance. Optional - defaults to no type filtering.
+* status - a status name. Defaults to filtering by any status that is set to for public display eg "Published" when using the default statuses.
+
+
+
+

@@ -1,0 +1,29 @@
+h4. Purpose
+
+The wcm:eachSibling tag allows you to iterate over the siblings of the node currently being rendered.
+
+*Example*
+
+{code}
+<wcm:eachSibling type="HTMLContent" max="10" offset="0" sort="date" order="desc" var="sib">
+  ${sib.title.encodeAsHTML()}
+</wcm:eachSibling >
+{code}
+
+The above example will return an ordered list of sibling content in the current space relative to the current page.
+
+h4. Description
+
+The supported attributes are:
+
+* type - name of a Content class to restrict the results to. Optional - if omitted, will return any type of child. Note that inheritence applies here so type="org.weceem.content.WcmContent" is the same as specifying no type, as all content extends WcmContent
+* max - maximum number of elements to return - optional, default is 50
+* offset - offset into the search results, for paging - optional, default is 0
+* sort - property of the content to sort on, eg "title" or "changedOn" - optional, will be "title" sorted if unspecified
+* order - ordering when sorting, either "asc" or "desc" - optional, asc is default
+* var - name of the variable passed to the body containing each result
+* changedSince - earliest changedOn date that a matching content node can have
+* changedBefore - latest changedOn date that a matching content node can have
+* createdSince - earliest createdOn date that a matching content node can have
+* createdBefore - latest createdOn date that a matching content node can have
+* filter - closure passed each content node, which must return true if the node is to be included in the results. Optional

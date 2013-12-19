@@ -1,0 +1,21 @@
+h4. Purpose
+
+This tag finds the nearest ancestor of given node type.  It will look for a node from the starting point you give it, going up the parent lineage of the node until it finds a node that is of the specified type (or a descendent). If the node reference passed to it matches the type, it will be returned. If there is no ancestor matching the type, null will be returned.
+
+This tag is useful for situations where you are writing a widget or template that needs to locate the nearest ancestor of a given type, e.g. when trying to render feed links for a Blog when your template may be used to render blog indexes or individual blog entry nodes.
+
+*Example*
+
+{code}
+<g:set var="blogNode" value="${wcm.ancestorOfType(node:node,type:org.weceem.blog.WcmBlog)}"/>
+{code}
+
+h4. Description
+
+The supported attributes are:
+
+* node (optional) - A content node instance where you'd like the search to start.
+* path (optional) - A content path URI where you'd like the search to start.
+* type - The class name or class itself, of the type you want to find.
+
+*Note:* If neither node nor path are specified, it will search from the current node - i.e. the node at the URI requested by the client.

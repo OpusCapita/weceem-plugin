@@ -1,0 +1,20 @@
+h4. Purpose
+
+This tag returns the URL required to POST a search request to Weceem. 
+
+*Note :* Used only if the wcm:search tag does not generate a form that you can work with.
+
+All attributes and semantics for rendering results are the same as in wcm:search  documentation.
+
+h4. Description
+
+The supported attributes are:
+
+* types - a comma-delimited list of content class names, listing only the classes that should be searched by this form. Typically you will limit this to: org.weceem.blog.BlogEntry, org.weceem.html.HtmlContent, org.weceem.content.Comment
+* resultsPath - content URI path for the page that will render the results. This can be any renderable Weceem content, but to render the results you will need to use content that supports GSP tags - usually a HtmlContent node with "allow GSP" ticked. If no value is supplied, defaults to "views/search-results"
+* baseURI - base content URI that will form the root of the search, for searching only parts of your content tree. 
+
+
+
+
+

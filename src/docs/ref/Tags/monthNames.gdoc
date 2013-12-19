@@ -1,0 +1,17 @@
+h4. Purpose
+
+The wcm:monthNames tag is typically used in tandem with wcm:archiveList this will take a month number and return the name of the month.
+
+*Example* 
+
+{code}
+<wcm:archiveList type="org.weceem.html.WcmHTMLContent" path="news/pressreleases">
+  <a href="${link}"><wcm:monthName value="${month}"/> ${year}</a><br/>
+</wcm:archiveList>
+{code}
+
+h4. Description
+
+The supported attributes are:
+
+* value - An integer in the range 1-12

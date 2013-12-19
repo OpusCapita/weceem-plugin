@@ -1,0 +1,15 @@
+h4. Purpose
+
+Each content type have an icon so you can display it on UI using this tag
+
+*Example*
+
+{code}
+<wcm:renderContentItemIcon node="${someNode}"/>
+{code}
+
+h4. Description
+
+The supported attributes are:
+
+* node (required) - content node whose icon should be shown

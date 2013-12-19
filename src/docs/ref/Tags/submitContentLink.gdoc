@@ -1,0 +1,15 @@
+h4. Purpose
+
+The wcm:submitContentLink tag is a link to a Weceem controller that creates the content, applying the security policy to prevent unauthorized content creation. It returns the link to which user-created content must be posted. 
+ 
+A form must post all the required fields for the content type to this URL.
+ 
+You do not need to use this tag directly in most cases, as the *submitContentForm* tag is more common.
+
+h4. Description
+
+The supported attributes are:
+
+* parent - parent node for the newly created content - can be a content node instance, a URI path to the content, or a content id
+* type - class name of the desired content type e.g. org.weceem.content.WcmComment
+* success - content node to display after the new content has been successfully saved - can be a node instance, a URI path or an id.

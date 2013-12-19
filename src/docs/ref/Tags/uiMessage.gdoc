@@ -1,0 +1,16 @@
+h4. Purpose
+
+There are times when Weceem must return feedback to users, for example when returning search results or after submitting content.
+
+This tag will allow you to insert Weceem's UI message anywhere in your page as appropriate.
+
+*Example*
+
+{code}
+<wcm:uiMessage>
+    <div class="info-message">
+        ${message.encodeAsHTML()}
+    </div>
+</wcm:uiMessage> 
+{code}
+

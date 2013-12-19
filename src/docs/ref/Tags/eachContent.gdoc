@@ -1,0 +1,26 @@
+h4. Purpose
+
+This tag will iterate over all content for a given space, defaulting to the current space.
+
+You can supply a closure that will filter the results further, although you can restrict the results to a specific node type and/or status without using the filter feature.
+
+For large spaces this tag can be expensive to execute.
+
+*Example* of iterating over all image files in a space, at any depth:
+
+{code}
+<wcm:eachContent var="f" type="org.weceem.files.WcmContentFile" filter="${ { n -> f.mimeType.startsWith('image/') } }">
+  Image: <img src="${wcm.createLink(path:f.absoluteURI)}"/><br/>
+</wcm:eachContent>
+{code}
+
+h4. Description
+
+The supported attributes are:
+
+* *space (Optional) - defaults to the alias URI of the current space. Pass the alias URI of the space.
+* filter (Optional) - closure to filter the results by. Only the nodes that return a true value from this closure will be iterated over.
+* status (Optional) - status code or string. Defaults to "any published status"
+* var (Optional) - name of the variable that will contain the current node in the body
+* type (Optional) - specify class or class name to restrict to nodes of that type only
+* max, sort, order, offset - standard Grails limit and ordering attributes.

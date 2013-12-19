@@ -1,0 +1,19 @@
+h4. Purpose
+
+Use this tag in your own applications or content pages if you need to render the content of a different URI inline in your page.
+
+*Example*
+
+You might have a section of HTML that is not a full HTML document, but rather a @<div>@ with some reusable content in it that you want to show in your own Grails application's GSP files, as well as elsewhere in your Weceem content. 
+
+To this, simply use this tag and specify the path:
+
+{code}
+<wcm:render path="marketing/panel1"/>
+{code}
+
+h4. Description
+
+The supported attributes are:
+
+* path (required) - Weceem URI path to the content node.

@@ -1,0 +1,22 @@
+h4. Purpose
+
+The breadcrumb tag renders a breadcrumb trail for the current page. It will render a link for every node in the content path from the root down to the current page.
+
+So a node at alias URI path "/home/products/acme2000" will render a link to "home" and "products" and just plain text for "acme2000". This tag uses the "Menu title" fields of content if available, but falls back to the regular node title.
+
+If you want to conditionally show a breadcrumb only on pages that have a parent, you can use the following markup :
+
+*Example*
+
+{code}
+<g:if test="${node.parent}">
+  <wcm:breadcrumb/>
+</g:if>
+{code}
+
+h4. Description
+
+The supported attributes are:
+
+* custom (optional) - if you want to customize the rendering of each breadcrumb element, you can set this value to "true" and then provide a body for the tag. The body will be passed the properties "first", "last" ( booleans) and "breadcrumbNode" the Content node for the current level in the breadcrumb.
+* divider (optional) - the text to use between breadcrumb trail elements, defaults to " &gt; ", when not using custom.

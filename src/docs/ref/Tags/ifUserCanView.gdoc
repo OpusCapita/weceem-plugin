@@ -1,0 +1,25 @@
+h4. Purpose
+
+If a security policy has been implemented, the current user or guest may not have permission to view the current content node, or other nodes referenced by the current page.
+
+Use the wcm:ifUserCanView tag to display content only if the current user is permitted to view the specified node.
+
+*Example* 
+
+Checking whether user has permission to view the site's blog : 
+
+{code}
+<wcm:ifUserCanView path="blog">
+  Don't forget to check the blog!
+</wcm:ifUserCanView>
+{code}
+
+The above would create a link to edit the current content if the user is allowed to do so.
+
+h4. Description
+
+The supported attributes are:
+
+* path (optional) - defaults to the current page's node. URI path to the node, or a node instance
+* space (optional) - defaults to the current space. Alias URI of the space of the node.
+* node (optional) - node instance. Deprecated (use path)

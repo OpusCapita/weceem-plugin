@@ -1,7 +1,33 @@
-This tag will iterate over the children of the current or specified content node.
+h4. Purpose
 
-h2. Attributes
+The eachChild tag iterates over the children of a specified node. The children are the nodes immediately below the node.
 
-path -
-node -
-max - 
+Using this tag you can do all kinds of useful things such as rendering a list of links to child nodes, or render a numbered list of user-submitted comments inline.
+
+*Example*
+
+{code}
+
+<wcm:eachChild var="c" counter="n" type="org.weceem.content.WcmComment">
+   <div>
+       <h3>${n}: ${c.title.encodeAsHTML()}</h3>
+       <p>${c.content.encodeAsHTML()}</p>
+   </div>
+</wcm:eachChild>
+
+{code}
+
+The above would render the comments of the current page, with a number alongside each.
+
+h4. Description
+
+The supported attributes are:
+
+* node (optional) - content node whose children you want to iterate. If no "path" specified and "node" is also not specified, will default to current node being rendered.
+* path (optional) - content URI path to the node whose children you want to iterate.  If no "path" specified and "node" is also not specified, will default to current node being rendered.
+* status (optional) - content status or list of statuses you want included in your results. If none specified, it defaults to any publicly viewable content. If you want to show non-public content to permitted users, you can pass a single status code number, a WcmStatus intance, or a list of status codes or instances in this attribute.
+* type (optional) - name of a Weceem content class to restrict the results to, or the class itself. e.g. "org.weceem.html.HtmlContent"
+* var (optional) - name of the variable the current child will be passed in as. If not specified, will default to "it"
+* counter (optional) - name of the variable to receive the ordinality of the child within the iteration.
+* filter (optional) - closure (Groovy code), which will determine if each item is included in the results by returning true or false when returned each child node.
+* max, sort, order, offset - the standard Grails attributes for affecting finder results

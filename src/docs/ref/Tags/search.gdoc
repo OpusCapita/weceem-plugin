@@ -1,0 +1,44 @@
+h4. Purpose
+
+The search tag creates a default search form with a search text field and search button. When clicked, the form will submit to Weceem's search system and return the results - usually rendered by one of your own content pages using GSP.
+
+@<wcm:search types="..." resultsPath="..." baseURI="..."/>@
+
+Usually the default form and some CSS styling will be all you need, but if you need a custom form you can use the wcm:searchLink tag. This accepts the same attributes but returns just the URL to POST to.
+
+To render the results, your resultsPath content node (e.g. a HtmlContent with Allow GSP ticked) will need to iterate over the results that are provided in the "searchResults" object:
+
+*Example* 
+
+{code}
+<p>Your search for &quot;${params.query.encodeAsHTML()}&quot; returned ${searchResults.total} results:</p>
+{code}
+
+{code}
+<g:each in="${searchResults.results}" var="r">
+  <wcm:ifUserCanView node="${r}">
+    <div class="searchResult">
+      <wcm:link path="${r.absoluteURI}">${r.title.encodeAsHTML()}</wcm:link> (Space: ${r.space.name.encodeAsHTML()})<br />
+      <wcm:summarize encodeAs="HTML">${r.contentAsText}</wcm:summarize>
+    </div>
+  </wcm:ifUserCanView>
+</g:each>
+{code}
+
+This code does several things:
+
+* Reports statistics about the search - using "params.query" which were the original search terms, and "searchResults.total", the total hit count
+* Uses the Grails g:each tag to iterate over "searchResults.results" which contain the actual matching content nodes
+* Uses Weceem's wcm:ifUserCanView tag to only render the search result if the current visitor to the site is permitted to view the content returned by the search
+* Uses wcm:link tag to create a link to the content, using the title as the text
+* Uses the wcm:summarize tag to provide a plain-text truncated representation of the content. This is HTML-safe so won't chop up content in the middle of tags, and strips out formatting as you would expect in search results.
+
+This code can be customized any way that you like.
+ 
+h4. Description
+
+The supported attributes are:
+
+* types - a comma-delimited list of content class names, listing only the classes that should be searched by this form. Typically you will limit this to: org.weceem.blog.BlogEntry, org.weceem.html.HtmlContent, org.weceem.content.Comment
+* resultsPath - content URI path for the page that will render the results. This can be any renderable Weceem content, but to render the results you will need to use content that supports GSP tags - usually a HtmlContent node with "allow GSP" ticked. If no value is supplied, defaults to "views/search-results"
+* baseURI - base content URI that will form the root of the search, for searching only parts of your content tree.

@@ -1,0 +1,19 @@
+h4. Purpose
+
+To locate a node by its path and get a reference to that object in a variable - e.g. a Widget or Template may need to interact with a specific node directly.
+
+To achieve this, use findNode to return a content node that you can store in a page variable.
+
+*Example*
+
+{code}
+<g:set var="contactForm" value="${wcm.findNode(path:'forms/contact')}"/>
+{code}
+
+h4. Description
+
+The supported attributes are:
+
+* id (optional) - database id of the node to locate. Use of this is not recommended
+* path (optional) - content URI path of the node to locate, e.g. "forms/contact"
+* title (optional) - title text of the node to find. It will return the first matching node, as many nodes may have the same title. As such the consistency of results is not guaranteed. This can be useful to locate nodes that may be moved around the hierarchy in future.
