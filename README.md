@@ -14,7 +14,7 @@ Full documentation is available on the [Weceem site](http://weceem.org).
 
 To install the plugin into an existing Grails application, you can simply run `grails install-plugin weceem` or better, add the plugin as a dependency in `BuildConfig.groovy`:
 
-    runtime ':weceem:1.1.3-SNAPSHOT'
+    runtime ':weceem:1.2-SNAPSHOT'
    
 You then must configure a couple of things for it to operate correctly:
 
