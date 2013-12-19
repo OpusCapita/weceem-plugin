@@ -16,7 +16,7 @@
 
     
     <g:if test="${flash.message}">
-      <div class="message span-22 prepend-1 append-1 prepent-top append-bottom last ui-state-highlight ui-corner-all"><g:message code="${flash.message}" encodeAs="HTML"/></div>
+      <div class="message span-22 prepend-1 append-1 prepent-top append-bottom last ui-state-highlight ui-corner-all"><g:message code="${flash.message.encodeAsHTML()}"/></div>
     </g:if>
     <g:if test="${flash.error}">
       <div class="message span-22 prepend-1 append-1 prepent-top append-bottom last ui-state-error ui-corner-all">${flash.error}</div>
