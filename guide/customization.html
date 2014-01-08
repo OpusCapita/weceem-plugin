@@ -1,0 +1,567 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>5 Customization 1.2-SNAPSHOT</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/1.Introduction.html"><strong>1</strong><span>Introduction</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/2.ConfigurationAndInstallation.html"><strong>2</strong><span>Configuration and installation</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/3.GeneralBehaviourAndConcepts.html"><strong>3</strong><span>General behaviour and concepts</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/4.WeceemSecuritPolicy.html"><strong>4</strong><span>Weceem security policy</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/customization.html"><strong>5</strong><span>Customization</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>A CMS that you can install into your own applications, as used by the Weceem CMS application</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../guide/4.WeceemSecuritPolicy.html">&lt;&lt; <strong>4</strong><span>Weceem security policy</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+
+
+                <div class="project">
+                    <h1>5 Customization - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> jCatalog AG</p>
+
+                    <p><strong>Version:</strong> 1.2-SNAPSHOT</p>
+
+                    
+                </div>
+
+                
+                <div id="table-of-content">
+                    <h2>Table of Contents</h2>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#0.HookingIntoTheAdminInterface"><strong>5.1</strong><span>Hooking into the Admin interface</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#1.CreateCustomContentTypes"><strong>5.2</strong><span>Create custom content types</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#2.CustomContentEditors"><strong>5.3</strong><span>Custom content editors</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#3.CustomRequestAndFormSubmissionWithGroovyScripts"><strong>5.4</strong><span>Custom request/form submission with groovy scripts</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#4.EmbeddingContent"><strong>5.5</strong><span>Embedding content</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#5.ExportingAndImportingContent"><strong>5.6</strong><span>Exporting and importing content</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#6.HookingIntoContentEvents"><strong>5.7</strong><span>Hooking into content events</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#7.PageRendering"><strong>5.8</strong><span>Page rendering</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#8.IntegratingTheAuthenticationAndAuthorisationSystem"><strong>5.9</strong><span>Integrating the  authenticationand authorisation system</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#9.StylingWithTemplates"><strong>5.10</strong><span>Styling With Templates</span></a>
+                    </div>
+                    
+                </div>
+                
+
+                
+
+<h1 id="customization">5 Customization</h1>
+This section covers the internal details that can be used to customize Weceem within your application, create custom content types and other more technical subjects.
+
+
+<h2 id="0.HookingIntoTheAdminInterface">5.1 Hooking into the Admin interface</h2>
+<strong class="bold">Hooking into the Admin interface of Weceem</strong><p class="paragraph"/>Applications can add items to the Weceem "Administration" page by using the Navigation plugin that Weceem CMS uses, to add items to the navigation group "weceem.app.admin". The Weceem Application does this :<p class="paragraph"/><div class="code"><pre>class UserController &#123;
+        def authenticateService<p class="paragraph"/>        <span class="java&#45;keyword">static</span> navigation = &#91;group: 'weceem.app.admin', action: 'list', title: 'users'&#93;
+&#125;</pre></div><p class="paragraph"/>The navigation plugin uses this convention property to place the "list" action of the user controller into the "Administration" section of Weceem Admin.
+
+
+<h2 id="1.CreateCustomContentTypes">5.2 Create custom content types</h2>
+Weceem provides many content types as standard. Each content type has a specific purpose, with different fields in the editor.<p class="paragraph"/>Some content types are directly rendered when requested, others are used by other content nodes to compose the page seen by the user.<p class="paragraph"/>The standard content types available in Weceem are :
+<ul class="star">
+<li>Action - A server-side action that will execute the code in a Groovy Script node, for example to create new content nodes or send an email</li>
+<li>Blog - The root node of a Blog, which has Blog Entry nodes as children</li>
+<li>Blog Entry - An entry (child of) a Blog node</li>
+<li>Comment - A comment on a content node. Any nodes can have comments attached or created.</li>
+<li>External Link - A URL of another website. When this URI is rendered, it redirects to the external site</li>
+<li>Folder - A folder for grouping together content nodes and creating URI hierarchy</li>
+<li>Groovy Script - A piece of Groovy code to execute on the server, used by Action nodes</li>
+<li>HTML - A piece of HTML which may contain GSP (Grails Server Page) tags</li>
+<li>JavaScript - A piece of JavaScript source</li>
+<li>Server File - A file uploaded to the Weceem repository and stored on the server filesystem, e.g. an image file</li>
+<li>Server Directory - A directory on the server filesystem which contains Server File nodes</li>
+<li>Stylesheet - A CSS style sheet</li>
+<li>Template - A GSP template used to layout and decorate the current content node</li>
+<li>Widget - A reusable GSP fragment for rendering sections of a page, e.g. a header/footer or a remote news feed.</li>
+</ul><p class="paragraph"/><h4> Creating custom content types</h4><p class="paragraph"/>You can add new content types that will be editable by your users and displayed in the repository along with the standard content types.<p class="paragraph"/>These custom types can have full control over how a request is handled (e.g. issue a redirect, like WcmExternalLink does) or delegate to established rendering mechanisms within Weceem. You might have it call out to a PDF generator for example, or render some data using an alternative presentation technology e.g. wiki rendering or Freemarker. They can also specify how their properties should be edited in the repository, and hook into events.<p class="paragraph"/>To create a new content type, you just need to create a new Grails domain class that extends the WcmContent class and follow a few simple conventions. You can create a basic template for a new content type using the create-content-class script :<p class="paragraph"/><div class="code"><pre>grails create&#45;content&#45;class com.mycompany.Product</pre></div><p class="paragraph"/>This will create the domain class under grails-app/domain/, with some default placeholder code. Here is an of the contentions.<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">import</span> org.weceem.util.ContentUtils
+<span class="java&#45;keyword">import</span> org.weceem.content.WcmContent<p class="paragraph"/>class PressRelease <span class="java&#45;keyword">extends</span> WcmContent &#123;<p class="paragraph"/>    // Set to <span class="java&#45;keyword">false</span> <span class="java&#45;keyword">if</span> <span class="java&#45;keyword">this</span> content node should never actually be rendered
+    // i.e. Groovy Script nodes cannot be rendered directly.
+    <span class="java&#45;keyword">static</span> standaloneContent = <span class="java&#45;keyword">false</span><p class="paragraph"/>    <span class="java&#45;object">String</span> getMimeType() &#123; <span class="java&#45;quote">"text/html"</span> &#125;<p class="paragraph"/>    <span class="java&#45;object">String</span> content<p class="paragraph"/>    /&#42;&#42;
+     &#42; Must be overriden by content types that can represent their content as text.
+     &#42; Used <span class="java&#45;keyword">for</span> search results and versioning
+     &#42;/
+    <span class="java&#45;keyword">public</span> <span class="java&#45;object">String</span> getContentAsText() &#123; ContentUtils.htmlToText(content) &#125;<p class="paragraph"/>    /&#42;&#42;
+     &#42; Should be overriden by content types that can represent their content as HTML.
+     &#42; Used <span class="java&#45;keyword">for</span> wcm:content tag (content rendering)
+     &#42;/
+    <span class="java&#45;keyword">public</span> <span class="java&#45;object">String</span> getContentAsHTML() &#123; content &#125;<p class="paragraph"/>    <span class="java&#45;keyword">static</span> constraints = &#123;
+        content(nullable: <span class="java&#45;keyword">false</span>, maxSize: 65536)
+    &#125;<p class="paragraph"/>    <span class="java&#45;keyword">static</span> editors = &#123;
+        content(editor:'HtmlCode')
+    &#125;<p class="paragraph"/>    <span class="java&#45;keyword">static</span> transients = WcmContent.transients
+&#125;</pre></div><p class="paragraph"/>It declares a new type which, when created, will immediately become editable in the repository when you run your application.  There are several conventions that apply, described in more detail below -<p class="paragraph"/><strong class="bold">Basic considerations</strong><p class="paragraph"/>Your descendent class has certain conventions it must honour for correct operation :
+<ul class="minus">
+<li> the Grails "transients" property must be populated with the sum of the superclass transients and any new transient properties you add (should not be necessary for newer Grails versions)</li>
+<li> the "searchable" property convention must be defined as per Grails Searchable plugin, to add any fields that should be indexed for searching</li>
+</ul><p class="paragraph"/><h4> Controlling the editing of your content type</h4><p class="paragraph"/>To customize behaviour for the properties of the domain class, the "editors" closure property is used, like Grails constraints closure - but in this case how they are treated in the Weceem editor.<p class="paragraph"/>For each field of the content domain class you can define the order in which they appear in the editor - based on the order in which they are listed in the editors closure.<p class="paragraph"/>You can also set the editor used for each property. These have names like HtmlCode, ReadOnly, CssCode, GroovyCode etc. You can also define your own editors if the supplied editors are not suitable. See the section on customizing content editors.<p class="paragraph"/>Some properties are for internal use only, for those you can set hidden:true.<p class="paragraph"/>Finally, you can push your properties into the "Extras" editor group that is displayed separately by setting "group" to "extra":<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">static</span> editors = &#123;
+    isbn(editor:'ISBNEditor')
+    genre(editor:'GenrePopup', group:'extra')</pre></div><p class="paragraph"/><h4> Displaying content as text or HTML</h4><p class="paragraph"/>For various reasons such as search results and versioning, Weceem needs to be able to get some kind of representation of your custom content as both plain text and HTML. If your needs are different from the defaults, you can override the methods for getContentAsText and getContentAsHTML.<p class="paragraph"/>The default behaviour is:<p class="paragraph"/><div class="code"><pre>/&#42;&#42;  &#42; Must be overriden by content types that can represent their content as text.
+ &#42; Used <span class="java&#45;keyword">for</span> search results and versioning
+ &#42;/ <span class="java&#45;object">String</span> getContentAsText() &#123; <span class="java&#45;quote">""</span> &#125;
+/&#42;&#42;
+ &#42; Should be overriden by content types that can represent their content as HTML.
+ &#42; Used <span class="java&#45;keyword">for</span> wcm:content tag (content rendering)
+ &#42;/ <span class="java&#45;object">String</span> getContentAsHTML() &#123; contentAsText ? contentAsText.encodeAsHTML() : '' &#125;</pre></div><p class="paragraph"/>So as a minimum, override getContentAsText() - but if there is a reasonable HTML representation, e.g. for HTML, Wiki or other richly formatted content,  you should also implement getContentAsHTML().<p class="paragraph"/><h4> Defining mime type</h4><p class="paragraph"/>Weceem's content controller will ask the content for its MIME type when building the response. In many content types this is a constant value and is not persisted, but in types such as WcmContentFile this is persisted so that the type can be overridden by the user.<p class="paragraph"/>To return the correct MIME type, just implement the getter:<p class="paragraph"/><div class="code"><pre><span class="java&#45;object">String</span> getMimeType() &#123; <span class="java&#45;quote">"text/html"</span> &#125;</pre></div><p class="paragraph"/>This non-static value is read whenever the content is to be served. This means that you can determine it on a per-node basis, which is how the WcmContentFile type specifies the mime types of downloadable files.<p class="paragraph"/><h4> Customizing rendering of your content </h4><p class="paragraph"/>Weceem delegates rendering of content to the content node itself. If there is no rendering implementation provided, it will simply render the node as text to the client. This mechanism is used by the built in content types to render themselves appropriately. Some types render HTML decorated by a template, and others issue redirects.<p class="paragraph"/>There are two conventions that control the custom rendering of content:
+<ul class="star">
+<li>Static "standaloneContent" property is set to false if content type is not intended for direct rendering. This prevents node types used by other types from being rendered when their URI is requested - e.g. is the built-in template and widget types, which make no sense being rendered on their own.</li>
+<li>Static "handleRequest" Closure property provides custom implementation of rendering if you require it.</li>
+</ul><p class="paragraph"/>The handleRequest closure is executed so that it delegates to Weceem's content controller. This means you can use all the regular Grails dynamic controller methods and properties (render, redirect, response, request, session) as well as some custom methods to render Weceem content nodes using the normal GSP and templating mechanisms.<p class="paragraph"/>Here's an example of how WcmHTMLContent renders its regular HTML or GSP code :<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">static</span> handleRequest = &#123; content &#45;&#62;
+    <span class="java&#45;keyword">if</span> (content.allowGSP) &#123;
+        renderGSPContent(content)
+    &#125; <span class="java&#45;keyword">else</span> &#123;
+        renderContent(content)
+    &#125;
+&#125;</pre></div><p class="paragraph"/>This implementation calls WcmContentController's renderContent method if the content is HTML, which will render the content inside a Template if the node has one. Alternatively if the content is classed as GSP content, it calls the controller's renderGSPContent method which renders the content as GSP code, inside a template if one is found for the node.<p class="paragraph"/>Another example is the External Link type which redirects the browser to the target URL of the node :<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">static</span> handleRequest = &#123; content &#45;&#62;
+   redirect(url:content.url)
+&#125;</pre></div><p class="paragraph"/>This implementation uses the standard Grails "redirect" method to redirect to the URL specified in the content's "url" property.<p class="paragraph"/>The Template, Widget and HTML content nodes can use Weceem tags and other Grails tags to perform view rendering logic.<p class="paragraph"/><h4> Interacting with content events </h4><p class="paragraph"/>Content nodes can hook into common events, such as deletion and updates. To do this your content class needs to implement methods for any events it wants to support. None of these are mandatory, and you can implement only those you need. The available event methods are defined in 
+<a href="https://fisheye.codehaus.org/browse/grails-plugins/grails-weceem/trunk/src/groovy/org/weceem/event/WeceemDomainEvents.groovy?r=HEAD" target="blank">WeceemDomainEvents.groovy</a><p class="paragraph"/>The event methods are:<p class="paragraph"/><div class="code"><pre><span class="java&#45;object">boolean</span> contentShouldBeCreated(WcmContent parentNodeOrNull)</pre></div><p class="paragraph"/>This method allows the content to veto whether or not it can be created. This is called on the newly populated but not saved content node, and is passed the parent node that it would be attached to, which can be null if it is root level content.<p class="paragraph"/><div class="code"><pre>void contentDidGetCreated()</pre></div><p class="paragraph"/>This is called after the content node has been created and saved.<p class="paragraph"/><div class="code"><pre><span class="java&#45;object">boolean</span> contentShouldBeDeleted()</pre></div><p class="paragraph"/>This allows the content type to veto whether or not the node can or should be deleted - e.g. it may not be possible to delete a content node if it has children.<p class="paragraph"/><div class="code"><pre>void contentWillBeDeleted()</pre></div><p class="paragraph"/>This event is triggered just before the node is deleted.<p class="paragraph"/><div class="code"><pre>void contentDidGetDeleted()</pre></div><p class="paragraph"/>This event is triggered immediately after the node is deleted.<p class="paragraph"/><div class="code"><pre>void contentDidChangeTitle(<span class="java&#45;object">String</span> previousTitle)</pre></div><p class="paragraph"/>This event is called when the title property of a node has changed.<p class="paragraph"/><div class="code"><pre>void contentDidGetUpdated()</pre></div><p class="paragraph"/>This event is triggered after a node has been edited and the new values saved.<p class="paragraph"/><div class="code"><pre><span class="java&#45;object">boolean</span> contentShouldMove(WcmContent targetParent)</pre></div><p class="paragraph"/>This event is called to allow it to veto being moved to parent nodes that are not compatible. Returning false will prevent the user moving the node (changing its parent).<p class="paragraph"/><div class="code"><pre>void contentDidMove()</pre></div><p class="paragraph"/>This is called after the content's parent has been changed and saved.<p class="paragraph"/><div class="code"><pre><span class="java&#45;object">boolean</span> contentShouldAcceptChildren()</pre></div><p class="paragraph"/>This event is called to find out if the current node can accept child nodes.<p class="paragraph"/><div class="code"><pre><span class="java&#45;object">boolean</span> contentShouldAcceptChild(WcmContent newChild)</pre></div><p class="paragraph"/>This event is called to find out if the current node can accept the new child node. There might be per-node reasons for vetoing new children.<p class="paragraph"/>You can also hook into many events outside of the domain classes themselves, using the Event Service.<p class="paragraph"/><h4> Customizing the icon shown in the repository</h4><p class="paragraph"/>You can supply an icon for your custom content types, that will be used in the admin UI of Weceem, e.g. in the repository view. To do this, define a static "icon" property which contains the arguments you would pass to <strong class="bold">Grails g:resource tag</strong> to create a link to the resource :<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">static</span> icon = &#91;
+   plugin: <span class="java&#45;quote">"weceem"</span>,
+   dir: <span class="java&#45;quote">"_weceem/images/weceem/content&#45;icons"</span>,
+   file: <span class="java&#45;quote">"widget&#45;32.png"</span>
+&#93;</pre></div><p class="paragraph"/>It is vital to include the "plugin" attribute and value if you are placing your custom content class in a plugin of your own.<p class="paragraph"/><h4> Content versioning</h4><p class="paragraph"/>In order to participate in Weceem's content versioning system, you need to add any properties you wish to have serialized to the getVersioningProperties() implementation of your class. This function returns a map of values that are stored in the content revision.<p class="paragraph"/>These are simple values that must be expressible as strings. By necessity you may refer to objects not available at the time the user views your revision, so all complex object references that need to be versioned should be coerced to some kind of text representation.<p class="paragraph"/>For a real example, here's the code from WcmHTMLContent :<p class="paragraph"/><div class="code"><pre>Map getVersioningProperties() &#123;
+    def r = <span class="java&#45;keyword">super</span>.getVersioningProperties() + &#91;
+        menuTitle:menuTitle,
+        htmlTitle:htmlTitle,
+        keywords:keywords,
+        template:template?.ident() // A string representation of template object
+    &#93; 
+    <span class="java&#45;keyword">return</span> r
+&#125;</pre></div><p class="paragraph"/>In almost all cases you will want to call the super method to ensure all inherited properties are correctly versioned.
+
+
+<h2 id="2.CustomContentEditors">5.3 Custom content editors</h2>
+As mentioned in the create custom content type section, you can specify what kind of editor is used for each property of content types. By following some simple procedure, you can also create your own new editors.<p class="paragraph"/>Weceem will locate the appropriate editor using the name of the type of the property, if a custom property editor name is not given.<p class="paragraph"/><h4> Content Editors</h4><p class="paragraph"/>Weceem has quite a few editors that are available to edit all the predefined content type properties.<p class="paragraph"/>| <em class="italic">. Editor Field Name |</em> . Description |
+| String | for single-line strings |
+| LongString | for multi-line strings |
+| Integer | for whole numbers |
+| Boolean | for boolean fields |
+| Date | for dates, includes datepicker and HH and MM fields |
+| Title | uses a larger font for editing the title |
+| Tags | UI for displaying and add/remove tags via ajax | 
+| ContentFileUpload | renders a file upload field or file information if already uploaded |
+| RichHTML | HTML editing with rich editor |
+| HTMLContent | HTML content editor that checks allowGSP property on content and switches between RichHTML and HtmlCode as appropriate |
+| HtmlCode | Code editor with highlighting for HTML |
+| JSCode | Code editor with highlighting for JavaScript |
+| GroovyCode | Code editor with highlighting for Groovy code |
+|CSSCode | Code editor with highlighting for CSS code |
+| LanguageList | a language selection drop-down list |
+| WcmScript | For selecting any WcmScript node in the current space |
+| WcmStatus | For selecting any WcmStatus instance |
+|WcmTemplate | For selecting any WcmTemplate instance in the current space |
+| WcmSpace | For selecting a Space |
+| ReadOnly | a text-only rendering of the value with no editing capability |
+| ReadOnlyURI | a text-only URI value, using URL encoding of restricted chars |
+| ReadOnlyDate | a read-only display of a date |<p class="paragraph"/><h4> Writing your own content editor</h4><p class="paragraph"/>Creating a custom editor is simply a case of defining one or two Grails tags in the "wcm" namespace.<p class="paragraph"/>Editors are resolved by looking for a tag with the target editor name appended to "wcm:editorField". So for example a new editor for choosing a colour might be called Colour and the tag would be called "editorFieldColour" :<p class="paragraph"/><div class="code"><pre>class MyWeceemTagLib &#123;
+    <span class="java&#45;keyword">static</span> namespace = <span class="java&#45;quote">"wcm"</span><p class="paragraph"/>def editorFieldColour = &#123; attrs &#45;&#62; 
+          out &#60;&#60; someFancyColourPicker(pageScope.content&#91;attrs.property&#93;)
+    &#125;
+&#125;</pre></div><p class="paragraph"/>These tags are called with the following attributes:
+<ul class="star">
+<li>property - property name of the content object for which the tag should render a field</li>
+</ul><p class="paragraph"/>Your tags can access the current content object being edited using :<p class="paragraph"/><div class="code"><pre>pageScope.content&#91;attrs.property&#93;</pre></div><p class="paragraph"/>In the above example,  you would not need to specify editor:'Colour' on your custom content classes if the property type is actually an instance of a Colour class.<p class="paragraph"/><strong class="bold">Note :</strong> Polymorphism is not yet supported in this scenario so only exact class matches will work.<p class="paragraph"/><h4> Providing resources needed by custom editors</h4><p class="paragraph"/>Some editors - e.g. the FCK and code editors used by Weceem, require JavaScript and CSS resources to be included in the &#60;head&#62; section of the editor page. To achieve this, Weceem looks for a tag with a name like "wcm:editorResourcesColour" where the type name is appended to "editorResources". This tag can output anything you like into the &#60;head&#62; section of the page:<p class="paragraph"/><div class="code"><pre>def editorResourcesTags = &#123; attrs &#45;&#62;
+        out &#60;&#60; g.render(template:'/editors/tags_resources', plugin:'weceem', 
+            model:&#91;name:attrs.property, value:pageScope.content&#91;attrs.property&#93;&#93;)
+    &#125;</pre></div><p class="paragraph"/>Here, the Tags editor uses another GSP to output the more complex resource elements it requires, setting up JS code in the &#60;head&#62; section to bind add/remove buttons using jQuery.<p class="paragraph"/>
+
+
+<h2 id="3.CustomRequestAndFormSubmissionWithGroovyScripts">5.4 Custom request/form submission with groovy scripts</h2>
+Capture data from forms and perform an action, such as sending mail after submission of a contact form by writing some Groovy code that you store in the content repository. This happens dynamically and you don't need to redeploy your Weceem application or restart it.<p class="paragraph"/>Two content types work together in Weceem to enable you to write arbitrary server-side code. The Scripted Action node type is used to receive requests, and delegates the work to a Groovy Script node.<p class="paragraph"/>For example, to create a Contact form that sends mail to a known address, you could implement it like this :
+<ol>
+<li>Create a Groovy Script node in your repository, and paste into it the following code :</li>
+</ol><p class="paragraph"/><div class="code"><pre>def args = &#91;
+  recipients:'admin@yourserver.com',
+  subject:'Message from website visitor'
+&#93;
+<span class="java&#45;keyword">try</span> &#123;
+  sendMail &#123;
+    to args.recipients
+    <span class="java&#45;keyword">if</span> (args.ccRecipients) &#123;
+      cc args.ccRecipients
+    &#125;
+    subject args.subject<p class="paragraph"/>    from params.senderAddress
+    body params.message
+  &#125;
+  redirect(uri:params.success)
+&#125; <span class="java&#45;keyword">catch</span> (Exception e) &#123;
+  log.error <span class="java&#45;quote">"Can't send mail"</span>, e
+  redirect(uri:params.error)
+&#125;</pre></div><p class="paragraph"/>This code expects the Grails "mail" plugin to be installed (as it is by default in the Weceem application WAR file). This code is exactly what you would write if you were writing your own <a href="https://grails.org/doc/latest/guide/theWebLayer.html#6.1%20Controllers." target="blank">Grails controller action</a>  You can call redirect, render and other Grails controller methods as usual. The request parameters are in "params".<p class="paragraph"/><a href="https://grails.org/doc/latest/guide/theWebLayer.html#6.1%20Controllers" target="blank">WeceemDomainEvents.groovy</a><p class="paragraph"/>2. Now that you have a script to run, you need to create a Scripted Action node to respond to requests for a specific URI and run the script. When you do this, select the script you created in the "Script" field. The full repository URI of this Scripted Action content node is the URI that needs to be used in your HTML form's action attribute. You can create links to this action inside your own Widget or Template nodes using the wcm:createLink tag.<p class="paragraph"/>With the above example, the HTML form needs to supply fields "senderAddress" and "message". It will redirect the user to the value of the "success" parameter which will usually be a URI in your content repository created using the wcm:createLink tag.<p class="paragraph"/>You can write any Groovy code you like in the Groovy Script node. The possibilities are endless for example, you can call out to external web services, perform calculations, render complex results in alternative formats (e.g. JSON).<p class="paragraph"/>However, you can easily degrade the performance of your server by writing inefficient code in a Groovy Script that is executed frequently.<p class="paragraph"/>It is strongly recommended that you limit the users that can create Groovy Scripts using the Weceem Security Policy.
+
+
+<h2 id="4.EmbeddingContent">5.5 Embedding content</h2>
+In some custom applications you may want to embed some Weceem content within your own Grails GSP views. This is easily achieved for most situations using the new <strong class="bold">wcm:render</strong> tag as of release 1.1.<p class="paragraph"/>However, if you need to render content with more control over the process - e.g. using an artificial request/response to render content for use in emails, you can use the wcmRenderEngine bean.<p class="paragraph"/>This bean offers methods for rendering a specific content node.<p class="paragraph"/>You must typically pass in a request and response to use - given that most of Weceem functionality uses Grails tags and these require features of requests and responses - although you can usually also pass in your own controller instance if you have one.<p class="paragraph"/>See the source code for <a href="https://github.com/jCatalog/weceem-plugin/blob/master/src/groovy/org/weceem/content/RenderEngine.groovy" target="blank">RenderEngine on github</a> for more details.
+
+
+<h2 id="5.ExportingAndImportingContent">5.6 Exporting and importing content</h2>
+Each Weceem space (repository) can be individually exported and imported individually and is useful for backups or migrating content between servers or spaces.<p class="paragraph"/>For this :
+<ol>
+<li>Go to the Administration section</li>
+<li>Select option - "Spaces"</li>
+<li>Click  the Export or Import buttons</li>
+<li>Select space when prompted.</li>
+</ol><p class="paragraph"/>Use the default import/exporter - it is the native Weceem exporter.<p class="paragraph"/>The exported ZIP file will include all content nodes and uploaded files for that space. You can then import this ZIP into another Weceem instance, or to a different space in the same instance.<p class="paragraph"/><strong class="bold">Importing will replace any content in the space!</strong><p class="paragraph"/><strong class="bold">Note :</strong><p class="paragraph"/>Exported spaces will not include your user accounts or any custom WcmStatus nodes you created, as these are not Space-specific.
+
+
+
+<h2 id="6.HookingIntoContentEvents">5.7 Hooking into content events</h2>
+In custom Grails applications that use Weceem plugin you may need to perform actions when certain events occur on content.<p class="paragraph"/>To do this, register a listener with the WcmEventService and implement any of the event notification methods you require.<p class="paragraph"/>First, you inject the WcmEventService using Grails dependency injection, or obtain it via the Spring ApplicationContext, and then call the "addListener" method :<p class="paragraph"/><div class="code"><pre>class MyService <span class="java&#45;keyword">implements</span> InitializingBean &#123;
+    def wcmEventService<p class="paragraph"/>    void afterPropertiesSet() &#123;
+        wcmEventService.addListener(<span class="java&#45;keyword">this</span>)
+    &#125;<p class="paragraph"/>    void contentDidGetUpdated(WcmContent node) &#123;
+        log.info <span class="java&#45;quote">"Look! Content $&#123;node.title&#125; was updated"</span>
+    &#125;
+&#125;</pre></div><p class="paragraph"/>The list of available events is defined in the WeceemEvents class, which uses an optional event callback method mechanism -<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">package</span> org.weceem.event<p class="paragraph"/><span class="java&#45;keyword">import</span> org.weceem.content.WcmContent<p class="paragraph"/>class WeceemEvents &#123;
+    <span class="java&#45;keyword">static</span> events = &#123;
+        /&#42; Called just before saving the node &#42;/
+        contentWillBeCreated &#123; WcmContent contentNode, WcmContent parentNode &#45;&#62; &#125;
+        /&#42; Called after a <span class="java&#45;keyword">new</span> node has been created &#42;/
+        contentDidGetCreated &#123; WcmContent node &#45;&#62; &#125;<p class="paragraph"/>        /&#42; Called before a node is deleted &#42;/
+        contentWillBeDeleted &#123; WcmContent node &#45;&#62; &#125;
+        /&#42; Called after a node is deleted &#42;/
+        contentDidGetDeleted &#123; WcmContent node &#45;&#62; &#125;<p class="paragraph"/>        /&#42; Called after a <span class="java&#45;keyword">new</span> node is updated &#42;/
+        contentDidGetUpdated &#123; WcmContent node &#45;&#62; &#125;<p class="paragraph"/>        /&#42; Called after a <span class="java&#45;keyword">new</span> node is moved to a <span class="java&#45;keyword">new</span> parent &#42;/
+        contentDidMove &#123; WcmContent node, <span class="java&#45;object">String</span> previousURL, WcmContent previousParent &#45;&#62; &#125;
+    &#125;<p class="paragraph"/>    <span class="java&#45;keyword">static</span> &#123;
+        EventManager.define(WeceemEvents)
+    &#125;
+&#125;</pre></div><p class="paragraph"/>Implement the methods you need, using the signature defined in the WeceemEvents class.<p class="paragraph"/>There is a separate event interface called WeceemDomainEvents (given below) for developers that supply custom content types and for this you do not need to register as a lister - they are called as part of the regular lifecycle.<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">package</span> org.weceem.event<p class="paragraph"/><span class="java&#45;keyword">import</span> org.weceem.content.WcmContent<p class="paragraph"/>class WeceemDomainEvents &#123;
+    <span class="java&#45;keyword">static</span> events = &#123;
+        /&#42; Called before a <span class="java&#45;keyword">new</span> node is created. Return <span class="java&#45;keyword">true</span> to allow the creation &#42;/
+        contentShouldBeCreated &#123; WcmContent parentConent &#45;&#62; &#125;
+        /&#42; Called just before saving the node &#42;/
+        contentWillBeCreated &#123; WcmContent parentConent &#45;&#62; &#125;
+        /&#42; Called after a node has been created, so that it can intialize anything that depends on it &#42;/
+        contentDidGetCreated()<p class="paragraph"/>
+        /&#42; Called to see <span class="java&#45;keyword">if</span> a node can be deleted. Return <span class="java&#45;keyword">true</span> to permit the deletion &#42;/
+        contentShouldBeDeleted()
+        /&#42; Called before a node is deleted. &#42;/
+        contentWillBeDeleted()
+        /&#42; Called after a node is deleted. &#42;/
+        contentDidGetDeleted()<p class="paragraph"/>        /&#42; Called after a node's title has changed (edited). &#42;/
+        contentDidChangeTitle &#123; <span class="java&#45;object">String</span> previousTitle &#45;&#62; &#125;
+        /&#42; Called after a node is updated (edited). &#42;/
+        contentDidGetUpdated()<p class="paragraph"/>        /&#42; Called before a node is moved to a <span class="java&#45;keyword">new</span> parent. Return <span class="java&#45;keyword">true</span> to permit the move. Parent may be <span class="java&#45;keyword">null</span> &#42;/
+        contentShouldMove &#123; WcmContent newParent &#45;&#62; &#125;
+        /&#42; Called after a node is moved to a <span class="java&#45;keyword">new</span> parent. &#42;/
+        contentDidMove &#123; <span class="java&#45;object">String</span> previousURL, WcmContent previousParent &#45;&#62; &#125;<p class="paragraph"/>        /&#42; Called to establish whether <span class="java&#45;keyword">this</span> node can have children. Return <span class="java&#45;keyword">true</span> to permit addition of children &#42;/
+        contentShouldAcceptChildren()
+        /&#42; Called before a node is moved to become a child of <span class="java&#45;keyword">this</span> node. Return <span class="java&#45;keyword">true</span> to permit addition of the <span class="java&#45;keyword">new</span> child &#42;/
+        contentShouldAcceptChild &#123; WcmContent possibleChild &#45;&#62; &#125;
+    &#125;<p class="paragraph"/>    <span class="java&#45;keyword">static</span> &#123;
+        EventManager.define(WeceemDomainEvents)
+    &#125;
+&#125;</pre></div>
+
+
+<h2 id="7.PageRendering">5.8 Page rendering</h2>
+When a request is made to Weceem, it goes through a number of steps to produce the final content.
+<ol>
+<li> Weceem first locates the content at the URI path specified in the request</li>
+<li> Once located, it checks if content can be rendered. Content which is not "standalone" and used by other content cannot be rendered directly (e.g. Templates cannot be rendered directly).</li>
+<li> Next, it checks to see if the content implements rendering itself. If it does, it will call the content's handleRequest method to perform the rendering of the response.</li>
+<li> If there is no handleRequest method, Weceem will look for a "template" property on the content object and if it finds one, will ask that template to render the content.</li>
+</ol><p class="paragraph"/>Different content types may implement handleRequest differently - e.g. HTML Content first checks if the content is set to allow GSP tags to execute. If they are, it will execute the page and capture the output. The content is then passed to the template (if any) and returned to the client.<p class="paragraph"/><strong class="bold">Note :</strong> If the content supports templates and a template is not set,  Weceem will look up the content tree to see if any ancestors specify a template and will use the first one it finds.<p class="paragraph"/>In this most common case, the HTML and Template will work together and render one or more Widget nodes using &#60;wcm:widget&#62; to render common page elements like the header and footer sections.<p class="paragraph"/>Other types such as External Link will use handleRequest to issue a redirect to the browser.<p class="paragraph"/><h4> Default document handling</h4><p class="paragraph"/>Weceem supports httpd-style request URLs that end in /,  it will automatically check for a child node of the URI, with one of the default names ("index.html" or "index"), much like a regular webserver.
+
+
+<h2 id="8.IntegratingTheAuthenticationAndAuthorisationSystem">5.9 Integrating the  authenticationand authorisation system</h2>
+The Weceem plugin neither provides an authentication mechanism nor depends on authentication plugins. Just wire-in whichever authentication system you want to use - e.g.  the Weceem CMS Application wires up the Weceem plugin to the Spring Security plugin for authentication and provides a simple user management UI as part of the Weceem Admin.
+Customizing Authentication<p class="paragraph"/>The WcmSecurityService class has simple methods on it that the CMS uses to get information about the current logged-in user. To customize this, just replace or modify the delegate property on the service - e.g. to plug in Acegi (note that Spring Security replaces Acegi - see below for an off the shelf solution), you would place code like this in the BootStrap of your application :<p class="paragraph"/><div class="code"><pre>def authenticateService = context.authenticateService<p class="paragraph"/>context.wcmSecurityService.securityDelegate = &#91;
+	getUserName : &#123; &#45;&#62;
+		def princ = authenticateService.principal()
+		<span class="java&#45;keyword">if</span> (princ <span class="java&#45;keyword">instanceof</span> <span class="java&#45;object">String</span>) &#123;
+			<span class="java&#45;keyword">return</span> <span class="java&#45;keyword">null</span>
+		&#125; <span class="java&#45;keyword">else</span> &#123;
+			<span class="java&#45;keyword">return</span> authenticateService.principal()?.username
+		&#125;
+	&#125;,
+	getUserEmail : &#123; &#45;&#62;
+		def princ = authenticateService.principal()
+		<span class="java&#45;keyword">if</span> (princ <span class="java&#45;keyword">instanceof</span> <span class="java&#45;object">String</span>) &#123;
+			<span class="java&#45;keyword">return</span> <span class="java&#45;keyword">null</span>
+		&#125; <span class="java&#45;keyword">else</span> &#123;
+			<span class="java&#45;keyword">return</span> authenticateService.principal()?.email
+		&#125;
+	&#125;
+        getUserRoles : &#123; &#45;&#62; 
+		authenticateService.userDomain()?.roleAuthorities ?: &#91;'ROLE_GUEST'&#93; 
+	&#125;,
+        getUserPrincipal : &#123; &#45;&#62; 
+		authenticateService.principal()
+	&#125;
+&#93;</pre></div><p class="paragraph"/><h4> Integration with Spring Security</h4><p class="paragraph"/>If you create your own application using Weceem plugin and wish to use the Grails Spring Security plugin, install the weceem-spring-security plugin to provide the bridge between Weceem and your application's Spring Security authentication/authorization scheme.<p class="paragraph"/>When you use this plugin there is no need to write your own UserDetailsService for the Spring Security plugin.<p class="paragraph"/>To do this, after installing the plugin you simply have to specify some configuration to tell the plugin how to map from your Spring Security domain classes, and the plugin will make this information available to Weceem :<p class="paragraph"/><div class="code"><pre>weceem.springsecurity.details.mapper = &#123; &#45;&#62;
+    &#91; // Stuff required by weceem spring sec
+        username: username,
+        password: password,
+        enabled: enabled,
+        authorities: authorities,
+        // optional stuff we add
+        email: email,
+        description: description,
+        firstName: firstName,
+        lastName: lastName,
+        id: id
+    &#93;
+&#125;</pre></div><p class="paragraph"/>This closure must return a map of data used by Spring Security to store the information about your domain class. The "it" passed to the closure is the domain class instance, so the above is returning a map with values copied from the domain class.<p class="paragraph"/><strong class="bold">Note :</strong> Only information required by Weceem is the username, password, enabled and authorities. Everything else is optional and only used by your application if you code it to do so.<p class="paragraph"/>The application remains responsible for defining the domain classes and performing the relevant Spring Security configuration to protect your URIs.<p class="paragraph"/>
+
+
+<h2 id="9.StylingWithTemplates">5.10 Styling With Templates</h2>
+Templates are content nodes used to set page layouts on your site. Certain content types such as HTML and Blog, support setting a template when creating or editing nodes. If a template is not set, it is inherited from the content's ancestors.<p class="paragraph"/>Typically the template will include the head and body tags, pull in the CSS and other resources required, and provide some common layout elements.<p class="paragraph"/>They use standard Grails tags and Weceem tags to render content within the body of the page, as well as meta data about the current page e.g. dynamic titles.<p class="paragraph"/>Here's a simple example that renders a dynamic title and renders the content of the current node.<p class="paragraph"/><div class="code"><pre>&#60;html&#62;
+  &#60;head&#62;
+    &#60;title&#62;$&#123;page.title.encodeAsHTML()&#125;&#60;/title&#62;
+  &#60;/head&#62;
+  &#60;body&#62;
+    &#60;div id=<span class="java&#45;quote">"content"</span>&#62;
+      &#60;wcm:content/&#62;
+    &#60;/div&#62;
+  &#60;/body&#62;
+&#60;/html&#62;</pre></div><p class="paragraph"/>The <code>&#60;wcm:content/&#62;</code> tag is used to render the content of the page the user requested. Its important to remember that your Template is not actually requested by the user by URI - it is simply used to decorate the content the user requested.<p class="paragraph"/>You might add a news panel to this layout, by using the <code>&#60;wcm:widget&#62;</code> tag to render a reusable block that iterates over children of the "News" node to list the titles of articles and links to them.<p class="paragraph"/><p class="paragraph"/>
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../guide/4.WeceemSecuritPolicy.html">&lt;&lt; <strong>4</strong><span>Weceem security policy</span></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Domain</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Domain/attach.html">attach</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Tags</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../ref/Tags/ancestorOfType.html">ancestorOfType</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/archiveList.html">archiveList</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/breadcrumb.html">breadcrumb</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/cache.html">cache</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/content.html">content</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/contentIconURL.html">contentIconURL</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/countChildren.html">countChildren</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/createFeedLink.html">createFeedLink</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/createLink.html">createLink</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/createSearchLink.html">createSearchLink</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/dataFeed.html">dataFeed</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/date.html">date</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/eachChild.html">eachChild</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/eachComment.html">eachComment</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/eachContent.html">eachContent</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/eachParent.html">eachParent</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/eachSibling.html">eachSibling</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/feedLink.html">feedLink</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/find.html">find</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/findNode.html">findNode</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/htmlToText.html">htmlToText</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/ifContentIs.html">ifContentIs</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/ifContentIsNot.html">ifContentIsNot</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/ifUserCanEdit.html">ifUserCanEdit</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/ifUserCanView.html">ifUserCanView</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/join.html">join</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/link.html">link</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/loggedInEmail.html">loggedInEmail</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/loggedInUserName.html">loggedInUserName</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/menu.html">menu</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/monthNames.html">monthNames</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/render.html">render</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/renderContentItemIcon.html">renderContentItemIcon</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/resource.html">resource</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/search.html">search</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/searchLink.html">searchLink</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/space.html">space</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/submitContentForm.html">submitContentForm</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/submitContentLink.html">submitContentLink</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/summarize.html">summarize</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/uiMessage.html">uiMessage</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/userInfo.html">userInfo</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../ref/Tags/widget.html">widget</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>
