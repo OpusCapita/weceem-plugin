@@ -6,7 +6,7 @@ h4.  Requirements
 
 Deploying Weceem CMS requires:
 
-*  Java 5 or higher
+*  Java 6 or higher
 *  A supported SQL server e.g. MySQL or Postgres
 *  A recommended 500MB RAM allocated to the Java VM
 *  A writeable filesystem folder for storing Lucene full-text search indexes
@@ -24,7 +24,7 @@ To install the Weceem plugin, the dependency must be added into grails-app/conf/
 "runtime('com.jcatalog.grailsplugins:weceem:1.2-SNAPSHOT')"
 {code}
 
-The plugin should function with Grails versions 2.2 and higher.
+The plugin should function with Grails versions 2.1 and higher.
 
 Once the plugin is installed into the application, a few Grails configuration changes may be required to make the CMS work in your application. These options are required for Weceem to operate correctly inside the application.
 
