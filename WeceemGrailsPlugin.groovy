@@ -27,7 +27,7 @@ class WeceemGrailsPlugin {
     def author = "jCatalog AG"
     def authorEmail = "info@weceem.org"
     def title = "Weceem CMS"
-    def description = '''A CMS that you can install into your own applications, as used by the Weceem CMS application'''
+    def description = '''Weceem CMS is a free, open source content management system.'''
 
     // URL to the plugin's documentation
     def documentation = "http://grails.org/plugin/weceem"
