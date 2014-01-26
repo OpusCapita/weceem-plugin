@@ -456,7 +456,7 @@ class WcmContentRepositoryService implements InitializingBean {
     void requirePermissionToCreateContent(WcmContent parentContent, WcmContent content) throws AccessDeniedException {
         if (!permissionsBypass.get()) {
             if (!wcmSecurityService.isUserAllowedToCreateContent(content.space, parentContent, content)) {
-                throw new AccessDeniedException("User [${wcmSecurityService.userName}] with roles [${wcmSecurityService.userRoles}] does not have the permissions [$permissionList] to create content under [${parentContent ? parentContent.absoluteURI + '/' + content.aliasURI : content.aliasURI}] in space [${content.space.name}]")
+                throw new AccessDeniedException("User [${wcmSecurityService.userName}] with roles [${wcmSecurityService.userRoles}] does not have the permissions to create content under [${parentContent ? parentContent.absoluteURI + '/' + content.aliasURI : content.aliasURI}] in space [${content.space.name}]")
             }
         }
     }
@@ -2170,11 +2170,15 @@ class WcmContentRepositoryService implements InitializingBean {
         requirePermissions(newContent, [WeceemSecurityPolicy.PERMISSION_CREATE])
 
         // Check for binding errors
-        def result = newContent.hasErrors() ? newContent : newContent.save() // it might not work, but hasErrors will be set if not
-        if (result) {
+        if (newContent.hasErrors()) {
+            log.error("Submitted Content has errors: ")
+            newContent.errors.allErrors.each { log.error(it) }
+            return newContent
+        } else {
+            newContent.save()
             newContent.index()
+            return newContent
         }
-        return result
     }
     
     /**

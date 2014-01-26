@@ -59,7 +59,7 @@ class WcmComment extends WcmContent {
     // Injected
     def wcmContentRepositoryService
     
-    static transients = WcmContent.transients + ['wcmContentRepositoryService']
+    static transients = WcmContent.transients + ['wcmContentRepositoryService', 'template']
 
     static editors = {
         content editor: 'RichHTML'
@@ -68,6 +68,12 @@ class WcmComment extends WcmContent {
         websiteUrl()
         ipAddress editor: 'ReadOnly'
         aliasURI hidden:true
+    }
+
+    WcmTemplate getTemplate() {
+        if (parent &&  parent.metaClass.hasProperty(parent, 'template')) {
+            return parent.template
+        } else return null
     }
     
     @Override

@@ -48,6 +48,7 @@ class WcmBlogEntry extends WcmContent {
         summary(nullable: true, blank: true, maxSize:500)
         content(maxSize:WcmContent.MAX_CONTENT_SIZE)
         status(nullable: false)
+        template(nullable: true)
     }
     
     static editors = {
@@ -56,9 +57,15 @@ class WcmBlogEntry extends WcmContent {
         keywords(group:'meta')
     }
 
-    static transients = WcmContent.transients
+    static transients = WcmContent.transients + ['template']
 
     String getMimeType() { "text/html" }
+
+    WcmTemplate getTemplate() {
+        if (parent &&  parent.metaClass.hasProperty(parent, 'template')) {
+            return parent.template
+        } else return null
+    }
 
     /**
      * Must be overriden by content types that can represent their content as text.
