@@ -695,9 +695,6 @@ function initTreeTable() {
 	        hideInserter();
 	    },
 	    buttons: {
-	        "Cancel" : function() {
-	            $(this).dialog('close');
-            },
 	        "Move" : function(){
 	            var swc = $(this).data('switch');
 	            var src = $(this).data('source');
@@ -779,7 +776,10 @@ function initTreeTable() {
         	                }
         	            });
     	        $(this).dialog('close');
-	        }
+	        } ,
+            "Cancel" : function() {
+                $(this).dialog('close');
+            }
 	    }
 	});
 	

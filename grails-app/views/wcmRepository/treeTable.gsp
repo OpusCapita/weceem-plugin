@@ -25,6 +25,8 @@
     
     #repository-toolbar label { display:inline; padding-right: 4px; }
     #repository-searchbox { text-align: right; }
+
+    .ui-dialog .ui-dialog-buttonpane button { float: left; }
 </style>
 <script type="text/javascript">
 
