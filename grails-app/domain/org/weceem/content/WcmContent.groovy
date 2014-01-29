@@ -184,10 +184,10 @@ class WcmContent implements Comparable, Taggable, Serializable {
     
     int compareTo(Object o) {
         if (this.is(o)) return 0
-        
-        // NOTE: the orderIndex == a.orderIndex returning -1 is REQUIRED with Grails 1.1.1 to workaround
-        // issues where orderIndex for children is not unique - returning 0 stops a node being returned in the set!
-        if (!o || (o.orderIndex == null) || (o.orderIndex == orderIndex)) return -1
+
+        if (o.orderIndex == orderIndex) return 0
+        if (!o || (o.orderIndex == null)) return -1
+
         this.orderIndex <=> o.orderIndex
     }
 
