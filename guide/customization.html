@@ -52,7 +52,7 @@ function addJsClass() {
         
         
     </div>
-    <p>A CMS that you can install into your own applications, as used by the Weceem CMS application</p>
+    <p>Weceem CMS is a free, open source content management system.</p>
 </div>
 
 
@@ -263,7 +263,7 @@ Capture data from forms and perform an action, such as sending mail after submis
 
 
 <h2 id="4.EmbeddingContent">5.5 Embedding content</h2>
-In some custom applications you may want to embed some Weceem content within your own Grails GSP views. This is easily achieved for most situations using the new <strong class="bold">wcm:render</strong> tag as of release 1.1.<p class="paragraph"/>However, if you need to render content with more control over the process - e.g. using an artificial request/response to render content for use in emails, you can use the wcmRenderEngine bean.<p class="paragraph"/>This bean offers methods for rendering a specific content node.<p class="paragraph"/>You must typically pass in a request and response to use - given that most of Weceem functionality uses Grails tags and these require features of requests and responses - although you can usually also pass in your own controller instance if you have one.<p class="paragraph"/>See the source code for <a href="https://github.com/jCatalog/weceem-plugin/blob/master/src/groovy/org/weceem/content/RenderEngine.groovy" target="blank">RenderEngine on github</a> for more details.
+﻿In some custom applications you may want to embed some Weceem content within your own Grails GSP views. This is easily achieved for most situations using the new <strong class="bold">wcm:render</strong> tag as of release 1.1.<p class="paragraph"/>However, if you need to render content with more control over the process - e.g. using an artificial request/response to render content for use in emails, you can use the wcmRenderEngine bean.<p class="paragraph"/>This bean offers methods for rendering a specific content node.<p class="paragraph"/>You must typically pass in a request and response to use - given that most of Weceem functionality uses Grails tags and these require features of requests and responses - although you can usually also pass in your own controller instance if you have one.<p class="paragraph"/>See the source code for <a href="https://github.com/jCatalog/weceem-plugin/blob/master/src/groovy/org/weceem/content/RenderEngine.groovy" target="blank">RenderEngine on github</a> for more details.
 
 
 <h2 id="5.ExportingAndImportingContent">5.6 Exporting and importing content</h2>
@@ -379,7 +379,7 @@ Customizing Authentication<p class="paragraph"/>The WcmSecurityService class has
 
 
 <h2 id="9.StylingWithTemplates">5.10 Styling With Templates</h2>
-Templates are content nodes used to set page layouts on your site. Certain content types such as HTML and Blog, support setting a template when creating or editing nodes. If a template is not set, it is inherited from the content's ancestors.<p class="paragraph"/>Typically the template will include the head and body tags, pull in the CSS and other resources required, and provide some common layout elements.<p class="paragraph"/>They use standard Grails tags and Weceem tags to render content within the body of the page, as well as meta data about the current page e.g. dynamic titles.<p class="paragraph"/>Here's a simple example that renders a dynamic title and renders the content of the current node.<p class="paragraph"/><div class="code"><pre>&#60;html&#62;
+﻿Templates are content nodes used to set page layouts on your site. Certain content types such as HTML and Blog, support setting a template when creating or editing nodes. If a template is not set, it is inherited from the content's ancestors.<p class="paragraph"/>Typically the template will include the head and body tags, pull in the CSS and other resources required, and provide some common layout elements.<p class="paragraph"/>They use standard Grails tags and Weceem tags to render content within the body of the page, as well as meta data about the current page e.g. dynamic titles.<p class="paragraph"/>Here's a simple example that renders a dynamic title and renders the content of the current node.<p class="paragraph"/><div class="code"><pre>&#60;html&#62;
   &#60;head&#62;
     &#60;title&#62;$&#123;page.title.encodeAsHTML()&#125;&#60;/title&#62;
   &#60;/head&#62;
