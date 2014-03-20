@@ -21,7 +21,7 @@ h4. Installing Weceem Plugin into the application
 
 To install the Weceem plugin, the dependency must be added into grails-app/conf/BuildConfig.groovy file in Grails application.
 {code}
-"runtime('com.jcatalog.grailsplugins:weceem:1.2-SNAPSHOT')"
+compile ":weceem:1.2-SNAPSHOT"
 {code}
 
 The plugin should function with Grails versions 2.1 and higher.
@@ -43,6 +43,12 @@ h4.  Allowing file extensions
 By default, Grails applications have content negotiation enabled based on file extensions in the URI, and this file extension is then removed from the URI. For the CMS to function correctly with content URIs like "common.css" and "jquery.js", you need to turn this off. To do so, change your application's Config.groovy to :
 
 {code} grails.mime.file.extensions = false {code}
+
+h4.  Default codec usage
+
+By default, Grails applications are configured to use value 'html' - legacy setting for codec used to encode data with ${} . But Weceem plugin requires such data without encoding.
+
+{code} grails.views.default.codec="none" {code}
 
 h4.  URL mappings and Weceem
 
@@ -72,7 +78,7 @@ h4. Setting URL prefix for Weceem administration UI
 
 The Weceem repository and administration UIs may also clash with your URI conventions, or you may have your own "admin" controller that you want at "/admin". For this, you can just change the prefix for the Weceem Admin controllers by adding the following to Config.groovy:
 
-weceem.admin.prefix = 'wcm-admin'
+{code} weceem.admin.prefix = 'wcm-admin' {code}
 
 The standard Weceem admin interfaces under http://localhost:8080/wcm-admin/
 
