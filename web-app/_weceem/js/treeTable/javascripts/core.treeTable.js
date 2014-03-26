@@ -544,7 +544,7 @@ function initTreeTable() {
     }
 
     // Handle selection of rows with click
-    $('tr[id*=content-node-]').live('click', function(){
+    $('tr[id*=content-node-]').on('click', function(){
             var clickedNode = $(this)
             var wasSel = clickedNode.hasClass('selected')
             clearSelection();

@@ -44,7 +44,7 @@ $(function() {
         dataElem.val(existingTags.join(','));
         newTagsElem.val('');
     });
-    $('#tagsfield_${name} .removeTag').live('click', function(event) {
+    $('body').on('click', '#tagsfield_${name} .removeTag',function(event) {
         event.preventDefault();
         var tagParentDiv = $(event.target).parentsUntil('.existingTagList');
         var tagToRemove = $('.tagtext', tagParentDiv).text();
