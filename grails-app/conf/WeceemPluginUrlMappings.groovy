@@ -100,7 +100,12 @@ class WeceemPluginUrlMappings {
             action = "show"
         })
 
+        final page404 = (config.weceem.page404 instanceof String) ?
+            config.weceem.page404 : '404'
+        "404"(view: "/${page404}")
+
         "403"(view:'/denied')
         "500"(view:'/error')
+
     }
 }
