@@ -14,7 +14,7 @@ class WeceemGrailsPlugin {
 
     def observe = ["hibernate", 'services']
 
-    def loadAfter = ['logging', 'hibernate', 'services', 'searchable']
+    def loadAfter = ['logging', 'searchable']
     def loadBefore = ['controllers', 'ckeditor'] // Make sure taglib sees configured service
     
     // resources that are excluded from plugin packaging
