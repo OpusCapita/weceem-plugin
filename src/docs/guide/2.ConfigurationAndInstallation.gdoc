@@ -133,6 +133,14 @@ For the Weceem Admin pages to fit in better with your application's own styling,
 
 This stops Weceem from using the standard "weceemadmin" GSP layout and uses yours instead.
 
+h4. Customizing page for 404 Server response
+
+For the HTTP 404 Server response, you can specify a different GSP page with this Config option:
+
+{code} weceem.page404 = 'errorpage' {code}
+
+By default, the page '404.gsp' from Weceem plugin is used.
+
 h4. Controlling creation of the default space
 
 You can configure whether or not Weceem should create a default space at startup, as well as what templates are available to the user:
