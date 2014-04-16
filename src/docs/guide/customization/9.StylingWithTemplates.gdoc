@@ -1,4 +1,4 @@
-﻿Templates are content nodes used to set page layouts on your site. Certain content types such as HTML and Blog, support setting a template when creating or editing nodes. If a template is not set, it is inherited from the content's ancestors.
+Templates are content nodes used to set page layouts on your site. Certain content types such as HTML and Blog, support setting a template when creating or editing nodes. If a template is not set, it is inherited from the content's ancestors.
 
 Typically the template will include the head and body tags, pull in the CSS and other resources required, and provide some common layout elements.
 

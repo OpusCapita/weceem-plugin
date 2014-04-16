@@ -1,4 +1,4 @@
-﻿In some custom applications you may want to embed some Weceem content within your own Grails GSP views. This is easily achieved for most situations using the new *wcm:render* tag as of release 1.1. 
+In some custom applications you may want to embed some Weceem content within your own Grails GSP views. This is easily achieved for most situations using the new *wcm:render* tag as of release 1.1. 
 
 However, if you need to render content with more control over the process - e.g. using an artificial request/response to render content for use in emails, you can use the wcmRenderEngine bean.
 

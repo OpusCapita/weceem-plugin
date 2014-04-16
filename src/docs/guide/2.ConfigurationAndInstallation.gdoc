@@ -1,4 +1,4 @@
-﻿h3.  Installation
+h3.  Installation
 
 Weceem is available either as a standalone Java web application (.war file) for deployment to standard Java server environments, or as a plugin for the [Grails application framework|http://grails.org/].
 
