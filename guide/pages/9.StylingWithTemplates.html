@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>5.10 Styling With Templates 1.2-SNAPSHOT</title>
+    <title>5.10 Styling With Templates 1.2</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -75,7 +75,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> jCatalog AG</p>
 
-                    <p><strong>Version:</strong> 1.2-SNAPSHOT</p>
+                    <p><strong>Version:</strong> 1.2</p>
 
                     
                 </div>
@@ -85,7 +85,7 @@ function addJsClass() {
                 
 
 <h2 id="9.StylingWithTemplates">5.10 Styling With Templates</h2>
-﻿Templates are content nodes used to set page layouts on your site. Certain content types such as HTML and Blog, support setting a template when creating or editing nodes. If a template is not set, it is inherited from the content's ancestors.<p class="paragraph"/>Typically the template will include the head and body tags, pull in the CSS and other resources required, and provide some common layout elements.<p class="paragraph"/>They use standard Grails tags and Weceem tags to render content within the body of the page, as well as meta data about the current page e.g. dynamic titles.<p class="paragraph"/>Here's a simple example that renders a dynamic title and renders the content of the current node.<p class="paragraph"/><div class="code"><pre>&#60;html&#62;
+Templates are content nodes used to set page layouts on your site. Certain content types such as HTML and Blog, support setting a template when creating or editing nodes. If a template is not set, it is inherited from the content's ancestors.<p class="paragraph"/>Typically the template will include the head and body tags, pull in the CSS and other resources required, and provide some common layout elements.<p class="paragraph"/>They use standard Grails tags and Weceem tags to render content within the body of the page, as well as meta data about the current page e.g. dynamic titles.<p class="paragraph"/>Here's a simple example that renders a dynamic title and renders the content of the current node.<p class="paragraph"/><div class="code"><pre>&#60;html&#62;
   &#60;head&#62;
     &#60;title&#62;$&#123;page.title.encodeAsHTML()&#125;&#60;/title&#62;
   &#60;/head&#62;
