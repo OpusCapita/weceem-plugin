@@ -1347,7 +1347,6 @@ class WcmContentRepositoryService implements InitializingBean {
     
     // @todo This is a hack so we can bind without x.properties = y which is broken in production on Grails 1.2-M2
     public hackedBindData(obj, params) {
-//        def transientProps = obj.metaClass.hasProperty(null, 'transients') ? obj.class.transients : []
         def excludes
         new BindDynamicMethod().invoke(this /* dummy value */, 'bindData', obj, params, [exclude:excludes])
     }
@@ -1422,9 +1421,14 @@ class WcmContentRepositoryService implements InitializingBean {
         def contentForRevisionSave = proxyHandler.unwrapIfProxy(content).class.read(content.id)
 
         def oldTitle = content.title
-        // map in new values
-        hackedBindData(content, params)
-        
+
+        try {
+            // map in new values
+            hackedBindData(content, params)
+        } catch (Throwable throwable) {
+            log.error("Error during data binding.", throwable)
+        }
+
         if (!content.hasErrors()) {
         
             if (params.tags != null) {
@@ -1450,7 +1454,6 @@ class WcmContentRepositoryService implements InitializingBean {
                 // back to published soon after edit to non-published without manually clearing publishFrom
                 content.publishFrom = null
             }
-
             def ok = content.validate()
             if (content.save()) {
                 // Save the revision now
@@ -2329,7 +2332,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
     }
     
     /**
-     * Look for any content pending publication, and move statys to published
+     * Look for any content pending publication, and move status to published
      */
     def publishPendingContent() {
         if (log.debugEnabled) {
@@ -2356,7 +2359,9 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
         pendingContent?.each { content ->
             // Find the next status (in code order) that is public content, after the content's current status
             def status
-            WcmStatus.withNewSession { status = WcmStatus.findByPublicContentAndCodeGreaterThan(true, content.status.code) }
+            WcmStatus.withNewSession {
+                status = WcmStatus.findByPublicContentAndCodeGreaterThan(true, content.status.code)
+            }
 
             if (!status) {
                 log.error "Tried to publish content ${content} with status [${content.status.dump()}] but found no public status with a code higher than it"

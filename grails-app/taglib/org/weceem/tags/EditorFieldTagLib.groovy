@@ -96,31 +96,9 @@ class EditorFieldTagLib {
     def editorFieldDate = { attrs ->
         StringBuilder sb = new StringBuilder()
         def d = pageScope.content[attrs.property]
-        def dval = d?.format('yyyy/MM/dd')
-        sb << g.textField(name:attrs.property+'_date', size:10, maxLength:10, value:dval)
-        sb << " @ "
-        def hr = d?.format('HH')
-        def min = d?.format('mm')
-        sb << g.textField(name:attrs.property+'_hour', size:2, maxLength:2, value:hr, 'class':'date-editor-hour')
-        sb << " : "
-        sb << g.textField(name:attrs.property+'_minute', size:2, maxLength:2, value:min, 'class':'date-editor-minute')
-
-        out << bean.customField(beanName:'content', property:attrs.property, noLabel:true) {
+        sb << g.datePicker(name: attrs.property, value: d, default: "none", precision: "minute", noSelection: [ '':''])
+            out << bean.customField(beanName:'content', property:attrs.property, noLabel:true) {
             out << sb
-        }
-
-        out << g.javascript([:]) {
-"""
-\$(function(){ 
-    \$('#${attrs.property.encodeAsJavaScript()}_date').datepicker({ 
-        dateFormat: 'yy/mm/dd',
-        onSelect: function(dateText, inst) {
-            \$(this).siblings('.date-editor-hour').val('00');
-            \$(this).siblings('.date-editor-minute').val('00');
-        }
-    })
-})
-"""
         }
     }
 /*
