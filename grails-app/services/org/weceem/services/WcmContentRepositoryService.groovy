@@ -1534,10 +1534,10 @@ class WcmContentRepositoryService implements InitializingBean {
             originalCriteria.delegate = delegate
             originalCriteria()
             if (params?.max != null) {
-                maxResults(params.max)
+                maxResults(params.max.toInteger())
             }
             if (params?.offset != null) {
-                firstResult(params.offset)
+                firstResult(params.offset.toInteger())
             }
             if (params?.sort != null) {
                 order(params.sort, params.order ?: 'asc')
