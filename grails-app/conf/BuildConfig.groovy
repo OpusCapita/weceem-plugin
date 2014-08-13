@@ -72,7 +72,7 @@ grails.project.dependency.resolution = {
         compile ":jquery-ui:1.10.3"
         compile ":navigation:1.3.2"
         compile ":quartz:1.0-RC7"
-        compile ":searchable:0.6.6"
+        compile ":searchable:0.6.8"
         compile ":taggable:1.0.1"
 
         // For serlvet filter ordering
