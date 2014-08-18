@@ -15,7 +15,7 @@
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <title>Sorry, that page doesn’t exist!</title>
+    <title>Sorry, this content is not intended for rendering!</title>
 
     <link rel="shortcut icon" href="${g.resource(plugin:'weceem', dir:'_weceem/images/favicon.ico')}"/>
 
@@ -32,7 +32,7 @@
     <div id="adminLogo" class="span-14"></div>
   </div>
 
-  <h3>Sorry, that page doesn’t exist!</h3>
+  <h3>${flash.message ?: 'This content is not intended for rendering!'}</h3>
 
   <g:render plugin="weceem" template="/layouts/main/footer"/>
 </div>

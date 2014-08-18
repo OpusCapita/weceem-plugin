@@ -272,13 +272,14 @@ class RenderEngine {
            }
        }
        
-	   def pageInfo = makePageInfo(content.absoluteURI, contentInfo, content)
+	   PageInfo pageInfo = makePageInfo(content.absoluteURI, contentInfo, content)
        request[REQUEST_ATTRIBUTE_PAGE] = pageInfo
 
        def contentClass = proxyHandler.unwrapIfProxy(content).class
        
        if (!wcmContentRepositoryService.contentIsRenderable(content)) {
-           log.warn "Request for [${params.uri}] resulted in content node that is not standalone and cannot be rendered directly"
+           log.warn "Request for [${pageInfo.URI}] resulted in content node that is not standalone and cannot be rendered directly"
+           flash.message = "Request for [${pageInfo.URI}] resulted in content node that is not standalone and cannot be rendered directly"
            response.sendError(406 /* Not acceptable */, "This content is not intended for rendering")
            return null
        }
