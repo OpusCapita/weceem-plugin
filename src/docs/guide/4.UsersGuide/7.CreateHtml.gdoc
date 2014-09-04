@@ -1,0 +1,10 @@
+If the user needs to create HTML page, he needs to select row in the content repository tree by clicking on it. As the
+result the row is preselected by color. The row selection means that the content will be child to selected content. Then
+at the top of *Content* tab there is a button *New Content* that offers a list of available content types to be created.
+Select the type "HTML" and press "Create" button. The new content editor
+should be shown to the user
+
+!usersGuide/htmlEditor.jpg!
+
+
+

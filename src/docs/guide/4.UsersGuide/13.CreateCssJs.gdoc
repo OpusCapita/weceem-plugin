@@ -1,0 +1,8 @@
+It is possible to prepare CSS Stylesheets and JavaScript Sources as a content nodes. At the top of *Content* tab there
+is a button *New Content* that offers a list of available content types to be created. Select the type "CSS Stylesheets"
+or "JavaScript Sources" and press "Create" button. The simple content editor should be shown to the user.
+
+!usersGuide/createCss.jpg!
+
+
+!usersGuide/createJs.jpg!

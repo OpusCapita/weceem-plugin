@@ -1,0 +1,6 @@
+The user has possibility to create content with the type "*External Link*". This content type is representing a link to
+an external URL . To create new *External Link*, check at the top of *Content* tab there is a button *New Content* that
+offers a list of available content types to be created. Select the type "External Link" and press "Create" button. The
+special content editor should be shown to the user.
+
+!usersGuide/externalLink.jpg!

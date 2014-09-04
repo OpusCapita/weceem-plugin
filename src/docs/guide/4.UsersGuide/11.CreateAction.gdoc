@@ -1,0 +1,9 @@
+It is possible to create content Action that is determined with Groovy Script that should be executed. For example,
+sending mails of checking links on the page. To create new Action is possible using button "New Content" at the top of
+repository tree and selecting content type *Action* in the available content types. The simple editor is available for
+creating user Actions.
+
+!usersGuide/createAction.jpg!
+
+
+

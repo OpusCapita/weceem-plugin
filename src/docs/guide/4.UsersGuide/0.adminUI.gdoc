@@ -1,0 +1,28 @@
+Weceem contains administrative UI for users that have access to creating new content and managing existed sources.
+In your weceem.properties file or in Config.groovy file the user can customize URL that leads to admin UI. By default
+the mapping *"wcm/admin"* will be used.
+
+Admin UI consists of two tabs: "Content" and "Administration".
+
+*Content tab*
+
+At the top of the Content tab there is a panel with action buttons and settings. Action buttons *New Content* and
+*More Actions* contain list of operations that can be done on stored contents. The setting list *Space* gives the user
+possibility to select Space for editing. As far as the user change Space in list, the contents from selected Space should
+be listed in content repository tree below.
+
+!usersGuide/contentAdminUI.jpg!
+
+*Administration tab*
+
+The tab contains several editors:
+* Spaces
+* Synchronize files
+* Plugins management
+* Licenses
+* Check links
+* Users
+
+!usersGuide/administrationAdminUI.jpg!
+
+

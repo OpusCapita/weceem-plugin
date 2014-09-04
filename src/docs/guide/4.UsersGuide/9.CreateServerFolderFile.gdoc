@@ -1,0 +1,14 @@
+If the user needs to add some files, f.e. images then it is possible to create a "Server Directory" on a file system and put
+your uploaded files as "Server File" there. Although there are special content types for CSS anf JS files such as
+"CSS Stylesheet" and "JavaScript Source", but they are restricted to be no longer then *500000* symbols.
+In case if the user wants to use the biggest CSS, JS libraries or images, the *ServerFile* is the type that is needed to
+be used.
+
+Firstly create *Server Directory*  - the folder on the file system will be created, then put your uploaded files
+as *Server Files* to this directory.
+
+!usersGuide/createServerDirectory.jpg!
+
+
+!usersGuide/createServerFile.jpg!
+

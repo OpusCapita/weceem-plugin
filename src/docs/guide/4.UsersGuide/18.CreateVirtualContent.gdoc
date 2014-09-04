@@ -1,0 +1,7 @@
+There is a possibility to create virtual content for any existed content in the content repository tree. For that aim,
+please check button "New Content" at the top of repository tree and select content type *Virtual Content* in the
+available content types. Each *Virtual Content* is determined by its "target" - the content node from repository tree.
+
+!usersGuide/createVirtualContent.jpg!
+
+

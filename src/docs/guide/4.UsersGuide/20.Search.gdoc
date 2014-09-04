@@ -1,0 +1,10 @@
+The full text search is available in Weceem by default. It is provided by using Searchable plugin , that is built on
+Compass (http://www.compass-project.org/) and Lucene (http://lucene.apache.org/).
+
+The component provides search for specified content types. Please check *Tags* section for more information.
+
+{code}
+  <wcm:search types="org.weceem.html.WcmHTMLContent,org.weceem.blog.WcmBlogEntry,org.weceem.content.WcmComment"/>
+{code}
+
+

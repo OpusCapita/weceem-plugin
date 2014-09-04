@@ -1,0 +1,7 @@
+The content type *Binary Content* represents files, that are stored in the data base using base64 encoding.
+Don't use it for large content. It is intended for logos etc. To create such content, please check that at the top of
+*Content* tab there is a button *New Content* that offers a list of available content types to be created. Select the
+type "Binary Content" and press "Create" button. The new editor similar to *Server File* editor should be shown to the
+user
+
+!usersGuide/createBinaryContent.jpg!

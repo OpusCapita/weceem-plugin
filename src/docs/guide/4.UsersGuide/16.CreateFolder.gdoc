@@ -1,0 +1,5 @@
+It is possible to create Folders in content repository tree. The Folders usually used to organize content by types or
+logically. For example, the user can create Folders "CSS" and "JavaScript" and put CSS Stylesheets and JavaScript
+sources in them respectively.
+
+!usersGuide/createFolder.jpg!

@@ -1,0 +1,30 @@
+There is a list of operations that can be done with content repository tree. The button with dropping menu items is
+situated above the content repository tree, it is called "*More Actions*". The following operations are available:
+
+* Preview selected content
+* Delete content
+* Move to Space
+* Duplicate...
+
+*Preview selected* opens a new page/tab with the content previewing. Not all types of a content can be previewed, for
+example Templates and Widgets cannot be previewed as standalone pages. If the user tries to get preview for them the
+special message (or error page - depends on configuration settings) will be displayed.
+
+!usersGuide/previewError.jpg!
+
+*Delete* content gives the user possibility to delete selected content. If the content contains children, the error
+message will be displayed and content won't be deleted.
+
+!usersGuide/deleteError.jpg!
+
+*Move to Space* operation should move content from one Space to another one, but currently not implemented yet.
+
+*Duplicate* should copy the selected content to the other holder, parent content or even in another Space, but
+currently not implemented yet.
+
+Also there are several operations that can be done on content repository tree, f.e. the user can drag a content and
+drop it as a child to another content. It is possible such way to move or copy the content to the another location.
+
+!usersGuide/dropAction.jpg!
+
+

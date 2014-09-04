@@ -1,0 +1,35 @@
+The statuses are very important part in content management. According to status of a content it can be shown, hidden,
+publish or unpublish by specified date.
+
+The following Statuses are provided:
+
+* Draft
+* Unmoderated
+* Reviewed
+* Approved
+* Published
+* Archived
+
+Each status has a numerical code - e.g. Draft is 100, Unmoderated - 150, Published - 400 etc. Each status has a flag to
+indicate whether or not it is "public" content i.e. can be viewed by non-administrators.
+By default *Published* is the only status with this flag set.
+
+All changes to status are made manually by repository users, unless the *Publish From* or *Publish Until* fields have
+values.
+
+In the case of *Publish From*, once the date passes, the status of the content will change to the first status with
+"public content" flag switched on, which has a higher code number than the current status of the content. This offers
+scope for other statuses beyond the existing set, and migration upward through those states.
+
+The one caveat here is that the *Publish From* mechanism will never change the status on content that is currently in
+the "Unmoderated" or "Archived" status used for visitor-submitted or expired content. If you need to change which status
+is used for "Unmoderated" or "Archived" content you can do this by setting the configuration variables to the numerical
+code values of the desired status *weceem.unmoderated.status* and *weceem.archived.status*
+
+With *Publish Until*, the status of any published content that has expired will be set to the "Archived" status or the
+status defined in the configuration variable *weceem.archived.status*.
+
+
+
+
+

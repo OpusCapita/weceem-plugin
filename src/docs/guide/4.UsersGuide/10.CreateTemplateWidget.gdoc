@@ -1,0 +1,12 @@
+If the user needs to prepare template, he needs to select row in the content repository tree by clicking on it. As the
+result the row is preselected by color. The row selection means that the content will be child to selected content. Then
+at the top of *Content* tab there is a button *New Content* that offers a list of available content types to be created.
+Select the type "Template" and press "Create" button. The new content editor should be shown to the user. Usually the
+template is a GSP page that uses Weceem tags for rendering necessary content. Check *Tags* section for more details.
+
+!usersGuide/createTemplate.jpg!
+
+Also it is possible to create widgets, by selecting content type "Widget" to prepare widgets for templates. Usually
+template is consists from widgets as from blocks. It helps template to be more flexible and customizable.
+
+!usersGuide/createWidget.jpg!

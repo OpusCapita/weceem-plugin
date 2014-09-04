@@ -1,0 +1,5 @@
+It is possible to create Groovy Scripts, that can be used for creating new content Actions. For that aim at the top of
+*Content* tab there is a button *New Content* that offers a list of available content types to be created. Select the
+type "Groovy Script" and press "Create" button. The special content editor should be shown to the user.
+
+!usersGuide/createGroovyScript.jpg!

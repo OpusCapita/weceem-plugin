@@ -1,0 +1,7 @@
+Space editor gives the user possibility to create new Spaces or edit/delete/import/export existed one.
+
+!usersGuide/spaceEditor.jpg!
+
+Each Space is determined by its name and alias URI, where alias URI is a prefix for your site (Space), that will be used
+in URL mappings when you try to review the ready site content.
+

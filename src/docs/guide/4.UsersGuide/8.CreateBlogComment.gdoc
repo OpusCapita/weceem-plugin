@@ -1,0 +1,21 @@
+There is a simple default support for blogs in Weceem. For preparing new blog, the user needs to select row in the
+content repository tree by clicking on it. As the result the row is preselected by color. The row selection means that
+the content will be child to selected content. Then at the top of *Content* tab there is a button *New Content* that
+offers a list of available content types to be created. Select the type "Blog" and press "Create" button. The new
+blog editor should be shown to the user
+
+!usersGuide/blogEditor.jpg!
+
+If the Blog is created, then it is possible to create Blog Entries. The user should  select "Blog row" as a parent and
+press *New Content* button to select *Blog entry* content type. The editor contains CKEditor for entering content.
+
+!usersGuide/createBlogEntry.jpg!
+
+Also it is possible to create or manage existed Comments. If you put a submission form for your Blog Entry page then
+the users will push comments to your through your site. Also you can create new Comment from "Content" tab by pressing
+button "New Content" and selecting *Comment* content type.
+
+!usersGuide/createComment.jpg!
+
+
+

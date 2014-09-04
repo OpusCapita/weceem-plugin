@@ -4,7 +4,31 @@
   title: Configuration and installation
 3.GeneralBehaviourAndConcepts:
   title: General behaviour and concepts
-4.WeceemSecuritPolicy:
+4.UsersGuide:
+  title: User Guide
+  0.adminUI: Administrative UI
+  1.CreateSpace: Create Space
+  2.SynchronizeFiles: File Synchronization
+  3.Plugins: Plugins
+  4.Licenses: Licenses
+  5.CheckLinks: Check Links
+  6.Users: CMS User management
+  7.CreateHtml: Create HTML pages
+  8.CreateBlogComment: Create Blog, Blog Entries and Comments
+  9.CreateServerFolderFile: Server Directory and Server File
+  10.CreateTemplateWidget: Templates and Widgets
+  11.CreateAction: Create Action
+  12.CreateBinaryContent: Create Binary Content
+  13.CreateCssJs: Create CSS Stylesheets and Javascript Sources
+  14.CreateExternalLink: Create External Link
+  15.CreateGroovyScript: Create Groovy Script
+  16.CreateFolder: Create Folder
+  17.CreateWikiPage: Create Wiki page
+  18.CreateVirtualContent: Create Virtual Content
+  19.StatusPublishing: Statuses, Publishing and Unpublishing by date
+  20.Search: Search in Weceem
+  21.DragAndDrop: Operations with content repository tree
+5.WeceemSecuritPolicy:
   title: Weceem security policy
 customization:
   title: Customization
