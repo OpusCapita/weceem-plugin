@@ -155,6 +155,30 @@ function addJsClass() {
                     <div class="toc-item" style="margin-left:0px"><a href="#21.DragAndDrop"><strong>4.22</strong><span>Operations with content repository tree</span></a>
                     </div>
                     
+                    <div class="toc-item" style="margin-left:0px"><a href="#22.TagsAndJspContent"><strong>4.23</strong><span>Tags and JSP content</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#23.ReusingCodeWithWidgets"><strong>4.24</strong><span>Reusing code and page fragments with Widgets</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#24.UsingImagesInHtml"><strong>4.25</strong><span>Using images in HTML content</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#25.UploadingAndLinking"><strong>4.26</strong><span>Uploading and linking to files</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#26.ControllingAccess"><strong>4.27</strong><span>Controlling who can see content and when</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#27.MultiLanguageSite"><strong>4.28</strong><span>Creating sites with content in different languages</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#28.PerformanceAndCache"><strong>4.29</strong><span>Site performance and caching content</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0px"><a href="#29.PublishingFeeds"><strong>4.30</strong><span>Publishing Feeds</span></a>
+                    </div>
+                    
                 </div>
                 
 
@@ -165,12 +189,25 @@ function addJsClass() {
 
 
 <h2 id="0.adminUI">4.1 Administrative UI</h2>
-Weceem contains administrative UI for users that have access to creating new content and managing existed sources.
+To edit or create content, view the content repository or perform any administrative functions you must first log in to
+Weceem.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/login.jpg"></img><p class="paragraph"/>You can do this by browsing to &#60;yourserver-url&#62;/admin if you are using the standalone Weceem WAR. Here you will be
+prompted for your user name and password. By default new installations have a single "admin" account with password
+"admin". You must change this password, and you can do so in the Administration section.
+Logging in to your own application that uses Weceem plugin<p class="paragraph"/>Normally this will be a case of browsing to &#60;yourserver-url&#62;/admin but your application may have configured weceem to
+use a different URL mappings such as /wcm/admin. You need to look at your application's configuration if /admin does not
+work for you.<p class="paragraph"/>Weceem contains administrative UI for users that have access to creating new content and managing existed sources.
 In your weceem.properties file or in Config.groovy file the user can customize URL that leads to admin UI. By default
-the mapping <strong class="bold">"wcm/admin"</strong> will be used.<p class="paragraph"/>Admin UI consists of two tabs: "Content" and "Administration".<p class="paragraph"/><strong class="bold">Content tab</strong><p class="paragraph"/>At the top of the Content tab there is a panel with action buttons and settings. Action buttons <strong class="bold">New Content</strong> and
-<strong class="bold">More Actions</strong> contain list of operations that can be done on stored contents. The setting list <strong class="bold">Space</strong> gives the user
-possibility to select Space for editing. As far as the user change Space in list, the contents from selected Space should
-be listed in content repository tree below.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/contentAdminUI.jpg"></img><p class="paragraph"/><strong class="bold">Administration tab</strong><p class="paragraph"/>The tab contains several editors:
+the mapping <strong class="bold">"wcm/admin"</strong> will be used.<p class="paragraph"/>Admin UI consists of two tabs: "Content" and "Administration".<p class="paragraph"/><strong class="bold">Content tab</strong><p class="paragraph"/>The content repository is the main user interface for Weceem.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/contentAdminUI.jpg"></img><p class="paragraph"/>What you see in the repository is the tree of content for the currently selected space. You can switch spaces using the
+space selector box.<p class="paragraph"/>Each row in the table represents one of your content nodes. You can do the following things with rows:
+<ul class="star">
+<li>To select a node, you click its row (but not the icon).</li>
+<li>To drag a node to a new location in the tree, you drag the content's icon</li>
+<li>To edit the content you click the title of the content</li>
+</ul><p class="paragraph"/>With a row selected, it will be highlighted and when you click the "New Content" or "More Actions" button the operation
+will be performed on the selected node. So when a node is selected and you choose "New Content", the new content will be
+a child of the node you selected in the repository.<p class="paragraph"/>To deselect a row - so that you can create new content at the root of the repository - you just click the row again.<p class="paragraph"/>You can also search for content using the search box. The results can be further filtered by content type and date, and
+sorted by clicking the column headers.<p class="paragraph"/><p class="paragraph"/>
+<strong class="bold">Administration tab</strong><p class="paragraph"/>The tab contains several editors:
 <ul class="star">
 <li>Spaces</li>
 <li>Synchronize files</li>
@@ -183,7 +220,13 @@ be listed in content repository tree below.<p class="paragraph"/><img border="0"
 
 
 <h2 id="1.CreateSpace">4.2 Create Space</h2>
-Space editor gives the user possibility to create new Spaces or edit/delete/import/export existed one.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/spaceEditor.jpg"></img><p class="paragraph"/>Each Space is determined by its name and alias URI, where alias URI is a prefix for your site (Space), that will be used
+Weceem supports multiple content repositories. Each repository is called a "Space" and represents a website that you
+maintain.<p class="paragraph"/><strong class="bold">About spaces</strong><p class="paragraph"/>A Space contains "Content" that is served to your visitors. There are many different types of Content that you can
+create and arrange in any structure you like within your Space. You can have as many spaces as you like, representing
+different sites or micro sites.<p class="paragraph"/>Spaces are separate content graphs and are imported and exported separately for backup purposes and have a URI alias
+that defines the web address of that space within your server. You cannot normally use content from one space inside
+another.<p class="paragraph"/>Spaces can have different access rights defined in the Weceem security policy, so the same user may have different
+permissions in different spaces.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/spaceEditor.jpg"></img><p class="paragraph"/>Each Space is determined by its name and alias URI, where alias URI is a prefix for your site (Space), that will be used
 in URL mappings when you try to review the ready site content.<p class="paragraph"/>
 
 
@@ -214,7 +257,38 @@ information such as First Name, Last Name, Email.<p class="paragraph"/><img bord
 
 
 <h2 id="7.CreateHtml">4.8 Create HTML pages</h2>
-If the user needs to create HTML page, he needs to select row in the content repository tree by clicking on it. As the
+<strong class="bold">About content</strong><p class="paragraph"/>Content is ultimately what your end-users view on your site. Weceem has an extensible content system, and supplied
+content types for the most common web content.<p class="paragraph"/>The following content types are supplied out of the box:
+<ul class="star">
+<li>Action - A server-side action that will execute the code in a Groovy Script node, for example to create new content</li>
+</ul><p class="paragraph"/>nodes or send an email
+<ul class="star">
+<li>Blog - The root node of a Blog, which has Blog Entry nodes as children</li>
+<li>Blog Entry - An entry (child of) a Blog node</li>
+<li>Comment - A comment on a content node. Any nodes can have comments attached or created.</li>
+<li>External Link - A URL of another website. When this URI is rendered, it redirects to the external site</li>
+<li>Folder - A folder for grouping together content nodes and creating URI hierarchy</li>
+<li>Groovy Script - A piece of Groovy code to execute on the server, used by Action nodes</li>
+<li>HTML - A piece of HTML which may contain GSP (Grails Server Page) tags</li>
+<li>JavaScript - A piece of JavaScript source</li>
+<li>Server File - A file uploaded to the Weceem repository and stored on the server filesystem, e.g. an image file</li>
+<li>Server Directory - A directory on the server filesystem which contains Server File nodes</li>
+<li>Stylesheet - A CSS style sheet</li>
+<li>Template - A GSP template used to layout and decorate the current content node</li>
+<li>Widget - A reusable GSP fragment for rendering sections of a page, e.g. a header/footer or a remote news feed.</li>
+</ul><p class="paragraph"/>The Template, Widget and HTML content nodes can use Weceem tags and other Grails tags to perform view rendering logic.
+Weceem's content is stored in an SQL database, not in files on the server filesystem. The exception to this rule is
+uploaded file content, which is stored "as is" in the server filesystem, with information about the files stored in the
+SQL database.<p class="paragraph"/>When editing content, you are shown only the fields appropriate to that type of content. For example when editing
+JavaScript or CSS you see a code editor, but when editing HTML content you see a rich text editor.<p class="paragraph"/>Developers writing their own Grails application that embeds Weceem can easily add their own new content types that have
+a great deal of flexibility allowing them to customize their behaviour in the editor and when rendered.<p class="paragraph"/>When creating new content the currently selected repository node will become the parent. You will be asked what kind of
+content you wish to create, and then be shown the content editor for that content type.<p class="paragraph"/>Different content types have different fields and capabilities, and the editor adapts accordingly. Most content types
+will have at least a Title and Status, an area for the main content, and the Extras, Metadata, Change history and
+Parents &#38; Children sections.<p class="paragraph"/>In the editor you can <strong class="bold">Save</strong> and return to the repository or save and continue to keep your changes but carry on
+editing. You can also <strong class="bold">Preview</strong> your changes in a new window without saving them, if the content is able to be rendered
+in isolation (e.g. Templates and Widgets cannot themselves be previewed).<p class="paragraph"/>The HTML editor will present itself as a rich text editor unless you have saved it with "Allow GSP", in which case it
+will show as a code editor. Style sheets, Javascript, Templates, Widgets and Groovy code all present with a syntax
+highlighting code editor.<p class="paragraph"/><strong class="bold">Create HTML page</strong><p class="paragraph"/>If the user needs to create HTML page, he needs to select row in the content repository tree by clicking on it. As the
 result the row is preselected by color. The row selection means that the content will be child to selected content. Then
 at the top of <strong class="bold">Content</strong> tab there is a button <strong class="bold">New Content</strong> that offers a list of available content types to be created.
 Select the type "HTML" and press "Create" button. The new content editor
@@ -222,14 +296,55 @@ should be shown to the user<p class="paragraph"/><img border="0" class="center" 
 
 
 <h2 id="8.CreateBlogComment">4.9 Create Blog, Blog Entries and Comments</h2>
-There is a simple default support for blogs in Weceem. For preparing new blog, the user needs to select row in the
+Creating a blog in Weceem requires just two steps:
+<ul class="star">
+<li>Create a Blog content node</li>
+<li>Create a Blog Entry content node underneath (as a child of) the blog node</li>
+</ul><p class="paragraph"/>If you are using the default styling, when you create the Blog you can set the Template to the default blog template
+supplied.<p class="paragraph"/>Blogs in Weceem are just like any other content, and by gluing together a Template, some Widgets and some Weceem GSP
+ags, you get full blog functionality (caveat: pinging blog aggregators is not yet supported). See the examples in the
+default space template for further details.<p class="paragraph"/>To enable comments on your blog you must edit your Weceem security policy file and allow unauthenticated users to create
+content of type org.weceem.content.WcmComment. Make sure that you do this for only that type, or
+malicious users may be able to create non-Comment content on your site!<p class="paragraph"/>The default space template for blogs uses widgets to render a single blog entry view, or a list of the most recent
+posts, and widgets to render the comment form and list of current comments.<p class="paragraph"/>The generic content submission mechanism of Weceem is used to submit comments by users, and the comment widget uses the
+Weceem content submission tags to set this up.<p class="paragraph"/>The Weceem archive tags are used to render the months for which there exist child nodes of type "Comment", with links to
+view those. Finally, the widgets render the list of tags assigned to the blog entry, with links to search for other blog
+entries based on those tags.<p class="paragraph"/>For preparing new blog, the user needs to select row in the
 content repository tree by clicking on it. As the result the row is preselected by color. The row selection means that
 the content will be child to selected content. Then at the top of <strong class="bold">Content</strong> tab there is a button <strong class="bold">New Content</strong> that
 offers a list of available content types to be created. Select the type "Blog" and press "Create" button. The new
 blog editor should be shown to the user<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/blogEditor.jpg"></img><p class="paragraph"/>If the Blog is created, then it is possible to create Blog Entries. The user should  select "Blog row" as a parent and
 press <strong class="bold">New Content</strong> button to select <strong class="bold">Blog entry</strong> content type. The editor contains CKEditor for entering content.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/createBlogEntry.jpg"></img><p class="paragraph"/>Also it is possible to create or manage existed Comments. If you put a submission form for your Blog Entry page then
 the users will push comments to your through your site. Also you can create new Comment from "Content" tab by pressing
-button "New Content" and selecting <strong class="bold">Comment</strong> content type.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/createComment.jpg"></img><p class="paragraph"/><p class="paragraph"/>
+button "New Content" and selecting <strong class="bold">Comment</strong> content type.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/createComment.jpg"></img><p class="paragraph"/><strong class="bold">Visitor comments and submitted content</strong><p class="paragraph"/>Sites often permit visitors to leave comments - be they blog comments, visitor books or comments on Wiki pages.<p class="paragraph"/>Weceem supports a generic mechanism for visitors to create new content nodes via a form, filtered through the security
+policy.<p class="paragraph"/>This is, for example, how the default space implements comments on blogs. A widget is used to render a form to capture
+the comment fields and submit them to Weceem's content submission controller - where they are, if the security policy
+permits that kind of content at that URI, from that (anonymous) user - saved in an "unmoderated" status.
+Creating a comment submission form<p class="paragraph"/>To allow users to submit content, you need to provide the data from the client browser - usually with a form that the
+user completes. You will usually do this inside a Widget node so that the code can be reused:<p class="paragraph"/><div class="code"><pre>&#60;g:hasErrors bean=<span class="java&#45;quote">"$&#123;submittedContent&#125;"</span>&#62;
+There were some errors on your submission, please check below
+&#60;/g:hasErrors&#62;<p class="paragraph"/>&#60;wcm:submitContentForm parent=<span class="java&#45;quote">"$&#123;parentContent&#125;"</span> type=<span class="java&#45;quote">"org.weceem.content.WcmComment"</span> success=<span class="java&#45;quote">"$&#123;parentContent&#125;"</span>&#62;<p class="paragraph"/>&#60;bean:require beanName=<span class="java&#45;quote">"submittedContent"</span> className=<span class="java&#45;quote">"org.weceem.content.WcmComment"</span>/&#62;
+&#60;bean:field beanName=<span class="java&#45;quote">"submittedContent"</span> property=<span class="java&#45;quote">"author"</span> label=<span class="java&#45;quote">"Your name"</span>/&#62;
+&#60;bean:field beanName=<span class="java&#45;quote">"submittedContent"</span> property=<span class="java&#45;quote">"email"</span>/&#62;
+&#60;bean:input beanName=<span class="java&#45;quote">"submittedContent"</span> property=<span class="java&#45;quote">"websiteUrl"</span> label=<span class="java&#45;quote">"Website URL"</span>/&#62;
+&#60;bean:input beanName=<span class="java&#45;quote">"submittedContent"</span> property=<span class="java&#45;quote">"title"</span>/&#62;
+&#60;bean:field beanName=<span class="java&#45;quote">"submittedContent"</span> property=<span class="java&#45;quote">"content"</span> label=<span class="java&#45;quote">"Your comment"</span>/&#62;
+&#60;input type=<span class="java&#45;quote">"submit"</span> class=<span class="java&#45;quote">"button positive"</span> value=<span class="java&#45;quote">"Send comment"</span>/&#62;<p class="paragraph"/>&#60;/wcm:submitContentForm&#62;</pre></div><p class="paragraph"/>
+Here, three different Grails taglibs are being used to create the form:
+<ul class="star">
+<li>  g:hasErrors is a Grails tag used to detect any errors on the submittedContent data and alerts the user if so</li>
+<li>  wcm:submitContentForm creates a form that will submit content of a specific type, as set in the "type" attribute.</li>
+</ul><p class="paragraph"/> The "parent" attribute must be set to the node that will be the parent of the new content (or null for root content),
+ and the "success" attribute is the repository URI path or node that should be shown after the content has been
+ submitted - e.g. the original Blog Entry
+<ul class="star">
+<li>  bean:* tags are from the Grails bean-fields plugin that is provided as part of Weceem. They make it easy to render</li>
+</ul><p class="paragraph"/> sensible default fields, labels and error messages for properties of an object. In this case the object is the
+ "submittedContent" bean used by the content submission form.<p class="paragraph"/>The form will include a link to the content submission controller. This controller will save the content if it is valid,
+or return to the existing content with the "submittedContent" object populated with the previous data and any errors
+attached. Using the bean:* tags of the Grails Bean-Fields plugin is merely a convenience, but is very useful as it will
+display the validation errors associated with each field inline in the form.<p class="paragraph"/>If the submission succeeds - which requires the user to have permission to create that type of content under the
+specified parent in the repository - it will redirect the user to the content specified in the "success" attribute.<p class="paragraph"/>The content will be in the "unmoderated" status, until an administrator updates the status to Published.<p class="paragraph"/><p class="paragraph"/>
 
 
 <h2 id="9.CreateServerFolderFile">4.10 Server Directory and Server File</h2>
@@ -268,9 +383,24 @@ user<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/
 
 
 <h2 id="13.CreateCssJs">4.14 Create CSS Stylesheets and Javascript Sources</h2>
-It is possible to prepare CSS Stylesheets and JavaScript Sources as a content nodes. At the top of <strong class="bold">Content</strong> tab there
-is a button <strong class="bold">New Content</strong> that offers a list of available content types to be created. Select the type "CSS Stylesheets"
-or "JavaScript Sources" and press "Create" button. The simple content editor should be shown to the user.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/createCss.jpg"></img><p class="paragraph"/>
+There are two ways to create JavaScript and CSS resources in Weceem.<p class="paragraph"/>You can upload JS and CSS files to "Server File" content nodes, or you create JavaScript and Stylesheet nodes and edit
+the files directly in Weceem.<p class="paragraph"/>Whichever approach you choose, you include these files in your Template or Widget nodes something like this:<p class="paragraph"/><div class="code"><pre>&#60;html&#62;
+&#60;head&#62;
+&#60;link rel=<span class="java&#45;quote">"stylesheet"</span> href=<span class="java&#45;quote">"$&#123;wcm.createLink(path:'css/main.css')&#125;"</span>/&#62;
+&#60;script type=<span class="java&#45;quote">"text/javascript"</span> src=<span class="java&#45;quote">"$&#123;wcm.createLink(path:'js/main.js')&#125;"</span>&#62;&#60;/script&#62;
+&#60;/head&#62;
+&#8230;
+&#60;/html&#62;</pre></div><p class="paragraph"/>Here we just use the wcm.createLink tag to get the URL to the content nodes. Whether you used Server File or
+Stylesheet/JavaScript nodes for these files, this will produce the correct URL if the "path" value points to the
+correct nodes. Note that the Alias URI of the nodes should include the file extension although it does not have to.
+Some older browsers may require the file extension for correctly identifying the content type.<p class="paragraph"/>You can of course place these files anywhere in your repository as long as you use the correct content path URI.<p class="paragraph"/>Note that if your CSS files need to reference external resources like images, you will need to make sure the links make
+sense in relation to the content repository. Relative links will work for Server File nodes, which must be under a
+Server Directory node. However a Server Directory node cannot have StyleSheet or JavaScript child nodes, so usually if
+you need to link to relative images from a stylesheet, you will need to upload it as a Server File instead of a
+StyleSheet node. That is, unless you have a Server Directory node that is a sibling to the StyleSheet node, and you
+place your images under there.<p class="paragraph"/>At the top of <strong class="bold">Content</strong> tab there is a button <strong class="bold">New Content</strong> that offers a list of available content types to be created.
+Select the type "CSS Stylesheets" or "JavaScript Sources" and press "Create" button. The simple content editor should be
+shown to the user.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/createCss.jpg"></img><p class="paragraph"/>
 <img border="0" class="center" src="../img/usersGuide/createJs.jpg"></img>
 
 
@@ -329,9 +459,15 @@ status defined in the configuration variable <strong class="bold">weceem.archive
 
 
 <h2 id="20.Search">4.21 Search in Weceem</h2>
-The full text search is available in Weceem by default. It is provided by using Searchable plugin , that is built on
-Compass (http://www.compass-project.org/) and Lucene (http://lucene.apache.org/).<p class="paragraph"/>The component provides search for specified content types. Please check <strong class="bold">Tags</strong> section for more information.<p class="paragraph"/><div class="code"><pre>&#60;wcm:search types=<span class="java&#45;quote">"org.weceem.html.WcmHTMLContent,org.weceem.blog.WcmBlogEntry,org.weceem.content.WcmComment"</span>/&#62;</pre></div><p class="paragraph"/>
-
+Weceem has full-text search support for visitors using your site.<p class="paragraph"/>All of your content is automatically indexed as appropriate, all you need to do is add a way for them to start a search,
+and customise the display of the search results.<p class="paragraph"/>To add a default search field, you can use the wcm:search tag:<p class="paragraph"/><div class="code"><pre>&#60;wcm:search types=<span class="java&#45;quote">"org.weceem.html.WcmHTMLContent,
+     org.weceem.blog.WcmBlogEntry,org.weceem.content.WcmComment"</span>/&#62;</pre></div><p class="paragraph"/>This single tag creates the search field and button, which you can style with standard CSS. The "types" attribute is
+used to limit the types of content that can be returned by the search. You usually don't want your Widgets, CSS or
+JavaScript code coming back in search results! This also means you can have different searches on your side, for
+different kinds of content, including custom content types. For example you may have a custom ProductInformation
+content type and want to add a product-only search feature for users.<p class="paragraph"/>Other attributes of this tag allow you to control the parent URI to use as the context for the search, and the content
+path for the results path which will render the search results. For full details see the wcm:search tag page.<p class="paragraph"/>You can also create a completely customized search form and use wcm:searchLink to create the appropriate link to invoke
+the search for the types and other attributes you specify.<p class="paragraph"/><p class="paragraph"/>
 
 
 <h2 id="21.DragAndDrop">4.22 Operations with content repository tree</h2>
@@ -349,6 +485,132 @@ message will be displayed and content won't be deleted.<p class="paragraph"/><im
 currently not implemented yet.<p class="paragraph"/>Also there are several operations that can be done on content repository tree, f.e. the user can drag a content and
 drop it as a child to another content. It is possible such way to move or copy the content to the another location.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/dropAction.jpg"></img><p class="paragraph"/>
 
+
+
+<h2 id="22.TagsAndJspContent">4.23 Tags and JSP content</h2>
+Weceem is built with Grails which provides a technology called Groovy Server Pages. In essence, it allows you to embed
+special tags in the content to perform special functions or logic. Some content types in Weceem (Template, Widget and
+HTML) support the use of these tags to provide advanced features.<p class="paragraph"/>To users of JSP (Java Server Pages) this will be a familiar concept.<p class="paragraph"/>These custom tags or "GSP tags" as they are called, use the XML namespacing syntax:<p class="paragraph"/>Search:
+<div class="code"><pre>&#60;wcm:search/&#62;</pre></div><p class="paragraph"/>The "wcm:" prefix is the Weceem tag namespace. This tells you it is a Weceem-specific tag you are using. Grails provides
+its own "g:" namespace for basic built-in functions like link creation, iteration over items in a list and so on.<p class="paragraph"/>Attributes can be passed to these tags as you would with HTML, with the addition of a Groovy-based "Expression Language"
+(EL) that lets you pass around variables that are available to the page or execute small pieces of code to perform
+calculations. These are put inside a dollar and brace syntax "${...}":<p class="paragraph"/><div class="code"><pre>&#60;g:each in=<span class="java&#45;quote">"$&#123;node.lineage&#125;"</span>&#62;
+$&#123;node.title.encodeAsHTML()&#125;&#60;br/&#62;
+&#60;/g:each&#62;</pre></div><p class="paragraph"/>The above would iterate over every item in the "lineage" property of the "node" object. The "node" object represents the
+current content node being rendered. See the reference section on page variables for more details of the available
+objects.<p class="paragraph"/>You will see here also that the EL can be used outside of tag attributes, to render information into the page output.
+As a side-note, the encodeAsHTML() method called in that example escapes the resulting title text so that it is safe for
+inclusion in HTML output (it escapes special characters to HTML entities). This encodeAs functionality is provided by Grails.<p class="paragraph"/>Using these features you can code your Template and Widget nodes to perform all kinds of powerful functions, from
+listing child nodes of the current page, to generating RSS feeds. See the Weceem tag reference for full details.<p class="paragraph"/>
+
+
+
+<h2 id="23.ReusingCodeWithWidgets">4.24 Reusing code and page fragments with Widgets</h2>
+While Templates are used for laying out a page, Widgets are used to render fragments within a page. These might be page
+content such as header/footer text or reusable code that renders a list of news items.<p class="paragraph"/>Widgets can use the same GSP tags as Templates, which makes them very powerful. The News content on the home page of
+this site is a Widget, and the default space renders blog entries using Widgets.<p class="paragraph"/>To render widgets inside a Template (or GSP-enabled HTML content node) you use the &#60;wcm:widget&#62; tag:<p class="paragraph"/><div class="code"><pre>&#60;html&#62;
+  &#60;head&#62;
+    &#60;wcm:widget path=<span class="java&#45;quote">"widgets/resources"</span>/&#62;
+    &#60;wcm:widget path=<span class="java&#45;quote">"widgets/metatags"</span>/&#62;
+  &#60;/head&#62;
+  &#60;body&#62;
+    &#60;wcm:widget path=<span class="java&#45;quote">"widgets/header"</span>/&#62;
+    &#60;wcm:content/&#62;
+    &#60;wcm:widget path=<span class="java&#45;quote">"widgets/footer"</span>/&#62;
+  &#60;/body&#62;
+&#60;/html&#62;</pre></div><p class="paragraph"/>The above could be used as a generic template for content, pulling in your standard SEO meta tags from a "metatags"
+widget, and JS and CSS resources from a widget called "resources".<p class="paragraph"/>The "resources" widget might look something like this:<p class="paragraph"/><div class="code"><pre>&#60;link rel=<span class="java&#45;quote">"stylesheet"</span> type=<span class="java&#45;quote">"text/css"</span> href=<span class="java&#45;quote">"$&#123;wcm.createLink(path:'css/main.css')&#125;"</span>/&#62;
+&#60;script type=<span class="java&#45;quote">"application/javascript"</span> src=<span class="java&#45;quote">"$&#123;wcm.createLink(path:'js/jquery.js')&#125;"</span>/&#62;</pre></div><p class="paragraph"/>This uses the &#60;wcm:createLink&#62; tag to get the full URI to the resources within the current space.
+
+
+<h2 id="24.UsingImagesInHtml">4.25 Using images in HTML content</h2>
+To insert images into HTML content, you use the image icon on the rich text editor's toolbar.<p class="paragraph"/>This will allow you to:
+<ul class="star">
+<li>upload a new image</li>
+<li>use one that has been uploaded already</li>
+<li>insert a URL to an image on the web</li>
+</ul><p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/imgEditor.jpg"></img><p class="paragraph"/>When using the option to upload or browse the images on the server, the files will be located in the "/Image" folder on
+your server (&#60;weceem-application-path&#62;/WeceemFiles/&#60;space-alias&#62;/Image).<p class="paragraph"/>If you have uploaded files as Server File nodes, if you did not put them inside the /Image folder then they will not be
+visible to the FCK file editor browser, but you can still link to them by entering in their full or relative URI.
+
+
+<h2 id="25.UploadingAndLinking">4.26 Uploading and linking to files</h2>
+There are two ways to upload files to your Weceem content repository.<p class="paragraph"/><strong class="bold">Creating Server File nodes</strong><p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/createServerFile.jpg"></img><p class="paragraph"/>When you create a Server File node in the repository, it will be uploaded from the Weceem editor into the server
+directory allocated to the space, at a path defined by the Alias URIs of its ancestor Server Directory nodes.<p class="paragraph"/>Once the file has been uploaded it cannot be changed - the node can be deleted and the file will also be deleted.<p class="paragraph"/>You link to server file nodes in the same way as you do any other content, using the wcm.createLink or wcm.link tags.<p class="paragraph"/><strong class="bold">Uploading while editing HTML content</strong><p class="paragraph"/>You can also upload files - most likely images - using the file uploader in the rich HTML editor when editing a HTML
+content node. It is important to note that all such files are uploaded to a <strong class="bold">/Image</strong> folder under your space's server
+folder. Server File nodes will not automatically be created for these, and they are not needed - unless you use the
+"Synchronize Files" option in the Administration section of Weceem.
+
+
+<h2 id="26.ControllingAccess">4.27 Controlling who can see content and when</h2>
+With Weceem you can restrict who can view your content by user role, as well as the date period during which the content
+is available.<p class="paragraph"/><strong class="bold">Automatic publishing and removal of content</strong><p class="paragraph"/>Every type of content has a Status, a Publish From and a Publish Until field. Together these work to provide a simple
+automatic publishing workflow.<p class="paragraph"/><strong class="bold">Writing content for automatic publishing later</strong><p class="paragraph"/>To write content today but have it available to view only at some point in the future you just do the following:
+<ul class="star">
+<li>  Set the status of the content to Draft, Approved or some other non-"published" status (apart from Archived!)</li>
+<li>  Set a value in the Publish From field in the "Extras" section of the editor</li>
+</ul><p class="paragraph"/>Once saved, Weceem will automatically publish your content when the time has passed (within a minute or so of the time)
+by moving it into the Published status.<p class="paragraph"/><strong class="bold">Writing content that disappears after a certain date and time</strong><p class="paragraph"/>To perform the opposite - automatic removal of public content - you simply set the Publish Until date and time on your
+content. When this time has passed, the content will be put into the "Archived" status which is not visible to the
+public. You will still be able to view the content in the repository.<p class="paragraph"/><strong class="bold">Restricting access by user</strong><p class="paragraph"/>To limit the content that different users can view, you need to edit your Weceem security policy file.<p class="paragraph"/>All that is required is that you grant the "view" permission only on the URIs and content types that you wish the user
+role to be able to see.
+
+
+<h2 id="27.MultiLanguageSite">4.28 Creating sites with content in different languages</h2>
+Often your site will need to present content in multiple languages. You may provide translations of your site, say in
+French and German as well as your primary language.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/weceemLanguages.jpg"></img><p class="paragraph"/>It is often the case that not only does the text differ in other languages, but images, CSS and other resources may have
+differ, and in fact due to different territory restrictions you may have very different content for each language.<p class="paragraph"/>With this in mind, the recommended way to achieve this in Weceem is to create a Folder node for each language you
+support, and add the translated content under those folder nodes. For content that is the same as the primary language,
+you could create Virtual Content nodes to "defer" to the original primary content.<p class="paragraph"/>To give your users access to this content, you simply add some links or a selection box to your page templates - so they
+click on the language they want and it takes them to the content for that language.
+
+
+<h2 id="28.PerformanceAndCache">4.29 Site performance and caching content</h2>
+Processing and rendering content in a CMS is a relatively time consuming activity, particularly with complex pages that
+render external feeds or loop over other content nodes.<p class="paragraph"/>So as with regular websites it makes sense to use standard browser caching features to reduce the number of requests for
+content and supporting HTTP mechanisms for detecting changes to content.<p class="paragraph"/>Weceem supports both of these aims by implementing smart ETag handling as well as allowing you to tell the browser how
+long to keep the content for before checking for new versions using ETag. With ETags, the browser still makes a request
+to the server to check for changes, but if there has been no change, receives no new content.<p class="paragraph"/>This is done by calculating ETags for all URIs in your repository, based on the contents of other nodes on which those
+depend. For example even a simple home page is dependent on at least a Template node and likely at least a couple of
+widgets. This information is cached by Weceem, so checking for new content is very quick.<p class="paragraph"/>However this means that the ETag for your home page must change if the Template or widgets have been edited - otherwise
+users will continue to see your old home page styling for some time.<p class="paragraph"/>Weceem handles this by allowing you specify the URIs of content that a node is dependent on, a "maximum age" and also
+whether content contains user-specific information (which means that a different ETag is used per user).<p class="paragraph"/><strong class="bold">Content Dependencies</strong><p class="paragraph"/>When editing content, there is a "Content dependencies" field in the Advanced settings. This is where you enter a
+comma-delimited list of URIs on which the content node depends. By dependency we mean that this content's visual
+representation may change if any of these nodes are changed.<p class="paragraph"/>Wild cards of the form /<strong class="bold"></strong> are supported, to represent any dependents.<p class="paragraph"/>There is however no need to specify dependency on the content Template, because this is handled automatically for you.<p class="paragraph"/>For example a Template used for your entire site may render widgets for header and footer. If you want all content that
+uses this template to become invalidated if the header or footer change, you would set the content dependencies to e.g:<p class="paragraph"/>widget/header, widget/footer<p class="paragraph"/>If you had a dependency on a lot of widgets, you could simplify this with the wildcard:<p class="paragraph"/>widget/<strong class="bold"></strong><p class="paragraph"/>Another example is a News widget that uses wcm:eachChild to iterate over the news article nodes at URI "news-articles".
+Here you'd set the content dependencies of the widget to:<p class="paragraph"/>news-articles/<strong class="bold"></strong><p class="paragraph"/>This way, any template that depends on this news widget, will also depen on the news articles, and hence everything
+invalidates as appropriate.<p class="paragraph"/>NOTE: some content types are smart and add some implicit dependencies. For example Blog automatically depends on its
+BlogEntry children. This is required because a Blog page normally lists its child nodes, and needs to update if new
+entries are added.<p class="paragraph"/><strong class="bold">Controlling how long a browser may keep a cached page</strong><p class="paragraph"/>Aside from the dependencies, you can tell the browser how long to wait before checking for new content. For example if
+you know that usually you don't post more than one news article per day, and that even if you did you didn't mind
+someone not seeing the very latest, you can tell Weceem this.<p class="paragraph"/>Each content node has a setting labelled "Is updated" in Advanced. Here you can select how often the node is likely to
+be updated. If you never want it to be cached you can set this to "All the time". If you know that the content is
+unlikely to change you can set it to something like "Weekly" or "Never"<p class="paragraph"/>Doing this reduces the requests made to your server - saving you CPU time and bandwidth, and improving the response time
+of your site for users.<p class="paragraph"/>Note that if a user uses the "refresh" button in their browser, they will always get the newest content.<p class="paragraph"/><strong class="bold">User-specific conten</strong><p class="paragraph"/>In some cases you may use Weceem's advanced scripting and widget features to present user-specific information. This
+typically uses the HTTP session to store user information, such as the contents of a shopping cart, or their user ID.<p class="paragraph"/>By ticking the "User specific content" option (available on Template nodes only in 1.0), you can instruct Weceem to
+allow the client to use cached content but still update if that user's rendering of the content will have changed.<p class="paragraph"/>When checked, this option forces Weceem to create a user-specific ETag for the content using that template. This is done
+by monitoring the HTTP session for changes. Any changes to the HTTP session result in a new ETag for pages using
+that template.<p class="paragraph"/>If you have other data changes that should invalidate the user's view of the content, but don't directly change the
+session, you can force this simply by writing to the session.<p class="paragraph"/>For example if you have a Widget that renders a log in / log out button depending on whether the user has a cookie or
+not (perhaps for a separate app on the same domain) you simply make that widget set a variable in the session if the
+cookie value is no longer present:<p class="paragraph"/><div class="code"><pre>&#60;g:set <span class="java&#45;keyword">var</span>=<span class="java&#45;quote">"hasCookie"</span> value=<span class="java&#45;quote">"$&#123;request.cookies.find &#123; it.name == 'userInfo' &#125;?.value&#125;"</span>/&#62;<p class="paragraph"/>&#60;%&#45;&#45; only <span class="java&#45;keyword">if</span> the presence of cookie has changed to we change the session &#45;&#45;%&#62;
+&#60;g:<span class="java&#45;keyword">if</span> test=<span class="java&#45;quote">"$&#123;session.userLoggedIn != hasCookie&#125;"</span>&#62;
+   &#60;g:set <span class="java&#45;keyword">var</span>=<span class="java&#45;quote">"userLoggedIn"</span> scope=<span class="java&#45;quote">"session"</span> value=<span class="java&#45;quote">"$&#123;hasCookie&#125;"</span>/&#62;
+&#60;/g:<span class="java&#45;keyword">if</span>&#62;<p class="paragraph"/>&#60;%&#45;&#45; render the links &#45;&#45;%&#62;
+&#60;g:<span class="java&#45;keyword">if</span> test=<span class="java&#45;quote">"$&#123;hasCookie&#125;"</span>&#62;
+  &#60;wcm:link path=<span class="java&#45;quote">"user/logout"</span>&#62;Log out&#60;/a&#62;
+&#60;/g:<span class="java&#45;keyword">if</span>&#62;
+&#60;g:<span class="java&#45;keyword">else</span>&#62;
+  &#60;wcm:link path=<span class="java&#45;quote">"user/login"</span>&#62;Log in&#60;/a&#62;
+&#60;/g:<span class="java&#45;keyword">else</span>&#62;</pre></div>
+
+
+
+<h2 id="29.PublishingFeeds">4.30 Publishing Feeds</h2>
+You can expose RSS/Atom feeds of any list of child nodes in your repository with a simple tag, wcm:feedLink.<p class="paragraph"/>This tag will create the correct &#60;meta&#62; tag in the HEAD section of your HTML so that any RSS readers that request the
+feed will get a list of nodes in reverse date order:<p class="paragraph"/><div class="code"><pre>&#60;head&#62;
+&#60;wcm:feedLink type=<span class="java&#45;quote">"rss"</span> path=<span class="java&#45;quote">"$&#123;node&#125;"</span>/&#62;
+&#60;/head&#62;</pre></div><p class="paragraph"/>This would add a feed for the children of the current page. For full details see <strong class="bold">Tags</strong> section.
 
 
                 <div style="clear:both;margin-top:15px;"></div>

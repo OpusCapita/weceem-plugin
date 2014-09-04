@@ -90,14 +90,55 @@ function addJsClass() {
                 
 
 <h2 id="8.CreateBlogComment">4.9 Create Blog, Blog Entries and Comments</h2>
-There is a simple default support for blogs in Weceem. For preparing new blog, the user needs to select row in the
+Creating a blog in Weceem requires just two steps:
+<ul class="star">
+<li>Create a Blog content node</li>
+<li>Create a Blog Entry content node underneath (as a child of) the blog node</li>
+</ul><p class="paragraph"/>If you are using the default styling, when you create the Blog you can set the Template to the default blog template
+supplied.<p class="paragraph"/>Blogs in Weceem are just like any other content, and by gluing together a Template, some Widgets and some Weceem GSP
+ags, you get full blog functionality (caveat: pinging blog aggregators is not yet supported). See the examples in the
+default space template for further details.<p class="paragraph"/>To enable comments on your blog you must edit your Weceem security policy file and allow unauthenticated users to create
+content of type org.weceem.content.WcmComment. Make sure that you do this for only that type, or
+malicious users may be able to create non-Comment content on your site!<p class="paragraph"/>The default space template for blogs uses widgets to render a single blog entry view, or a list of the most recent
+posts, and widgets to render the comment form and list of current comments.<p class="paragraph"/>The generic content submission mechanism of Weceem is used to submit comments by users, and the comment widget uses the
+Weceem content submission tags to set this up.<p class="paragraph"/>The Weceem archive tags are used to render the months for which there exist child nodes of type "Comment", with links to
+view those. Finally, the widgets render the list of tags assigned to the blog entry, with links to search for other blog
+entries based on those tags.<p class="paragraph"/>For preparing new blog, the user needs to select row in the
 content repository tree by clicking on it. As the result the row is preselected by color. The row selection means that
 the content will be child to selected content. Then at the top of <strong class="bold">Content</strong> tab there is a button <strong class="bold">New Content</strong> that
 offers a list of available content types to be created. Select the type "Blog" and press "Create" button. The new
 blog editor should be shown to the user<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/blogEditor.jpg"></img><p class="paragraph"/>If the Blog is created, then it is possible to create Blog Entries. The user should  select "Blog row" as a parent and
 press <strong class="bold">New Content</strong> button to select <strong class="bold">Blog entry</strong> content type. The editor contains CKEditor for entering content.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/createBlogEntry.jpg"></img><p class="paragraph"/>Also it is possible to create or manage existed Comments. If you put a submission form for your Blog Entry page then
 the users will push comments to your through your site. Also you can create new Comment from "Content" tab by pressing
-button "New Content" and selecting <strong class="bold">Comment</strong> content type.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/createComment.jpg"></img><p class="paragraph"/><p class="paragraph"/>
+button "New Content" and selecting <strong class="bold">Comment</strong> content type.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/createComment.jpg"></img><p class="paragraph"/><strong class="bold">Visitor comments and submitted content</strong><p class="paragraph"/>Sites often permit visitors to leave comments - be they blog comments, visitor books or comments on Wiki pages.<p class="paragraph"/>Weceem supports a generic mechanism for visitors to create new content nodes via a form, filtered through the security
+policy.<p class="paragraph"/>This is, for example, how the default space implements comments on blogs. A widget is used to render a form to capture
+the comment fields and submit them to Weceem's content submission controller - where they are, if the security policy
+permits that kind of content at that URI, from that (anonymous) user - saved in an "unmoderated" status.
+Creating a comment submission form<p class="paragraph"/>To allow users to submit content, you need to provide the data from the client browser - usually with a form that the
+user completes. You will usually do this inside a Widget node so that the code can be reused:<p class="paragraph"/><div class="code"><pre>&#60;g:hasErrors bean=<span class="java&#45;quote">"$&#123;submittedContent&#125;"</span>&#62;
+There were some errors on your submission, please check below
+&#60;/g:hasErrors&#62;<p class="paragraph"/>&#60;wcm:submitContentForm parent=<span class="java&#45;quote">"$&#123;parentContent&#125;"</span> type=<span class="java&#45;quote">"org.weceem.content.WcmComment"</span> success=<span class="java&#45;quote">"$&#123;parentContent&#125;"</span>&#62;<p class="paragraph"/>&#60;bean:require beanName=<span class="java&#45;quote">"submittedContent"</span> className=<span class="java&#45;quote">"org.weceem.content.WcmComment"</span>/&#62;
+&#60;bean:field beanName=<span class="java&#45;quote">"submittedContent"</span> property=<span class="java&#45;quote">"author"</span> label=<span class="java&#45;quote">"Your name"</span>/&#62;
+&#60;bean:field beanName=<span class="java&#45;quote">"submittedContent"</span> property=<span class="java&#45;quote">"email"</span>/&#62;
+&#60;bean:input beanName=<span class="java&#45;quote">"submittedContent"</span> property=<span class="java&#45;quote">"websiteUrl"</span> label=<span class="java&#45;quote">"Website URL"</span>/&#62;
+&#60;bean:input beanName=<span class="java&#45;quote">"submittedContent"</span> property=<span class="java&#45;quote">"title"</span>/&#62;
+&#60;bean:field beanName=<span class="java&#45;quote">"submittedContent"</span> property=<span class="java&#45;quote">"content"</span> label=<span class="java&#45;quote">"Your comment"</span>/&#62;
+&#60;input type=<span class="java&#45;quote">"submit"</span> class=<span class="java&#45;quote">"button positive"</span> value=<span class="java&#45;quote">"Send comment"</span>/&#62;<p class="paragraph"/>&#60;/wcm:submitContentForm&#62;</pre></div><p class="paragraph"/>
+Here, three different Grails taglibs are being used to create the form:
+<ul class="star">
+<li>  g:hasErrors is a Grails tag used to detect any errors on the submittedContent data and alerts the user if so</li>
+<li>  wcm:submitContentForm creates a form that will submit content of a specific type, as set in the "type" attribute.</li>
+</ul><p class="paragraph"/> The "parent" attribute must be set to the node that will be the parent of the new content (or null for root content),
+ and the "success" attribute is the repository URI path or node that should be shown after the content has been
+ submitted - e.g. the original Blog Entry
+<ul class="star">
+<li>  bean:* tags are from the Grails bean-fields plugin that is provided as part of Weceem. They make it easy to render</li>
+</ul><p class="paragraph"/> sensible default fields, labels and error messages for properties of an object. In this case the object is the
+ "submittedContent" bean used by the content submission form.<p class="paragraph"/>The form will include a link to the content submission controller. This controller will save the content if it is valid,
+or return to the existing content with the "submittedContent" object populated with the previous data and any errors
+attached. Using the bean:* tags of the Grails Bean-Fields plugin is merely a convenience, but is very useful as it will
+display the validation errors associated with each field inline in the form.<p class="paragraph"/>If the submission succeeds - which requires the user to have permission to create that type of content under the
+specified parent in the repository - it will redirect the user to the content specified in the "success" attribute.<p class="paragraph"/>The content will be in the "unmoderated" status, until an administrator updates the status to Published.<p class="paragraph"/><p class="paragraph"/>
 
 
                 <div style="clear:both;margin-top:15px;"></div>

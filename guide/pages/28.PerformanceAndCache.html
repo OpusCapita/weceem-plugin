@@ -1,0 +1,308 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    <title>4.29 Site performance and caching content 1.3-SNAPSHOT</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
+    <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
+    <script type="text/javascript">
+function addJsClass() {
+    var classes = document.body.className.split(" ");
+    classes.push("js");
+    document.body.className = classes.join(" ");
+}
+    </script>
+</head>
+
+<body class="body" onload="addJsClass();">
+<div id="navigation">
+    <ul>
+        <li>
+            <div id="nav-summary" onmouseover="toggleNavSummary(false)" onmouseout="toggleNavSummary(true)">
+                <a href="../../guide/index.html" class="button">Table of contents</a>
+
+                <div id="nav-summary-childs" style="display:none;">
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/1.Introduction.html"><strong>1</strong><span>Introduction</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/2.ConfigurationAndInstallation.html"><strong>2</strong><span>Configuration and installation</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/3.GeneralBehaviourAndConcepts.html"><strong>3</strong><span>General behaviour and concepts</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/4.UsersGuide.html"><strong>4</strong><span>User Guide</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/5.WeceemSecuritPolicy.html"><strong>5</strong><span>Weceem security policy</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../../guide/customization.html"><strong>6</strong><span>Customization</span></a>
+                    </div>
+                    
+                </div>
+            </div>
+        </li>
+        <li class="separator selected">
+            <a id="ref-button" onclick="localToggle(); return false;" href="#">Quick Reference</a>
+        </li>
+    </ul>
+</div>
+<div id="header">
+    <div class="images clearfix">
+        
+        
+    </div>
+    <p>jCatalog Software AG</p>
+</div>
+
+
+<table id="colset" border="0" cellpadding="0" cellspacing="0">
+    <tr>
+        <td id="col1">
+            <div id="main" class="corner-all">
+
+                
+                    <div class="toc-item prev-left"><a href="../../guide/3.GeneralBehaviourAndConcepts.html">&lt;&lt; <strong>3</strong><span>General behaviour and concepts</span></a></div>
+                
+
+                <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
+
+                
+                    <div class="toc-item next-right"><a href="../../guide/5.WeceemSecuritPolicy.html"><strong>5</strong><span>Weceem security policy</span> >></a></div>
+                
+
+
+                <div class="project">
+                    <h1>4.29 Site performance and caching content - Reference Documentation</h1>
+
+                    <p><strong>Authors:</strong> Stephan Albers, Mark Palmer, July Antonicheva</p>
+
+                    <p><strong>Version:</strong> 1.3-SNAPSHOT</p>
+
+                    
+                </div>
+
+                
+
+                
+
+<h2 id="28.PerformanceAndCache">4.29 Site performance and caching content</h2>
+Processing and rendering content in a CMS is a relatively time consuming activity, particularly with complex pages that
+render external feeds or loop over other content nodes.<p class="paragraph"/>So as with regular websites it makes sense to use standard browser caching features to reduce the number of requests for
+content and supporting HTTP mechanisms for detecting changes to content.<p class="paragraph"/>Weceem supports both of these aims by implementing smart ETag handling as well as allowing you to tell the browser how
+long to keep the content for before checking for new versions using ETag. With ETags, the browser still makes a request
+to the server to check for changes, but if there has been no change, receives no new content.<p class="paragraph"/>This is done by calculating ETags for all URIs in your repository, based on the contents of other nodes on which those
+depend. For example even a simple home page is dependent on at least a Template node and likely at least a couple of
+widgets. This information is cached by Weceem, so checking for new content is very quick.<p class="paragraph"/>However this means that the ETag for your home page must change if the Template or widgets have been edited - otherwise
+users will continue to see your old home page styling for some time.<p class="paragraph"/>Weceem handles this by allowing you specify the URIs of content that a node is dependent on, a "maximum age" and also
+whether content contains user-specific information (which means that a different ETag is used per user).<p class="paragraph"/><strong class="bold">Content Dependencies</strong><p class="paragraph"/>When editing content, there is a "Content dependencies" field in the Advanced settings. This is where you enter a
+comma-delimited list of URIs on which the content node depends. By dependency we mean that this content's visual
+representation may change if any of these nodes are changed.<p class="paragraph"/>Wild cards of the form /<strong class="bold"></strong> are supported, to represent any dependents.<p class="paragraph"/>There is however no need to specify dependency on the content Template, because this is handled automatically for you.<p class="paragraph"/>For example a Template used for your entire site may render widgets for header and footer. If you want all content that
+uses this template to become invalidated if the header or footer change, you would set the content dependencies to e.g:<p class="paragraph"/>widget/header, widget/footer<p class="paragraph"/>If you had a dependency on a lot of widgets, you could simplify this with the wildcard:<p class="paragraph"/>widget/<strong class="bold"></strong><p class="paragraph"/>Another example is a News widget that uses wcm:eachChild to iterate over the news article nodes at URI "news-articles".
+Here you'd set the content dependencies of the widget to:<p class="paragraph"/>news-articles/<strong class="bold"></strong><p class="paragraph"/>This way, any template that depends on this news widget, will also depen on the news articles, and hence everything
+invalidates as appropriate.<p class="paragraph"/>NOTE: some content types are smart and add some implicit dependencies. For example Blog automatically depends on its
+BlogEntry children. This is required because a Blog page normally lists its child nodes, and needs to update if new
+entries are added.<p class="paragraph"/><strong class="bold">Controlling how long a browser may keep a cached page</strong><p class="paragraph"/>Aside from the dependencies, you can tell the browser how long to wait before checking for new content. For example if
+you know that usually you don't post more than one news article per day, and that even if you did you didn't mind
+someone not seeing the very latest, you can tell Weceem this.<p class="paragraph"/>Each content node has a setting labelled "Is updated" in Advanced. Here you can select how often the node is likely to
+be updated. If you never want it to be cached you can set this to "All the time". If you know that the content is
+unlikely to change you can set it to something like "Weekly" or "Never"<p class="paragraph"/>Doing this reduces the requests made to your server - saving you CPU time and bandwidth, and improving the response time
+of your site for users.<p class="paragraph"/>Note that if a user uses the "refresh" button in their browser, they will always get the newest content.<p class="paragraph"/><strong class="bold">User-specific conten</strong><p class="paragraph"/>In some cases you may use Weceem's advanced scripting and widget features to present user-specific information. This
+typically uses the HTTP session to store user information, such as the contents of a shopping cart, or their user ID.<p class="paragraph"/>By ticking the "User specific content" option (available on Template nodes only in 1.0), you can instruct Weceem to
+allow the client to use cached content but still update if that user's rendering of the content will have changed.<p class="paragraph"/>When checked, this option forces Weceem to create a user-specific ETag for the content using that template. This is done
+by monitoring the HTTP session for changes. Any changes to the HTTP session result in a new ETag for pages using
+that template.<p class="paragraph"/>If you have other data changes that should invalidate the user's view of the content, but don't directly change the
+session, you can force this simply by writing to the session.<p class="paragraph"/>For example if you have a Widget that renders a log in / log out button depending on whether the user has a cookie or
+not (perhaps for a separate app on the same domain) you simply make that widget set a variable in the session if the
+cookie value is no longer present:<p class="paragraph"/><div class="code"><pre>&#60;g:set <span class="java&#45;keyword">var</span>=<span class="java&#45;quote">"hasCookie"</span> value=<span class="java&#45;quote">"$&#123;request.cookies.find &#123; it.name == 'userInfo' &#125;?.value&#125;"</span>/&#62;<p class="paragraph"/>&#60;%&#45;&#45; only <span class="java&#45;keyword">if</span> the presence of cookie has changed to we change the session &#45;&#45;%&#62;
+&#60;g:<span class="java&#45;keyword">if</span> test=<span class="java&#45;quote">"$&#123;session.userLoggedIn != hasCookie&#125;"</span>&#62;
+   &#60;g:set <span class="java&#45;keyword">var</span>=<span class="java&#45;quote">"userLoggedIn"</span> scope=<span class="java&#45;quote">"session"</span> value=<span class="java&#45;quote">"$&#123;hasCookie&#125;"</span>/&#62;
+&#60;/g:<span class="java&#45;keyword">if</span>&#62;<p class="paragraph"/>&#60;%&#45;&#45; render the links &#45;&#45;%&#62;
+&#60;g:<span class="java&#45;keyword">if</span> test=<span class="java&#45;quote">"$&#123;hasCookie&#125;"</span>&#62;
+  &#60;wcm:link path=<span class="java&#45;quote">"user/logout"</span>&#62;Log out&#60;/a&#62;
+&#60;/g:<span class="java&#45;keyword">if</span>&#62;
+&#60;g:<span class="java&#45;keyword">else</span>&#62;
+  &#60;wcm:link path=<span class="java&#45;quote">"user/login"</span>&#62;Log in&#60;/a&#62;
+&#60;/g:<span class="java&#45;keyword">else</span>&#62;</pre></div>
+
+
+
+                <div style="clear:both;margin-top:15px;"></div>
+                
+                    <div class="toc-item prev-left"><a href="../../guide/3.GeneralBehaviourAndConcepts.html">&lt;&lt; <strong>3</strong><span>General behaviour and concepts</span></a></div>
+                
+                    <div class="toc-item next-right"><a href="../../guide/5.WeceemSecuritPolicy.html"><strong>5</strong><span>Weceem security policy</span> >></a></div>
+                
+                <div style="clear:both"></div>
+            </div>
+        </td>
+        <td id="col2">
+            <div class="local clearfix">
+                <div class="local-title">
+                    <a href="../../guide/index.html" target="mainFrame">Quick Reference</a>
+                    <span class="toggle">(<a href="#" onclick="localToggle(); return false;">hide</a>)</span>
+                </div>
+                <div class="menu">
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Domain</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../../ref/Domain/attach.html">attach</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                    <div class="menu-block"><h1 class="menu-title" onclick="toggleRef(this.parentNode.childNodes[1])">Tags</h1><div class="menu-sub">
+                        
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/ancestorOfType.html">ancestorOfType</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/archiveList.html">archiveList</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/breadcrumb.html">breadcrumb</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/cache.html">cache</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/content.html">content</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/contentIconURL.html">contentIconURL</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/countChildren.html">countChildren</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/createFeedLink.html">createFeedLink</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/createLink.html">createLink</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/createSearchLink.html">createSearchLink</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/dataFeed.html">dataFeed</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/date.html">date</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/eachChild.html">eachChild</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/eachComment.html">eachComment</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/eachContent.html">eachContent</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/eachParent.html">eachParent</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/eachSibling.html">eachSibling</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/feedLink.html">feedLink</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/find.html">find</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/findNode.html">findNode</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/htmlToText.html">htmlToText</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/ifContentIs.html">ifContentIs</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/ifContentIsNot.html">ifContentIsNot</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/ifUserCanEdit.html">ifUserCanEdit</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/ifUserCanView.html">ifUserCanView</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/join.html">join</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/link.html">link</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/loggedInEmail.html">loggedInEmail</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/loggedInUserName.html">loggedInUserName</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/menu.html">menu</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/monthNames.html">monthNames</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/render.html">render</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/renderContentItemIcon.html">renderContentItemIcon</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/resource.html">resource</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/search.html">search</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/searchLink.html">searchLink</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/space.html">space</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/submitContentForm.html">submitContentForm</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/submitContentLink.html">submitContentLink</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/summarize.html">summarize</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/uiMessage.html">uiMessage</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/userInfo.html">userInfo</a>
+                            </div>
+                            
+                            <div class="menu-item"><a href="../../ref/Tags/widget.html">widget</a>
+                            </div>
+                            
+                            </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </td>
+    </tr>
+</table>
+
+<div id="footer">
+    jCatalog Software AG
+    
+</div>
+
+<script type="text/javascript" src="../js/docs.js"></script>
+
+</body>
+</html>
