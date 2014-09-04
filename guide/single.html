@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
     <head>
-        <title>Weceem CMS 1.2</title>
+        <title>Weceem Documentation 1.3-SNAPSHOT</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8" />
         <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8" />
@@ -29,9 +29,11 @@ function addJsClass(el) {
                             
                             <div class="toc-item" style="margin-left:0"><a href="#3.GeneralBehaviourAndConcepts"><strong>3</strong><span>General behaviour and concepts</span></a></div>
                             
-                            <div class="toc-item" style="margin-left:0"><a href="#4.WeceemSecuritPolicy"><strong>4</strong><span>Weceem security policy</span></a></div>
+                            <div class="toc-item" style="margin-left:0"><a href="#4.UsersGuide"><strong>4</strong><span>User Guide</span></a></div>
                             
-                            <div class="toc-item" style="margin-left:0"><a href="#customization"><strong>5</strong><span>Customization</span></a></div>
+                            <div class="toc-item" style="margin-left:0"><a href="#5.WeceemSecuritPolicy"><strong>5</strong><span>Weceem security policy</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#customization"><strong>6</strong><span>Customization</span></a></div>
                             
                         </div>
                     </div>
@@ -46,7 +48,7 @@ function addJsClass(el) {
                 
                 
             </div>
-            <p>Weceem CMS is a free, open source content management system.</p>
+            <p>jCatalog Software AG</p>
         </div>
 
 
@@ -58,9 +60,9 @@ function addJsClass(el) {
                         <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
                         <div class="project">
-                            <h1>Weceem CMS - Reference Documentation</h1>
-                            <p><strong>Authors:</strong> jCatalog AG</p>
-                            <p><strong>Version:</strong> 1.2</p>
+                            <h1>Weceem Documentation - Reference Documentation</h1>
+                            <p><strong>Authors:</strong> Stephan Albers, Mark Palmer, July Antonicheva</p>
+                            <p><strong>Version:</strong> 1.3-SNAPSHOT</p>
                             
                         </div>
 
@@ -74,29 +76,75 @@ function addJsClass(el) {
                             
                             <div class="toc-item" style="margin-left:0px"><a href="#3.GeneralBehaviourAndConcepts"><strong>3</strong><span>General behaviour and concepts</span></a></div>
                             
-                            <div class="toc-item" style="margin-left:0px"><a href="#4.WeceemSecuritPolicy"><strong>4</strong><span>Weceem security policy</span></a></div>
+                            <div class="toc-item" style="margin-left:0px"><a href="#4.UsersGuide"><strong>4</strong><span>User Guide</span></a></div>
                             
-                            <div class="toc-item" style="margin-left:0px"><a href="#customization"><strong>5</strong><span>Customization</span></a></div>
+                            <div class="toc-item" style="margin-left:10px"><a href="#0.adminUI"><strong>4.1</strong><span>Administrative UI</span></a></div>
                             
-                            <div class="toc-item" style="margin-left:10px"><a href="#0.HookingIntoTheAdminInterface"><strong>5.1</strong><span>Hooking into the Admin interface</span></a></div>
+                            <div class="toc-item" style="margin-left:10px"><a href="#1.CreateSpace"><strong>4.2</strong><span>Create Space</span></a></div>
                             
-                            <div class="toc-item" style="margin-left:10px"><a href="#1.CreateCustomContentTypes"><strong>5.2</strong><span>Create custom content types</span></a></div>
+                            <div class="toc-item" style="margin-left:10px"><a href="#2.SynchronizeFiles"><strong>4.3</strong><span>File Synchronization</span></a></div>
                             
-                            <div class="toc-item" style="margin-left:10px"><a href="#2.CustomContentEditors"><strong>5.3</strong><span>Custom content editors</span></a></div>
+                            <div class="toc-item" style="margin-left:10px"><a href="#3.Plugins"><strong>4.4</strong><span>Plugins</span></a></div>
                             
-                            <div class="toc-item" style="margin-left:10px"><a href="#3.CustomRequestAndFormSubmissionWithGroovyScripts"><strong>5.4</strong><span>Custom request/form submission with groovy scripts</span></a></div>
+                            <div class="toc-item" style="margin-left:10px"><a href="#4.Licenses"><strong>4.5</strong><span>Licenses</span></a></div>
                             
-                            <div class="toc-item" style="margin-left:10px"><a href="#4.EmbeddingContent"><strong>5.5</strong><span>Embedding content</span></a></div>
+                            <div class="toc-item" style="margin-left:10px"><a href="#5.CheckLinks"><strong>4.6</strong><span>Check Links</span></a></div>
                             
-                            <div class="toc-item" style="margin-left:10px"><a href="#5.ExportingAndImportingContent"><strong>5.6</strong><span>Exporting and importing content</span></a></div>
+                            <div class="toc-item" style="margin-left:10px"><a href="#6.Users"><strong>4.7</strong><span>CMS User management</span></a></div>
                             
-                            <div class="toc-item" style="margin-left:10px"><a href="#6.HookingIntoContentEvents"><strong>5.7</strong><span>Hooking into content events</span></a></div>
+                            <div class="toc-item" style="margin-left:10px"><a href="#7.CreateHtml"><strong>4.8</strong><span>Create HTML pages</span></a></div>
                             
-                            <div class="toc-item" style="margin-left:10px"><a href="#7.PageRendering"><strong>5.8</strong><span>Page rendering</span></a></div>
+                            <div class="toc-item" style="margin-left:10px"><a href="#8.CreateBlogComment"><strong>4.9</strong><span>Create Blog, Blog Entries and Comments</span></a></div>
                             
-                            <div class="toc-item" style="margin-left:10px"><a href="#8.IntegratingTheAuthenticationAndAuthorisationSystem"><strong>5.9</strong><span>Integrating the  authenticationand authorisation system</span></a></div>
+                            <div class="toc-item" style="margin-left:10px"><a href="#9.CreateServerFolderFile"><strong>4.10</strong><span>Server Directory and Server File</span></a></div>
                             
-                            <div class="toc-item" style="margin-left:10px"><a href="#9.StylingWithTemplates"><strong>5.10</strong><span>Styling With Templates</span></a></div>
+                            <div class="toc-item" style="margin-left:10px"><a href="#10.CreateTemplateWidget"><strong>4.11</strong><span>Templates and Widgets</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#11.CreateAction"><strong>4.12</strong><span>Create Action</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#12.CreateBinaryContent"><strong>4.13</strong><span>Create Binary Content</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#13.CreateCssJs"><strong>4.14</strong><span>Create CSS Stylesheets and Javascript Sources</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#14.CreateExternalLink"><strong>4.15</strong><span>Create External Link</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#15.CreateGroovyScript"><strong>4.16</strong><span>Create Groovy Script</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#16.CreateFolder"><strong>4.17</strong><span>Create Folder</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#17.CreateWikiPage"><strong>4.18</strong><span>Create Wiki page</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#18.CreateVirtualContent"><strong>4.19</strong><span>Create Virtual Content</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#19.StatusPublishing"><strong>4.20</strong><span>Statuses, Publishing and Unpublishing by date</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#20.Search"><strong>4.21</strong><span>Search in Weceem</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#21.DragAndDrop"><strong>4.22</strong><span>Operations with content repository tree</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#5.WeceemSecuritPolicy"><strong>5</strong><span>Weceem security policy</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#customization"><strong>6</strong><span>Customization</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#0.HookingIntoTheAdminInterface"><strong>6.1</strong><span>Hooking into the Admin interface</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#1.CreateCustomContentTypes"><strong>6.2</strong><span>Create custom content types</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#2.CustomContentEditors"><strong>6.3</strong><span>Custom content editors</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#3.CustomRequestAndFormSubmissionWithGroovyScripts"><strong>6.4</strong><span>Custom request/form submission with groovy scripts</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#4.EmbeddingContent"><strong>6.5</strong><span>Embedding content</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#5.ExportingAndImportingContent"><strong>6.6</strong><span>Exporting and importing content</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#6.HookingIntoContentEvents"><strong>6.7</strong><span>Hooking into content events</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#7.PageRendering"><strong>6.8</strong><span>Page rendering</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#8.IntegratingTheAuthenticationAndAuthorisationSystem"><strong>6.9</strong><span>Integrating the  authenticationand authorisation system</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:10px"><a href="#9.StylingWithTemplates"><strong>6.10</strong><span>Styling With Templates</span></a></div>
                             
                             <div style="clear:both" ></div>
                         </div>
@@ -155,7 +203,198 @@ weceem.space.templates = &#91;
 </ul><p class="paragraph"/>There is no UI for editing the list of statuses, but if you are a developer and wish to add new ones, bear in mind the rules for the workflow as set out here.<p class="paragraph"/>Each status has a numerical code - e.g. Draft is 100, Unmoderated - 150, Published - 400 etc. Each status also has a flag to indicate whether or not it is "public" content i.e. can be viewed by non-administrators. By default Published is the only status with this flag set.<p class="paragraph"/>All changes to status are made manually by repository users, unless the <strong class="bold">Publish From</strong> or <strong class="bold">Publish Until</strong> fields have values,<p class="paragraph"/>In the case of <strong class="bold">Publish From</strong>, once the date passes, the status of the content will change to the first status with "public content" flag switched on, which has a higher code number than the current status of the content. This offers scope for other statuses beyond the existing set, and migration upward through those states.<p class="paragraph"/>The one caveat here is that the <strong class="bold">Publish From</strong> mechanism will never change the status on content that is currently in the "Unmoderated" or "Archived" status used for visitor-submitted or expired content. If you need to change which status is used for "Unmoderated" or "Archived" content you can do this by setting the configuration variables to the numerical code values of the desired status <code>weceem.unmoderated.status</code> and <code>weceem.archived.status</code><p class="paragraph"/>With <strong class="bold">Publish Until</strong>, the status of any published content that has expired will be set to the "Archived" status or the status defined in the configuration variable <code>weceem.archived.status</code><p class="paragraph"/><h4> Page Variables</h4><p class="paragraph"/>Templates, Widgets and HTML Content (with allow GSP enabled) have access to a data model that includes several variables used to render information about the current page, user or space.<p class="paragraph"/><strong class="bold">Variable: page</strong><p class="paragraph"/>This object presents information about the current page of the web site. The page is constructed from a template and content, and is located using a unique URI.  This is not to be confused with the "active" content node.<p class="paragraph"/><strong class="bold">Properties</strong><p class="paragraph"/><table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Name</strong></th><th>Description</th></tr><tr class="table-odd"><td>URI</td><td>uri of this page relative to the current space</td></tr><tr class="table-even"><td>parentURI</td><td>uri of this page's content node's parent</td></tr><tr class="table-odd"><td>lineage</td><td>list of ancestor nodes, in top-down order</td></tr><tr class="table-even"><td>title</td><td>page title</td></tr><tr class="table-odd"><td>titleForHTML</td><td>page title for HTML title tag, including SEO keywords</td></tr><tr class="table-even"><td>titleForMenu</td><td>page title for rendering menus, usually a shorter version of the title</td></tr></table><p class="paragraph"/><strong class="bold">Variable: user</strong><p class="paragraph"/>This object presents information about the current user.<p class="paragraph"/><strong class="bold">Properties</strong><p class="paragraph"/><table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Name</strong></th><th><strong class="bold">Description</strong></th></tr><tr class="table-odd"><td>username</td><td>User's login name</td></tr><tr class="table-even"><td>firstName</td><td>User's first name</td></tr><tr class="table-odd"><td>lastName</td><td>User's last name</td></tr><tr class="table-even"><td>email</td><td>User's email address</td></tr></table><p class="paragraph"/><strong class="bold">Variable: node</strong><p class="paragraph"/>This object provides access to information about the primary content node of this page. The properties available will vary based on the content type.<p class="paragraph"/><strong class="bold">Properties</strong><p class="paragraph"/><table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Name</strong></th><th><strong class="bold">Description</strong></th></tr><tr class="table-odd"><td>title</td><td>content title</td></tr><tr class="table-even"><td>content</td><td>content text</td></tr><tr class="table-odd"><td>aliasURI</td><td>primary URI for this content node</td></tr><tr class="table-even"><td>language</td><td>language of this content, a Language object</td></tr><tr class="table-odd"><td>createdBy</td><td>name of the user who created the content</td></tr><tr class="table-even"><td>createdOn</td><td>date the content was originally created</td></tr><tr class="table-odd"><td>changedBy</td><td>username of the last user to edit the content</td></tr><tr class="table-even"><td>changedOn</td><td>date on which the content was last edited</td></tr><tr class="table-odd"><td>space</td><td>space (object) to which this content node belongs</td></tr></table><p class="paragraph"/>
 
 
-<h1 id="4.WeceemSecuritPolicy">4 Weceem security policy</h1>
+<h1 id="4.UsersGuide">4 User Guide</h1>
+
+
+
+<h2 id="0.adminUI">4.1 Administrative UI</h2>
+Weceem contains administrative UI for users that have access to creating new content and managing existed sources.
+In your weceem.properties file or in Config.groovy file the user can customize URL that leads to admin UI. By default
+the mapping <strong class="bold">"wcm/admin"</strong> will be used.<p class="paragraph"/>Admin UI consists of two tabs: "Content" and "Administration".<p class="paragraph"/><strong class="bold">Content tab</strong><p class="paragraph"/>At the top of the Content tab there is a panel with action buttons and settings. Action buttons <strong class="bold">New Content</strong> and
+<strong class="bold">More Actions</strong> contain list of operations that can be done on stored contents. The setting list <strong class="bold">Space</strong> gives the user
+possibility to select Space for editing. As far as the user change Space in list, the contents from selected Space should
+be listed in content repository tree below.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/contentAdminUI.jpg"></img><p class="paragraph"/><strong class="bold">Administration tab</strong><p class="paragraph"/>The tab contains several editors:
+<ul class="star">
+<li>Spaces</li>
+<li>Synchronize files</li>
+<li>Plugins management</li>
+<li>Licenses</li>
+<li>Check links</li>
+<li>Users</li>
+</ul><p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/administrationAdminUI.jpg"></img><p class="paragraph"/>
+
+
+
+<h2 id="1.CreateSpace">4.2 Create Space</h2>
+Space editor gives the user possibility to create new Spaces or edit/delete/import/export existed one.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/spaceEditor.jpg"></img><p class="paragraph"/>Each Space is determined by its name and alias URI, where alias URI is a prefix for your site (Space), that will be used
+in URL mappings when you try to review the ready site content.<p class="paragraph"/>
+
+
+<h2 id="2.SynchronizeFiles">4.3 File Synchronization</h2>
+Synchronizing a space with the server filesystem will create new content nodes for any directories and files that exist
+in the filesystem but are not currently in the content repository.<p class="paragraph"/>You will be given the option to delete any content nodes that refer to server files or directories that no longer exist.<p class="paragraph"/>
+
+
+
+<h2 id="3.Plugins">4.4 Plugins</h2>
+The feature you selected is not quite ready. Please view the Weceem.org roadmap for what is coming in the next release.<p class="paragraph"/>
+
+
+<h2 id="4.Licenses">4.5 Licenses</h2>
+Weceem is 100% open source licensed.
+The Weceem application and plugin and Grails are Apache 2 licensed
+The jQuery and jQuery UI libraries are provided under the MIT license.<p class="paragraph"/>
+
+
+<h2 id="5.CheckLinks">4.6 Check Links</h2>
+The feature you selected is not quite ready. Please view the Weceem.org roadmap for what is coming in the next release.<p class="paragraph"/>
+
+
+<h2 id="6.Users">4.7 CMS User management</h2>
+The editor gives possibility to manage CMS user: enable user, give/change auhorities, update password and other user
+information such as First Name, Last Name, Email.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/users.jpg"></img>
+
+
+
+<h2 id="7.CreateHtml">4.8 Create HTML pages</h2>
+If the user needs to create HTML page, he needs to select row in the content repository tree by clicking on it. As the
+result the row is preselected by color. The row selection means that the content will be child to selected content. Then
+at the top of <strong class="bold">Content</strong> tab there is a button <strong class="bold">New Content</strong> that offers a list of available content types to be created.
+Select the type "HTML" and press "Create" button. The new content editor
+should be shown to the user<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/htmlEditor.jpg"></img><p class="paragraph"/><p class="paragraph"/>
+
+
+<h2 id="8.CreateBlogComment">4.9 Create Blog, Blog Entries and Comments</h2>
+There is a simple default support for blogs in Weceem. For preparing new blog, the user needs to select row in the
+content repository tree by clicking on it. As the result the row is preselected by color. The row selection means that
+the content will be child to selected content. Then at the top of <strong class="bold">Content</strong> tab there is a button <strong class="bold">New Content</strong> that
+offers a list of available content types to be created. Select the type "Blog" and press "Create" button. The new
+blog editor should be shown to the user<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/blogEditor.jpg"></img><p class="paragraph"/>If the Blog is created, then it is possible to create Blog Entries. The user should  select "Blog row" as a parent and
+press <strong class="bold">New Content</strong> button to select <strong class="bold">Blog entry</strong> content type. The editor contains CKEditor for entering content.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/createBlogEntry.jpg"></img><p class="paragraph"/>Also it is possible to create or manage existed Comments. If you put a submission form for your Blog Entry page then
+the users will push comments to your through your site. Also you can create new Comment from "Content" tab by pressing
+button "New Content" and selecting <strong class="bold">Comment</strong> content type.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/createComment.jpg"></img><p class="paragraph"/><p class="paragraph"/>
+
+
+<h2 id="9.CreateServerFolderFile">4.10 Server Directory and Server File</h2>
+If the user needs to add some files, f.e. images then it is possible to create a "Server Directory" on a file system and put
+your uploaded files as "Server File" there. Although there are special content types for CSS anf JS files such as
+"CSS Stylesheet" and "JavaScript Source", but they are restricted to be no longer then <strong class="bold">500000</strong> symbols.
+In case if the user wants to use the biggest CSS, JS libraries or images, the <strong class="bold">ServerFile</strong> is the type that is needed to
+be used.<p class="paragraph"/>Firstly create <strong class="bold">Server Directory</strong>  - the folder on the file system will be created, then put your uploaded files
+as <strong class="bold">Server Files</strong> to this directory.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/createServerDirectory.jpg"></img><p class="paragraph"/>
+<img border="0" class="center" src="../img/usersGuide/createServerFile.jpg"></img><p class="paragraph"/>
+
+
+<h2 id="10.CreateTemplateWidget">4.11 Templates and Widgets</h2>
+If the user needs to prepare template, he needs to select row in the content repository tree by clicking on it. As the
+result the row is preselected by color. The row selection means that the content will be child to selected content. Then
+at the top of <strong class="bold">Content</strong> tab there is a button <strong class="bold">New Content</strong> that offers a list of available content types to be created.
+Select the type "Template" and press "Create" button. The new content editor should be shown to the user. Usually the
+template is a GSP page that uses Weceem tags for rendering necessary content. Check <strong class="bold">Tags</strong> section for more details.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/createTemplate.jpg"></img><p class="paragraph"/>Also it is possible to create widgets, by selecting content type "Widget" to prepare widgets for templates. Usually
+template is consists from widgets as from blocks. It helps template to be more flexible and customizable.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/createWidget.jpg"></img>
+
+
+
+<h2 id="11.CreateAction">4.12 Create Action</h2>
+It is possible to create content Action that is determined with Groovy Script that should be executed. For example,
+sending mails of checking links on the page. To create new Action is possible using button "New Content" at the top of
+repository tree and selecting content type <strong class="bold">Action</strong> in the available content types. The simple editor is available for
+creating user Actions.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/createAction.jpg"></img><p class="paragraph"/><p class="paragraph"/>
+
+
+<h2 id="12.CreateBinaryContent">4.13 Create Binary Content</h2>
+The content type <strong class="bold">Binary Content</strong> represents files, that are stored in the data base using base64 encoding.
+Don't use it for large content. It is intended for logos etc. To create such content, please check that at the top of
+<strong class="bold">Content</strong> tab there is a button <strong class="bold">New Content</strong> that offers a list of available content types to be created. Select the
+type "Binary Content" and press "Create" button. The new editor similar to <strong class="bold">Server File</strong> editor should be shown to the
+user<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/createBinaryContent.jpg"></img>
+
+
+<h2 id="13.CreateCssJs">4.14 Create CSS Stylesheets and Javascript Sources</h2>
+It is possible to prepare CSS Stylesheets and JavaScript Sources as a content nodes. At the top of <strong class="bold">Content</strong> tab there
+is a button <strong class="bold">New Content</strong> that offers a list of available content types to be created. Select the type "CSS Stylesheets"
+or "JavaScript Sources" and press "Create" button. The simple content editor should be shown to the user.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/createCss.jpg"></img><p class="paragraph"/>
+<img border="0" class="center" src="../img/usersGuide/createJs.jpg"></img>
+
+
+<h2 id="14.CreateExternalLink">4.15 Create External Link</h2>
+The user has possibility to create content with the type "<strong class="bold">External Link</strong>". This content type is representing a link to
+an external URL . To create new <strong class="bold">External Link</strong>, check at the top of <strong class="bold">Content</strong> tab there is a button <strong class="bold">New Content</strong> that
+offers a list of available content types to be created. Select the type "External Link" and press "Create" button. The
+special content editor should be shown to the user.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/externalLink.jpg"></img>
+
+
+<h2 id="15.CreateGroovyScript">4.16 Create Groovy Script</h2>
+It is possible to create Groovy Scripts, that can be used for creating new content Actions. For that aim at the top of
+<strong class="bold">Content</strong> tab there is a button <strong class="bold">New Content</strong> that offers a list of available content types to be created. Select the
+type "Groovy Script" and press "Create" button. The special content editor should be shown to the user.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/createGroovyScript.jpg"></img>
+
+
+<h2 id="16.CreateFolder">4.17 Create Folder</h2>
+It is possible to create Folders in content repository tree. The Folders usually used to organize content by types or
+logically. For example, the user can create Folders "CSS" and "JavaScript" and put CSS Stylesheets and JavaScript
+sources in them respectively.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/createFolder.jpg"></img>
+
+
+<h2 id="17.CreateWikiPage">4.18 Create Wiki page</h2>
+It is possible to create <strong class="bold">Wiki page</strong> content by using button "New Content" at the top of repository tree and selecting
+content type <strong class="bold">Wiki Page</strong> in the available content types. The editor is available for creating new content.<p class="paragraph"/>
+<img border="0" class="center" src="../img/usersGuide/createWikiPage.jpg"></img><p class="paragraph"/><p class="paragraph"/>
+
+
+<h2 id="18.CreateVirtualContent">4.19 Create Virtual Content</h2>
+There is a possibility to create virtual content for any existed content in the content repository tree. For that aim,
+please check button "New Content" at the top of repository tree and select content type <strong class="bold">Virtual Content</strong> in the
+available content types. Each <strong class="bold">Virtual Content</strong> is determined by its "target" - the content node from repository tree.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/createVirtualContent.jpg"></img><p class="paragraph"/>
+
+
+
+<h2 id="19.StatusPublishing">4.20 Statuses, Publishing and Unpublishing by date</h2>
+The statuses are very important part in content management. According to status of a content it can be shown, hidden,
+publish or unpublish by specified date.<p class="paragraph"/>The following Statuses are provided:
+<ul class="star">
+<li>Draft</li>
+<li>Unmoderated</li>
+<li>Reviewed</li>
+<li>Approved</li>
+<li>Published</li>
+<li>Archived</li>
+</ul><p class="paragraph"/>Each status has a numerical code - e.g. Draft is 100, Unmoderated - 150, Published - 400 etc. Each status has a flag to
+indicate whether or not it is "public" content i.e. can be viewed by non-administrators.
+By default <strong class="bold">Published</strong> is the only status with this flag set.<p class="paragraph"/>All changes to status are made manually by repository users, unless the <strong class="bold">Publish From</strong> or <strong class="bold">Publish Until</strong> fields have
+values.<p class="paragraph"/>In the case of <strong class="bold">Publish From</strong>, once the date passes, the status of the content will change to the first status with
+"public content" flag switched on, which has a higher code number than the current status of the content. This offers
+scope for other statuses beyond the existing set, and migration upward through those states.<p class="paragraph"/>The one caveat here is that the <strong class="bold">Publish From</strong> mechanism will never change the status on content that is currently in
+the "Unmoderated" or "Archived" status used for visitor-submitted or expired content. If you need to change which status
+is used for "Unmoderated" or "Archived" content you can do this by setting the configuration variables to the numerical
+code values of the desired status <strong class="bold">weceem.unmoderated.status</strong> and <strong class="bold">weceem.archived.status</strong><p class="paragraph"/>With <strong class="bold">Publish Until</strong>, the status of any published content that has expired will be set to the "Archived" status or the
+status defined in the configuration variable <strong class="bold">weceem.archived.status</strong>.<p class="paragraph"/><p class="paragraph"/><p class="paragraph"/>
+
+
+<h2 id="20.Search">4.21 Search in Weceem</h2>
+The full text search is available in Weceem by default. It is provided by using Searchable plugin , that is built on
+Compass (http://www.compass-project.org/) and Lucene (http://lucene.apache.org/).<p class="paragraph"/>The component provides search for specified content types. Please check <strong class="bold">Tags</strong> section for more information.<p class="paragraph"/><div class="code"><pre>&#60;wcm:search types=<span class="java&#45;quote">"org.weceem.html.WcmHTMLContent,org.weceem.blog.WcmBlogEntry,org.weceem.content.WcmComment"</span>/&#62;</pre></div><p class="paragraph"/>
+
+
+
+<h2 id="21.DragAndDrop">4.22 Operations with content repository tree</h2>
+There is a list of operations that can be done with content repository tree. The button with dropping menu items is
+situated above the content repository tree, it is called "<strong class="bold">More Actions</strong>". The following operations are available:
+<ul class="star">
+<li>Preview selected content</li>
+<li>Delete content</li>
+<li>Move to Space</li>
+<li>Duplicate...</li>
+</ul><p class="paragraph"/><strong class="bold">Preview selected</strong> opens a new page/tab with the content previewing. Not all types of a content can be previewed, for
+example Templates and Widgets cannot be previewed as standalone pages. If the user tries to get preview for them the
+special message (or error page - depends on configuration settings) will be displayed.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/previewError.jpg"></img><p class="paragraph"/><strong class="bold">Delete</strong> content gives the user possibility to delete selected content. If the content contains children, the error
+message will be displayed and content won't be deleted.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/deleteError.jpg"></img><p class="paragraph"/><strong class="bold">Move to Space</strong> operation should move content from one Space to another one, but currently not implemented yet.<p class="paragraph"/><strong class="bold">Duplicate</strong> should copy the selected content to the other holder, parent content or even in another Space, but
+currently not implemented yet.<p class="paragraph"/>Also there are several operations that can be done on content repository tree, f.e. the user can drag a content and
+drop it as a child to another content. It is possible such way to move or copy the content to the another location.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/dropAction.jpg"></img><p class="paragraph"/>
+
+
+
+<h1 id="5.WeceemSecuritPolicy">5 Weceem security policy</h1>
 The Weceem security policy file is a Groovy script in your server filesystem, that lets you control who can access your content and what they can do with it.<p class="paragraph"/>The security policy uses information about the currently-logged in user's roles as supplied by the integration with your authentication system.<p class="paragraph"/>The security system gives you control over:
 <ul class="star">
 <li>spaces that users in different roles can access</li>
@@ -207,17 +446,17 @@ policy = &#123;<p class="paragraph"/>  // Here we define a role &#45; <span clas
 
 
 
-<h1 id="customization">5 Customization</h1>
+<h1 id="customization">6 Customization</h1>
 This section covers the internal details that can be used to customize Weceem within your application, create custom content types and other more technical subjects.
 
 
-<h2 id="0.HookingIntoTheAdminInterface">5.1 Hooking into the Admin interface</h2>
+<h2 id="0.HookingIntoTheAdminInterface">6.1 Hooking into the Admin interface</h2>
 <strong class="bold">Hooking into the Admin interface of Weceem</strong><p class="paragraph"/>Applications can add items to the Weceem "Administration" page by using the Navigation plugin that Weceem CMS uses, to add items to the navigation group "weceem.app.admin". The Weceem Application does this :<p class="paragraph"/><div class="code"><pre>class UserController &#123;
         def authenticateService<p class="paragraph"/>        <span class="java&#45;keyword">static</span> navigation = &#91;group: 'weceem.app.admin', action: 'list', title: 'users'&#93;
 &#125;</pre></div><p class="paragraph"/>The navigation plugin uses this convention property to place the "list" action of the user controller into the "Administration" section of Weceem Admin.
 
 
-<h2 id="1.CreateCustomContentTypes">5.2 Create custom content types</h2>
+<h2 id="1.CreateCustomContentTypes">6.2 Create custom content types</h2>
 Weceem provides many content types as standard. Each content type has a specific purpose, with different fields in the editor.<p class="paragraph"/>Some content types are directly rendered when requested, others are used by other content nodes to compose the page seen by the user.<p class="paragraph"/>The standard content types available in Weceem are :
 <ul class="star">
 <li>Action - A server-side action that will execute the code in a Groovy Script node, for example to create new content nodes or send an email</li>
@@ -290,7 +529,7 @@ Weceem provides many content types as standard. Each content type has a specific
 &#125;</pre></div><p class="paragraph"/>In almost all cases you will want to call the super method to ensure all inherited properties are correctly versioned.
 
 
-<h2 id="2.CustomContentEditors">5.3 Custom content editors</h2>
+<h2 id="2.CustomContentEditors">6.3 Custom content editors</h2>
 As mentioned in the create custom content type section, you can specify what kind of editor is used for each property of content types. By following some simple procedure, you can also create your own new editors.<p class="paragraph"/>Weceem will locate the appropriate editor using the name of the type of the property, if a custom property editor name is not given.<p class="paragraph"/><h4> Content Editors</h4><p class="paragraph"/>Weceem has quite a few editors that are available to edit all the predefined content type properties.<p class="paragraph"/>| <em class="italic">. Editor Field Name |</em> . Description |
 | String | for single-line strings |
 | LongString | for multi-line strings |
@@ -326,7 +565,7 @@ As mentioned in the create custom content type section, you can specify what kin
     &#125;</pre></div><p class="paragraph"/>Here, the Tags editor uses another GSP to output the more complex resource elements it requires, setting up JS code in the &#60;head&#62; section to bind add/remove buttons using jQuery.<p class="paragraph"/>
 
 
-<h2 id="3.CustomRequestAndFormSubmissionWithGroovyScripts">5.4 Custom request/form submission with groovy scripts</h2>
+<h2 id="3.CustomRequestAndFormSubmissionWithGroovyScripts">6.4 Custom request/form submission with groovy scripts</h2>
 Capture data from forms and perform an action, such as sending mail after submission of a contact form by writing some Groovy code that you store in the content repository. This happens dynamically and you don't need to redeploy your Weceem application or restart it.<p class="paragraph"/>Two content types work together in Weceem to enable you to write arbitrary server-side code. The Scripted Action node type is used to receive requests, and delegates the work to a Groovy Script node.<p class="paragraph"/>For example, to create a Contact form that sends mail to a known address, you could implement it like this :
 <ol>
 <li>Create a Groovy Script node in your repository, and paste into it the following code :</li>
@@ -350,11 +589,11 @@ Capture data from forms and perform an action, such as sending mail after submis
 &#125;</pre></div><p class="paragraph"/>This code expects the Grails "mail" plugin to be installed (as it is by default in the Weceem application WAR file). This code is exactly what you would write if you were writing your own <a href="https://grails.org/doc/latest/guide/theWebLayer.html#6.1%20Controllers." target="blank">Grails controller action</a>  You can call redirect, render and other Grails controller methods as usual. The request parameters are in "params".<p class="paragraph"/><a href="https://grails.org/doc/latest/guide/theWebLayer.html#6.1%20Controllers" target="blank">WeceemDomainEvents.groovy</a><p class="paragraph"/>2. Now that you have a script to run, you need to create a Scripted Action node to respond to requests for a specific URI and run the script. When you do this, select the script you created in the "Script" field. The full repository URI of this Scripted Action content node is the URI that needs to be used in your HTML form's action attribute. You can create links to this action inside your own Widget or Template nodes using the wcm:createLink tag.<p class="paragraph"/>With the above example, the HTML form needs to supply fields "senderAddress" and "message". It will redirect the user to the value of the "success" parameter which will usually be a URI in your content repository created using the wcm:createLink tag.<p class="paragraph"/>You can write any Groovy code you like in the Groovy Script node. The possibilities are endless for example, you can call out to external web services, perform calculations, render complex results in alternative formats (e.g. JSON).<p class="paragraph"/>However, you can easily degrade the performance of your server by writing inefficient code in a Groovy Script that is executed frequently.<p class="paragraph"/>It is strongly recommended that you limit the users that can create Groovy Scripts using the Weceem Security Policy.
 
 
-<h2 id="4.EmbeddingContent">5.5 Embedding content</h2>
+<h2 id="4.EmbeddingContent">6.5 Embedding content</h2>
 In some custom applications you may want to embed some Weceem content within your own Grails GSP views. This is easily achieved for most situations using the new <strong class="bold">wcm:render</strong> tag as of release 1.1.<p class="paragraph"/>However, if you need to render content with more control over the process - e.g. using an artificial request/response to render content for use in emails, you can use the wcmRenderEngine bean.<p class="paragraph"/>This bean offers methods for rendering a specific content node.<p class="paragraph"/>You must typically pass in a request and response to use - given that most of Weceem functionality uses Grails tags and these require features of requests and responses - although you can usually also pass in your own controller instance if you have one.<p class="paragraph"/>See the source code for <a href="https://github.com/jCatalog/weceem-plugin/blob/master/src/groovy/org/weceem/content/RenderEngine.groovy" target="blank">RenderEngine on github</a> for more details.
 
 
-<h2 id="5.ExportingAndImportingContent">5.6 Exporting and importing content</h2>
+<h2 id="5.ExportingAndImportingContent">6.6 Exporting and importing content</h2>
 Each Weceem space (repository) can be individually exported and imported individually and is useful for backups or migrating content between servers or spaces.<p class="paragraph"/>For this :
 <ol>
 <li>Go to the Administration section</li>
@@ -365,7 +604,7 @@ Each Weceem space (repository) can be individually exported and imported individ
 
 
 
-<h2 id="6.HookingIntoContentEvents">5.7 Hooking into content events</h2>
+<h2 id="6.HookingIntoContentEvents">6.7 Hooking into content events</h2>
 In custom Grails applications that use Weceem plugin you may need to perform actions when certain events occur on content.<p class="paragraph"/>To do this, register a listener with the WcmEventService and implement any of the event notification methods you require.<p class="paragraph"/>First, you inject the WcmEventService using Grails dependency injection, or obtain it via the Spring ApplicationContext, and then call the "addListener" method :<p class="paragraph"/><div class="code"><pre>class MyService <span class="java&#45;keyword">implements</span> InitializingBean &#123;
     def wcmEventService<p class="paragraph"/>    void afterPropertiesSet() &#123;
         wcmEventService.addListener(<span class="java&#45;keyword">this</span>)
@@ -415,7 +654,7 @@ In custom Grails applications that use Weceem plugin you may need to perform act
 &#125;</pre></div>
 
 
-<h2 id="7.PageRendering">5.8 Page rendering</h2>
+<h2 id="7.PageRendering">6.8 Page rendering</h2>
 When a request is made to Weceem, it goes through a number of steps to produce the final content.
 <ol>
 <li> Weceem first locates the content at the URI path specified in the request</li>
@@ -425,7 +664,7 @@ When a request is made to Weceem, it goes through a number of steps to produce t
 </ol><p class="paragraph"/>Different content types may implement handleRequest differently - e.g. HTML Content first checks if the content is set to allow GSP tags to execute. If they are, it will execute the page and capture the output. The content is then passed to the template (if any) and returned to the client.<p class="paragraph"/><strong class="bold">Note :</strong> If the content supports templates and a template is not set,  Weceem will look up the content tree to see if any ancestors specify a template and will use the first one it finds.<p class="paragraph"/>In this most common case, the HTML and Template will work together and render one or more Widget nodes using &#60;wcm:widget&#62; to render common page elements like the header and footer sections.<p class="paragraph"/>Other types such as External Link will use handleRequest to issue a redirect to the browser.<p class="paragraph"/><h4> Default document handling</h4><p class="paragraph"/>Weceem supports httpd-style request URLs that end in /,  it will automatically check for a child node of the URI, with one of the default names ("index.html" or "index"), much like a regular webserver.
 
 
-<h2 id="8.IntegratingTheAuthenticationAndAuthorisationSystem">5.9 Integrating the  authenticationand authorisation system</h2>
+<h2 id="8.IntegratingTheAuthenticationAndAuthorisationSystem">6.9 Integrating the  authenticationand authorisation system</h2>
 The Weceem plugin neither provides an authentication mechanism nor depends on authentication plugins. Just wire-in whichever authentication system you want to use - e.g.  the Weceem CMS Application wires up the Weceem plugin to the Spring Security plugin for authentication and provides a simple user management UI as part of the Weceem Admin.
 Customizing Authentication<p class="paragraph"/>The WcmSecurityService class has simple methods on it that the CMS uses to get information about the current logged-in user. To customize this, just replace or modify the delegate property on the service - e.g. to plug in Acegi (note that Spring Security replaces Acegi - see below for an off the shelf solution), you would place code like this in the BootStrap of your application :<p class="paragraph"/><div class="code"><pre>def authenticateService = context.authenticateService<p class="paragraph"/>context.wcmSecurityService.securityDelegate = &#91;
 	getUserName : &#123; &#45;&#62;
@@ -466,7 +705,7 @@ Customizing Authentication<p class="paragraph"/>The WcmSecurityService class has
 &#125;</pre></div><p class="paragraph"/>This closure must return a map of data used by Spring Security to store the information about your domain class. The "it" passed to the closure is the domain class instance, so the above is returning a map with values copied from the domain class.<p class="paragraph"/><strong class="bold">Note :</strong> Only information required by Weceem is the username, password, enabled and authorities. Everything else is optional and only used by your application if you code it to do so.<p class="paragraph"/>The application remains responsible for defining the domain classes and performing the relevant Spring Security configuration to protect your URIs.<p class="paragraph"/>
 
 
-<h2 id="9.StylingWithTemplates">5.10 Styling With Templates</h2>
+<h2 id="9.StylingWithTemplates">6.10 Styling With Templates</h2>
 Templates are content nodes used to set page layouts on your site. Certain content types such as HTML and Blog, support setting a template when creating or editing nodes. If a template is not set, it is inherited from the content's ancestors.<p class="paragraph"/>Typically the template will include the head and body tags, pull in the CSS and other resources required, and provide some common layout elements.<p class="paragraph"/>They use standard Grails tags and Weceem tags to render content within the body of the page, as well as meta data about the current page e.g. dynamic titles.<p class="paragraph"/>Here's a simple example that renders a dynamic title and renders the content of the current node.<p class="paragraph"/><div class="code"><pre>&#60;html&#62;
   &#60;head&#62;
     &#60;title&#62;$&#123;page.title.encodeAsHTML()&#125;&#60;/title&#62;
@@ -639,7 +878,7 @@ Templates are content nodes used to set page layouts on your site. Certain conte
         </table>
 
         <div id="footer">
-            
+            jCatalog Software AG
             
         </div>
 
