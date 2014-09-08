@@ -7,9 +7,11 @@ Grails applications. You can create customized CMS functionality or a hybrid app
 content in production. Security is completely decoupled so that you can plug in whatever security mechanism you are
 using, and you can  customize the look and feel of the user interface to suit your application.
 
-It is now compatible with Grails 2.3.x, current released version: 1.2 [release notes](http://jira.jcatalog.com/secure/IssueNavigator.jspa?reset=true&jqlQuery=project+%3D+WCM+AND+fixVersion+%3D+%221.2%22)
+It is now compatible with *Grails 2.3.x*, current released version: *1.2* [release notes](http://jira.jcatalog.com/secure/IssueNavigator.jspa?reset=true&jqlQuery=project+%3D+WCM+AND+fixVersion+%3D+%221.2%22)
 
-For the latest updates and release information visit [Weceem site](http://weceem.org) and follow @weceem on twitter.
+For the latest updates and release information visit [Weceem site](http://weceem.org) and follow [@weceem](https://twitter.com/weceem) on twitter.
+
+Lead: Stephan Albers
 
 ## Additional information
 
