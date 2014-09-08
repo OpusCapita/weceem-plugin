@@ -1,3 +1,54 @@
+*About content*
+
+Content is ultimately what your end-users view on your site. Weceem has an extensible content system, and supplied
+content types for the most common web content.
+
+The following content types are supplied out of the box:
+
+* Action - A server-side action that will execute the code in a Groovy Script node, for example to create new content
+nodes or send an email
+* Blog - The root node of a Blog, which has Blog Entry nodes as children
+* Blog Entry - An entry (child of) a Blog node
+* Comment - A comment on a content node. Any nodes can have comments attached or created.
+* External Link - A URL of another website. When this URI is rendered, it redirects to the external site
+* Folder - A folder for grouping together content nodes and creating URI hierarchy
+* Groovy Script - A piece of Groovy code to execute on the server, used by Action nodes
+* HTML - A piece of HTML which may contain GSP (Grails Server Page) tags
+* JavaScript - A piece of JavaScript source
+* Server File - A file uploaded to the Weceem repository and stored on the server filesystem, e.g. an image file
+* Server Directory - A directory on the server filesystem which contains Server File nodes
+* Stylesheet - A CSS style sheet
+* Template - A GSP template used to layout and decorate the current content node
+* Widget - A reusable GSP fragment for rendering sections of a page, e.g. a header/footer or a remote news feed.
+
+The Template, Widget and HTML content nodes can use Weceem tags and other Grails tags to perform view rendering logic.
+Weceem's content is stored in an SQL database, not in files on the server filesystem. The exception to this rule is
+uploaded file content, which is stored "as is" in the server filesystem, with information about the files stored in the
+SQL database.
+
+When editing content, you are shown only the fields appropriate to that type of content. For example when editing
+JavaScript or CSS you see a code editor, but when editing HTML content you see a rich text editor.
+
+Developers writing their own Grails application that embeds Weceem can easily add their own new content types that have
+a great deal of flexibility allowing them to customize their behaviour in the editor and when rendered.
+
+When creating new content the currently selected repository node will become the parent. You will be asked what kind of
+content you wish to create, and then be shown the content editor for that content type.
+
+Different content types have different fields and capabilities, and the editor adapts accordingly. Most content types
+will have at least a Title and Status, an area for the main content, and the Extras, Metadata, Change history and
+Parents & Children sections.
+
+In the editor you can *Save* and return to the repository or save and continue to keep your changes but carry on
+editing. You can also *Preview* your changes in a new window without saving them, if the content is able to be rendered
+in isolation (e.g. Templates and Widgets cannot themselves be previewed).
+
+The HTML editor will present itself as a rich text editor unless you have saved it with "Allow GSP", in which case it
+will show as a code editor. Style sheets, Javascript, Templates, Widgets and Groovy code all present with a syntax
+highlighting code editor.
+
+*Create HTML page*
+
 If the user needs to create HTML page, he needs to select row in the content repository tree by clicking on it. As the
 result the row is preselected by color. The row selection means that the content will be child to selected content. Then
 at the top of *Content* tab there is a button *New Content* that offers a list of available content types to be created.

@@ -20,7 +20,7 @@ Prior to installing a new version of Weceem, always export each of your spaces t
 h4. Installing Weceem Plugin into the application
 
 To install the Weceem plugin, the dependency must be added into grails-app/conf/BuildConfig.groovy file in Grails application.
-{code}  compile ':weceem:1.2-SNAPSHOT' {code}
+{code}  compile ':weceem:1.3-SNAPSHOT' {code}
 
 The plugin should function with Grails versions 2.1 and higher.
 
@@ -28,7 +28,7 @@ Once the plugin is installed into the application, a few Grails configuration ch
 
 *Note:* When upgrading from an earlier version of the Weceem plugin, you may need to manually uninstall some older Grails plugins, if your new release of Grails does not do it automatically.
 
-*Warning!* Weceem plugin uses Searchable plugin (version 0.6.6), it requires additional maven repository _"http://repo.grails.org/grails/core"_ for getting
+*Warning!* Weceem plugin uses Searchable plugin (version 0.6.6 or higher), it requires additional maven repository _"http://repo.grails.org/grails/core"_ for getting
 dependencies. Do not forget to configure:
 
 {code}

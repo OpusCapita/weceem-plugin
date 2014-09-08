@@ -1,4 +1,18 @@
-Space editor gives the user possibility to create new Spaces or edit/delete/import/export existed one.
+Weceem supports multiple content repositories. Each repository is called a "Space" and represents a website that you
+maintain.
+
+*About spaces*
+
+A Space contains "Content" that is served to your visitors. There are many different types of Content that you can
+create and arrange in any structure you like within your Space. You can have as many spaces as you like, representing
+different sites or micro sites.
+
+Spaces are separate content graphs and are imported and exported separately for backup purposes and have a URI alias
+that defines the web address of that space within your server. You cannot normally use content from one space inside
+another.
+
+Spaces can have different access rights defined in the Weceem security policy, so the same user may have different
+permissions in different spaces.
 
 !usersGuide/spaceEditor.jpg!
 

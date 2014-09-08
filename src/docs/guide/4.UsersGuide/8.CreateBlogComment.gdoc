@@ -1,4 +1,30 @@
-There is a simple default support for blogs in Weceem. For preparing new blog, the user needs to select row in the
+Creating a blog in Weceem requires just two steps:
+
+* Create a Blog content node
+* Create a Blog Entry content node underneath (as a child of) the blog node
+
+If you are using the default styling, when you create the Blog you can set the Template to the default blog template
+supplied.
+
+Blogs in Weceem are just like any other content, and by gluing together a Template, some Widgets and some Weceem GSP
+ags, you get full blog functionality (caveat: pinging blog aggregators is not yet supported). See the examples in the
+default space template for further details.
+
+To enable comments on your blog you must edit your Weceem security policy file and allow unauthenticated users to create
+content of type org.weceem.content.WcmComment. Make sure that you do this for only that type, or
+malicious users may be able to create non-Comment content on your site!
+
+The default space template for blogs uses widgets to render a single blog entry view, or a list of the most recent
+posts, and widgets to render the comment form and list of current comments.
+
+The generic content submission mechanism of Weceem is used to submit comments by users, and the comment widget uses the
+Weceem content submission tags to set this up.
+
+The Weceem archive tags are used to render the months for which there exist child nodes of type "Comment", with links to
+view those. Finally, the widgets render the list of tags assigned to the blog entry, with links to search for other blog
+entries based on those tags.
+
+For preparing new blog, the user needs to select row in the
 content repository tree by clicking on it. As the result the row is preselected by color. The row selection means that
 the content will be child to selected content. Then at the top of *Content* tab there is a button *New Content* that
 offers a list of available content types to be created. Select the type "Blog" and press "Create" button. The new
@@ -16,6 +42,61 @@ the users will push comments to your through your site. Also you can create new 
 button "New Content" and selecting *Comment* content type.
 
 !usersGuide/createComment.jpg!
+
+*Visitor comments and submitted content*
+
+Sites often permit visitors to leave comments - be they blog comments, visitor books or comments on Wiki pages.
+
+Weceem supports a generic mechanism for visitors to create new content nodes via a form, filtered through the security
+policy.
+
+This is, for example, how the default space implements comments on blogs. A widget is used to render a form to capture
+the comment fields and submit them to Weceem's content submission controller - where they are, if the security policy
+permits that kind of content at that URI, from that (anonymous) user - saved in an "unmoderated" status.
+Creating a comment submission form
+
+To allow users to submit content, you need to provide the data from the client browser - usually with a form that the
+user completes. You will usually do this inside a Widget node so that the code can be reused:
+
+{code}
+<g:hasErrors bean="${submittedContent}">
+There were some errors on your submission, please check below
+</g:hasErrors>
+
+<wcm:submitContentForm parent="${parentContent}" type="org.weceem.content.WcmComment" success="${parentContent}">
+
+<bean:require beanName="submittedContent" className="org.weceem.content.WcmComment"/>
+<bean:field beanName="submittedContent" property="author" label="Your name"/>
+<bean:field beanName="submittedContent" property="email"/>
+<bean:input beanName="submittedContent" property="websiteUrl" label="Website URL"/>
+<bean:input beanName="submittedContent" property="title"/>
+<bean:field beanName="submittedContent" property="content" label="Your comment"/>
+<input type="submit" class="button positive" value="Send comment"/>
+
+</wcm:submitContentForm>
+{code}
+
+
+Here, three different Grails taglibs are being used to create the form:
+
+ *   g:hasErrors is a Grails tag used to detect any errors on the submittedContent data and alerts the user if so
+ *   wcm:submitContentForm creates a form that will submit content of a specific type, as set in the "type" attribute.
+ The "parent" attribute must be set to the node that will be the parent of the new content (or null for root content),
+ and the "success" attribute is the repository URI path or node that should be shown after the content has been
+ submitted - e.g. the original Blog Entry
+ *   bean:* tags are from the Grails bean-fields plugin that is provided as part of Weceem. They make it easy to render
+ sensible default fields, labels and error messages for properties of an object. In this case the object is the
+ "submittedContent" bean used by the content submission form.
+
+The form will include a link to the content submission controller. This controller will save the content if it is valid,
+or return to the existing content with the "submittedContent" object populated with the previous data and any errors
+attached. Using the bean:* tags of the Grails Bean-Fields plugin is merely a convenience, but is very useful as it will
+display the validation errors associated with each field inline in the form.
+
+If the submission succeeds - which requires the user to have permission to create that type of content under the
+specified parent in the repository - it will redirect the user to the content specified in the "success" attribute.
+
+The content will be in the "unmoderated" status, until an administrator updates the status to Published.
 
 
 

@@ -1,0 +1,33 @@
+While Templates are used for laying out a page, Widgets are used to render fragments within a page. These might be page
+content such as header/footer text or reusable code that renders a list of news items.
+
+Widgets can use the same GSP tags as Templates, which makes them very powerful. The News content on the home page of
+this site is a Widget, and the default space renders blog entries using Widgets.
+
+To render widgets inside a Template (or GSP-enabled HTML content node) you use the <wcm:widget> tag:
+
+{code}
+<html>
+  <head>
+    <wcm:widget path="widgets/resources"/>
+    <wcm:widget path="widgets/metatags"/>
+  </head>
+  <body>
+    <wcm:widget path="widgets/header"/>
+    <wcm:content/>
+    <wcm:widget path="widgets/footer"/>
+  </body>
+</html>
+{code}
+
+The above could be used as a generic template for content, pulling in your standard SEO meta tags from a "metatags"
+widget, and JS and CSS resources from a widget called "resources".
+
+The "resources" widget might look something like this:
+
+{code}
+<link rel="stylesheet" type="text/css" href="${wcm.createLink(path:'css/main.css')}"/>
+<script type="application/javascript" src="${wcm.createLink(path:'js/jquery.js')}"/>
+{code}
+
+This uses the <wcm:createLink> tag to get the full URI to the resources within the current space.

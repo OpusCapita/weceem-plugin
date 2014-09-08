@@ -1,0 +1,14 @@
+Often your site will need to present content in multiple languages. You may provide translations of your site, say in
+French and German as well as your primary language.
+
+!usersGuide/weceemLanguages.jpg!
+
+It is often the case that not only does the text differ in other languages, but images, CSS and other resources may have
+differ, and in fact due to different territory restrictions you may have very different content for each language.
+
+With this in mind, the recommended way to achieve this in Weceem is to create a Folder node for each language you
+support, and add the translated content under those folder nodes. For content that is the same as the primary language,
+you could create Virtual Content nodes to "defer" to the original primary content.
+
+To give your users access to this content, you simply add some links or a selection box to your page templates - so they
+click on the language they want and it takes them to the content for that language.

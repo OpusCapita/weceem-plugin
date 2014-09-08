@@ -1,0 +1,19 @@
+There are two ways to upload files to your Weceem content repository.
+
+*Creating Server File nodes*
+
+!usersGuide/createServerFile.jpg!
+
+When you create a Server File node in the repository, it will be uploaded from the Weceem editor into the server
+directory allocated to the space, at a path defined by the Alias URIs of its ancestor Server Directory nodes.
+
+Once the file has been uploaded it cannot be changed - the node can be deleted and the file will also be deleted.
+
+You link to server file nodes in the same way as you do any other content, using the wcm.createLink or wcm.link tags.
+
+*Uploading while editing HTML content*
+
+You can also upload files - most likely images - using the file uploader in the rich HTML editor when editing a HTML
+content node. It is important to note that all such files are uploaded to a */Image* folder under your space's server
+folder. Server File nodes will not automatically be created for these, and they are not needed - unless you use the
+"Synchronize Files" option in the Administration section of Weceem.

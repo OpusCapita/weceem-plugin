@@ -1,0 +1,12 @@
+You can expose RSS/Atom feeds of any list of child nodes in your repository with a simple tag, wcm:feedLink.
+
+This tag will create the correct <meta> tag in the HEAD section of your HTML so that any RSS readers that request the
+feed will get a list of nodes in reverse date order:
+
+{code}
+<head>
+<wcm:feedLink type="rss" path="${node}"/>
+</head>
+{code}
+
+This would add a feed for the children of the current page. For full details see *Tags* section.

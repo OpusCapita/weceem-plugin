@@ -1,0 +1,38 @@
+Weceem is built with Grails which provides a technology called Groovy Server Pages. In essence, it allows you to embed
+special tags in the content to perform special functions or logic. Some content types in Weceem (Template, Widget and
+HTML) support the use of these tags to provide advanced features.
+
+To users of JSP (Java Server Pages) this will be a familiar concept.
+
+These custom tags or "GSP tags" as they are called, use the XML namespacing syntax:
+
+Search:
+{code}
+<wcm:search/>
+{code}
+
+The "wcm:" prefix is the Weceem tag namespace. This tells you it is a Weceem-specific tag you are using. Grails provides
+its own "g:" namespace for basic built-in functions like link creation, iteration over items in a list and so on.
+
+Attributes can be passed to these tags as you would with HTML, with the addition of a Groovy-based "Expression Language"
+(EL) that lets you pass around variables that are available to the page or execute small pieces of code to perform
+calculations. These are put inside a dollar and brace syntax "${...}":
+
+{code}
+<g:each in="${node.lineage}">
+${node.title.encodeAsHTML()}<br/>
+</g:each>
+{code}
+
+The above would iterate over every item in the "lineage" property of the "node" object. The "node" object represents the
+current content node being rendered. See the reference section on page variables for more details of the available
+objects.
+
+You will see here also that the EL can be used outside of tag attributes, to render information into the page output.
+As a side-note, the encodeAsHTML() method called in that example escapes the resulting title text so that it is safe for
+inclusion in HTML output (it escapes special characters to HTML entities). This encodeAs functionality is provided by Grails.
+
+Using these features you can code your Template and Widget nodes to perform all kinds of powerful functions, from
+listing child nodes of the current page, to generating RSS feeds. See the Weceem tag reference for full details.
+
+

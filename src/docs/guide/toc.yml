@@ -28,10 +28,18 @@
   19.StatusPublishing: Statuses, Publishing and Unpublishing by date
   20.Search: Search in Weceem
   21.DragAndDrop: Operations with content repository tree
+  22.TagsAndJspContent: Tags and JSP content
+  23.ReusingCodeWithWidgets: Reusing code and page fragments with Widgets
+  24.UsingImagesInHtml: Using images in HTML content
+  25.UploadingAndLinking: Uploading and linking to files
+  26.ControllingAccess: Controlling who can see content and when
+  27.MultiLanguageSite: Creating sites with content in different languages
+  28.PerformanceAndCache: Site performance and caching content
+  29.PublishingFeeds: Publishing Feeds
 5.WeceemSecuritPolicy:
   title: Weceem security policy
 customization:
-  title: Customization
+  title: Developer Guide
   0.HookingIntoTheAdminInterface: Hooking into the Admin interface
   1.CreateCustomContentTypes: Create custom content types
   2.CustomContentEditors: Custom content editors

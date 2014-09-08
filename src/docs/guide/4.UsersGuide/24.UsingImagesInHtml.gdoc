@@ -1,0 +1,15 @@
+To insert images into HTML content, you use the image icon on the rich text editor's toolbar.
+
+This will allow you to:
+
+* upload a new image
+* use one that has been uploaded already
+* insert a URL to an image on the web
+
+!usersGuide/imgEditor.jpg!
+
+When using the option to upload or browse the images on the server, the files will be located in the "/Image" folder on
+your server (<weceem-application-path>/WeceemFiles/<space-alias>/Image).
+
+If you have uploaded files as Server File nodes, if you did not put them inside the /Image folder then they will not be
+visible to the FCK file editor browser, but you can still link to them by entering in their full or relative URI.

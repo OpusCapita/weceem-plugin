@@ -1,10 +1,26 @@
-The full text search is available in Weceem by default. It is provided by using Searchable plugin , that is built on
-Compass (http://www.compass-project.org/) and Lucene (http://lucene.apache.org/).
+Weceem has full-text search support for visitors using your site.
 
-The component provides search for specified content types. Please check *Tags* section for more information.
+All of your content is automatically indexed as appropriate, all you need to do is add a way for them to start a search,
+and customise the display of the search results.
+
+To add a default search field, you can use the wcm:search tag:
 
 {code}
-  <wcm:search types="org.weceem.html.WcmHTMLContent,org.weceem.blog.WcmBlogEntry,org.weceem.content.WcmComment"/>
+<wcm:search types="org.weceem.html.WcmHTMLContent,
+     org.weceem.blog.WcmBlogEntry,org.weceem.content.WcmComment"/>
 {code}
+
+This single tag creates the search field and button, which you can style with standard CSS. The "types" attribute is
+used to limit the types of content that can be returned by the search. You usually don't want your Widgets, CSS or
+JavaScript code coming back in search results! This also means you can have different searches on your side, for
+different kinds of content, including custom content types. For example you may have a custom ProductInformation
+content type and want to add a product-only search feature for users.
+
+Other attributes of this tag allow you to control the parent URI to use as the context for the search, and the content
+path for the results path which will render the search results. For full details see the wcm:search tag page.
+
+You can also create a completely customized search form and use wcm:searchLink to create the appropriate link to invoke
+the search for the types and other attributes you specify.
+
 
 

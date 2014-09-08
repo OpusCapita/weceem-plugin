@@ -1,3 +1,17 @@
+To edit or create content, view the content repository or perform any administrative functions you must first log in to
+Weceem.
+
+!usersGuide/login.jpg!
+
+You can do this by browsing to <yourserver-url>/admin if you are using the standalone Weceem WAR. Here you will be
+prompted for your user name and password. By default new installations have a single "admin" account with password
+"admin". You must change this password, and you can do so in the Administration section.
+Logging in to your own application that uses Weceem plugin
+
+Normally this will be a case of browsing to <yourserver-url>/admin but your application may have configured weceem to
+use a different URL mappings such as /wcm/admin. You need to look at your application's configuration if /admin does not
+work for you.
+
 Weceem contains administrative UI for users that have access to creating new content and managing existed sources.
 In your weceem.properties file or in Config.groovy file the user can customize URL that leads to admin UI. By default
 the mapping *"wcm/admin"* will be used.
@@ -6,12 +20,30 @@ Admin UI consists of two tabs: "Content" and "Administration".
 
 *Content tab*
 
-At the top of the Content tab there is a panel with action buttons and settings. Action buttons *New Content* and
-*More Actions* contain list of operations that can be done on stored contents. The setting list *Space* gives the user
-possibility to select Space for editing. As far as the user change Space in list, the contents from selected Space should
-be listed in content repository tree below.
+The content repository is the main user interface for Weceem.
 
 !usersGuide/contentAdminUI.jpg!
+
+What you see in the repository is the tree of content for the currently selected space. You can switch spaces using the
+space selector box.
+
+Each row in the table represents one of your content nodes. You can do the following things with rows:
+
+* To select a node, you click its row (but not the icon).
+* To drag a node to a new location in the tree, you drag the content's icon
+* To edit the content you click the title of the content
+
+With a row selected, it will be highlighted and when you click the "New Content" or "More Actions" button the operation
+will be performed on the selected node. So when a node is selected and you choose "New Content", the new content will be
+a child of the node you selected in the repository.
+
+To deselect a row - so that you can create new content at the root of the repository - you just click the row again.
+
+You can also search for content using the search box. The results can be further filtered by content type and date, and
+sorted by clicking the column headers.
+
+
+
 
 *Administration tab*
 

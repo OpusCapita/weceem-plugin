@@ -1,4 +1,9 @@
-The editor gives possibility to manage CMS user: enable user, give/change auhorities, update password and other user
-information such as First Name, Last Name, Email.
+To create, edit or manage the content repository, users must be able to log in to the CMS.
+
+When using the Weceem Application, a simple user management system is provided.
+
+To access this, log in as administrator and go to the Administration section and then select Users. From there you can
+create and edit users.
 
 !usersGuide/users.jpg!
+

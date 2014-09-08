@@ -1,0 +1,30 @@
+With Weceem you can restrict who can view your content by user role, as well as the date period during which the content
+is available.
+
+*Automatic publishing and removal of content*
+
+Every type of content has a Status, a Publish From and a Publish Until field. Together these work to provide a simple
+automatic publishing workflow.
+
+*Writing content for automatic publishing later*
+
+To write content today but have it available to view only at some point in the future you just do the following:
+
+ *   Set the status of the content to Draft, Approved or some other non-"published" status (apart from Archived!)
+ *   Set a value in the Publish From field in the "Extras" section of the editor
+
+Once saved, Weceem will automatically publish your content when the time has passed (within a minute or so of the time)
+by moving it into the Published status.
+
+*Writing content that disappears after a certain date and time*
+
+To perform the opposite - automatic removal of public content - you simply set the Publish Until date and time on your
+content. When this time has passed, the content will be put into the "Archived" status which is not visible to the
+public. You will still be able to view the content in the repository.
+
+*Restricting access by user*
+
+To limit the content that different users can view, you need to edit your Weceem security policy file. 
+
+All that is required is that you grant the "view" permission only on the URIs and content types that you wish the user
+role to be able to see.

@@ -1,6 +1,37 @@
-It is possible to prepare CSS Stylesheets and JavaScript Sources as a content nodes. At the top of *Content* tab there
-is a button *New Content* that offers a list of available content types to be created. Select the type "CSS Stylesheets"
-or "JavaScript Sources" and press "Create" button. The simple content editor should be shown to the user.
+There are two ways to create JavaScript and CSS resources in Weceem.
+
+You can upload JS and CSS files to "Server File" content nodes, or you create JavaScript and Stylesheet nodes and edit
+the files directly in Weceem.
+
+Whichever approach you choose, you include these files in your Template or Widget nodes something like this:
+
+{code}
+<html>
+<head>
+<link rel="stylesheet" href="${wcm.createLink(path:'css/main.css')}"/>
+<script type="text/javascript" src="${wcm.createLink(path:'js/main.js')}"></script>
+</head>
+...
+</html>
+{code}
+
+Here we just use the wcm.createLink tag to get the URL to the content nodes. Whether you used Server File or
+Stylesheet/JavaScript nodes for these files, this will produce the correct URL if the "path" value points to the
+correct nodes. Note that the Alias URI of the nodes should include the file extension although it does not have to.
+Some older browsers may require the file extension for correctly identifying the content type.
+
+You can of course place these files anywhere in your repository as long as you use the correct content path URI.
+
+Note that if your CSS files need to reference external resources like images, you will need to make sure the links make
+sense in relation to the content repository. Relative links will work for Server File nodes, which must be under a
+Server Directory node. However a Server Directory node cannot have StyleSheet or JavaScript child nodes, so usually if
+you need to link to relative images from a stylesheet, you will need to upload it as a Server File instead of a
+StyleSheet node. That is, unless you have a Server Directory node that is a sibling to the StyleSheet node, and you
+place your images under there.
+
+At the top of *Content* tab there is a button *New Content* that offers a list of available content types to be created.
+Select the type "CSS Stylesheets" or "JavaScript Sources" and press "Create" button. The simple content editor should be
+shown to the user.
 
 !usersGuide/createCss.jpg!
 
