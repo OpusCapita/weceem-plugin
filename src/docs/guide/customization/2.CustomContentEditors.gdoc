@@ -6,29 +6,31 @@ h4.  Content Editors
 
 Weceem has quite a few editors that are available to edit all the predefined content type properties.
 
-|_. Editor Field Name |_. Description |
-| String | for single-line strings |
-| LongString | for multi-line strings |
-| Integer | for whole numbers |
-| Boolean | for boolean fields |
-| Date | for dates, includes datepicker and HH and MM fields |
-| Title | uses a larger font for editing the title |
-| Tags | UI for displaying and add/remove tags via ajax | 
-| ContentFileUpload | renders a file upload field or file information if already uploaded |
-| RichHTML | HTML editing with rich editor |
-| HTMLContent | HTML content editor that checks allowGSP property on content and switches between RichHTML and HtmlCode as appropriate |
-| HtmlCode | Code editor with highlighting for HTML |
-| JSCode | Code editor with highlighting for JavaScript |
-| GroovyCode | Code editor with highlighting for Groovy code |
-|CSSCode | Code editor with highlighting for CSS code |
-| LanguageList | a language selection drop-down list |
-| WcmScript | For selecting any WcmScript node in the current space |
-| WcmStatus | For selecting any WcmStatus instance |
-|WcmTemplate | For selecting any WcmTemplate instance in the current space |
-| WcmSpace | For selecting a Space |
-| ReadOnly | a text-only rendering of the value with no editing capability |
-| ReadOnlyURI | a text-only URI value, using URL encoding of restricted chars |
-| ReadOnlyDate | a read-only display of a date |
+{table}
+ *Editor Field Name* | *Description*
+ String | for single-line strings
+ LongString | for multi-line strings
+ Integer | for whole numbers
+ Boolean | for boolean fields
+ Date | for dates, includes datepicker and HH and MM fields
+ Title | uses a larger font for editing the title
+ Tags | UI for displaying and add/remove tags via ajax
+ ContentFileUpload | renders a file upload field or file information if already uploaded
+ RichHTML | HTML editing with rich editor
+ HTMLContent | HTML content editor that checks allowGSP property on content and switches between RichHTML and HtmlCode as appropriate
+ HtmlCode | Code editor with highlighting for HTML
+ JSCode | Code editor with highlighting for JavaScript
+ GroovyCode | Code editor with highlighting for Groovy code
+ CSSCode | Code editor with highlighting for CSS code
+ LanguageList | a language selection drop-down list
+ WcmScript | For selecting any WcmScript node in the current space
+ WcmStatus | For selecting any WcmStatus instance
+ WcmTemplate | For selecting any WcmTemplate instance in the current space
+ WcmSpace | For selecting a Space
+ ReadOnly | a text-only rendering of the value with no editing capability
+ ReadOnlyURI | a text-only URI value, using URL encoding of restricted chars
+ ReadOnlyDate | a read-only display of a date
+{table}
 
 h4.  Writing your own content editor
 

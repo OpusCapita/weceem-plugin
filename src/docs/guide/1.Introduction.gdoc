@@ -1,24 +1,34 @@
 h3.  Weceem CMS Grails Plugin
 
-Weceem is an open source Content Management System. It is written in Groovy and Grails and leverages the Grails infrastructure to a build customized CMS inside the Grails application.
+Weceem is an open source Content Management System. It is written in Groovy and Grails and leverages the Grails
+infrastructure to a build customized CMS inside the Grails application.
 
-It can be used to manage content, and create desired content types for custom functionality which can be integrated with existing systems.
+It can be used to manage content, and create desired content types for custom functionality which can be integrated
+with existing systems.
 
-With the Weceem plugin you can host corporate websites, simple blogs, search the site, SEO or build your own applications. You can define your own content types that add custom functionality or integrate tightly with existing systems you have.
+With the Weceem plugin you can host corporate websites, simple blogs, search the site, SEO or build your own
+applications. You can define your own content types that add custom functionality or integrate tightly with existing
+systems you have.
 
-There are numerous customization points that allow you to tailor the security mechanisms, administration skin, URL paths, scope for custom data types and server-side scripting using Groovy. It is built from the ground up to be embeddable as well as a standalone application.
+There are numerous customization points that allow you to tailor the security mechanisms, administration skin, URL
+paths, scope for custom data types and server-side scripting using Groovy. It is built from the ground up to be
+embeddable as well as a standalone application.
 
-The plugin supports multiple content repositories. Each repository is called a "Space" and represents a website that you maintain.
+The plugin supports multiple content repositories. Each repository is called a "Space" and represents a website that
+you maintain.
 
-*Spaces* are used to map and track content exchanges.  They can have multiple access rights defined in the Weceem security policy, hence one user can have permission or rights for different spaces.
+*Spaces* are used to map and track content exchanges. They can have multiple access rights defined in the Weceem
+security policy, hence one user can have permission or rights for different spaces.
 
-*Content* is created for the visitors of your website. Different types of content can be created and arranged in any desired structure within a Space
+*Content* is created for the visitors of your website. Different types of content can be created and arranged in any
+desired structure within a Space
 
 All you need for Weceem is an SQL database for storing content, a Java servlet container like Tomcat or Jetty to run.
 
-Weceem's content is stored in a SQL database and not in files on the server filesystem. Uploaded file content is stored on the server filesystem and information about the file stored in the SQL database.
+Weceem's content is stored in a SQL database and not in files on the server filesystem. Uploaded file content is stored
+on the server filesystem and information about the file stored in the SQL database.
 
-Current version of Weceem plugin is compatible with Grails 2.3
+Current version of Weceem plugin (Weceem-1.2) is compatible with Grails 2.3
 
 *Feature Highlights*
 
@@ -33,6 +43,6 @@ Current version of Weceem plugin is compatible with Grails 2.3
 * Tagging
 * Auto-publish and auto-unpublish by date
 * Spaces: manage many sites in a single Weceem instance with per-space permissions
-* Content types include: HTML, Folder, JavaScript, CSS, Files, Blog, Comment, External Link, Groovy Scripts and Actions
+* Content types include: HTML, Folder, JavaScript, CSS, Files, Blog, Comment, External Link, Virtual Content, Wiki Pages, Groovy Scripts and Actions
 * Extensible using Java, Groovy and Grails
 * No design or SEO restrictions

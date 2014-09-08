@@ -42,7 +42,7 @@ Here you'd set the content dependencies of the widget to:
 
 news-articles/**
 
-This way, any template that depends on this news widget, will also depen on the news articles, and hence everything
+This way, any template that depends on this news widget, will also depend on the news articles, and hence everything
 invalidates as appropriate.
 
 NOTE: some content types are smart and add some implicit dependencies. For example Blog automatically depends on its
@@ -64,7 +64,7 @@ of your site for users.
 
 Note that if a user uses the "refresh" button in their browser, they will always get the newest content.
 
-*User-specific conten*
+*User-specific content*
 
 In some cases you may use Weceem's advanced scripting and widget features to present user-specific information. This
 typically uses the HTTP session to store user information, such as the contents of a shopping cart, or their user ID.

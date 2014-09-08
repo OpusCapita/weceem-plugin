@@ -1,5 +1,6 @@
 The Weceem plugin neither provides an authentication mechanism nor depends on authentication plugins. Just wire-in whichever authentication system you want to use - e.g.  the Weceem CMS Application wires up the Weceem plugin to the Spring Security plugin for authentication and provides a simple user management UI as part of the Weceem Admin.
-Customizing Authentication
+
+*Customizing Authentication*
 
 The WcmSecurityService class has simple methods on it that the CMS uses to get information about the current logged-in user. To customize this, just replace or modify the delegate property on the service - e.g. to plug in Acegi (note that Spring Security replaces Acegi - see below for an off the shelf solution), you would place code like this in the BootStrap of your application :
 
