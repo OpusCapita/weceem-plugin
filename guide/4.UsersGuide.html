@@ -39,7 +39,7 @@ function addJsClass() {
                     <div class="toc-item" style="margin-left:0"><a href="../guide/5.WeceemSecuritPolicy.html"><strong>5</strong><span>Weceem security policy</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../guide/customization.html"><strong>6</strong><span>Customization</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/customization.html"><strong>6</strong><span>Developer Guide</span></a>
                     </div>
                     
                 </div>
@@ -251,9 +251,8 @@ The feature you selected is not quite ready. Please view the Weceem.org roadmap 
 
 
 <h2 id="6.Users">4.7 CMS User management</h2>
-The editor gives possibility to manage CMS user: enable user, give/change auhorities, update password and other user
-information such as First Name, Last Name, Email.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/users.jpg"></img>
-
+To create, edit or manage the content repository, users must be able to log in to the CMS.<p class="paragraph"/>When using the Weceem Application, a simple user management system is provided.<p class="paragraph"/>To access this, log in as administrator and go to the Administration section and then select Users. From there you can
+create and edit users.<p class="paragraph"/><img border="0" class="center" src="../img/usersGuide/users.jpg"></img><p class="paragraph"/>
 
 
 <h2 id="7.CreateHtml">4.8 Create HTML pages</h2>
@@ -578,7 +577,7 @@ whether content contains user-specific information (which means that a different
 comma-delimited list of URIs on which the content node depends. By dependency we mean that this content's visual
 representation may change if any of these nodes are changed.<p class="paragraph"/>Wild cards of the form /<strong class="bold"></strong> are supported, to represent any dependents.<p class="paragraph"/>There is however no need to specify dependency on the content Template, because this is handled automatically for you.<p class="paragraph"/>For example a Template used for your entire site may render widgets for header and footer. If you want all content that
 uses this template to become invalidated if the header or footer change, you would set the content dependencies to e.g:<p class="paragraph"/>widget/header, widget/footer<p class="paragraph"/>If you had a dependency on a lot of widgets, you could simplify this with the wildcard:<p class="paragraph"/>widget/<strong class="bold"></strong><p class="paragraph"/>Another example is a News widget that uses wcm:eachChild to iterate over the news article nodes at URI "news-articles".
-Here you'd set the content dependencies of the widget to:<p class="paragraph"/>news-articles/<strong class="bold"></strong><p class="paragraph"/>This way, any template that depends on this news widget, will also depen on the news articles, and hence everything
+Here you'd set the content dependencies of the widget to:<p class="paragraph"/>news-articles/<strong class="bold"></strong><p class="paragraph"/>This way, any template that depends on this news widget, will also depend on the news articles, and hence everything
 invalidates as appropriate.<p class="paragraph"/>NOTE: some content types are smart and add some implicit dependencies. For example Blog automatically depends on its
 BlogEntry children. This is required because a Blog page normally lists its child nodes, and needs to update if new
 entries are added.<p class="paragraph"/><strong class="bold">Controlling how long a browser may keep a cached page</strong><p class="paragraph"/>Aside from the dependencies, you can tell the browser how long to wait before checking for new content. For example if
@@ -586,7 +585,7 @@ you know that usually you don't post more than one news article per day, and tha
 someone not seeing the very latest, you can tell Weceem this.<p class="paragraph"/>Each content node has a setting labelled "Is updated" in Advanced. Here you can select how often the node is likely to
 be updated. If you never want it to be cached you can set this to "All the time". If you know that the content is
 unlikely to change you can set it to something like "Weekly" or "Never"<p class="paragraph"/>Doing this reduces the requests made to your server - saving you CPU time and bandwidth, and improving the response time
-of your site for users.<p class="paragraph"/>Note that if a user uses the "refresh" button in their browser, they will always get the newest content.<p class="paragraph"/><strong class="bold">User-specific conten</strong><p class="paragraph"/>In some cases you may use Weceem's advanced scripting and widget features to present user-specific information. This
+of your site for users.<p class="paragraph"/>Note that if a user uses the "refresh" button in their browser, they will always get the newest content.<p class="paragraph"/><strong class="bold">User-specific content</strong><p class="paragraph"/>In some cases you may use Weceem's advanced scripting and widget features to present user-specific information. This
 typically uses the HTTP session to store user information, such as the contents of a shopping cart, or their user ID.<p class="paragraph"/>By ticking the "User specific content" option (available on Template nodes only in 1.0), you can instruct Weceem to
 allow the client to use cached content but still update if that user's rendering of the content will have changed.<p class="paragraph"/>When checked, this option forces Weceem to create a user-specific ETag for the content using that template. This is done
 by monitoring the HTTP session for changes. Any changes to the HTTP session result in a new ETag for pages using
