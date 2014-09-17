@@ -884,6 +884,10 @@ class WcmContentRepositoryService implements InitializingBean {
                         }
                     }
                 }
+
+                if (!saved) {
+                    result = false
+                }
             }
             
             if (result) {
