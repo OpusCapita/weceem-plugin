@@ -5,22 +5,38 @@
   </head>
 
   <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12 col-xs-12">
+          <h1>Delete Space "${space.name.encodeAsHTML()}"?</h1>
+        </div>
+      </div>
 
-    <div class="body">
-      <h1>Delete Space "${space.name.encodeAsHTML()}"?</h1>
 
       <g:if test="${flash.message}">
-        <div class="message">${flash.message}</div>
+        <div class="row">
+          <div class="col-md-12 col-xs-12">
+            <div class="message">${flash.message}</div>
+          </div>
+        </div>
       </g:if>
       <g:hasErrors bean="${space}">
-        <div class="errors">
-          <g:renderErrors bean="${space}" as="list"/>
+        <div class="row">
+          <div class="col-md-12 col-xs-12">
+            <div class="errors">
+              <g:renderErrors bean="${space}" as="list"/>
+            </div>
+          </div>
         </div>
       </g:hasErrors>
 
-      <p>Do you really want to delete the space "${space.name.encodeAsHTML()}"? This will destroy all content in the space. There is no undo.</p>
-      <g:link action="delete" class="button ui-corner-all" id="${space.id}"><g:message code="command.confirm.delete"/></g:link>
-      <g:link action="list" class="button ui-corner-all" id="${space.id}"><g:message code="command.cancel"/></g:link>
+      <div class="row">
+        <div class="col-md-12 col-xs-12">
+          <p>Do you really want to delete the space "${space.name.encodeAsHTML()}"? This will destroy all content in the space. There is no undo.</p>
+          <g:link action="delete" class="button" id="${space.id}"><g:message code="command.confirm.delete"/></g:link>
+          <g:link action="list" class="button" id="${space.id}"><g:message code="command.cancel"/></g:link>
+        </div>
+      </div>
     </div>
   </body>
 </html>

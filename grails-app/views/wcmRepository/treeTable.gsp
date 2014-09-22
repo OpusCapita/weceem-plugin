@@ -8,26 +8,6 @@
 	<link href="${g.resource(plugin:'weceem', dir: '_weceem/js/treeTable/stylesheets', file:'jquery.treeTable.css')}" rel="stylesheet" type="text/css" />
 	<link href="${g.resource(plugin:'weceem', dir: '_weceem/css', file:'contentRepository.css')}" rel="stylesheet" type="text/css" />
 
-<style type="text/css">
-	td span.ui-icon { display: inline;}
-	th {text-align: left}
-	span.ui-icon-circle-triangle-e { float: left; margin-left: -2.6em; }
-	.nodeinfo { font-size: 85%;}
-	.nodeinfoDialog { display:none;}
-	span.ui-icon-info { float: left; margin-right: 0.8em; }
-	span.ui-icon-circle-plus { float: left; margin-right: 0.5em; }
-	span.ui-icon-circle-minus { float: left; }
-	a:hover { text-decoration: underline;}
-	ul.childList { font-size: 1em}
-	.ui-state-highlight { height: 1.5em; line-height: 1.2em; }
-
-    h2.title + span.type { margin-left: 10px;}
-    
-    #repository-toolbar label { display:inline; padding-right: 4px; }
-    #repository-searchbox { text-align: right; }
-
-    .ui-dialog .ui-dialog-buttonpane button { float: left; }
-</style>
 <script type="text/javascript">
 
 var resources = {};
@@ -62,18 +42,26 @@ $(function(){
 </script>
 </head>
 <body>
-
-    <div class="span-24 last">
-        <div class="container" id="repository-toolbar">
-            <div class="span-12"><g:render plugin="weceem" template="repository-buttons"/></div>
-            <div class="span-6"><label><g:message code="space.label.space" default="Space:"/></label><g:select id="spaceSelector" name="space" from="${spaces}"
+  <div class="container" id="repository-toolbar">
+    <div class="row">
+      <div class="col-md-4 col-xs-4">
+        <g:render plugin="weceem" template="repository-buttons"/>
+      </div>
+      <div class="col-md-4 col-xs-4" style="margin-top: 10px;">
+        <label><g:message code="space.label.space" default="Space:"/></label>
+         <g:select id="spaceSelector" name="space" from="${spaces}"
 				 optionKey="id" optionValue="name" onchange="changeSpace()" value="${space.id}"/>
-    		</div>
-    		<div class="span-6 last" id="repository-searchbox">
-		        <span id="search_btn" class="sbox_l"></span><span class="sbox"><input type="text" name="data" id="data" /></span><span id="clear_btn" class="sbox_r"></span>
-            </div>
-            <form controller="wcmRepository">
-            	<div id="advSearch" style="display:none" class="span-24 last"> 
+      </div>
+      <div class="col-md-4 col-xs-4" id="repository-searchbox"  style="margin-top: 10px;">
+        <span id="search_btn" class="sbox_l"></span>
+        <span class="sbox"><input type="text" name="data" id="data" /></span>
+        <span id="clear_btn" class="sbox_r"></span>
+      </div>
+    </div>
+
+    <div class="row">
+         <form controller="wcmRepository">
+            	<div id="advSearch" style="display:none" class="col-md-12">
             			You can filter results by type: <select id="classFilter">
                                                     	    <option value="none">All</option>
                                                     	    <g:each in="${grailsApplication.domainClasses.findAll{org.weceem.content.WcmContent.isAssignableFrom(it.clazz) && (it.clazz != org.weceem.content.WcmContent)}.sort({a,b->a.name.compareTo(b.name)})}">
@@ -84,9 +72,11 @@ $(function(){
             			and date <g:select name="fieldFilter" id="fieldFilter" from="[[id:'createdOn', value:'created'], [id:'changedOn', value:'changed']]"  optionKey="id" optionValue="value"/> from <input id="fromDate" type="text"/> to <input id="toDate" type="text"/>
             	</div>
             </form>
-            </div>
+    </div>
 
-            <div id="treeDiv">
+    <div class="row">
+
+      <div id="treeDiv" class="col-md-12 col-xs-12">
               <div class="table treeTable">
                   <div id="insert-marker"  class="ui-helper-hidden">
                       <img src="${g.resource(plugin:'weceem', dir:'_weceem/images/weceem', file:'inserter.gif')}"/>
@@ -110,11 +100,18 @@ $(function(){
                   </tbody>
                 </table>
              </div>
-            </div>
-            <div class="span-24 last"><g:render plugin="weceem" template="repository-buttons"/></div>
-            
-            <div id="searchDiv" style="display: none">
-                <div class="table">
+      </div>
+    </div>
+
+    <div class="row margin-top-15">
+      <div class="col-md-12 col-xs-12">
+        <g:render plugin="weceem" template="repository-buttons"/>
+      </div>
+    </div>
+
+    <div id="searchDiv" style="display: none" class="row">
+
+             <div class="table col-md-12 col-xs-12">
                     <table class="treeTable">
                         <thead style="border-spacing: 10px 10px">
                           <tr>
@@ -128,8 +125,8 @@ $(function(){
                         </tbody>
                     </table>
                 </div>
-            </div>
-         </div>
+    </div>
+  </div>
 
 <div id="createNewDialog" class="ui-helper-hidden" title="${message(code:'content.title.create', encodeAs:"HTML")}">
     <g:form controller="wcmEditor" action="create" method="GET">

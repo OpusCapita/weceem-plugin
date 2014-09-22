@@ -18,13 +18,17 @@
     <title><g:layoutTitle default="Weceem"/></title>
 
     <link rel="shortcut icon" href="${g.resource(plugin:'weceem', dir:'_weceem/images/favicon.ico')}"/>
+
+    <!-- Including Bootstrap resources -->
+    <link rel="stylesheet" href="${g.resource(plugin:'twitter-bootstrap', dir: 'css',file:'bootstrap.min.css')}"/>
+    <link rel="stylesheet" href="${g.resource(plugin:'twitter-bootstrap', dir: 'css',file:'bootstrap-theme.min.css')}"/>
+
     <nav:resources/>
     <g:javascript library="jquery" plugin="jquery"/>
     <plugin:isAvailable name="resources">
         <r:layoutResources/>
     </plugin:isAvailable>
 
-    <blueprint:resources plugins="buttons"/>
 
     <jqui:resources themeCss="${g.resource(dir:'_weceem/jquery-ui/themes/cupertino', file:'jquery-ui-1.8.4.custom.css', plugin:'weceem')}"/>
 
@@ -34,7 +38,6 @@
     <link rel="stylesheet" href="${g.resource(plugin:'weceem', dir: '_weceem/css',file:'admin.css')}"/>
     <link rel="stylesheet" href="${g.resource(plugin:'weceem', dir: '_weceem/css',file:'admin-theme.css')}"/>
 	<link rel="stylesheet" href="${g.resource(plugin:'weceem', dir: '_weceem/css',file:'weceem.css')}"/>
-
     <g:layoutHead/>
 
   </head>
@@ -43,13 +46,21 @@
   
   <div class="container">
     <g:if test="${!params.externalCall}">
+      <div class="row">
         <g:render plugin="weceem" template="/layouts/main/header"/>
+      </div>
     </g:if>
-  
-    <g:layoutBody/>
-    
+
+    <div class="row">
+      <g:layoutBody/>
+    </div>
+
     <g:if test="${!params.externalCall}">
-        <g:render plugin="weceem" template="/layouts/main/footer"/>
+      <div class="row">
+        <div class="col-md-12 col-xs-12">
+          <g:render plugin="weceem" template="/layouts/main/footer"/>
+        </div>
+      </div>
     </g:if>
   </div>
   

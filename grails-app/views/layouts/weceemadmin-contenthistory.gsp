@@ -18,6 +18,11 @@
     <title><g:layoutTitle default="Weceem"/></title>
 
     <link rel="shortcut icon" href="${g.resource(plugin:'weceem', dir:'_weceem/images/favicon.ico')}"/>
+
+    <!-- Including Bootstrap resources -->
+    <link rel="stylesheet" href="${g.resource(plugin:'twitter-bootstrap', dir: 'css',file:'bootstrap.min.css')}"/>
+    <link rel="stylesheet" href="${g.resource(plugin:'twitter-bootstrap', dir: 'css',file:'bootstrap-theme.min.css')}"/>
+
     <nav:resources/>
     <g:javascript library="jquery" plugin="jquery"/>
 
@@ -26,8 +31,6 @@
     </plugin:isAvailable>
 
     <jqui:resources themeCss="${g.resource(dir:'_weceem/jquery-ui/themes/cupertino', file:'jquery-ui-1.8.4.custom.css', plugin:'weceem')}"/>
-    <blueprint:resources plugins="buttons"/>
-
 	<link href="${g.resource(plugin:'weceem', dir:'_weceem/js/fg-menu', file:'fg.menu.css')}" rel="stylesheet" type="text/css" />
 	<script type="text/javascript" src="${g.resource(plugin:'weceem', dir: '_weceem/js/fg-menu', file:'fg.menu.js')}"></script>
 

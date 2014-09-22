@@ -65,6 +65,25 @@ By default, Grails applications are configured to use value 'html' - legacy sett
 
 {code} grails.views.default.codec="none" {code}
 
+*Important*: If you have additional configurations for GSP codecs, take into account the configuration for scriplets and expressions, they should be switched to 'none' :
+{code}
+// GSP settings
+grails {
+    views {
+        gsp {
+                ...
+            codecs {
+                ...
+                expression = 'none'
+                scriptlet = 'none' // escapes output from scriptlets in GSPs
+                ...
+            }
+        }
+    }
+}
+
+{code}
+
 h4. Be attentive with Resources plugin!
 
 Uninstall the `Resources` plugin or keep it but set

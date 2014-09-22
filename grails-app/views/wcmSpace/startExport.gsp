@@ -6,11 +6,19 @@
   </head>
 
   <body>
-    <div class="body">
-      <h1><g:message code="space.title.export" args="[space.name]"/></h1>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12 col-xs-12">
+          <h1><g:message code="space.title.export" args="[space.name]"/></h1>
+        </div>
+      </div>
 
       <br/><br/>
-      <div><g:message code="message.export.downloading"/></div>
+      <div class="row">
+        <div class="col-md-12 col-xs-12">
+          <div><g:message code="message.export.downloading"/></div>
+        </div>
+      </div>
     </div>
   </body>
 </html>

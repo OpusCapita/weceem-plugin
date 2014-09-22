@@ -5,34 +5,50 @@
   </head>
 
   <body>
-    <div class="body">
-      <b class="header">Edit Space</b>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12 col-xs-12">
+          <h1>Edit Space</h1>
+        </div>
+      </div>
 
       <g:if test="${flash.message}">
-        <div class="message">${flash.message}</div>
+        <div class="row">
+          <div class="col-md-12 col-xs-12">
+            <div class="message">${flash.message}</div>
+          </div>
+        </div>
       </g:if>
+
       <g:hasErrors bean="${space}">
-        <div class="errors">
-          <g:renderErrors bean="${space}" as="list"/>
+        <div class="row">
+          <div class="col-md-12 col-xs-12">
+            <div class="errors">
+              <g:renderErrors bean="${space}" as="list"/>
+            </div>
+          </div>
         </div>
       </g:hasErrors>
 
       <g:form method="post">
         <input type="hidden" name="id" value="${space?.id}"/>
-        <div class="dialog">
-          <table>
-            <tbody>
-              <g:render plugin="weceem" template="/wcmSpace/form" model="[space: space]"/>
-              <tr class="prop">
-                <td colspan="2">
-                  <g:actionSubmit class="button" value="Save" action="update"/>&nbsp;
-                  <g:actionSubmit class="button" value="Back" action="list"/>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="row">
+          <div class="col-md-12 col-xs-12">
+            <table>
+              <tbody>
+                <g:render plugin="weceem" template="/wcmSpace/form" model="[space: space]"/>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-12 col-xs-12">
+            <g:actionSubmit class="button" value="Save" action="update"/>&nbsp;
+            <g:actionSubmit class="button" value="Back" action="list"/>
+          </div>
         </div>
       </g:form>
+
     </div>
   </body>
 </html>

@@ -7,7 +7,8 @@
   
   <body>
     <div class="container">
-        <div class="span-24 last">
+      <div class="row">
+        <div class="col-md-12 col-xs-12">
           <h1>Revision ${historyItem.revision} of ${currentContent.title.encodeAsHTML()} (/${currentContent.absoluteURI.encodeAsHTML()})</h1>
           <h2><g:formatDate date="${historyItem.createdOn}" format="yyyy/MM/dd 'at' hh:mm:ss"/></h2>
 
@@ -23,6 +24,7 @@
               </g:each>
           </table>
         </div>
+      </div>
     </div>
   
   </body>

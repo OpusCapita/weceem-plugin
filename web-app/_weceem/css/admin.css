@@ -137,3 +137,89 @@ Just change the color-values to apply your own color-scheme.
   overflow : scroll;
   -webkit-overflow-scrolling: touch;
 }
+
+.message {
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+table {
+    margin-bottom: 1.4em;
+    width: 100%;
+}
+th {
+    font-weight: bold;
+}
+thead th {
+    background: none repeat scroll 0 0 #c3d9ff;
+}
+th, td, caption {
+    padding: 4px 10px 4px 5px;
+}
+tbody tr:nth-child(2n) td, tbody tr.even td {
+    background: none repeat scroll 0 0 #e5ecf9;
+}
+
+.navigation {
+    margin-bottom: 0px;
+}
+ul, ol {
+    padding-left: 1.5px;
+}
+.clearfix:after, .container:after {
+    clear: both;
+    content: " ";
+    display: block;
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+}
+.clearfix, .container {
+    display: block;
+}
+.container {
+    margin: 0 auto;
+    width: 950px;
+}
+
+html {
+    font-size: 100.01%;
+}
+h1 {
+    margin-top: 10px;
+    font-size: 36px;
+}
+h2 {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    font-size: 24px;
+}
+h2.sectionLabel {
+    margin-top: 0px;
+    margin-bottom: 0px;
+    font-size: 1em;
+    font-weight: bold;
+}
+a.button, button {
+    -moz-border-bottom-colors: none;
+    -moz-border-left-colors: none;
+    -moz-border-right-colors: none;
+    -moz-border-top-colors: none;
+    background-color: #f5f5f5;
+    border-color: #eee #dedede #dedede #eee;
+    border-image: none;
+    border-right: 1px solid #dedede;
+    border-style: solid;
+    border-width: 1px;
+    color: #565656;
+    cursor: pointer;
+    display: block;
+    float: left;
+    font-size: 100%;
+    line-height: 130%;
+    margin: 0.7em 0.5em 0.7em 0;
+    padding: 5px 10px 5px 7px;
+    text-decoration: none;
+}
+.ui-widget {
+    font-family: inherit;
+}

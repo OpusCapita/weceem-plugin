@@ -4,21 +4,30 @@
     <title><g:message code="synchronization.title"/></title>
   </head>
   <body >
-  
-      <div class="span-24 last">
-        <h1>File Synchronization of space ${space.name.encodeAsHTML()} complete.</h1>
+    <div class="container">
+      <div class="row">
+        <div class="col-md-12 col-xs-12">
+          <h1>File Synchronization of space ${space.name.encodeAsHTML()} complete.</h1>
+        </div>
       </div>
 
-    <g:form controller="wcmSynchronization">
+      <g:form controller="wcmSynchronization">
         <g:if test="${createdContent.size() != 0}">
-            <div class="message span-22 prepend-1 append-1 prepent-top append-bottom last ui-state-highlight ui-corner-all">
+          <div class="row">
+            <div class="col-md-12 col-xs-12">
+              <div class="message ui-state-highlight ui-corner-all">
                 ${dirnum} directories and ${filenum} files were added to the space ${space.name}
+              </div>
             </div>
-            <div class="container span-24 last" style="text-align: center">
-                <input type="button" class="ui-widget ui-state-default ui-corner-all"  onclick="$('#moreInfoDiv').toggle()" value="Show added content"></input>
+          </div>
+          <div class="row">
+            <div class="col-md-12 col-xs-12">
+                <input type="button" class="button"  onclick="$('#moreInfoDiv').toggle()" value="Show added content"/>
             </div>
-            <div id="moreInfoDiv" class="container span-24 last" style="display: none">
-                <table class="standart">
+          </div>
+          <div class="row">
+            <div id="moreInfoDiv" class="col-md-12 col-xs-12" style="display: none">
+                <table class="standard">
                     <thead>
                         <tr>
                             <th width="15px"><g:message code="synchronization.header.contentTitle"/></th>
@@ -35,14 +44,20 @@
                     </tbody>
                 </table>
             </div>
+          </div>
         </g:if>
+
         <g:if test="${missingFiles.size()}">
-        
-            <div class="message span-22 prepend-1 append-1 prepent-top append-bottom last ui-state-highlight ui-corner-all">
+          <div class="row">
+            <div class="col-md-12 col-xs-12">
+              <div class="message ui-state-highlight ui-corner-all">
                 The following nodes were found referencing files that no longer exist in the filesystem. To remove nodes click the checkboxes and then press Delete.
+              </div>
             </div>
-            <div class="container span-24 last">
-                <table class="standart">
+          </div>
+          <div class="row">
+            <div class="col-md-12 col-xs-12">
+                <table class="standard">
                     <thead>
                         <tr>
                             <th width="15px"><g:message code="synchronization.header.contentTitle"/></th>
@@ -66,17 +81,24 @@
                          </g:each>
                     </tbody>
                 </table>
-                <div class="span-24 last">
-                    <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="Delete selected" controller="wcmSynchronization" action="delete"/>
-                    <g:actionSubmit class="ui-widget ui-state-default ui-corner-all" value="Don't delete anything" controller="wcmSynchronization" action="done"/>
-                </div>
             </div>
+          </div>
+          <div class="row">
+                <div class="col-md-12 col-xs-12">
+                    <g:actionSubmit class="button" value="Delete selected" controller="wcmSynchronization" action="delete"/>
+                    <g:actionSubmit class="button" value="Don't delete anything" controller="wcmSynchronization" action="done"/>
+                </div>
+          </div>
         </g:if>
         <g:else>
-            Good news! Your repository has no content nodes referencing non-existent server files.<br/>
-            <g:link controller="wcmRepository" class="button">OK</g:link>
+          <div class="row">
+            <div class="col-md-12 col-xs-12">
+              Good news! Your repository has no content nodes referencing non-existent server files.<br/>
+              <g:link controller="wcmRepository" class="button">OK</g:link>
+            </div>
+          </div>
         </g:else>
-    </g:form>
-  
+      </g:form>
+    </div>
   </body>
 </html>

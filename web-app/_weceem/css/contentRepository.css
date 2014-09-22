@@ -77,4 +77,60 @@ span.loadingMessage {
     display: none;
 }
 
+td span.ui-icon { display: inline;}
+
+thead th { background: none repeat scroll 0 0 #C3D9FF; }
+
+table, tr .treeTable {width: 100%;}
+
+span.ui-icon-circle-triangle-e { float: left; margin-left: -2.6em; }
+
+.nodeinfo { font-size: 85%;}
+
+.nodeinfoDialog { display:none;}
+
+span.ui-icon-info { float: left; margin-right: 0.8em; }
+
+span.ui-icon-circle-plus { float: left; margin-right: 0.5em; }
+
+span.ui-icon-circle-minus { float: left; }
+
+a:hover { text-decoration: underline;}
+
+ul.childList { font-size: 1em}
+
+.ui-state-highlight { height: 1.5em; line-height: 1.2em; }
+
+h2.title + span.type { margin-left: 10px;}
+
+#repository-toolbar label { display:inline; padding-right: 4px; }
+#repository-searchbox { text-align: right; }
+
+.ui-dialog .ui-dialog-buttonpane button { float: left; }
+
+table .collapse.in {
+    display:table-row;
+}
+td {
+    margin: 5px;
+    padding: 5px;
+    vertical-align: middle;
+
+}
+.margin-top-15 {
+    margin-top: 15px;
+}
+.treeTable h2 {
+    margin-top:0;
+    padding-bottom:0.5em;
+    font-size: 13.2px;
+}
+.treeTable tr td .expander {
+    padding-bottom: 13px;
+}
+.treeTable .item {
+    padding-left: 15px;
+}
+
+
 
