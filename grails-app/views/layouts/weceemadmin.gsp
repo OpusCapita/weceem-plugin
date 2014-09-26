@@ -23,7 +23,6 @@
     <link rel="stylesheet" href="${g.resource(plugin:'twitter-bootstrap', dir: 'css',file:'bootstrap.min.css')}"/>
     <link rel="stylesheet" href="${g.resource(plugin:'twitter-bootstrap', dir: 'css',file:'bootstrap-theme.min.css')}"/>
 
-    <nav:resources/>
     <g:javascript library="jquery" plugin="jquery"/>
     <plugin:isAvailable name="resources">
         <r:layoutResources/>
@@ -43,7 +42,7 @@
   </head>
   
   <body onload="${pageProperty(name:'body.onload')}" class="${pageProperty(name:'body.class')}">
-  
+
   <div class="container">
     <g:if test="${!params.externalCall}">
       <div class="row">

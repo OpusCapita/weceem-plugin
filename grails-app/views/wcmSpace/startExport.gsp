@@ -2,10 +2,11 @@
   <head>
     <meta name="layout" content="${wcm.adminLayout().toString()}"/>
     <meta http-equiv="Refresh" content="1;URL=${createLink(action: 'performExport', params: [space:params.id, exporter:params.exporter])}">
-    <title><g:message code="space.title.export"/></title>
+    <title><g:message code="space.title.export" args="[space.name]"/></title>
   </head>
 
   <body>
+    <nav:set path="plugin.weceem.weceem_menu/administration" scope="plugin.weceem.weceem_menu"/>
     <div class="container">
       <div class="row">
         <div class="col-md-12 col-xs-12">

@@ -13,7 +13,16 @@
 
     <div id="navigation" class="row" style="margin:0px;">
         <div class="col-md-12 col-xs-12">
-            <nav:render group="weceem" actionMatch="true"/>
+            <nav:menu scope="plugin.weceem.weceem_menu" custom="true" class="nav nav-pills" >
+                <li class="${active ? 'active': ''}">
+                    <p:callTag tag="g:link"
+                               attrs="${linkArgs + [class: 'active' ? 'active' : '']}">
+                        <span>
+                            <nav:title item="${item}"/>
+                        </span>
+                    </p:callTag>
+             </li>
+            </nav:menu>
         </div>
     </div>
 

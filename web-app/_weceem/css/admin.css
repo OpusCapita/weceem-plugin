@@ -90,6 +90,7 @@ Just change the color-values to apply your own color-scheme.
 }
 
 
+
 .subnavigation {
     list-style-type: none;
     clear: both;
@@ -223,3 +224,7 @@ a.button, button {
 .ui-widget {
     font-family: inherit;
 }
+
+.margin-bottom-5 { margin-bottom: 5px; }
+.margin-bottom-10 { margin-bottom: 10px; }
+.margin-bottom-20 { margin-bottom: 20px; }

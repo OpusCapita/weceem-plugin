@@ -109,22 +109,6 @@ class WeceemGrailsPlugin {
 
         _log.info "Weceem plugin running with data source ${applicationContext.dataSource.dump()}"
         _log.info "Weceem plugin running with grails configuration ${applicationContext.grailsApplication.config}"
-        
-        applicationContext.navigationService.registerItem( 'weceem', 
-            [controller:'wcmRepository', action:'treeTable', title:'content', path:'contentrepo', order:0])
-
-        applicationContext.navigationService.registerItem( 'weceem', 
-            [controller:'wcmPortal', action:'administration', title:'administration', path:'admin',order:2])
-
-        // Register the standard admin sections
-        [
-            [controller:'wcmSpace', action:'list', title:'spaces', path:'admin/spaces', order: 0],
-            [controller:'wcmSynchronization', action:'list', title:'synchronize', path:'admin/files/synchronize', order: 1],
-            [controller:'wcmPortal', action:'comingsoon', title:'plugins', path:'admin/plugins', order: 2],
-            [controller:'wcmPortal', action:'licenses', title:'licenses', path:'admin/licenses', order: 3],
-            [controller:'wcmPortal', action:'comingsoon', title:'linkcheck', path:'admin/linkchecker', order: 4] ].each { item ->
-                applicationContext.navigationService.registerItem( 'weceem.plugin.admin', item)
-        }
 
         def repSvc = applicationContext.wcmContentRepositoryService
         repSvc.loadConfig()

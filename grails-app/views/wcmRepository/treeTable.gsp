@@ -42,6 +42,7 @@ $(function(){
 </script>
 </head>
 <body>
+  <nav:set path="plugin.weceem.weceem_menu/content" scope="plugin.weceem.weceem_menu"/>
   <div class="container" id="repository-toolbar">
     <div class="row">
       <div class="col-md-4 col-xs-4">
@@ -59,20 +60,25 @@ $(function(){
       </div>
     </div>
 
-    <div class="row">
-         <form controller="wcmRepository">
-            	<div id="advSearch" style="display:none" class="col-md-12">
-            			You can filter results by type: <select id="classFilter">
+    <form controller="wcmRepository">
+      <div id="advSearch" style="display:none">
+          <div class="row">
+            <div class="col-md-12">
+              <i>You can filter results by</i>
+              <br/>
+              type <select id="classFilter">
                                                     	    <option value="none">All</option>
                                                     	    <g:each in="${grailsApplication.domainClasses.findAll{org.weceem.content.WcmContent.isAssignableFrom(it.clazz) && (it.clazz != org.weceem.content.WcmContent)}.sort({a,b->a.name.compareTo(b.name)})}">
                                                     	        <option value="${it.fullName}"><g:message code="content.item.name.${it.fullName}" encodeAs="HTML"/></option>
                                                     	    </g:each>
-                                                    	</select>,
-            			status: <g:select name="statusFilter" id="statusFilter" from="${[['description': 'all', 'code': 0]] + org.weceem.content.WcmStatus.list()}" optionKey="code" optionValue="description" />
-            			and date <g:select name="fieldFilter" id="fieldFilter" from="[[id:'createdOn', value:'created'], [id:'changedOn', value:'changed']]"  optionKey="id" optionValue="value"/> from <input id="fromDate" type="text"/> to <input id="toDate" type="text"/>
-            	</div>
-            </form>
-    </div>
+                                                    	</select>
+              status <g:select name="statusFilter" id="statusFilter" from="${[['description': 'all', 'code': 0]] + org.weceem.content.WcmStatus.list()}" optionKey="code" optionValue="description" />
+              date <g:select name="fieldFilter" id="fieldFilter" from="[[id:'createdOn', value:'created'], [id:'changedOn', value:'changed']]"  optionKey="id" optionValue="value"/> from <input id="fromDate" type="text"/> to <input id="toDate" type="text"/>
+              </div>
+          </div>
+        </div>
+    </form>
+
 
     <div class="row">
 
@@ -109,11 +115,13 @@ $(function(){
       </div>
     </div>
 
-    <div id="searchDiv" style="display: none" class="row">
+    <div class="row">
 
-             <div class="table col-md-12 col-xs-12">
-                    <table class="treeTable">
-                        <thead style="border-spacing: 10px 10px">
+      <div id="searchDiv" style="display: none" class="col-md-12 col-xs-12">
+
+             <div class="table treeTable">
+                    <table id="searchResultTable" class="treeTable">
+                        <thead>
                           <tr>
                             <th align="left" class="asc"><a href="#" onclick="sortByField('title')"><g:message code="header.content" default="Page"/>&nbsp;&nbsp;</a></th>
                             <th align="left" class="asc"><a href="#" onclick="sortByField('status.description')"><g:message code="header.status" default="Status"/>&nbsp;&nbsp;</a></th>
@@ -124,7 +132,8 @@ $(function(){
                         <tbody>
                         </tbody>
                     </table>
-                </div>
+             </div>
+      </div>
     </div>
   </div>
 

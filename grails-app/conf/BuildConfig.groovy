@@ -60,7 +60,6 @@ grails.project.dependency.resolution = {
         compile ":ckeditor:3.6.6.1.0"
         compile ":feeds:1.6"
 
-        compile ":platform-core:1.0.RC6"
 //        test ":geb:$gebVersion"
         test(":functional-test:2.0.RC2-SNAPSHOT") { 
             excludes "xerces, xml-apis"
@@ -69,7 +68,7 @@ grails.project.dependency.resolution = {
 
         runtime ":jquery:1.11.1"
         compile ":jquery-ui:1.10.3"
-        compile ":navigation:1.3.2"
+        compile ":platform-core:1.0.0"
         compile ":quartz:1.0-RC7"
         compile ":searchable:0.6.8"
         compile ":taggable:1.0.1"

@@ -69,9 +69,9 @@ function sendSearchRequest(searchParams){
                 var createTd = td.clone();
                 var changeTd = td.clone();
                 // @todo this is hideous, clone a template div from the page
-                pageTd.html("<div class='item'><div class='ui-content-icon' style='display: inline-block'><img src='"+obj.iconHref+"'/></div>" + 
-                "<h2 class='title'>" + "<a href=" + obj.href + ">" + obj.title + 
-                "&nbsp;<span class='type'>(" + obj.aliasURI + " - " + obj.type + ")</span></a></h2>" + 
+                pageTd.html("<div class='item'><div class='ui-content-icon' style='display: inline-block'><img src='"+obj.iconHref+"'/></div>" +
+                "<div style='position: relative; padding-left: 30px;'><h2 class='title'>" + "<a href=" + obj.href + ">" + obj.title +
+                "&nbsp;<span class='type'>(" + obj.aliasURI + " - " + obj.type + ")</span></a></h2></div>" +
                 "<div >Parent: "
                     + obj.parentURI + "</div></div>");
                 statusTd.text(resources[obj.status]);

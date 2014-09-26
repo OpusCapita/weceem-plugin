@@ -51,8 +51,10 @@
           <div class="col-md-12 col-xs-12">
             <g:actionSubmit class="button" value="${message(code:'content.button.saveAndContinue', default:'Save and continue editing')}" action="${content.id ? 'updateContinue' : 'saveContinue'}"/>
             <g:actionSubmit class="button" value="${message(code:'content.button.save', default:'Save')}" action="${content.id ? 'update' : 'save'}"/>
-            <g:actionSubmit class="button" value="${message(code:'content.button.preview', default:'Preview')}" action="preview"/>
-            <input style="display:none" type="submit" id="preview-action-submitter" name="_action_preview" value="preview"/> <%-- Needed to invoke onsubmit on form during our preview submit phase --%>
+            <g:if test="${weceemEditorMode != 'create'}">
+              <g:actionSubmit class="button" value="${message(code:'content.button.preview', default:'Preview')}" action="preview"/>
+              <input style="display:none" type="submit" id="preview-action-submitter" name="_action_preview" value="preview"/> <%-- Needed to invoke onsubmit on form during our preview submit phase --%>
+            </g:if>
             <g:actionSubmit class="button" value="${message(code:'content.button.cancel', default:'Cancel')}" action="${content.id ? 'update' : 'save'}" action="cancel"/>
           </div>
         </div>
