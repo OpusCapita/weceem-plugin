@@ -59,21 +59,18 @@ To allow users to submit content, you need to provide the data from the client b
 user completes. You will usually do this inside a Widget node so that the code can be reused:
 
 {code}
-<g:hasErrors bean="${submittedContent}">
-There were some errors on your submission, please check below
-</g:hasErrors>
 
 <wcm:submitContentForm parent="${parentContent}" type="org.weceem.content.WcmComment" success="${parentContent}">
-
-<bean:require beanName="submittedContent" className="org.weceem.content.WcmComment"/>
-<bean:field beanName="submittedContent" property="author" label="Your name"/>
-<bean:field beanName="submittedContent" property="email"/>
-<bean:input beanName="submittedContent" property="websiteUrl" label="Website URL"/>
-<bean:input beanName="submittedContent" property="title"/>
-<bean:field beanName="submittedContent" property="content" label="Your comment"/>
-<input type="submit" class="button positive" value="Send comment"/>
-
+  <f:field bean="submittedContent"  property="author"/>
+  <f:field bean="submittedContent" property="email"/>
+  <f:field bean="submittedContent" property="websiteUrl" label="Website URL"/>
+  <f:field bean="submittedContent" property="title"/>
+  <f:field bean="submittedContent"  property="content">
+    <textarea name="content" cols="20" rows="5"></textarea>
+  </f:field>
+  <input type="submit" class="button positive" value="Send comment"/>
 </wcm:submitContentForm>
+
 {code}
 
 
@@ -84,8 +81,8 @@ Here, three different Grails taglibs are being used to create the form:
  The "parent" attribute must be set to the node that will be the parent of the new content (or null for root content),
  and the "success" attribute is the repository URI path or node that should be shown after the content has been
  submitted - e.g. the original Blog Entry
- *   bean:* tags are from the Grails bean-fields plugin that is provided as part of Weceem. They make it easy to render
- sensible default fields, labels and error messages for properties of an object. In this case the object is the
+ *   f:field * tags are from the Grails *fields* plugin that is provided as part of Weceem. They make it easy to render
+ sensible default fields for properties of an object. In this case the object is the
  "submittedContent" bean used by the content submission form.
 
 The form will include a link to the content submission controller. This controller will save the content if it is valid,
