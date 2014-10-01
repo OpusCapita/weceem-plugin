@@ -228,3 +228,7 @@ a.button, button {
 .margin-bottom-5 { margin-bottom: 5px; }
 .margin-bottom-10 { margin-bottom: 10px; }
 .margin-bottom-20 { margin-bottom: 20px; }
+
+.fieldcontain textarea {
+    margin-bottom: 5px;
+}

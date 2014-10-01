@@ -112,7 +112,14 @@ div.existingTag {
 
 label {
     padding-top: 10px;
-    display: block;
+
+}
+
+.fieldcontain label {
+    vertical-align: top;
+    width: 150px;
+    padding-top: 10px;
+    padding-right: 20px;
 }
 
 /* override the jquery treetable CSS */

@@ -1,4 +1,4 @@
-<div id="tagsfield_${name}">
+<div id="tagsfield_${name}" style="position: relative; float:left; vertical-align: top; margin-top: 0px;">
     <div class="existingTagList">
         <g:each in="${content[name]}" var="t">
             <div class="existingTag"><span class="tagtext">${t.encodeAsHTML()}</span><button class="removeTag">x</button></div>

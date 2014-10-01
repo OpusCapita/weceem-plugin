@@ -6,7 +6,6 @@
   </head>
   
   <body>
-    <nav:set path="plugin.weceem.weceem_menu/content" scope="plugin.weceem.weceem_menu"/>
     <div class="container">
       <div class="row">
         <div class="col-md-12 col-xs-12">
@@ -21,7 +20,14 @@
           <table>
               <tr><th>Name</th><th>Value</th></tr>
               <g:each in="${contentProperties}" var="p">
-              <tr><td><bean:label beanName="contentProperties" property="${p.key}" labelKey="${'content.label.'+p.key}"/></td><td>${p.value?.encodeAsHTML()}</td></tr>
+              <tr>
+                <td>
+                  <g:message code="content.label.${p.key}"/>
+                </td>
+                <td>
+                  ${p.value?.encodeAsHTML()}
+                </td>
+              </tr>
               </g:each>
           </table>
         </div>

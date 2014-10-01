@@ -31,14 +31,6 @@ grails.project.dependency.resolution = {
 
         compile 'xstream:xstream:1.2.1'
         compile "org.compass-project:compass:2.2.1"
-
-    //     test "org.seleniumhq.selenium:selenium-firefox-driver:$seleniumVersion"
-    //     // test "org.seleniumhq.selenium:selenium-ie-driver:$seleniumVersion"
-    //     // test "org.seleniumhq.selenium:selenium-chrome-driver:$seleniumVersion"
-    //     test "org.seleniumhq.selenium:selenium-support:$seleniumVersion"
-    //     test "org.gebish:geb-spock:$gebVersion"
-    //     test "org.gebish:geb-junit4:$gebVersion"
-
     }
 
 	plugins {
@@ -55,7 +47,7 @@ grails.project.dependency.resolution = {
         runtime ":hibernate:3.6.10.9" // or ":hibernate4:4.1.11.2"
         runtime ":database-migration:1.3.8"
 
-        compile ":bean-fields:1.0" // consider replacing with the fields plugin or even with the new Platform UI
+        compile ":fields:1.4"
         compile ":cache-headers:1.1.5"
         compile ":ckeditor:3.6.6.1.0"
         compile ":feeds:1.6"
