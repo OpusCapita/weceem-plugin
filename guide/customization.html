@@ -128,9 +128,15 @@ content types and other more technical subjects.
 
 
 <h2 id="0.HookingIntoTheAdminInterface">6.1 Hooking into the Admin interface</h2>
-<strong class="bold">Hooking into the Admin interface of Weceem</strong><p class="paragraph"/>Applications can add items to the Weceem "Administration" page by using the Navigation plugin that Weceem CMS uses, to add items to the navigation group "weceem.app.admin". The Weceem Application does this :<p class="paragraph"/><div class="code"><pre>class UserController &#123;
-        def authenticateService<p class="paragraph"/>        <span class="java&#45;keyword">static</span> navigation = &#91;group: 'weceem.app.admin', action: 'list', title: 'users'&#93;
-&#125;</pre></div><p class="paragraph"/>The navigation plugin uses this convention property to place the "list" action of the user controller into the "Administration" section of Weceem Admin.
+<strong class="bold">Hooking into the Admin interface of Weceem</strong><p class="paragraph"/>Applications can add items to the Weceem "Administration" page by using navigations from Platform-core plugin, to add
+items to the navigation group "weceem_admin". The Weceem Application does this :
+<ol>
+<li>Prepare AppNavigation.groovy file in "grails-app/conf/"</li>
+<li>Put some more configuration there</li>
+</ol><p class="paragraph"/><div class="code"><pre>navigation = &#123;
+    weceem_admin &#123;
+        users(controller:'CMSUser', action:'list', order:5) &#123;<p class="paragraph"/>        &#125;
+    &#125;<p class="paragraph"/>&#125;</pre></div><p class="paragraph"/>More information about navigation is available in documentation of <strong class="bold">Platform-core</strong> plugin (Navigation part)
 
 
 <h2 id="1.CreateCustomContentTypes">6.2 Create custom content types</h2>
