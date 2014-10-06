@@ -35,37 +35,31 @@ grails.project.dependency.resolution = {
 
 	plugins {
         // plugins for the build system only
-        build ":tomcat:7.0.52.1"
-        build (":release:3.0.1") {
-            export = false
-        }
-        // plugins for the compile step
-        compile ":scaffolding:2.0.1"
-        compile ':cache:1.1.1'
+        build   ':tomcat:7.0.54'
+        compile ':cache:1.1.7'
+        compile ':scaffolding:2.1.2'
 
-        // plugins needed at runtime but not for compilation
-        runtime ":hibernate:3.6.10.9" // or ":hibernate4:4.1.11.2"
-        runtime ":database-migration:1.3.8"
+        runtime ":hibernate:3.6.10.17"
+        runtime ":database-migration:1.4.0"
 
         compile ":fields:1.4"
-        compile ":cache-headers:1.1.5"
-        compile ":ckeditor:3.6.6.1.0"
+        compile ":cache-headers:1.1.7"
+        compile ":ckeditor:4.4.1.0"
         compile ":feeds:1.6"
 
-//        test ":geb:$gebVersion"
-        test(":functional-test:2.0.RC2-SNAPSHOT") { 
+        runtime ":jquery:1.11.1"
+        compile ":jquery-ui:1.10.4"
+        compile ":platform-core:1.0.0"
+        compile ":quartz:1.0.2"
+        compile ":searchable:0.6.9"
+        compile ":taggable:1.1.0"
+        compile ":twitter-bootstrap:3.2.0.2"
+
+        test(":functional-test:2.0.RC2-SNAPSHOT") {
             excludes "xerces, xml-apis"
             export = false
         }
-
-        runtime ":jquery:1.11.1"
-        compile ":jquery-ui:1.10.3"
-        compile ":platform-core:1.0.0"
-        compile ":quartz:1.0-RC7"
-        compile ":searchable:0.6.8"
-        compile ":taggable:1.0.1"
-        compile ":twitter-bootstrap:3.2.0.2"
-
+        build ":release:3.0.1"
         // For serlvet filter ordering
         provided ":webxml:1.4.1"
  	}
