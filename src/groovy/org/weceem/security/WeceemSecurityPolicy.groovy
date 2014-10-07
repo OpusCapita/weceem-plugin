@@ -15,6 +15,7 @@ class WeceemSecurityPolicy {
     static ROLE_ADMIN = "ROLE_ADMIN"
     static ROLE_USER = "ROLE_USER"
     static ROLE_GUEST = "ROLE_GUEST"
+    static ROLE_ANONYMOUS = "ROLE_ANONYMOUS"
 
     static PERMISSION_ADMIN = "admin"
     static PERMISSION_EDIT = "edit"
@@ -64,6 +65,10 @@ class WeceemSecurityPolicy {
         setDefaultPermissionForSpaceAndRole(PERMISSION_EDIT, false, ANY_SPACE_ALIAS, ROLE_GUEST)
         setDefaultPermissionForSpaceAndRole(PERMISSION_VIEW, true, ANY_SPACE_ALIAS, ROLE_GUEST)
         setDefaultPermissionForSpaceAndRole(PERMISSION_CREATE, false, ANY_SPACE_ALIAS, ROLE_GUEST)
+
+        setDefaultPermissionForSpaceAndRole(PERMISSION_EDIT, false, ANY_SPACE_ALIAS, ROLE_ANONYMOUS)
+        setDefaultPermissionForSpaceAndRole(PERMISSION_VIEW, true, ANY_SPACE_ALIAS, ROLE_ANONYMOUS)
+        setDefaultPermissionForSpaceAndRole(PERMISSION_CREATE, false, ANY_SPACE_ALIAS, ROLE_ANONYMOUS)
     }
 
     void setDefaultPermissionForSpaceAndRole(String perm, def permGranted, String alias, String role) {

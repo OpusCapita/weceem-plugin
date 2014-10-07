@@ -58,13 +58,12 @@ class RenderEngine {
 	{
 		def activeUser = wcmSecurityService.userName
 		def u = wcmSecurityService.userPrincipal
-		boolean isAuth = !(u instanceof String)
+
 		[
 		    username: activeUser,
-		    email: isAuth,
-		    email: isAuth ? u.email : null,
-		    firstName: isAuth ? u.firstName : null,
-		    lastName: isAuth ? u.lastName : null
+		    email: u.metaClass.hasProperty(u, 'email')? u.email : null,
+		    firstName: u.metaClass.hasProperty(u, 'firstName') ? u.firstName : null,
+		    lastName: u.metaClass.hasProperty(u, 'lastName') ? u.lastName : null
 		] as UserInfo
 	}
     
