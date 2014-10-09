@@ -114,6 +114,7 @@ label {
     padding-top: 10px;
 
 }
+.error { color: red;}
 
 .fieldcontain label {
     vertical-align: top;

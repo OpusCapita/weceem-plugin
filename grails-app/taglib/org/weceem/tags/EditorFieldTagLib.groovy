@@ -38,7 +38,8 @@ class EditorFieldTagLib {
     }
 
     def editorFieldBoolean = { attrs ->
-        out << f.field(bean:'content', property:attrs.property)
+        def args = argsWithRequiredOverride(attrs, [bean:'content', property:attrs.property])
+        out << f.field(args)
     }
 
     def argsWithRequiredOverride(attrs, args) {
@@ -47,7 +48,7 @@ class EditorFieldTagLib {
             def r = con.overrideRequired[attrs.property]
             if (r != null) {
                 if (!r) {
-                    args.requiredField = ' '
+                    args.required = 'false'
                 }
             }
         }
@@ -197,7 +198,8 @@ class EditorFieldTagLib {
     }
 
     def editorFieldRichHTML = { attrs ->
-        out << f.field(bean:'content', property:attrs.property) {
+        def args = argsWithRequiredOverride(attrs, [bean:'content', property:attrs.property])
+        out << f.field(args) {
             out << g.render(template:'/editors/richeditor', plugin:'weceem',
                     model:[name:attrs.property, value:pageScope.content[attrs.property]])
         }
