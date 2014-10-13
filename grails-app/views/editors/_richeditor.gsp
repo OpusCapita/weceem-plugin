@@ -2,4 +2,4 @@
                      name="${name}"
                      width="100%" height="420"
                      showThumbs="true"
-                     toolbar="HTMLEditor">${value}</ckeditor:editor>
+                     toolbar="HTMLEditor">${value?.encodeAsHTML()}</ckeditor:editor>

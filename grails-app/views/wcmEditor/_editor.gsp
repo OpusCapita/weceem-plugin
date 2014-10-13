@@ -38,7 +38,7 @@
     <g:grep in="${editableProperties}" var="prop" filter="${ { p -> p.group == null }}">
         <div class="row">
             <div class="col-md-12 col-xs-12">
-                <% println wcm."editorField${prop.editor}"(bean:content, property:prop.property) %>
+                <%= (wcm."editorField${prop.editor}"(bean:content, property:prop.property)).encodeAsRaw() %>
             </div>
         </div>
     </g:grep>
@@ -72,7 +72,7 @@
                                 <g:grep in="${editableProperties}" var="prop" filter="${ { p -> p.group == gn} }">
                                     <div class="row">
                                         <div class="col-md-12 col-xs-12">
-                                            <% println wcm."editorField${prop.editor}"(bean:content, property:prop.property) %>
+                                            <%= (wcm."editorField${prop.editor}"(bean:content, property:prop.property)).encodeAsRaw() %>
                                         </div>
                                     </div>
                                 </g:grep>
