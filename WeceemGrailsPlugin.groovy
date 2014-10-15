@@ -3,6 +3,8 @@ import org.apache.commons.logging.LogFactory
 import org.weceem.services.WcmContentRepositoryService
 
 import grails.util.Environment
+import grails.util.Holders
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 
 class WeceemGrailsPlugin {
     def _log = LogFactory.getLog('org.weceem.WeceemGrailsPlugin')
@@ -67,7 +69,7 @@ class WeceemGrailsPlugin {
         customPropertyEditorRegistrar(org.weceem.binding.CustomPropertyEditorRegistrar)
         
         // Configure caching
-        boolean hasEhCacheConfigXML = application.parentContext.getResource('classpath:/ehcache.xml').exists()
+        boolean hasEhCacheConfigXML = new PathMatchingResourcePatternResolver().getResource('classpath:/ehcache.xml').exists()
         if (hasEhCacheConfigXML) {
             // We assume app dev is managing cache with their own ehcache.xml
             println "Weceem: Initializing ehcache with default ehcache.xml from application"
@@ -76,7 +78,7 @@ class WeceemGrailsPlugin {
             }
         } else {
             // init with default Weceem caching
-            def configRes = application.parentContext.getResource('classpath:/weceem-default-ehcache.xml')
+            def configRes = new PathMatchingResourcePatternResolver().getResource('classpath:/weceem-default-ehcache.xml')
             println "Weceem: Initializing ehcache with default weceem ehcache.xml from plugin resource: ${configRes}"
             weceemCacheManager(net.sf.ehcache.CacheManager, configRes.URL) { bean -> 
                 bean.destroyMethod = 'shutdown'

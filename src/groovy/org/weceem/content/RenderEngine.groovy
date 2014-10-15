@@ -61,9 +61,9 @@ class RenderEngine {
 
 		[
 		    username: activeUser,
-		    email: u.metaClass.hasProperty(u, 'email')? u.email : null,
-		    firstName: u.metaClass.hasProperty(u, 'firstName') ? u.firstName : null,
-		    lastName: u.metaClass.hasProperty(u, 'lastName') ? u.lastName : null
+		    email: u?.metaClass?.hasProperty(u, 'email')? u.email : null,
+		    firstName: u?.metaClass?.hasProperty(u, 'firstName') ? u.firstName : null,
+		    lastName: u?.metaClass?.hasProperty(u, 'lastName') ? u.lastName : null
 		] as UserInfo
 	}
     
