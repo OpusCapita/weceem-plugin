@@ -23,7 +23,8 @@ class WeceemGrailsPlugin {
     def pluginExcludes = [
         "grails-app/views/error.gsp",
         "web-app/WeceemFiles/**/*",
-        "web-app/testing/**/*"
+        "web-app/testing/**/*",
+        "src/docs/**"
     ]
 
     def author = "jCatalog AG"
