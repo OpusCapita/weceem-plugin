@@ -109,15 +109,9 @@ $(function(){
       </div>
     </div>
 
-    <div class="row margin-top-15">
-      <div class="col-md-12 col-xs-12">
-        <g:render plugin="weceem" template="repository-buttons"/>
-      </div>
-    </div>
-
     <div class="row">
 
-      <div id="searchDiv" style="display: none" class="col-md-12 col-xs-12">
+      <div id="searchDiv" style="display: none" class="col-md-12 col-xs-12 margin-top-15">
 
              <div class="table treeTable">
                     <table id="searchResultTable" class="treeTable">
@@ -134,6 +128,12 @@ $(function(){
                     </table>
              </div>
       </div>
+    </div>
+
+    <div class="row margin-top-15">
+        <div class="col-md-12 col-xs-12">
+            <g:render plugin="weceem" template="repository-buttons"/>
+        </div>
     </div>
   </div>
 
