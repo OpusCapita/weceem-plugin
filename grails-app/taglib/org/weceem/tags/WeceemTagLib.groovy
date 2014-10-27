@@ -34,6 +34,7 @@ class WeceemTagLib {
     static ATTR_SORT = "sort"
     static ATTR_ORDER = "order"
     static ATTR_OFFSET = "offset"
+    static ATTR_SHUFFLE = "shuffle"
     static ATTR_PATH = "path"
     static ATTR_PARENT = "parent"
     static ATTR_SUCCESS = "success"
@@ -115,8 +116,18 @@ class WeceemTagLib {
         def params = makeFindParams(attrs)
         def baseNode = resolveNode(attrs)
         def status = attrs[ATTR_STATUS] ?: WcmContentRepositoryService.STATUS_ANY_PUBLISHED
+
+        def shuffle = attrs[ATTR_SHUFFLE] ? Boolean.parseBoolean(attrs[ATTR_SHUFFLE].toString()) : false
+        if (shuffle && attrs[ATTR_MAX] && attrs[ATTR_OFFSET] == null) {
+            def countParams = [ ATTR_CHANGEDSINCE:params.changedSince, ATTR_CHANGEDBEFORE:params.changedBefore, ATTR_CREATEDSINCE:params.createdSince, ATTR_CREATEDBEFORE:params.createdBefore]
+            def count = wcmContentRepositoryService.countChildren(baseNode, [type:attrs[ATTR_TYPE], status:status, params:countParams])
+            params.offset = (int) Math.round(Math.random() * (count - params.max))
+        }
+
         def children = wcmContentRepositoryService.findChildren(baseNode, [type:attrs[ATTR_TYPE], status:status, params:params])
         if (attrs[ATTR_FILTER]) children = children?.findAll(attrs[ATTR_FILTER])
+        if (shuffle) Collections.shuffle(children)
+
         def var = attrs[ATTR_VAR] ?: null
         def counter = attrs[ATTR_COUNTER] ?: null
         children?.eachWithIndex { child, idx ->
