@@ -591,7 +591,9 @@ class WcmContentRepositoryService implements InitializingBean {
             // Workaround for Grails 1.2.0 bug where page name must be a valid local system file path!
             // Was dying on Windows with / in uris. http://jira.codehaus.org/browse/GRAILS-5772
             // @todo This is VERY nasty, assumes GSP content is in a "content" property
-            groovyPagesTemplateEngine.createTemplate(content.content, ('WcmContent:'+absURI).replaceAll(/[^a-zA-Z0-9\-]/, '_') )
+            def template = groovyPagesTemplateEngine
+                .createTemplate(content.content, ('WcmContent:'+absURI+(new Date().time).toString()).replaceAll(/[^a-zA-Z0-9\-]/, '_') )
+            return template
         }
     }
 

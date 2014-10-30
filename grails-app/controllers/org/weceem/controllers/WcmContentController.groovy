@@ -101,7 +101,7 @@ class WcmContentController {
                 if (content) {
                     template = wcmContentRepositoryService.getTemplateForContent(content)
                 }
-                
+
                 def tagValue
                 withCacheHeaders { 
                     etag {
@@ -122,8 +122,8 @@ class WcmContentController {
                             return content ? tagValue : null
                         }
                     }
-                    
-                    lastModified {
+
+                    delegate.lastModified {
                         content ? wcmContentRepositoryService.getLastModifiedDateFor(content) : null
                     }
                     
@@ -141,6 +141,7 @@ class WcmContentController {
                             def publiclyCacheable = template ? !template.userSpecificContent : true
                             
                             cache validFor: cacheMaxAge, shared:publiclyCacheable  // 1 second caching, just makes sure some OK headers are sent for proxies
+
                             wcmRenderEngine.showContent(delegate, content)
                         } else {
                             response.sendError 404, "No content found for this URI"
