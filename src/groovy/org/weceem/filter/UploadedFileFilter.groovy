@@ -61,6 +61,7 @@ class UploadedFileFilter implements Filter {
                 def f = wcmContentRepositoryService.getUploadPath(space, uri)
                 if (!f.exists()) {
                     response.sendError(404)
+                    chain.doFilter(request, response)
                     return
                 }
         
@@ -93,15 +94,28 @@ class UploadedFileFilter implements Filter {
 
                         response.setContentType(mt)    
                         try {
-                            // @todo is this fast enough?    
                             response.outputStream << f.newInputStream()
+                            response.outputStream.flush()
                         } catch (IOException ioe) {
                             // Munch. We should never do this but the client has gone away so...
+                        } finally {
+                          if (response.outputStream != null){
+                            try {
+                                response.outputStream.close()
+                            } catch (IOException e) {
+                                e.printStackTrace()
+                            }
+                          }
+
+                          return
                         }
                     }
                 }
             }
         }
-        chain.doFilter(request, response)
+
+        if (!response.committed) {
+            chain.doFilter(request, response)
+        }
     }
 }
