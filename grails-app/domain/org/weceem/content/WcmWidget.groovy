@@ -35,9 +35,7 @@ class WcmWidget extends WcmContent {
     static standaloneContent = false
 
     static searchable = {
-        alias WcmWidget.name.replaceAll("\\.", '_')
-        
-        only = ['content', 'title', 'status']
+        only = ['content', 'title', 'status', 'space', 'aliasURI', 'parent']
     }
 
     Integer width

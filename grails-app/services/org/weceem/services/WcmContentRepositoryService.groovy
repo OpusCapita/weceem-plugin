@@ -69,6 +69,7 @@ class WcmContentRepositoryService implements InitializingBean {
     def unmoderatedStatusCode
     
     def proxyHandler
+    def elasticSearchService
     
     ThreadLocal permissionsBypass = new ThreadLocal()
     
@@ -483,7 +484,7 @@ class WcmContentRepositoryService implements InitializingBean {
 
             removeContentFromParent(content)
             content.parent = null
-            content.unindex()
+            elasticSearchService.unindex(content)
             content.save()
         }
 		
@@ -893,7 +894,7 @@ class WcmContentRepositoryService implements InitializingBean {
             }
             
             if (result) {
-                content.index()
+                elasticSearchService.index(content)
 
                 triggerEvent(content, WeceemEvents.contentDidGetCreated)
             }
@@ -959,7 +960,7 @@ class WcmContentRepositoryService implements InitializingBean {
                 return null
             }
         }
-        vcont.index()
+        elasticSearchService.index(vcont)
         return vcont
     }
 
@@ -1022,7 +1023,7 @@ class WcmContentRepositoryService implements InitializingBean {
                 parent.children.remove(sourceContent)
                 sourceContent.parent = null
                 assert parent.save()
-                parent.reindex()
+                elasticSearchService.index(parent)
             }
         }
         
@@ -1044,7 +1045,7 @@ class WcmContentRepositoryService implements InitializingBean {
             requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
             
             assert targetContent.save()
-            targetContent.reindex()
+            elasticSearchService.index(targetContent)
         } else {
             // Check we can be saved there
             requirePermissions(sourceContent, [WeceemSecurityPolicy.PERMISSION_CREATE])        
@@ -1056,7 +1057,7 @@ class WcmContentRepositoryService implements InitializingBean {
         if (sourceContent.save(flush: true)) {
             updateCachingMetadataFor(sourceContent)
 
-            sourceContent.reindex()
+            elasticSearchService.index(sourceContent)
             triggerEvent(sourceContent, WeceemEvents.contentDidMove, [originalURI, originalParent])
         } else {
             log.error "Couldn't save node: ${sourceContent.errors}"
@@ -1090,7 +1091,7 @@ class WcmContentRepositoryService implements InitializingBean {
         nodes.each{it->
             it.orderIndex = ++orderIndex
             it.save()
-            it.reindex()
+            elasticSearchService.index(it)
         }
     }
     
@@ -1251,7 +1252,7 @@ class WcmContentRepositoryService implements InitializingBean {
         if (parent) {
             removeContentFromParent(sourceContent)
             assert parent.save(flush:true)
-            parent.reindex()
+            elasticSearchService.index(parent)
         }
 
         // We don't want any dep info relating to us to persist
@@ -1272,9 +1273,8 @@ class WcmContentRepositoryService implements InitializingBean {
                 }
             }
         }
-
         sourceContent.delete(flush: true)
-        sourceContent.unindex()
+        elasticSearchService.unindex(sourceContent)
 
 
         triggerEvent(sourceContent, WeceemEvents.contentDidGetDeleted)
@@ -1306,7 +1306,7 @@ class WcmContentRepositoryService implements InitializingBean {
 
         if (parentRef) {
             parentRef.children << child
-            parentRef.reindex()
+            elasticSearchService.index(parentRef)
             parentRef.save()
         }
 
@@ -1475,7 +1475,7 @@ class WcmContentRepositoryService implements InitializingBean {
                 invalidateCachingForURI(content.space, content.absoluteURI)
                 updateCachingMetadataFor(content)
 
-                content.reindex()
+                elasticSearchService.index(content)
 
                 triggerEvent(content, WeceemEvents.contentDidGetUpdated)
 
@@ -2185,7 +2185,7 @@ class WcmContentRepositoryService implements InitializingBean {
             return newContent
         } else {
             newContent.save()
-            newContent.index()
+            elasticSearchService.index(newContent)
             return newContent
         }
     }
@@ -2376,7 +2376,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
             }
             content.status = status
             content.save() // This shouldn't be needed, but without it we get "collection not processed by flush"
-            content.reindex()
+            elasticSearchService.index(content)
             count++
         }
         return count
@@ -2415,7 +2415,7 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
             }
             content.status = archivedCode
             content.save() // This shouldn't be needed, but without it we get "collection not processed by flush"
-            content.reindex()
+            elasticSearchService.index(content)
             count++
         }
         return count
@@ -2434,28 +2434,19 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
             }
         }
 
-        def domCls = args.type ?: WcmContent
-        
-        domCls.search([reload:true, offset:args?.offset ?:0, max:args?.max ?: 25]){
-            must(queryString(query))
+        def types = args.type ? [args.type]: listContentClasses()
 
-/* This doesn't work yet
-            // Restrict to base URI
-            if (baseURI) {
-                must {
-                    term('absoluteURI', baseURI+'/')
-                }
+        def results = elasticSearchService.search({
+          bool {
+            must{
+                query_string(query: query)
             }
-*/
-         
-                // Restrict to space
             must {
-                listContentClassNames().each { n ->
-                    def t = '$/'+n.replaceAll('\\.', '_')+'/space/id'
-                    term(t, space.id)
-                }
+                term("space.id": space.id)
             }
-        }
+          }
+        }, [indices: types, types: types, size: (args?.max ?: 25), from: (args?.offset ?:0)])
+        return results
     }
 
     def filterToTypes(listOfContent, String typeNames) {
@@ -2518,33 +2509,38 @@ order by year(publishFrom) desc, month(publishFrom) desc""", [parent:parentOrSpa
                 baseURI = contentOrPath.toString()
             }
         }
-        
-        def results = WcmContent.search([reload:true, offset:args?.offset ?:0, max:args?.max ?: 25]){
-            must(queryString(query))
 
-            // @todo apply baseURI
-
-            // Restrict to public
-            must(term('status_publicContent', true))
-
-            // Restrict to space
-            must {
-                listContentClassNames( { 
-                    def hasSCProp = it.metaClass.hasProperty(proxyHandler.unwrapIfProxy(it).class, 'standaloneContent')
-                    !hasSCProp || it.standaloneContent
-                } ).each { n ->
-                    def t = '$/'+n.replaceAll('\\.', '_')+'/space/id'
-                    term(t, space.id)
+        def types = []
+        if (args.types) {
+            args.types.tokenize(',').each { n ->
+                def cls = grailsApplication.getClassForName(n.trim())
+                if (cls) {
+                    types << cls
+                } else {
+                    log.warn "Attempt to filter content nodes by type ${n} but this class is not known"
                 }
             }
         }
-
-        // Filter by type if required
-        if (args.types) {
-            results.results = filterToTypes(results.results, args.types)
-            results.total = results.results.size()
+        if (types.isEmpty()){
+            types = listContentClasses()
         }
-        
+
+        def results = elasticSearchService.search({
+            bool {
+                must {
+                    query_string(query: query)
+                }
+
+                must {
+                    term("status.publicContent": "true")
+                }
+
+                must {
+                    term("space.id": space.id)
+                }
+            }
+        }, [indices: types, types: types, size: (args?.max ?: 25), from: (args?.offset ?:0)])
+
         return results
     }
     

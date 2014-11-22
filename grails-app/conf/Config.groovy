@@ -36,6 +36,10 @@ log4j = {
 
 }
 
+elasticSearch.datastoreImpl = 'hibernateDatastore'
+elasticSearch.disableAutoIndex = 'false'
+elasticSearch.bulkIndexOnStartup = true
+elasticSearch.unmarshallComponents = false
 
 environments {
     development {
@@ -44,27 +48,6 @@ environments {
     }
     
     test {
-/*        log4j = {
-            appenders {
-               file name:'file', file: '/Users/marc/Desktop/Pending/testlog.log'
-            }
-            root {
-               debug 'stdout', 'file'
-            }
-
-            warn  'org.codehaus.groovy.grails.web.servlet',  //  controllers
-        	       'org.codehaus.groovy.grails.web.pages' //  GSP
-            debug   'grails.app', 'org.weceem'
-
-        }
-*/
-        searchable {
-            // disable bulk index on startup
-            bulkIndexOnStartup = false
-
-            // use faster in-memory index
-            compassConnection = "ram://test-index"
-        }
     }
 }
 

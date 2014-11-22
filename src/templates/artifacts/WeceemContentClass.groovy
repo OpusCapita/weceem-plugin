@@ -97,7 +97,7 @@ class @artifact.name@ extends WcmContent {
         ContentUtils.summarise(content, 100, '...')
     }
 
-    /* Override normal Searchable values here to customize search indexing */
+    /* Override normal Elasticsearch values here to customize search indexing */
     /*
 
     static searchable = {

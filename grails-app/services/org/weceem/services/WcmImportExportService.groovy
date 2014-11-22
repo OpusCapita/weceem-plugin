@@ -12,12 +12,10 @@ class WcmImportExportService {
 
     def grailsApplication
     
-    def searchableService
+    def elasticSearchService
     
     def importSpace(WcmSpace space, String importerName, File file) throws ImportException {
-        // @todo couldn't inject this service, circular dependency problem. Investigate
-        searchableService.stopMirroring()
-        
+
         try {
             WcmContent.withTransaction { txn ->
                 try {
@@ -34,10 +32,9 @@ class WcmImportExportService {
                 }
             }
         } finally {
-            searchableService.startMirroring()
         }
         // Rebuild indexes
-        searchableService.reindex()
+         elasticSearchService.index()
     }
 
     def exportSpace(WcmSpace space, String exporterName) {

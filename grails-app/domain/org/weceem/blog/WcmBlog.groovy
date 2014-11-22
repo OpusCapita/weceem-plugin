@@ -22,8 +22,7 @@ class WcmBlog extends WcmContent {
     }
 
     static searchable = {
-        alias WcmBlog.name.replaceAll("\\.", '_')
-        only = ['title', 'status']
+        only = ['title', 'status', 'space', 'aliasURI', 'parent']
     }
     
     Map getVersioningProperties() { 

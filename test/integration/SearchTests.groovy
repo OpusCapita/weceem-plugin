@@ -18,16 +18,14 @@ class SearchTests extends AbstractWeceemIntegrationTest {
     def statusB
     def spaceA
     def spaceB
+    def elasticSearchService
     
     static transactional = true
-    
-    def searchableService
-    
+
     void setUp() {
         super.setUp()
-        
-        searchableService = grailsApplication.mainContext.searchableService
-        
+        elasticSearchService = grailsApplication.mainContext.elasticSearchService
+
         statusA = new WcmStatus(code: 400, description: "published", publicContent: true)
         assert statusA.save(flush:true)
         statusB = new WcmStatus(code: 100, description: "draft", publicContent: false)
@@ -71,6 +69,11 @@ class SearchTests extends AbstractWeceemIntegrationTest {
         wcmContentRepositoryService.findAllRootContent(spaceA).each { n ->
             System.out.println n.debugDescription()
         }
+        System.out.println "spaceB: \n"
+        wcmContentRepositoryService.findAllRootContent(spaceB).each { n ->
+            System.out.println n.debugDescription()
+        }
+        elasticSearchService.index()
     }
     
     void tearDown() {
@@ -82,43 +85,28 @@ class SearchTests extends AbstractWeceemIntegrationTest {
         
         def resultData = wcmContentRepositoryService.searchForContent('content', spaceA, null, [max:pageSize])
         
-        assert pageSize.equals(resultData.results.size())
-        assert resultData.results.every { it.space.id == spaceA.id }
+        assert pageSize.equals(resultData.searchResults.size())
+        assert resultData.searchResults.every { it.space.id == spaceA.id }
 
         resultData = wcmContentRepositoryService.searchForContent('content', spaceB, null, [max:pageSize])
         
-        assert resultData.results.size().equals(10)
-        assert resultData.results.every { it.space.id == spaceB.id }
+        assert resultData.searchResults.size().equals(10)
+        assert resultData.searchResults.every { it.space.id == spaceB.id }
     }
-    
-/* commented out because for now this doesn't work and we're deferring this until a later version
-    void testSearchForContentUnderURI() {
-        def pageSize = 20
-        
-        def resultData = wcmContentRepositoryService.searchForContent('content', spaceA, 'folder1', [max:pageSize])
-        
-        println "Results: ${resultData.results}" 
-        assertEquals 10, resultData.results.size()
-        def f = WcmFolder.findByAliasURI('folder1')
-        
-        assertTrue resultData.results.every { n->
-            (n.space.id == spaceA.id) && (n.parent.id == f.id)
-        }
-    }
-*/
-    
+
+
     void testSearchForPublicContentPaging() {
         def pagesize = 10
         def resultData = wcmContentRepositoryService.searchForPublicContent('content', spaceA, null, [max:pagesize])
 
-        assert pagesize.equals(resultData.results.size())
-        assert resultData.results.every { n -> n.status.publicContent == true }
+        assert pagesize.equals(resultData.searchResults.size())
+        assert resultData.searchResults.every { n -> n.status.publicContent == true }
 
         def resultData2 = wcmContentRepositoryService.searchForPublicContent('content', spaceA, null, [max:pagesize, offset:pagesize])
 
-        assert pagesize.equals(resultData2.results.size())
-        assert resultData2.results.every { r ->
-            r.status.publicContent && !resultData.results.find { n -> n.id == r.id }
+        assert pagesize.equals(resultData2.searchResults.size())
+        assert resultData2.searchResults.every { r ->
+            r.status.publicContent && !resultData.searchResults.find { n -> n.id == r.id }
         }
     }
 
@@ -127,30 +115,7 @@ class SearchTests extends AbstractWeceemIntegrationTest {
         def resultData = wcmContentRepositoryService.searchForPublicContent('content', spaceA, null, [max:pageSize])
 
         int size = Math.round(pageSize / 2)
-        assert resultData.results.size().equals(size)
-        assert resultData.results.every { it.status.publicContent == true }
+        assert resultData.searchResults.size().equals(size)
+        assert resultData.searchResults.every { it.status.publicContent == true }
     }
-
-/* commented out as we can't get this implementation to work at all, Searchable/Compass issues
-    void testSearchCascadesChangesToStatusPublicContentProperty() {
-        def pageSize = 50
-        def resultData = wcmContentRepositoryService.searchForPublicContent('content', spaceA, null, [max:pageSize])
-        
-        assertEquals pageSize/2, resultData.results.size()
-        assertTrue resultData.results.every { it.status.publicContent == true }
- 
-        def status = WcmStatus.findByCode(100)
-        status.publicContent = true
-        status.save(flush:true)
-        
-        searchableService.stopMirroring()
-        searchableService.reindex()
-        searchableService.startMirroring()
-        
-        resultData = wcmContentRepositoryService.searchForPublicContent('content', spaceA, null, [max:pageSize])
-        
-        assertEquals pageSize, resultData.results.size()
-        assertTrue resultData.results.every { it.status.publicContent == true }
-    }
-*/
 }

@@ -24,8 +24,7 @@ import org.weceem.content.*
 class WcmWikiItem extends WcmContent {
 
     static searchable = {
-        alias WcmWikiItem.name.replaceAll("\\.", '_')
-        only = ['content', 'keywords', 'title', 'status']
+        only = ['content', 'keywords', 'title', 'status', 'space', 'aliasURI', 'parent']
     }
     
     static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "wiki-32.png"]

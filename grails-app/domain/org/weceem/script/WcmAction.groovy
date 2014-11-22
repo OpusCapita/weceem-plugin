@@ -9,8 +9,8 @@ class WcmAction extends WcmContent {
     String allowedMethods
     
     static searchable = {
-        alias WcmAction.name.replaceAll("\\.", '_')
-        only = ['description', 'title', 'status']
+        only = ['description', 'title', 'status', 'space', 'aliasURI', 'parent']
+
     }
 
     static mapping = {

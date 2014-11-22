@@ -13,8 +13,7 @@ import org.weceem.content.*
 class WcmContentDirectory extends WcmContentFile {
 
     static searchable = {
-        alias WcmContentDirectory.name.replaceAll("\\.", '_')
-        only = ['title', 'status']
+        only = ['title', 'status', 'space', 'aliasURI', 'parent']
     }
 
     // This cannot be rendered

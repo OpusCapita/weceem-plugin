@@ -652,13 +652,13 @@ class WcmRepositoryController {
         def space = null
         if (params.space) space = WcmSpace.get(params.long('space'))
         
-        def filterClass = WcmContent
-        if (params.classFilter != "none") 
+        def filterClass = null
+        if (params.classFilter != "none") {
             filterClass = Class.forName("${params.classFilter}", true, proxyHandler.unwrapIfProxy(this).class.classLoader)
-//        def searchResults = filterClass.search("*$searchStr* +name:$space".toString(), [reload: true])
+        }
         def searchResults = wcmContentRepositoryService.searchForContent("*$searchStr*", space, null, [type:filterClass])
         def searchResult = []
-        searchResult.addAll(searchResults.results)
+        searchResult.addAll(searchResults.searchResults)
         
         if (log.debugEnabled) {
             log.debug "Searching repository resulted in: ${searchResults}"

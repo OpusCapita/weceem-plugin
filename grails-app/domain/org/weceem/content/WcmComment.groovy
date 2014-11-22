@@ -30,9 +30,7 @@ class WcmComment extends WcmContent {
     String content
     
     static searchable = {
-        alias WcmComment.name.replaceAll("\\.", '_')
-
-        only = ['content', 'email', 'author', 'title', 'status']
+        only = ['content', 'email', 'author', 'title', 'status', 'space', 'aliasURI', 'parent']
     }
     
     static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "comment-32.png"]

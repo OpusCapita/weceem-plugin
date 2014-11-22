@@ -12,8 +12,7 @@ class WcmFolder extends WcmContent {
     static standaloneContent = false
     
     static searchable = {
-        alias WcmFolder.name.replaceAll("\\.", '_')
-        only = ['title', 'status']
+        only = ['title', 'status', 'space', 'aliasURI', 'parent']
     }
     
 }

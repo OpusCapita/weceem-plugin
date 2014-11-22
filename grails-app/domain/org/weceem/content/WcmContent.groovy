@@ -35,15 +35,15 @@ class WcmContent implements Comparable, Taggable, Serializable {
     transient def wcmSecurityService
     transient def proxyHandler
     
-    // we only index title and space
     static searchable = {
-         alias WcmContent.name.replaceAll("\\.", '_')
-         
-         only = ['title', 'status', 'absoluteURI']
-         
+         root true
+         only = ['title', 'space', 'status', 'aliasURI', 'parent']
          absoluteURI excludeFromAll: true
-         space component: true 
-         status component: [prefix:'status_']
+
+         space component: true
+         status component: true
+         parent reference: true
+
     }
     
     static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "html-file-32.png"]
@@ -252,6 +252,7 @@ class WcmContent implements Comparable, Taggable, Serializable {
 
     public String getAbsoluteURI() {
         def uri = new StringBuilder()
+
         uri << aliasURI
         def c = this
         def visitedNodes = [c.ident()]
@@ -261,11 +262,11 @@ class WcmContent implements Comparable, Taggable, Serializable {
             uri.insert(0,c.aliasURI)
             if (visitedNodes.contains(c.ident())) {
                 def msg = "Cannot calculate absoluteURI of content with id ${ident()} and "+
-                    "aliasURI $aliasURI because there is a loop in the ancestry to ${c.ident()} (${c.aliasURI})"
+                        "aliasURI $aliasURI because there is a loop in the ancestry to ${c.ident()} (${c.aliasURI})"
                 log.error(msg)
                 throw new IllegalArgumentException(msg)
             } else {
-                visitedNodes << c.ident() 
+                visitedNodes << c.ident()
             }
         }
         return uri.toString()

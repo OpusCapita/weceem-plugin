@@ -26,9 +26,7 @@ class WcmVirtualContent extends WcmContent {
     static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "virtual-content-32.png"]
 
     static searchable = {
-        alias WcmVirtualContent.name.replaceAll("\\.", '_')
-        
-        only = ['title', 'status']
+        only = ['title', 'status', 'space', 'aliasURI', 'parent']
     }
 
     Map getVersioningProperties() { 

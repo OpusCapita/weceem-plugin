@@ -5,8 +5,7 @@ import org.weceem.content.WcmContent
 class WcmScript extends WcmContent {
 
     static searchable = {
-        alias WcmScript.name.replaceAll("\\.", '_')
-        only = ['content', 'description', 'title', 'status']
+        only = ['content', 'description', 'title', 'status', 'space', 'aliasURI', 'parent']
     }
 
     static standaloneContent = false

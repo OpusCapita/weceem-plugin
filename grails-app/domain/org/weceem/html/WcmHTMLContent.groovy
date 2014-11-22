@@ -29,10 +29,9 @@ import org.weceem.content.TemplateUtils
  */
 class WcmHTMLContent extends WcmContent {
 
-    static searchable = {
-        alias WcmHTMLContent.name.replaceAll("\\.", '_')
-        only = ['content', 'keywords', 'htmlTitle', 'menuTitle', 'title', 'status']
-    }
+   static searchable = {
+        only = ['content', 'keywords', 'htmlTitle', 'menuTitle', 'title', 'status', 'space', 'aliasURI', 'parent']
+   }
     
     Boolean allowGSP = false
     

@@ -10,14 +10,14 @@ class WeceemGrailsPlugin {
     def _log = LogFactory.getLog('org.weceem.WeceemGrailsPlugin')
 
     // the plugin version
-    def version = "1.3-M2"
+    def version = "1.3-SNAPSHOT"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.3 > *"
 
     def observe = ["hibernate", 'services']
 
-    def loadAfter = ['logging', 'searchable']
-    def loadBefore = ['controllers', 'ckeditor'] // Make sure taglib sees configured service
+    def loadAfter = ['logging']
+    def loadBefore = ['controllers', 'ckeditor', 'elasticsearch'] // Make sure taglib sees configured service
     
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
@@ -85,27 +85,16 @@ class WeceemGrailsPlugin {
                 bean.destroyMethod = 'shutdown'
             }
         }
-        //configure defaults for searchable plugin here
-        if (!application.config.searchable) {
-            def searchableConfig = new ConfigObject()
-            def userHome = System.getProperty("user.home")
-            searchableConfig.searchable.compassConnection = new File("${userHome}/.weceem/searchable-index").absolutePath
-            searchableConfig.searchable.defaultExcludedProperties = ["password"]
-            searchableConfig.searchable.defaultMethodOptions = [
-                    search: [reload: false, escape: false, offset: 0, max: 10, defaultOperator: "and"],
-                    suggestQuery: [userFriendly: true]
-            ]
-            searchableConfig.searchable.mirrorChanges = false
-            searchableConfig.searchable.bulkIndexOnStartup = true
-            searchableConfig.searchable.releaseLocksOnStartup = true
-            application.config.merge(searchableConfig)
 
-        } else if (!application.config.searchable.compassConnection) {
+        //configure defaults for elasticsearch plugin here
+        if (!application.config.elasticSearch.datastoreImpl) {
             def searchableConfig = new ConfigObject()
-            def userHome = System.getProperty("user.home")
-            searchableConfig.searchable.compassConnection = new File("${userHome}/.weceem/searchable-index").absolutePath
+            searchableConfig.elasticSearch.datastoreImpl = 'hibernateDatastore'
             application.config.merge(searchableConfig)
         }
+        def searchableConfig = new ConfigObject()
+        searchableConfig.elasticSearch.unmarshallComponents = false
+        application.config.merge(searchableConfig)
     }
 
     def doWithApplicationContext = { applicationContext ->

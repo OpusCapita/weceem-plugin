@@ -39,9 +39,7 @@ class WcmTemplate extends WcmContent {
     Boolean userSpecificContent
 
     static searchable = {
-        alias WcmTemplate.name.replaceAll("\\.", '_')
-
-        only = ['content', 'title', 'status']
+        only = ['content', 'title', 'status', 'space', 'aliasURI', 'parent']
     }
 
     /**

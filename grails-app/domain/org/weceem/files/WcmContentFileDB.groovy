@@ -18,8 +18,7 @@ import org.weceem.util.MimeUtils
 class WcmContentFileDB extends WcmContent {
 
 	static searchable = {
-		alias WcmContentFile.name.replaceAll("\\.", '_')
-		only = ['title', 'status']
+		only = ['title', 'status', 'space', 'aliasURI', 'parent']
 	}
 
 	String fileMimeType

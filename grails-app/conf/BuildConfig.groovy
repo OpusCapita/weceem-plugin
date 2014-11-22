@@ -13,7 +13,6 @@ grails.project.dependency.resolution = {
 		grailsPlugins()
 		grailsHome()
 		grailsCentral()
-        mavenRepo "http://repo.grails.org/grails/core"
         mavenCentral() // need this to resolve junit 3.8.1 (with grails 2.2.1+)
     }
 
@@ -30,38 +29,38 @@ grails.project.dependency.resolution = {
         compile 'com.lowagie:itext:2.1.3'
 
         compile 'xstream:xstream:1.2.1'
-        compile "org.compass-project:compass:2.2.1"
-    }
+     }
 
 	plugins {
         // plugins for the build system only
         build   ':tomcat:7.0.54'
-        compile ':cache:1.1.8'
+        runtime(':hibernate4:4.3.5.5') {
+            export = false
+        }
+        runtime ':database-migration:1.4.0'
+        runtime ':elasticsearch:0.0.3.6'
+
         compile ':scaffolding:2.1.2'
+        compile ':cache:1.1.8'
+        compile ':cache-headers:1.1.7'
+        compile ':fields:1.4'
+        compile ':ckeditor:4.4.1.0'
+        compile ':feeds:1.6'
 
-        runtime ":hibernate:3.6.10.17"
-        runtime ":database-migration:1.4.0"
+        runtime ':jquery:1.11.1'
+        compile ':jquery-ui:1.10.4'
+        compile ':platform-core:1.0.0'
+        compile ':quartz:1.0.2'
+        compile ':taggable:1.1.0'
+        compile ':twitter-bootstrap:3.2.0.2'
 
-        compile ":fields:1.4"
-        compile ":cache-headers:1.1.7"
-        compile ":ckeditor:4.4.1.0"
-        compile ":feeds:1.6"
-
-        runtime ":jquery:1.11.1"
-        compile ":jquery-ui:1.10.4"
-        compile ":platform-core:1.0.0"
-        compile ":quartz:1.0.2"
-        compile ":searchable:0.6.9"
-        compile ":taggable:1.1.0"
-        compile ":twitter-bootstrap:3.2.0.2"
-
-        test(":functional-test:2.0.RC2-SNAPSHOT") {
+        test(':functional-test:2.0.RC2-SNAPSHOT') {
             excludes "xerces, xml-apis"
             export = false
         }
-        build ":release:3.0.1"
+        build ':release:3.0.1'
         // For serlvet filter ordering
-        provided ":webxml:1.4.1"
+        provided ':webxml:1.4.1'
  	}
 }
 

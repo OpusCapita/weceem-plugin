@@ -25,9 +25,7 @@ import org.weceem.util.ContentUtils
 class WcmBlogEntry extends WcmContent {
 
     static searchable = {
-        alias WcmBlogEntry.name.replaceAll("\\.", '_')
-        
-        only = ['content', 'keywords', 'summary', 'title']
+        only = ['content', 'keywords', 'summary', 'title', 'status', 'space', 'aliasURI', 'parent']
     }
     
     static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "blog-entry-32.png"]

@@ -15,8 +15,7 @@ class WcmStyleSheet extends WcmContent {
     static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "css-file-32.png"]
 
     static searchable = {
-        alias WcmStyleSheet.name.replaceAll("\\.", '_')
-        only = ['content', 'title', 'status']
+        only = ['content', 'title', 'status', 'space', 'aliasURI', 'parent']
     }
 
     /**

@@ -12,9 +12,7 @@ class WcmExternalLink extends WcmContent {
     static icon = [plugin: "weceem", dir: "_weceem/images/weceem/content-icons", file: "ext-link-32.png"]
 
     static searchable = {
-        alias WcmExternalLink.name.replaceAll("\\.", '_')
-        
-        only = ["description", 'title', 'status']
+        only = ["description", 'title', 'status', 'space', 'aliasURI', 'parent']
     }
     
     static handleRequest = { content ->
