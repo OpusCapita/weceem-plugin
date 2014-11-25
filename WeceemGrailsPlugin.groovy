@@ -1,16 +1,12 @@
 import org.apache.commons.logging.LogFactory
-
-import org.weceem.services.WcmContentRepositoryService
-
 import grails.util.Environment
-import grails.util.Holders
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 
 class WeceemGrailsPlugin {
     def _log = LogFactory.getLog('org.weceem.WeceemGrailsPlugin')
 
     // the plugin version
-    def version = "1.3-SNAPSHOT"
+    def version = "1.3"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.3 > *"
 
