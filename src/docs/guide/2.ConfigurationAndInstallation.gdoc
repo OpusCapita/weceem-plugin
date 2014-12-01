@@ -20,17 +20,17 @@ Prior to installing a new version of Weceem, always export each of your spaces t
 h4. Installing Weceem Plugin into the application
 
 To install the Weceem plugin, the dependency must be added into grails-app/conf/BuildConfig.groovy file in Grails application.
-{code}  compile ':weceem:1.3-M1' {code}
+{code}  compile ':weceem:1.3' {code}
 
-The plugin version 1.3-M1 should function with Grails versions 2.3.x (checked under version 2.3.8) and higher
+The plugin version 1.3 should function with Grails versions > 2.3.8 (checked under version Grails-2.3.8, Grails-2.4.3) and higher
 (version Weceem-1.2 -- for Grails-2.1.x, 2.2.x, 2.3.x).
 
 Once the plugin is installed into the application, a few Grails configuration changes may be required to make the CMS work in your application. These options are required for Weceem to operate correctly inside the application.
 
 *Note:* When upgrading from an earlier version of the Weceem plugin, you may need to manually uninstall some older Grails plugins, if your new release of Grails does not do it automatically.
 
-*Warning!* Weceem plugin uses Searchable plugin (version 0.6.6 or higher), it requires additional maven repository _"http://repo.grails.org/grails/core"_ for getting
-dependencies. Do not forget to configure:
+*Warning!* Weceem-1.3 uses *Elasticsearch* plugin - it can be configured with Hibernate3 and Hibernate4. *Weceem-1.3-M2 and lower* uses *Hibernate3* because of Searchable plugin usage (Searchable is not running on Hibernate4), also Searchable requires additional maven repository _"http://repo.grails.org/grails/core"_ for getting
+dependencies. Do not forget to configure (*for version 1.3-M2 and lower*) :
 
 {code}
      repositories {
@@ -90,7 +90,7 @@ h4. Be attentive with Resources plugin!
 
 Uninstall the `Resources` plugin or keep it but set
 
-{code} grails.resources.adhoc.excludes=['/plugins/weceem-1.3-M1'] {code}
+{code} grails.resources.adhoc.excludes=['/plugins/weceem-1.3'] {code}
 
 It is necessary to exclude everything served by Weceem (see above note on setting a content URL prefix) because Weceem must serve this content and Resources assumes that `/css` and so on are static resources.
 

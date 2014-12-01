@@ -28,7 +28,7 @@ All you need for Weceem is an SQL database for storing content, a Java servlet c
 Weceem's content is stored in a SQL database and not in files on the server filesystem. Uploaded file content is stored
 on the server filesystem and information about the file stored in the SQL database.
 
-Current version of Weceem plugin Weceem-1.3-M1 is compatible with Grails-2.4.3.
+Current version of Weceem plugin Weceem-1.3-M2 is compatible with Grails-2.4.3.
 
 *Feature Highlights*
 
