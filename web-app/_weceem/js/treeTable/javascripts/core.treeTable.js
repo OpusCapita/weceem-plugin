@@ -137,6 +137,17 @@ function getSelectedNodeIds() {
     return nodeIds
 }
 
+/**
+ * Get the node ids of all currently selected nodes
+ */
+function getSelectedNodeInfos() {
+    var infos = $.map( $("tr.selected > td:first"), function (item, idx) {
+        var text = $(item).text()
+        return text
+    })
+    return infos
+}
+
 function hideInserter() {
     var mrk = $('#insert-marker');
     mrk.queue('concurrentfx', function() { 
@@ -625,6 +636,8 @@ function initTreeTable() {
 	})
 	
 	$('button.createNew').click( function() {
+        var parentContent = getSelectedNodeInfos()
+        $("#newTypeParent").html("<label>"+parentContent+"</label>")
 	    $('#createNewDialog').dialog('open')
 	})
 	
