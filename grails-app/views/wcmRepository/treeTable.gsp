@@ -144,7 +144,7 @@ $(function(){
             <b>${message(code:'content.label.parentContent', encodeAs:"HTML")}:</b>&nbsp;
             <label id="newTypeParent"></label>
         </div>
-        <label for="createNewType"><g:message code="content.label.type" encodeAs="HTML"/></label><br/>
+        <p><label for="createNewType"><g:message code="content.label.type" encodeAs="HTML"/></label></p>
         <g:select id="createNewType" name="type" from="${contentTypes.sort { message(code:'content.type.name.'+it) } }" optionValue="${ { message(code:'content.type.name.'+it) } }"/>
         <input id="spaceField" type="hidden" name="space.id" value="${params.space.id}">
     </g:form>

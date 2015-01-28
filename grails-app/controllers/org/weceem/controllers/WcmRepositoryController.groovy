@@ -272,7 +272,7 @@ class WcmRepositoryController {
     }
 
     /**
-     * Loads infromation about related content for selected node.
+     * Loads information about related content for selected node.
      *
      * params.contentPath
      */
