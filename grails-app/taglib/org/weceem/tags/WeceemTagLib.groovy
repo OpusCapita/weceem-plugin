@@ -170,19 +170,37 @@ class WeceemTagLib {
         }
     }
    
-    def eachSibling = { attrs, body -> 
+    def eachSibling = { attrs, body ->
+        def space = request[RenderEngine.REQUEST_ATTRIBUTE_SPACE]
+        if (attrs[ATTR_SPACE] != null) {
+            space = WcmSpace.findByAliasURI(attrs[ATTR_SPACE])
+            if (!space) {
+                throwTagError "Tag invoked with space attribute value [${attrs[ATTR_SPACE]}] but no space could be found with that aliasURI"
+            }
+        }
+
         def params = makeFindParams(attrs)
         def lineage = request[RenderEngine.REQUEST_ATTRIBUTE_PAGE].lineage
         def parentHierarchyNode = lineage.size() > 0 ? lineage[-1] : null
+        if (attrs[ATTR_NODE] != null || attrs[ATTR_PATH] != null) {
+            def attr_node = attrs[ATTR_NODE]
+            def attr_path = attrs[ATTR_PATH]
+            def node = resolveNode(attrs)
+            if (!node) {
+                throwTagError "Tag invoked with node, nodePath attribute values [${attr_node}], [${attr_path}]  but no node could be found with these values"
+            }
+            parentHierarchyNode = node?.parent ? node : null
+        }
+
         def status = attrs[ATTR_STATUS] ?: WcmContentRepositoryService.STATUS_ANY_PUBLISHED
         def siblings 
         if (!parentHierarchyNode) {
-            siblings = wcmContentRepositoryService.findAllRootContent( 
-                request[RenderEngine.REQUEST_ATTRIBUTE_SPACE],attrs[ATTR_TYPE])
+            siblings = wcmContentRepositoryService.findAllRootContent(space, [type: attrs[ATTR_TYPE]])
         } else {
             siblings = wcmContentRepositoryService.findChildren( parentHierarchyNode.parent, 
                 [type:attrs[ATTR_TYPE], params:params, status:status])
         }
+
         if (attrs[ATTR_FILTER]) siblings = siblings?.findAll(attrs[ATTR_FILTER])
         def var = attrs[ATTR_VAR] ?: null
         def counter = attrs[ATTR_COUNTER] ?: null
