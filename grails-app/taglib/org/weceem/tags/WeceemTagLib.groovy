@@ -23,6 +23,7 @@ import org.weceem.services.WcmContentRepositoryService
 import org.weceem.util.ContentUtils
 
 import java.text.DateFormatSymbols
+import org.weceem.content.WcmStatus
 
 class WeceemTagLib {
     
@@ -589,14 +590,18 @@ class WeceemTagLib {
         def id = attrs[ATTR_ID]
         def title = attrs[ATTR_TITLE]
         def path = attrs[ATTR_PATH]
+
+        String statusDesc = attrs[ATTR_STATUS] ?: WcmContentRepositoryService.STATUS_ANY_PUBLISHED
+        WcmStatus status = WcmStatus.findByDescription(statusDesc)
+
         def c
         if (id) {
-            c = WcmContent.get(id)
+            c = WcmContent.findByIdAndStatus(id, status, params)
         } else if (title) {
-            c = WcmContent.findByTitle(title, params)
+            c = WcmContent.findByTitleAndStatus(title, status, params)
         } else if (path) {
             c = wcmContentRepositoryService.findContentForPath(path, 
-                request[RenderEngine.REQUEST_ATTRIBUTE_SPACE])?.content
+                request[RenderEngine.REQUEST_ATTRIBUTE_SPACE], true, statusDesc)?.content
         } else throwTagError("One of [id], [title] or [path] must be specified")
         
         return c

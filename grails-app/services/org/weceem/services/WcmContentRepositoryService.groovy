@@ -1800,7 +1800,7 @@ class WcmContentRepositoryService implements InitializingBean {
      * @return a map of 'content' (the node), 'lineage' (list of parent WcmContent nodes to reach the node)
      * and 'parentURI' (the uri to the parent of this instance of the node)
      */
-    def findContentForPath(String uriPath, WcmSpace space, boolean useCache = true) {
+    def findContentForPath(String uriPath, WcmSpace space, boolean useCache = true, String status = null) {
         if (uriPath == null) {
             uriPath = ''
         }
@@ -1828,10 +1828,16 @@ class WcmContentRepositoryService implements InitializingBean {
                 }
             }
         }
-        
-        return c
+
+        if (c?.content && status) {
+            if (c.content.status?.description == status) {
+                return c
+            }  else {
+                return null
+            }
+        } else return c
     }
-    
+
     protected def doFindContentForPath(String uriPath, WcmSpace space, boolean useCache) {
         if (log.debugEnabled) {
             log.debug "findContentForPath uri: ${uriPath} space: ${space}"
