@@ -7,7 +7,7 @@ The wcm:find tag allows you to load one or more content nodes from the space.
 {code}
 <wcm:find id="484" var="c">
   ${c.title.encodeAsHTML()}<br/>
-</wcm:content>
+</wcm:find>
 {code}
 
 The above form will retrieve a single content node identified by its internal unique id, and place it into a variable for rendering.
@@ -20,4 +20,6 @@ The supported attributes are:
 
 * id (optional) - unique id of the content, numerical 
 * title (optional) - title to search for
+* path (optional) - the node path to search for
+* status(optional) - the status of the search node, by default only public nodes are found
 * var (optional) - name of the variable passed to the body containing each result
