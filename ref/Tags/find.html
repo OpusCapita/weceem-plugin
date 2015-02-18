@@ -69,10 +69,12 @@ function addJsClass(el) {
 
                 <h4>Purpose</h4><p class="paragraph"/>The wcm:find tag allows you to load one or more content nodes from the space.<p class="paragraph"/><strong class="bold">Example</strong><p class="paragraph"/><div class="code"><pre>&#60;wcm:find id=<span class="java&#45;quote">"484"</span> <span class="java&#45;keyword">var</span>=<span class="java&#45;quote">"c"</span>&#62;
   $&#123;c.title.encodeAsHTML()&#125;&#60;br/&#62;
-&#60;/wcm:content&#62;</pre></div><p class="paragraph"/>The above form will retrieve a single content node identified by its internal unique id, and place it into a variable for rendering.<p class="paragraph"/>If no body is supplied, it will simply return the content node - this is primarily for use when invoking as a function, to manipulate the content object directly.<p class="paragraph"/><h4>Description</h4><p class="paragraph"/>The supported attributes are:
+&#60;/wcm:find&#62;</pre></div><p class="paragraph"/>The above form will retrieve a single content node identified by its internal unique id, and place it into a variable for rendering.<p class="paragraph"/>If no body is supplied, it will simply return the content node - this is primarily for use when invoking as a function, to manipulate the content object directly.<p class="paragraph"/><h4>Description</h4><p class="paragraph"/>The supported attributes are:
 <ul class="star">
 <li>id (optional) - unique id of the content, numerical</li>
 <li>title (optional) - title to search for</li>
+<li>path (optional) - the node path to search for</li>
+<li>status(optional) - the status of the search node, by default only public nodes are found</li>
 <li>var (optional) - name of the variable passed to the body containing each result</li>
 </ul><p class="paragraph"/>
             </div>
