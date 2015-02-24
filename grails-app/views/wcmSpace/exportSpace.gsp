@@ -47,7 +47,7 @@
         </div>
         <div class="row">
           <div class="col-md-12 col-xs-12">
-            <input type="submit"class="button" value="${message(code: 'space.command.export')}"/>
+            <input type="submit" class="btn btn-primary" value="${message(code: 'space.command.export')}"/>
           </div>
         </div>
       </g:form>

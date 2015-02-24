@@ -34,8 +34,8 @@
       <div class="row">
         <div class="col-md-12 col-xs-12">
           <p>Do you really want to delete the space "${space.name.encodeAsHTML()}"? This will destroy all content in the space. There is no undo.</p>
-          <g:link action="delete" class="button" id="${space.id}"><g:message code="command.confirm.delete"/></g:link>
-          <g:link action="list" class="button" id="${space.id}"><g:message code="command.cancel"/></g:link>
+          <g:link action="delete" class="btn btn-primary" id="${space.id}"><g:message code="command.confirm.delete"/></g:link>
+          <g:link action="list" class="btn btn-default" id="${space.id}"><g:message code="command.cancel"/></g:link>
         </div>
       </div>
     </div>

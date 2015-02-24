@@ -23,7 +23,7 @@
           </div>
           <div class="row">
             <div class="col-md-12 col-xs-12">
-                <input type="button" class="button"  onclick="$('#moreInfoDiv').toggle()" value="Show added content"/>
+                <input type="button" class="btn btn-default"  onclick="$('#moreInfoDiv').toggle()" value="Show added content"/>
             </div>
           </div>
           <div class="row">
@@ -86,8 +86,8 @@
           </div>
           <div class="row">
                 <div class="col-md-12 col-xs-12">
-                    <g:actionSubmit class="button" value="Delete selected" controller="wcmSynchronization" action="delete"/>
-                    <g:actionSubmit class="button" value="Don't delete anything" controller="wcmSynchronization" action="done"/>
+                    <g:actionSubmit class="btn btn-default" value="Delete selected" controller="wcmSynchronization" action="delete"/>
+                    <g:actionSubmit class="btn btn-default" value="Don't delete anything" controller="wcmSynchronization" action="done"/>
                 </div>
           </div>
         </g:if>
@@ -95,7 +95,7 @@
           <div class="row">
             <div class="col-md-12 col-xs-12">
               Good news! Your repository has no content nodes referencing non-existent server files.<br/>
-              <g:link controller="wcmRepository" class="button">OK</g:link>
+              <g:link controller="wcmRepository" class="btn btn-default">OK</g:link>
             </div>
           </div>
         </g:else>

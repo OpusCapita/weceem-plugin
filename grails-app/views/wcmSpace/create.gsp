@@ -52,8 +52,8 @@
         </div>
         <div class="row">
           <div class="col-md-12 col-xs-12">
-            <g:actionSubmit class="button" value="Save" action="save"/>&nbsp;
-            <g:actionSubmit class="button" value="Back" action="list"/>
+            <g:actionSubmit class="btn btn-primary" value="Save" action="save"/>&nbsp;
+            <g:actionSubmit class="btn btn-default" value="Back" action="list"/>
           </div>
         </div>
       </g:form>

@@ -51,7 +51,7 @@
         <div class="row">
           <div class="col-md-12"><br/>
             <span class="menuButton" style="padding-left:3px; margin-bottom:8px;">
-              <g:actionSubmit action="create" value="${message(code: 'command.add')}" class="button"/>
+              <g:actionSubmit action="create" value="${message(code: 'command.add')}" class="btn btn-primary"/>
             </span>
           </div>
         </div>

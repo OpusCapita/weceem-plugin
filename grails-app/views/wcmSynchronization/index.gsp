@@ -9,7 +9,7 @@
     <div class="container">
       <div class="row">
         <div class="col-md-12 col-xs-12">
-          <h2><g:message code="synchronization.title"/></h2>
+          <h1><g:message code="synchronization.title"/></h1>
         </div>
       </div>
       <div class="row">
@@ -25,7 +25,7 @@
       </div>
       <div class="row">
         <div class="col-md-12 col-xs-12">
-          <input type="button" class="button"
+          <input type="button" class="btn btn-primary"
           value="${message(code: 'synchronization.action.start')}"
           onclick="document.location.href = '${createLink(action: 'list')}'"/>
         </div>
