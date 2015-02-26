@@ -87,7 +87,7 @@ Here, three different Grails taglibs are being used to create the form:
 
 The form will include a link to the content submission controller. This controller will save the content if it is valid,
 or return to the existing content with the "submittedContent" object populated with the previous data and any errors
-attached. Using the bean:* tags of the Grails Bean-Fields plugin is merely a convenience, but is very useful as it will
+attached. Using the field:* tags of the Grails Fields plugin is merely a convenience, but is very useful as it will
 display the validation errors associated with each field inline in the form.
 
 If the submission succeeds - which requires the user to have permission to create that type of content under the
