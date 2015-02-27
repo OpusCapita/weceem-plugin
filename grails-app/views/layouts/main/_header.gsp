@@ -32,7 +32,15 @@
           <div class="message span-22 prepend-1 append-1 prepent-top append-bottom last ui-state-highlight ui-corner-all">${g.message(code: flash.message).encodeAsHTML()}</div>
         </g:if>
         <g:if test="${flash.error}">
-          <div class="message span-22 prepend-1 append-1 prepent-top append-bottom last ui-state-error ui-corner-all">${flash.error}</div>
+          <div class="message span-22 prepend-1 append-1 prepent-top append-bottom last ui-state-error ui-corner-all">${g.message(code: flash.error).encodeAsRaw()}</div>
+        </g:if>
+        <g:if test="${flash.errors}">
+          <div class="message span-22 prepend-1 append-1 prepent-top append-bottom last ui-state-error ui-corner-all">
+            <g:each in="${flash.errors}">
+              ${it?.encodeAsHTML()}
+            <br/>
+            </g:each>
+          </div>
         </g:if>
       </div>
     </div>

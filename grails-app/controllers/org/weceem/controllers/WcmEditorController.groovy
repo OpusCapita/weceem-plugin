@@ -127,6 +127,7 @@ class WcmEditorController {
                         log.debug "Couldn't update content, has errors: ${errors}"
                     }
                     flash.message =  message(code:'message.content.has.errors')
+                    flash.error = renderErrors(bean: content)
                     render(view: 'edit', model: [content: content, 
                         // Get history in a new session so we don't see unsaved revision
                         changeHistory: WcmContent.withNewSession { wcmContentRepositoryService.getChangeHistory(content) },
