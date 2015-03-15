@@ -81,7 +81,8 @@ class SimpleSpaceImporter implements SpaceImporter {
                 }
             }
         }
-        def filesDir = org.weceem.services.WcmContentRepositoryService.getUploadPath(space)
+        def wcmContentRepositoryService = grailsApplication.mainContext.wcmContentRepositoryService
+        def filesDir = wcmContentRepositoryService.getUploadPath(space)
         ant.copy(todir: filesDir.absolutePath, failonerror: false) {
             fileset(dir: "${tmpDir.absolutePath}/files")
         }

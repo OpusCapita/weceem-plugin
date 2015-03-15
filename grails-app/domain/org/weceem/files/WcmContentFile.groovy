@@ -93,10 +93,14 @@ class WcmContentFile extends WcmContent {
             //@todo surely this is redundant, we can just count children?
             parentContent.filesCount += 1
         }
-        org.weceem.services.WcmContentRepositoryService.getUploadPath(space, path).mkdirs()
+
+        def wcmContentRepositoryService =  this.domainClass.grailsApplication
+                .mainContext.wcmContentRepositoryService
+
+        wcmContentRepositoryService.getUploadPath(space, path).mkdirs()
         
         if (uploadedFile) {
-            def f = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, "$path/${uploadedFile.originalFilename}")
+            def f = wcmContentRepositoryService.getUploadPath(space, "$path/${uploadedFile.originalFilename}")
             uploadedFile.transferTo(f)
             fileMimeType = uploadedFile.contentType ?: MimeUtils.getDefaultMimeType(uploadedFile.originalFilename)
             fileSize = f.length()
@@ -109,8 +113,10 @@ class WcmContentFile extends WcmContent {
         if (parent && (parent instanceof WcmContentDirectory)) {
             path = getPathTo(parent)
         }
-        def oldFile = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, "${path}/${oldTitle}")
-        def newFile = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, "${path}/${title}")
+        def wcmContentRepositoryService =  this.domainClass.grailsApplication
+                .mainContext.wcmContentRepositoryService
+        def oldFile = wcmContentRepositoryService.getUploadPath(space, "${path}/${oldTitle}")
+        def newFile = wcmContentRepositoryService.getUploadPath(space, "${path}/${title}")
         oldFile.renameTo(newFile)
         // Update our URI to match new file
         aliasURI = this.title 
@@ -141,9 +147,10 @@ class WcmContentFile extends WcmContent {
         if (originalParent) {
             originalParent.filesCount -= 1
             assert originalParent.save()
-        } 
-        
-        def file = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, srcPath)
+        }
+        def wcmContentRepositoryService =  this.domainClass.grailsApplication
+                .mainContext.wcmContentRepositoryService
+        def file = wcmContentRepositoryService.getUploadPath(space, srcPath)
         def targetDir = parent ? parent.toFile() : toFile()
         log.info "Moving file ${file} to ${targetDir}"
         try {
@@ -163,8 +170,9 @@ class WcmContentFile extends WcmContent {
             parentContent.children.remove(this)
             assert parentContent.save()
         }
-
-        def file = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, "${path}/${title}")
+        def wcmContentRepositoryService =  this.domainClass.grailsApplication
+                .mainContext.wcmContentRepositoryService
+        def file = wcmContentRepositoryService.getUploadPath(space, "${path}/${title}")
         if (!file.exists()) return true
         return FileUtils.deleteQuietly(file)
     }
@@ -202,9 +210,11 @@ class WcmContentFile extends WcmContent {
      * Get filesystem path to file, IF and only if it is in the web-app folder.
      */
     File toFile() {
-        org.weceem.services.WcmContentRepositoryService.getUploadPath(space, toRelativePath())
+        def wcmContentRepositoryService =  this.domainClass.grailsApplication
+                .mainContext.wcmContentRepositoryService
+        wcmContentRepositoryService.getUploadPath(space, toRelativePath())
     }
-    
+
     @Override 
     Date getLastModified() {
         new Date(toFile().lastModified())

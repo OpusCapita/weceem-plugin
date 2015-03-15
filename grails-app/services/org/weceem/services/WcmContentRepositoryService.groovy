@@ -72,9 +72,6 @@ class WcmContentRepositoryService implements InitializingBean {
     def elasticSearchService
     
     ThreadLocal permissionsBypass = new ThreadLocal()
-    
-    static uploadDir
-    static uploadUrl
 
     static DEFAULT_ARCHIVED_STATUS_CODE = 500
     static DEFAULT_UNMODERATED_STATUS_CODE = 150
@@ -134,58 +131,77 @@ class WcmContentRepositoryService implements InitializingBean {
         new String(chars)
     }
 
-    static File getUploadPath(WcmSpace space, path = null) {
+    public File getUploadPath(WcmSpace space, path = null) {
         if (File.separatorChar != '/') {
             path = makeFileSystemPathFromURI(path)
         }
-        def spcf = new File(WcmContentRepositoryService.uploadDir, 
+        def spcf = new File(getUploadDir(),
             space.makeUploadName() ?: EMPTY_ALIAS_URI)
         return path ? new File(spcf, path) : spcf
     }
 
     static getUploadDirFromConfig(configObject) {
-        def uploadDirConf = configObject.weceem.upload.dir
-        uploadDirConf ? uploadDirConf.toString() : "/WeceemFiles/"
+        def uploadDirConf
+        if (configObject.weceem.upload.dir instanceof Closure){
+            uploadDirConf = configObject.weceem.upload.dir()
+        } else {
+            uploadDirConf = configObject.weceem.upload.dir
+        }
+
+        return uploadDirConf ? uploadDirConf.toString() : null
     }
     
     static getUploadUrlFromConfig(configObject) {
-        def uploadDirConf = getUploadDirFromConfig(configObject)
-
-        if (!uploadDirConf.startsWith('file:')) {
-            if (!uploadDirConf.startsWith('/')) uploadDirConf = '/'+uploadDirConf
-            if (!uploadDirConf.endsWith('/')) uploadDirConf += '/'
-            
-            return uploadDirConf
+        def uploadUrlConf
+        if (configObject.weceem.upload.url instanceof Closure){
+            uploadUrlConf = configObject.weceem.upload.url()
         } else {
-            return '/uploads/'
+            uploadUrlConf = configObject.weceem.upload.url
         }
+
+        return uploadUrlConf ? uploadUrlConf.toString() : null
+    }
+
+    public File getUploadDir() {
+        def uploadDir
+        def uploadDirConf = getUploadDirFromConfig(grailsApplication.config)
+        def uploadUrlConf = getUploadUrlFromConfig(grailsApplication.config)
+        if (!uploadDirConf) {
+            def homeDir = new File(System.getProperty("user.home"))
+            uploadDir = uploadUrlConf ? new File(homeDir, uploadUrlConf) : new File(homeDir, "WeceemFiles/")
+        } else if (uploadDirConf.startsWith('file:')) {
+            uploadDir = new File(new URI(uploadDirConf))
+        } else {
+            uploadDir = new File(new File(System.getProperty("user.home")), uploadDirConf)
+        }
+
+        if (!uploadDir.exists()) {
+            def isExists = uploadDir.mkdirs()
+            if (!isExists) {
+                throw new RuntimeException("Cannot start Weceem - upload directory is set to [${uploadDir}] but cannot make the directory and it doesn't exist")
+            }
+        }
+        return uploadDir
+    }
+
+    public getUploadUrl() {
+        def uploadUrl = getUploadUrlFromConfig(grailsApplication.config)
+        if (!uploadUrl) {
+            def uploadDirConf = getUploadDirFromConfig(grailsApplication.config)
+            if (uploadDirConf && !uploadDirConf.startsWith('file:')) {
+                return uploadDirConf
+            } else return "/uploads/"
+        }
+
+        if (!uploadUrl.startsWith('/')) uploadUrl = '/'+uploadUrl
+        if (!uploadUrl.endsWith('/')) uploadUrl += '/'
+        uploadUrl
     }
 
     void loadConfig() {
         def config = grailsApplication.config
-        def uploadDirConf = getUploadDirFromConfig(config)
-
-        if (!uploadDirConf.startsWith('file:')) {
-            def homeDir = new File(System.getProperty("user.home"))
-            def weceemHomeDir = new File(homeDir, 'weceem-uploads')
-            uploadDir = new File(weceemHomeDir, uploadDirConf) 
-            if (!uploadDir.exists()) {
-                uploadDir.mkdirs()
-            }
-        } else {
-            def f = new File(new URI(uploadDirConf))
-            if (!f.exists()) {
-                def ok = f.mkdirs()
-                if (!ok) {
-                    throw new RuntimeException("Cannot start Weceem - upload directory is set to [${uploadDirConf}] but cannot make the directory and it doesn't exist")
-                }
-            }
-            uploadDir = f
-        }
-
-        uploadUrl = WcmContentRepositoryService.getUploadUrlFromConfig(grailsApplication.config)
         // In tests we don't have log
-        logOrPrint('info', "Weceem will use [${uploadDir}] as the directory for static uploaded files, and the url [${uploadUrl}] to serve them")
+        logOrPrint('info', "Weceem will use [${getUploadDir()}] as the directory for static uploaded files, and the url [${getUploadUrl()}] to serve them")
         
         if ( !(config.grails.mime.file.extensions instanceof Boolean) ||
             ((config.grails.mime.file.extensions instanceof Boolean) && (config.grails.mime.file.extensions == true)) ) {
@@ -1320,9 +1336,9 @@ class WcmContentRepositoryService implements InitializingBean {
             def oldAliasURI = space.makeUploadName()
             hackedBindData(space, params)
             if (!space.hasErrors() && space.save()) {
-                def oldFile = WcmContentRepositoryService.getUploadPath(space, oldAliasURI)
+                def oldFile = getUploadPath(space, oldAliasURI)
                 if (oldFile.exists()) {
-                    def newFile = WcmContentRepositoryService.getUploadPath(space)
+                    def newFile = getUploadPath(space)
                     oldFile.renameTo(newFile)
                 }
                 return [space: space]
@@ -2030,7 +2046,7 @@ class WcmContentRepositoryService implements InitializingBean {
         def existingFiles = new TreeSet()
         def clashingFiles = new TreeSet()
         def createdContent = []
-        def spaceDir = WcmContentRepositoryService.getUploadPath(space)
+        def spaceDir = getUploadPath(space)
         if (!spaceDir.exists()) spaceDir.mkdirs()
         log.info "Synchronizing filesystem with repository for space /${space.aliasURI} (server dir: ${spaceDir.absolutePath})"
         spaceDir.eachFileRecurse { file ->
@@ -2107,7 +2123,7 @@ class WcmContentRepositoryService implements InitializingBean {
                 log.debug "Creating content for file path $path, checking to see if node exists for ${parentPath}"
                 content = findContentForPath(parentPath, space)?.content
                 if (!content){
-                    def file = WcmContentRepositoryService.getUploadPath(space, parentPath)
+                    def file = getUploadPath(space, parentPath)
                     if (file.isDirectory()){
                         content = new WcmContentDirectory(title: file.name,
                             content: '', filesCount: 0, space: space, orderIndex: 0,

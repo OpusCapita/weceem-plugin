@@ -31,13 +31,15 @@ class WcmContentDirectory extends WcmContentFile {
 
     boolean contentWillBeCreated(WcmContent parentContent) {
         def p
+        def wcmContentRepositoryService =  this.domainClass.grailsApplication
+                .mainContext.wcmContentRepositoryService
         if (parentContent && (parentContent instanceof WcmContentDirectory)) {
             def path = getPathTo(parentContent)
-            p = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, "/$path/$aliasURI")
+            p = wcmContentRepositoryService.getUploadPath(space, "/$path/$aliasURI")
             log.debug "Creating directory path [$p]"
             p.mkdirs()
         } else if (!parentContent) {
-            p = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, title)
+            p = wcmContentRepositoryService.getUploadPath(space, title)
             log.debug "Creating directory path [$p]"
             p.mkdirs()
         } else {
@@ -80,7 +82,9 @@ class WcmContentDirectory extends WcmContentFile {
     // we need to delete all content children here (recursively)
     boolean contentWillBeDeleted() {
         def path = getPathTo(this.parent)
-        def file = org.weceem.services.WcmContentRepositoryService.getUploadPath(space, "$path/$title")
+        def wcmContentRepositoryService = this.domainClass.grailsApplication
+                .mainContext.wcmContentRepositoryService
+        def file = wcmContentRepositoryService.getUploadPath(space, "$path/$title")
         if (!file.exists()) return true
         if (FileUtils.deleteQuietly(file)) {
             def childrenList = this.children ? new ArrayList(this.children) : null

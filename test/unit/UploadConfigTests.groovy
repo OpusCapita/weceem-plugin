@@ -14,7 +14,7 @@ class UploadConfigTests extends grails.test.GrailsUnitTestCase {
     
     void testUploadDirNotSet() {
         
-        def basePath = new File(System.getProperty('user.home')+File.separator+'weceem-uploads')
+        def basePath = new File(System.getProperty('user.home'))
         
         def dummyConfig = new ConfigObject()
         dummyConfig.weceem.upload.dir = ''
@@ -30,16 +30,17 @@ class UploadConfigTests extends grails.test.GrailsUnitTestCase {
             loadConfig()
         }
         
-        assertEquals '/WeceemFiles/', service.uploadUrl
+        assertEquals '/uploads/', service.uploadUrl
         assertEquals new File(basePath, 'WeceemFiles'), service.uploadDir
     }
 
     void testWarRelativePathUploadDir() {
         
-        def basePath = new File(System.getProperty('user.home')+File.separator+'weceem-uploads')
+        def basePath = new File(System.getProperty('user.home'))
         
         def dummyConfig = new ConfigObject()
         dummyConfig.weceem.upload.dir = '/uploaded-files/'
+        dummyConfig.weceem.upload.url = '/uploaded-files/'
         dummyConfig.grails.mime.file.extensions = false
 
         service.with {

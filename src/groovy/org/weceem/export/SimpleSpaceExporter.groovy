@@ -27,7 +27,7 @@ class SimpleSpaceExporter implements SpaceExporter {
         baseDir.mkdirs()
 
         def file = new File(baseDir, "content.xml")
-                
+
         def writer = new StringWriter()
         def xml = new MarkupBuilder(writer)
         
@@ -73,11 +73,11 @@ class SimpleSpaceExporter implements SpaceExporter {
             }
         }
         file.write(writer.toString(), 'UTF-8')
-        
-        def ant = new AntBuilder()
 
+        def wcmContentRepositoryService =  grailsApplication.mainContext.wcmContentRepositoryService
+        def ant = new AntBuilder()
         ant.copy(todir: "${baseDir.absolutePath}/files", failonerror: false) {
-            fileset(dir: WcmContentRepositoryService.getUploadPath(spc))
+            fileset(dir: wcmContentRepositoryService.getUploadPath(spc))
         }
 
         def tmp = File.createTempFile("export", ".zip")

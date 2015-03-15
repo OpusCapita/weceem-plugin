@@ -32,6 +32,7 @@ class ImportExportTests extends AbstractServletContextMockingTest
 
     static transactional = true
 
+    def wcmContentRepositoryService
     def wcmImportExportService
     def applicationContext
     def grailsApplication
@@ -108,12 +109,11 @@ class ImportExportTests extends AbstractServletContextMockingTest
         assert WcmContentDirectory.findByAliasURIAndSpace('test_dir', space).children.size() != 0
 
         // check unpacked files
-        assert org.weceem.services.WcmContentRepositoryService.getUploadPath(space, 'test_dir').exists()
-        assert org.weceem.services.WcmContentRepositoryService.getUploadPath(space, '/test_dir/test_file.txt').exists()
+        assert wcmContentRepositoryService.getUploadPath(space, 'test_dir').exists()
+        assert wcmContentRepositoryService.getUploadPath(space, '/test_dir/test_file.txt').exists()
 
         def ant = new AntBuilder()
-        ant.delete(dir: 
-            org.weceem.services.WcmContentRepositoryService.getUploadPath(space))
+        ant.delete(dir: wcmContentRepositoryService.getUploadPath(space))
     }
 
     @Test
