@@ -15,15 +15,13 @@ class UploadedFileFilter implements Filter {
     def wcmContentRepositoryService
     def wcmSecurityService
     def cacheHeadersService
-    def uploadURI
-    
+
     void init(FilterConfig config) throws ServletException {
         def applicationContext = WebApplicationContextUtils.getWebApplicationContext(config.servletContext)
         wcmContentRepositoryService = applicationContext.wcmContentRepositoryService
         wcmSecurityService = applicationContext.wcmSecurityService
         cacheHeadersService = applicationContext.cacheHeadersService
         wcmContentFingerprintService = applicationContext.wcmContentFingerprintService
-        uploadURI = wcmContentRepositoryService.uploadUrl
     }
 
     void destroy() {
@@ -33,7 +31,7 @@ class UploadedFileFilter implements Filter {
         FilterChain chain) throws IOException, ServletException {
 
         def ruri = request.requestURI[request.contextPath.size()..-1]
-        if (ruri.startsWith(uploadURI)) {
+        if (ruri.startsWith(wcmContentRepositoryService.uploadUrl)) {
             // Force a continuous hib session across service calls to avoid detached objects causing lazy init problems
             WcmContent.withTransaction {
                 def info = wcmContentRepositoryService.resolveSpaceAndURIOfUploadedFile(request.requestURI.decodeURL() - request.contextPath)

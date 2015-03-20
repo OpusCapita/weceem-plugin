@@ -24,6 +24,7 @@ import org.weceem.event.WeceemEvents
 import org.weceem.event.WeceemDomainEvents
 import org.weceem.security.*
 import org.weceem.content.TemplateUtils
+import org.weceem.upload.UploadConfigHandler
 
 /**
  * WcmContentRepositoryService class provides methods for WcmContent Repository tree
@@ -70,6 +71,8 @@ class WcmContentRepositoryService implements InitializingBean {
     
     def proxyHandler
     def elasticSearchService
+
+    UploadConfigHandler uploadConfigHandler
     
     ThreadLocal permissionsBypass = new ThreadLocal()
 
@@ -147,7 +150,6 @@ class WcmContentRepositoryService implements InitializingBean {
         } else {
             uploadDirConf = configObject.weceem.upload.dir
         }
-
         return uploadDirConf ? uploadDirConf.toString() : null
     }
     
@@ -166,6 +168,7 @@ class WcmContentRepositoryService implements InitializingBean {
         def uploadDir
         def uploadDirConf = getUploadDirFromConfig(grailsApplication.config)
         def uploadUrlConf = getUploadUrlFromConfig(grailsApplication.config)
+
         if (!uploadDirConf) {
             def homeDir = new File(System.getProperty("user.home"))
             uploadDir = uploadUrlConf ? new File(homeDir, uploadUrlConf) : new File(homeDir, "WeceemFiles/")
@@ -181,11 +184,17 @@ class WcmContentRepositoryService implements InitializingBean {
                 throw new RuntimeException("Cannot start Weceem - upload directory is set to [${uploadDir}] but cannot make the directory and it doesn't exist")
             }
         }
+
+        if (uploadConfigHandler) {
+            uploadConfigHandler.handleUploadConfig(uploadDir, null)
+        }
+
         return uploadDir
     }
 
     public getUploadUrl() {
         def uploadUrl = getUploadUrlFromConfig(grailsApplication.config)
+
         if (!uploadUrl) {
             def uploadDirConf = getUploadDirFromConfig(grailsApplication.config)
             if (uploadDirConf && !uploadDirConf.startsWith('file:')) {
@@ -195,7 +204,11 @@ class WcmContentRepositoryService implements InitializingBean {
 
         if (!uploadUrl.startsWith('/')) uploadUrl = '/'+uploadUrl
         if (!uploadUrl.endsWith('/')) uploadUrl += '/'
-        uploadUrl
+
+        if (uploadConfigHandler) {
+            uploadConfigHandler.handleUploadConfig(null, uploadUrl)
+        }
+        return uploadUrl
     }
 
     void loadConfig() {

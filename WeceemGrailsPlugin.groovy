@@ -64,6 +64,10 @@ class WeceemGrailsPlugin {
 
         // Register our custom binding beans
         customPropertyEditorRegistrar(org.weceem.binding.CustomPropertyEditorRegistrar)
+
+        uploadConfigHandler(org.weceem.upload.CKEditorUploadConfigHandler) {
+            grailsApplication = ref('grailsApplication')
+        }
         
         // Configure caching
         boolean hasEhCacheConfigXML = new PathMatchingResourcePatternResolver().getResource('classpath:/ehcache.xml').exists()
