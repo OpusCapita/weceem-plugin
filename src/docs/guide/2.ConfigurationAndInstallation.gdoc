@@ -144,9 +144,34 @@ Since 1.0-M1 you can set the location of the upload folder or URL:
 weceem.upload.dir = '/weceem_uploads/'
 {code}
 
-Weceem auto-senses file URLs in the value and uses that location if it is a file URL. If it is not a file URL, then it assumes it is a new URL path and uses it when serving the files.
+*Till version 1.4-SNAPSHOT* Weceem auto-senses file URLs in the value and uses that location if it is a file URL. If it is not a file URL, then it assumes it is a new URL path and uses it when serving the files.
 
 Weceem will still store the files in @<app-dir>/WeceemFiles@, if a value is not specified for this config variable. These will be served from @http://<yourhost>/<yourapppath>/uploads/@
+
+*Since version 1.4-SNAPSHOT* it is possible to configure *weceem.upload.url* too.
+Also the configuration properties *weceem.upload.url*, *weceem.upload.dir* can be defined as a Closure, so the values can be changed during application running.
+
+{code}
+       weceem.upload.dir = {
+           URL fileUrl = new URL('file:./uploadDir.txt')
+           boolean isFileExists = new File(fileUrl.getPath()).exists()
+           if (isFileExists) {
+               return new File(fileUrl.getPath()).text
+           }  else {
+               return 'file:/var/weceem-smart-uploads/'
+           }
+       }
+
+       weceem.upload.url = {
+           URL fileUrl = new URL('file:./uploadUrl.txt')
+           boolean isFileExists = new File(fileUrl.getPath()).exists()
+           if (isFileExists) {
+               return new File(fileUrl.getPath()).text
+           }  else {
+               return '/wcm/files/'
+           }
+       }
+{code}
 
 h4. Customizing user profile and logout
 
