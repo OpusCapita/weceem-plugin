@@ -342,7 +342,7 @@ Here, three different Grails taglibs are being used to create the form:
 </ul><p class="paragraph"/> sensible default fields for properties of an object. In this case the object is the
  "submittedContent" bean used by the content submission form.<p class="paragraph"/>The form will include a link to the content submission controller. This controller will save the content if it is valid,
 or return to the existing content with the "submittedContent" object populated with the previous data and any errors
-attached. Using the bean:* tags of the Grails Bean-Fields plugin is merely a convenience, but is very useful as it will
+attached. Using the field:* tags of the Grails Fields plugin is merely a convenience, but is very useful as it will
 display the validation errors associated with each field inline in the form.<p class="paragraph"/>If the submission succeeds - which requires the user to have permission to create that type of content under the
 specified parent in the repository - it will redirect the user to the content specified in the "success" attribute.<p class="paragraph"/>The content will be in the "unmoderated" status, until an administrator updates the status to Published.<p class="paragraph"/><p class="paragraph"/>
 

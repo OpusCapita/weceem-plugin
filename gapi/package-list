@@ -18,6 +18,7 @@ org.weceem.security
 org.weceem.services
 org.weceem.servlet
 org.weceem.tags
+org.weceem.upload
 org.weceem.util
 org.weceem.versioning
 org.weceem.wiki
