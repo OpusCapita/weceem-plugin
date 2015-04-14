@@ -136,7 +136,8 @@ class WeceemGrailsPlugin {
         co.ckeditor.upload.baseurl = url.toString()
 
         co.ckeditor.upload.overwrite = false
-        co.ckeditor.defaultFileBrowser = "ofm"
+        co.ckeditor.defaultFileBrowser = "wcmofm"
+
         co.ckeditor.upload.image.browser = true
         co.ckeditor.upload.image.upload = true
         co.ckeditor.upload.image.allowed = ['jpg', 'gif', 'jpeg', 'png']

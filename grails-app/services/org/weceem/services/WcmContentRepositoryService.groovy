@@ -202,7 +202,7 @@ class WcmContentRepositoryService implements InitializingBean {
             } else return "/uploads/"
         }
 
-        if (!uploadUrl.startsWith('/')) uploadUrl = '/'+uploadUrl
+        if (!uploadUrl.startsWith('/') && !uploadUrl.startsWith('http')) uploadUrl = '/'+uploadUrl
         if (!uploadUrl.endsWith('/')) uploadUrl += '/'
 
         if (uploadConfigHandler) {

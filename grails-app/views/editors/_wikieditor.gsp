@@ -8,8 +8,8 @@
                           style="border: none; height: 420; width: 100%;">${content?.content}</textarea>
         </div>
         <div id="tabs-${name}-2">
-            <ckeditor:editor id="fckeditor" userSpace="${content.space.name}" name="${name}"
-                width="100%" height="420" showThumbs="true" toolbar="Basic">${value}</ckeditor:editor>
+            <wcm:wcmeditor id="fckeditor" userSpace="${content.space.makeUploadName()}" name="${name}"
+                width="100%" height="420" showThumbs="true" toolbar="Basic">${value}</wcm:wcmeditor>
         </div>
     </div>  
 

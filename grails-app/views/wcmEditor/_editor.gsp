@@ -1,4 +1,5 @@
 <g:javascript>
+
 <%-- I dont want to do this here but have no choice until we can include resources in header --%>
     $( function() {
         // Highlight any accordion headers that have errors inside them

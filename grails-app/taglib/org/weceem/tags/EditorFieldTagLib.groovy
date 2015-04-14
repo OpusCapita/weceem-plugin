@@ -6,6 +6,10 @@ import org.weceem.content.WcmStatus
 import org.weceem.content.WcmTemplate
 import org.weceem.script.WcmScript
 import org.codehaus.groovy.grails.web.pages.TagLibraryLookup
+import org.gualdi.grails.plugins.ckeditor.Ckeditor
+import grails.util.Holders
+import org.gualdi.grails.plugins.ckeditor.utils.PathUtils
+import org.apache.commons.lang.WordUtils
 
 class EditorFieldTagLib {
 
@@ -232,6 +236,94 @@ class EditorFieldTagLib {
             }
             request['weceem.editor.ckeditor.js.included'] = true
         }
+    }
+
+    def wcmeditor = { attrs, body ->
+        def editor = new Ckeditor(request, attrs, body())
+        out << renderWeceemEditor(editor)
+    }
+
+    def renderWeceemEditor(editor) {
+        StringBuffer outb = new StringBuffer()
+
+        if (!editor.config.append) {
+            outb << """<textarea id="${editor.config.instanceId}" name="${editor.config.instanceName}">${editor.initialValue?.encodeAsHTML()}</textarea>\n"""
+        }
+        outb << """<script type="text/javascript">\n"""
+
+        if (editor.config.removeInstance) {
+            outb << """if (CKEDITOR.instances['${editor.config.instanceId}']){CKEDITOR.remove(CKEDITOR.instances['${editor.config.instanceId}']);}\n"""
+        }
+
+        outb << """CKEDITOR."""
+        if (editor.config.append) {
+            outb << """appendTo"""
+        }
+        else {
+            outb << """replace"""
+        }
+        outb << """('${editor.config.instanceId}'"""
+        outb << getEditorConfiguration(editor)
+      //  outb << editor.config.configuration
+        outb << """);\n"""
+        outb << """</script>\n"""
+
+        return outb.toString()
+    }
+
+    def getEditorConfiguration(editor) {
+        def ckconfig = Holders.config.ckeditor
+
+        def customConfig = ckconfig?.config
+        if (customConfig && !editor.config.config["customConfig"]) {
+            customConfig = PathUtils.checkSlashes(customConfig, "L- R-", true)
+            editor.config.config["customConfig"] = "'${editor.config.contextPath}/${customConfig}'"
+        }
+
+        // Collect browser settings per media type
+        editor.config.resourceTypes.each { t ->
+            def type = WordUtils.capitalize(t)
+            def typeForConnector = "${type == 'Link' ? 'File' : type}"
+
+            if (ckconfig?.upload?."${t}"?.browser) {
+                editor.config.config["filebrowser${type}BrowseUrl"] = "'${getWeceemBrowseUrl(editor.config, typeForConnector, editor.config.userSpace, editor.config.fileBrowser,  editor.config.showThumbs, editor.config.viewMode)}'"
+            }
+            if (ckconfig?.upload?."${t}"?.upload) {
+                editor.config.config["filebrowser${type}UploadUrl"] = "'${getWeceemUploadUrl(editor.config, typeForConnector, editor.config.userSpace)}'"
+            }
+        }
+
+        // Config options
+        def configs = []
+        editor.config.config.each {k, v ->
+            if (!editor.config.localConfig[k]) {
+                configs << "${k}: ${v}"
+            }
+        }
+        editor.config.localConfig.each {k, v ->
+            configs << "${k}: ${v}"
+        }
+
+        StringBuffer configuration = new StringBuffer()
+        if (configs.size()) {
+            configuration << """, {\n"""
+            configuration << configs.join(",\n")
+            configuration << """}\n"""
+        }
+
+        return configuration
+    }
+
+    def getWeceemUploadUrl(config, type, userSpace) {
+        return "${config.contextPath}/${config.getConnectorsPrefix()}/wcmofm/uploader?type=${type}${userSpace ? '&space='+ userSpace : ''}"
+    }
+
+    def getWeceemBrowseUrl(config, type, userSpace, fileBrowser, showThumbs, viewMode) {
+        def browserUrl
+        def prefix = config.getConnectorsPrefix()
+        browserUrl = "${config.contextPath}/${prefix}/wcmofm?fileConnector=${config.contextPath}/${prefix}/wcmofm/filemanager&type=${type}${userSpace ? '&space='+ userSpace : ''}${showThumbs ? '&showThumbs='+ showThumbs : ''}${'&viewMode='+ viewMode}"
+
+        return browserUrl
     }
 
     def editorResourcesRichHTML = { attrs ->
