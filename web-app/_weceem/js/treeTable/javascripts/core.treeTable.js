@@ -617,23 +617,34 @@ function initTreeTable() {
 	})
 
 	$(document).bind('keyup', 'alt+ctrl+d', deleteSelected);
-	
-	$('#createNewDialog').dialog({
-	    autoOpen: false,
-	    modal: true,
-	    width: DIALOG_WIDTH,
-	    buttons: {
-	        Create : function () {
-	            var parentid = getSelectedNodeIds()
-	            $("#parentid").attr("value", parentid)
-	            $('#createNewDialog form').submit()
-	            $(this).dialog('close')
-	        },
-	        Cancel : function () {
-	            $(this).dialog('close')
-	        }
-	    }
-	})
+
+    $('#createNewDialog').dialog({
+        autoOpen: false,
+        modal: true,
+        width: DIALOG_WIDTH,
+        buttons: {
+            Create : function () {
+                var parentid = getSelectedNodeIds()
+                // check if the parent accept child
+                var childType = $("#createNewType").val()
+                var requestPath = $("#requestPath").attr("value")
+                $.ajax({
+                    url: requestPath+"/admin/repository/canAcceptChild?parentid="+parentid+"&childtype="+childType,
+                    success:function(data) {
+                        $("#parentid").attr("value", parentid)
+                        if (data && data.result) {
+                            $('#createNewDialog form').submit()
+                        } else {
+                            alert("Cannot create content of type ["+childType+"] under parent content type "+data.parenttype)
+                        }
+                    }
+                })
+            },
+            Cancel : function () {
+                $(this).dialog('close')
+            }
+        }
+    })
 	
 	$('button.createNew').click( function() {
         var parentContent = getSelectedNodeInfos()

@@ -139,6 +139,7 @@ $(function(){
 
 <div id="createNewDialog" class="ui-helper-hidden" title="${message(code:'content.title.create', encodeAs:"HTML")}">
     <g:form controller="wcmEditor" action="create" method="GET">
+        <input id="requestPath" name="requestPath" type="hidden" value="${request.contextPath}"/>
         <input id="parentid" name="parent.id" type="hidden"/>
         <div id="parentInformation" style="display: inline;">
             <b>${message(code:'content.label.parentContent', encodeAs:"HTML")}:</b>&nbsp;

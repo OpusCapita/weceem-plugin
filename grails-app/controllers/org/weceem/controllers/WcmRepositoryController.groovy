@@ -310,6 +310,29 @@ class WcmRepositoryController {
         render children as JSON
     }
 
+    def canAcceptChild = {
+        boolean result = Boolean.FALSE
+        WcmContent parentContent
+
+        if (!params.parentid) {
+            result = Boolean.TRUE
+        } else if (params.childtype) {
+            try {
+                parentContent = WcmContent.get(params.parentid)
+                WcmContent childInstance = wcmContentRepositoryService
+                    .newContentInstance(params.childtype, parentContent?.space)
+                if (parentContent && childInstance) {
+                    result = parentContent.contentShouldAcceptChild(childInstance)
+                }
+            } catch (Exception ex) {
+                log.error("Error during checking child instance acceptance", ex)
+            }
+        }
+
+        def text = [result: result, parentid: params.parentid, parenttype: parentContent?.getClass()?.name, childtype: params.childtype]
+        render text as JSON
+    }
+
     /**
      * This actions 'copyNode' and 'moveNode' are called when the user drops selected node.
      *
