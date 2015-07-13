@@ -42,7 +42,7 @@ class WidgetTagLib {
     def widget = {attrs, body ->
         def widget
         def path = attrs.path
-        def space = attrs.space ? WcmSpace.findByAliasURI(attrs.space) : request[RenderEngine.REQUEST_ATTRIBUTE_SPACE]
+        def space = (attrs.space!=null) ? WcmSpace.findByAliasURI(attrs.space) : request[RenderEngine.REQUEST_ATTRIBUTE_SPACE]
         if(!space) {throwTagError("No space by name ${attrs.space} or in page scope")}
 
         if (path) {
