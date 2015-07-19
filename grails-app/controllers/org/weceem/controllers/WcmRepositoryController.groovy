@@ -121,7 +121,7 @@ class WcmRepositoryController {
                 haveChildren.put(domainClass.name, wcmContentRepositoryService.triggerDomainEvent(dcInst, WeceemDomainEvents.contentShouldAcceptChildren))
             }
             return [content:nodes, contentTypes:wcmContentRepositoryService.listContentClassNames(), 
-                'haveChildren':haveChildren, space: params.space, spaces: WcmSpace.listOrderByName() ]
+                'haveChildren':haveChildren, space: params.space, spaces: WcmSpace.listOrderByName(), adminPrefix:grailsApplication.config.weceem.admin.prefix ]
         } else {
             flash.message = 'message.there.are.no.spaces'
             redirect(controller:'wcmSpace')

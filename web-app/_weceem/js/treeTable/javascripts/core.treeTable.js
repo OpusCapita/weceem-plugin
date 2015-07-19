@@ -628,8 +628,9 @@ function initTreeTable() {
                 // check if the parent accept child
                 var childType = $("#createNewType").val()
                 var requestPath = $("#requestPath").attr("value")
+                var adminPath = $("#adminPath").attr("value")
                 $.ajax({
-                    url: requestPath+"/admin/repository/canAcceptChild?parentid="+parentid+"&childtype="+childType,
+                    url: adminPath+"/repository/canAcceptChild?parentid="+parentid+"&childtype="+childType,
                     success:function(data) {
                         $("#parentid").attr("value", parentid)
                         if (data && data.result) {
