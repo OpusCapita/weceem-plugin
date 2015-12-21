@@ -46,13 +46,13 @@
 
     <div class="row">
         <div class="col-md-12 col-xs-12">
-            <g:actionSubmit class="button" value="${message(code:'content.button.saveAndContinue', default:'Save and continue editing')}" action="${content.id ? 'updateContinue' : 'saveContinue'}"/>
-            <g:actionSubmit class="button" value="${message(code:'content.button.save', default:'Save')}" action="${content.id ? 'update' : 'save'}"/>
+            <g:actionSubmit class="btn btn-primary" value="${message(code:'content.button.saveAndContinue', default:'Save and continue editing')}" action="${content.id ? 'updateContinue' : 'saveContinue'}"/>
+            <g:actionSubmit class="btn btn-default" value="${message(code:'content.button.save', default:'Save')}" action="${content.id ? 'update' : 'save'}"/>
             <g:if test="${weceemEditorMode != 'create'}">
-                <g:actionSubmit class="button" value="${message(code:'content.button.preview', default:'Preview')}" action="preview"/>
+                <g:actionSubmit class="btn btn-default" value="${message(code:'content.button.preview', default:'Preview')}" action="preview"/>
                 <input style="display:none" type="submit" id="preview-action-submitter" name="_action_preview" value="preview"/> <%-- Needed to invoke onsubmit on form during our preview submit phase --%>
             </g:if>
-            <g:link action="cancel" controller="wcmEditor" style="color: black; text-decoration: none;"><input type="button" value="${message(code:'content.button.cancel', default:'Cancel')}" class="button"/></g:link>
+            <g:link action="cancel" controller="wcmEditor" style="color: black; text-decoration: none;" class="btn btn-default">${message(code:'content.button.cancel', default:'Cancel')}</g:link>
         </div>
     </div>
 
