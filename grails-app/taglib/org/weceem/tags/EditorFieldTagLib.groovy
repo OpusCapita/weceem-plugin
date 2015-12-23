@@ -304,6 +304,10 @@ class EditorFieldTagLib {
             configs << "${k}: ${v}"
         }
 
+        if (ckconfig?.fullPage) {
+            configs << "fullPage: ${ckconfig?.fullPage}"
+        }
+
         StringBuffer configuration = new StringBuffer()
         if (configs.size()) {
             configuration << """, {\n"""
