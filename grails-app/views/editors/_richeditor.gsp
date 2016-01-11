@@ -1,7 +1,8 @@
 <bean:customField beanName="content" property="${name}" labelKey="${'content.label.'+name}" noLabel="true">
-    <ckeditor:editor userSpace="${content.space.makeUploadName()}" 
-        name="${name}" 
-        width="700" height="420"
-        showThumbs="true" 
-        toolbar="HTMLEditor">${value}</ckeditor:editor>
+    <wcm:wcmeditor userSpace="${content.space.makeUploadName()}"
+                   name="${name}"
+                   width="100%" height="500"
+                   showThumbs="true"
+                   toolbar="HTMLEditor">${value?.encodeAsHTML()}
+    </wcm:wcmeditor>
 </bean:customField>

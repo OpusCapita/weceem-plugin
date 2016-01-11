@@ -8,7 +8,7 @@ class WeceemGrailsPlugin {
     def _log = LogFactory.getLog('org.weceem.WeceemGrailsPlugin')
 
     // the plugin version
-    def version = "1.2-M1"
+    def version = "1.2-M1-bugfix-SNAPSHOT"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.1 > *"
 
@@ -160,7 +160,7 @@ class WeceemGrailsPlugin {
         co.ckeditor.upload.baseurl = url.toString()
 
         co.ckeditor.upload.overwrite = false
-        co.ckeditor.defaultFileBrowser = "ofm"
+        co.ckeditor.defaultFileBrowser = "wcmofm"
         co.ckeditor.upload.image.browser = true
         co.ckeditor.upload.image.upload = true
         co.ckeditor.upload.image.allowed = ['jpg', 'gif', 'jpeg', 'png']

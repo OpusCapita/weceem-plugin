@@ -58,7 +58,7 @@ grails.project.dependency.resolution = {
         compile ":bean-fields:1.0" // consider replacing with the fields plugin or even with the new Platform UI
         compile ":blueprint:1.0.2"
         compile ":cache-headers:1.1.5"
-        compile ":ckeditor:3.6.6.1.0"
+        compile ':ckeditor:4.4.1.0'
         compile ":feeds:1.6"
 
         compile ":platform-core:1.0.RC6"

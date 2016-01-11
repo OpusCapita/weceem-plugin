@@ -1,3 +1,5 @@
+import org.gualdi.grails.plugins.ckeditor.CkeditorConfig
+
 class WeceemPluginUrlMappings {
 
     static mappings = { appContext ->
@@ -99,6 +101,22 @@ class WeceemPluginUrlMappings {
             controller = "wcmContent"
             action = "show"
         })
+
+        def prefix = "/${CkeditorConfig.getConnectorsPrefix()}"
+        def uploadPrefix = CkeditorConfig.getUploadPrefix()
+
+        // Open File Manager
+        delegate.(prefix + "/wcmofm") (controller: "wcmOpenFileManagerConnector", action: "index")
+        delegate.(prefix + "/wcmofm/config") (controller: "wcmOpenFileManagerConnector", action: "config")
+        delegate.(prefix + "/wcmofm/filemanager") (controller: "wcmOpenFileManagerConnector", action: "fileManager")
+
+        // Images outside the web-app dir
+        if (uploadPrefix) {
+            delegate.(uploadPrefix + "/wcmofm/$filepath**") (controller: "wcmOpenFileManagerConnector", action: "show")
+        }
+
+        // File uploader
+        delegate.(prefix + "/wcmofm/uploader") (controller: "wcmOpenFileManagerConnector", action: "uploader")
 
         "403"(view:'/denied')
         "500"(view:'/error')
