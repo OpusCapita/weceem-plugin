@@ -14,8 +14,8 @@ class WeceemGrailsPlugin {
 
     def observe = ["hibernate", 'services']
 
-    def loadAfter = ['logging', 'hibernate', 'services', 'searchable']
-    def loadBefore = ['controllers', 'ckeditor'] // Make sure taglib sees configured service
+    def loadAfter = ['logging']
+    def loadBefore = ['controllers', 'ckeditor','searchable'] // Make sure taglib sees configured service
     
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
@@ -65,7 +65,7 @@ class WeceemGrailsPlugin {
 
         // Register our custom binding beans
         customPropertyEditorRegistrar(org.weceem.binding.CustomPropertyEditorRegistrar)
-        
+
         // Configure caching
         boolean hasEhCacheConfigXML = application.parentContext.getResource('classpath:/ehcache.xml').exists()
         if (hasEhCacheConfigXML) {
