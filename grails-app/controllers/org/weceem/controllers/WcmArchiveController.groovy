@@ -76,6 +76,8 @@ class WcmArchiveController {
             month:data.month,
             day:data.day,
         ]
+
+        //Note: uri should include space data right now it doesnt.    
         def uri = params.resultsPath ?: 'views/archive-results'
         params.clear()
         params.uri = uri
