@@ -31,11 +31,11 @@ class WeceemGrailsPlugin {
     // URL to the plugin's documentation
     def documentation = "http://grails.org/plugin/weceem"
     def license = "APACHE"
-    def organization = [ name: "jCatalog AG", url: "http://weceem.org/" ]
+    def organization = [name: "OpusCapita Software GmbH", url: "http://www.opuscapita.com/"]
     def developers = [
             [ name: "Marc Palmer", email: "marc@grailsrocks.com" ]
     ]
-    def issueManagement = [ system: "JIRA", url: "http://jira.jcatalog.com/browse/WCM" ]
+    def issueManagement = [system: "GitHub", url: "https://github.com/OpusCapita/weceem-plugin/issues"]
     def scm = [ url: "https://github.com/jCatalog/weceem-plugin" ]
 
     def getWebXmlFilterOrder() {
