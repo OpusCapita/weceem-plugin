@@ -9,7 +9,7 @@ using, and you can  customize the look and feel of the user interface to suit yo
 
 It is now compatible with **Grails 2.4.x**, current released version: **1.4** [release notes](https://github.com/OpusCapita/weceem-plugin/releases/tag/1.4)
 
-For the latest updates and release information visit [Weceem site](http://weceem.org) and follow [@weceem](https://twitter.com/weceem) on twitter.
+For the latest updates and release information follow [@weceem](https://twitter.com/weceem) on twitter.
 
 Lead: [Stephan Albers](https://github.com/stephanalbers)
 
