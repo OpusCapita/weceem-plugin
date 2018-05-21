@@ -23,7 +23,7 @@ class WeceemGrailsPlugin {
         "src/docs/**"
     ]
 
-    def author = "jCatalog AG"
+    def author = "OpusCapita Software GmbH"
     def authorEmail = "info@weceem.org"
     def title = "Weceem CMS"
     def description = '''Weceem CMS is a free, open source content management system.'''
@@ -36,7 +36,7 @@ class WeceemGrailsPlugin {
             [ name: "Marc Palmer", email: "marc@grailsrocks.com" ]
     ]
     def issueManagement = [system: "GitHub", url: "https://github.com/OpusCapita/weceem-plugin/issues"]
-    def scm = [ url: "https://github.com/jCatalog/weceem-plugin" ]
+    def scm = [ url: "https://github.com/OpusCapita/weceem-plugin" ]
 
     def getWebXmlFilterOrder() {
         def FilterManager = getClass().getClassLoader().loadClass('grails.plugin.webxml.FilterManager')

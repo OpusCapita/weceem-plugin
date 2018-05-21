@@ -53,8 +53,8 @@ environments {
 
 // Documentation configuring
 grails.doc.title  = "Weceem Documentation"
-grails.doc.subtitle = "jCatalog Software AG"
+grails.doc.subtitle = "OpusCapita Software GmbH"
 grails.doc.authors = "Stephan Albers, Mark Palmer, July Antonicheva"
 grails.doc.license = "Licensed under the Apache License, Version 2.0"
-grails.doc.copyright = "jCatalog Software AG"
+grails.doc.copyright = "OpusCapita Software GmbH"
 grails.doc.images = new File("src/docs/images")

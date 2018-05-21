@@ -6,4 +6,4 @@ This bean offers methods for rendering a specific content node.
 
 You must typically pass in a request and response to use - given that most of Weceem functionality uses Grails tags and these require features of requests and responses - although you can usually also pass in your own controller instance if you have one.
 
-See the source code for "RenderEngine on github":https://github.com/jCatalog/weceem-plugin/blob/master/src/groovy/org/weceem/content/RenderEngine.groovy for more details.
+See the source code for "RenderEngine on github":https://github.com/OpusCapita/weceem-plugin/blob/master/src/groovy/org/weceem/content/RenderEngine.groovy for more details.
