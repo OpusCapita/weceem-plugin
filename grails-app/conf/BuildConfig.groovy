@@ -44,7 +44,7 @@ grails.project.dependency.resolution = {
         compile ':scaffolding:2.1.2'
         compile ':cache:1.1.8'
         compile ':cache-headers:1.1.7'
-        compile ':fields:1.4'
+        compile ':fields:1.6'
         compile ':ckeditor:4.4.1.0'
         compile ':feeds:1.6'
 
